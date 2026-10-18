@@ -1,0 +1,290 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Disk Warden</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    background:#0f172a; color:#e2e8f0; height:100vh; overflow:hidden; display:flex;
+  }
+  .sidebar { width:200px; background:#1e293b; padding:16px 0; display:flex; flex-direction:column; flex-shrink:0; }
+  .logo { padding:0 20px 20px; font-size:16px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px; border-bottom:1px solid #334155; margin-bottom:12px; }
+  .logo-badge { background:#3b82f6; color:#fff; font-size:11px; font-weight:700; padding:3px 7px; border-radius:4px; }
+  .nav-item { padding:10px 20px; font-size:13px; color:#94a3b8; cursor:pointer; display:flex; align-items:center; gap:10px; transition:all .15s; }
+  .nav-item:hover { background:#334155; color:#e2e8f0; }
+  .nav-item.active { background:#3b82f6; color:#fff; }
+  .main { flex:1; padding:20px; overflow-y:auto; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .topbar h1 { font-size:18px; font-weight:600; color:#f1f5f9; }
+  .top-actions { display:flex; align-items:center; gap:10px; }
+  .btn { padding:7px 14px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer; border:none; transition:all .15s; }
+  .btn-primary { background:#3b82f6; color:#fff; }
+  .btn-primary:hover { background:#2563eb; }
+  .btn-ghost { background:#334155; color:#cbd5e1; }
+  .btn-ghost:hover { background:#475569; }
+  .btn-sm { padding:4px 10px; font-size:11.5px; }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+  .stat { background:#1e293b; border-radius:10px; padding:16px; }
+  .stat .label { font-size:11.5px; color:#94a3b8; margin-bottom:6px; }
+  .stat .value { font-size:24px; font-weight:700; }
+  .stat .sub { font-size:10.5px; color:#64748b; margin-top:4px; }
+  .value.red { color:#ef4444; }
+  .value.blue { color:#3b82f6; }
+  .value.green { color:#22c55e; }
+  .content { display:grid; grid-template-columns:280px 1fr; gap:14px; }
+  .panel { background:#1e293b; border-radius:10px; padding:16px; }
+  .ide-list { display:flex; flex-direction:column; gap:4px; }
+  .ide-item { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:6px; cursor:pointer; }
+  .ide-item:hover { background:#334155; }
+  .ide-item.active { background:#3b82f633; border-left:3px solid #3b82f6; }
+  .ide-left { display:flex; align-items:center; gap:8px; }
+  .dot { width:8px; height:8px; border-radius:50%; }
+  .ide-name { font-size:12.5px; color:#e2e8f0; }
+  .ide-size { font-size:11.5px; color:#94a3b8; font-family:Consolas,monospace; }
+  .badge { font-size:10px; padding:2px 6px; border-radius:3px; font-weight:600; }
+  .badge-d { background:#22c55e22; color:#22c55e; }
+  .badge-c { background:#ef444422; color:#ef4444; }
+  .detail-head { margin-bottom:16px; }
+  .detail-head h2 { font-size:15px; color:#f1f5f9; margin-bottom:4px; }
+  .detail-path { font-size:11px; color:#64748b; font-family:Consolas,monospace; }
+  .preview-card { background:#3b82f618; border:1px solid #3b82f633; border-radius:8px; padding:12px; margin-bottom:16px; }
+  .preview-row { display:flex; justify-content:space-between; font-size:11.5px; padding:3px 0; }
+  .preview-row .k { color:#94a3b8; }
+  .preview-row .v { font-weight:600; font-family:Consolas,monospace; color:#e2e8f0; }
+  .ok { color:#22c55e; }
+  .section-label { font-size:11px; color:#94a3b8; font-weight:700; margin:16px 0 8px; }
+  .rows { display:grid; gap:6px; }
+  .row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#0f172a; border-radius:6px; }
+  .row .name { font-weight:500; font-size:12.5px; color:#e2e8f0; }
+  .row .desc { font-size:10.5px; color:#64748b; margin-top:2px; }
+  .row .size { font-weight:600; font-family:Consolas,monospace; font-size:12.5px; color:#cbd5e1; }
+  .safe { font-size:10px; color:#22c55e; margin-left:6px; }
+  .actions { display:flex; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid #334155; }
+  .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:100; display:none; }
+  .modal-mask.show { display:flex; align-items:center; justify-content:center; }
+  .modal { background:#1e293b; border-radius:10px; padding:20px 22px; width:420px; box-shadow:0 20px 60px rgba(0,0,0,.4); display:none; }
+  .modal.show { display:block; }
+  .modal h3 { font-size:14px; margin-bottom:10px; color:#f1f5f9; }
+  .close-x { cursor:pointer; color:#64748b; font-size:16px; float:right; }
+  .close-x:hover { color:#e2e8f0; }
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#334155; color:#fff; padding:8px 16px; border-radius:6px; font-size:12px; opacity:0; transition:all .2s; z-index:200; }
+  .toast.show { opacity:1; }
+  .switch { width:32px; height:18px; background:#475569; border-radius:9px; position:relative; cursor:pointer; }
+  .switch::after { content:''; position:absolute; width:14px; height:14px; background:#fff; border-radius:50%; top:2px; left:2px; transition:left .2s; }
+  .switch.on { background:#22c55e; }
+  .switch.on::after { left:16px; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo"><span class="logo-badge">DW</span> Disk Warden</div>
+  <div class="nav-item active" onclick="switchNav('ide',this)">💾 IDE 数据</div>
+  <div class="nav-item" onclick="switchNav('proj',this)">📁 项目目录</div>
+  <div class="nav-item" onclick="switchNav('disk',this)">💽 C 盘全景</div>
+  <div class="nav-item" onclick="switchNav('rules',this)">📖 规则学习</div>
+  <div class="nav-item" onclick="switchNav('hist',this)">📜 操作历史</div>
+  <div style="flex:1;"></div>
+  <div class="nav-item" onclick="openModal('m-settings')">⚙️ 设置</div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <h1 id="page-title">IDE 数据</h1>
+    <div class="top-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('m-feedback')">反馈问题</button>
+      <button class="btn btn-primary btn-sm" onclick="toast('已重新扫描')">重新扫描</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="label">C盘剩余</div><div class="value red">2.8 GB</div><div class="sub">已用 97.6%</div></div>
+    <div class="stat"><div class="label">目标盘可用</div><div class="value blue">21.7 GB</div><div class="sub">D/E/F 盘可选</div></div>
+    <div class="stat"><div class="label">可释放总量</div><div class="value blue">31.6 GB</div><div class="sub">缓存清理 + 迁移</div></div>
+    <div class="stat"><div class="label">累计已释放</div><div class="value green">17.2 GB</div><div class="sub">Kiro 已迁出</div></div>
+  </div>
+  <div class="content">
+    <div class="panel"><div id="list"></div></div>
+    <div class="panel"><div id="detail"></div></div>
+  </div>
+</div>
+<div class="modal-mask" id="m-settings">
+  <div class="modal">
+    <span class="close-x" onclick="closeModal('m-settings')">×</span>
+    <h3>设置</h3>
+    <div style="margin-top:12px;">
+      <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:12.5px;">开机自启</span><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12.5px; margin-bottom:6px;">目标存储根目录</div>
+        <input type="text" value="D:\DiskWarden\" style="width:100%; padding:7px 10px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; font-size:12px; font-family:Consolas,monospace;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12.5px; margin-bottom:6px;">语言</div>
+        <select style="width:100%; padding:7px 10px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; font-size:12px;">
+          <option>English（默认）</option><option selected>中文</option>
+        </select>
+      </div>
+      <div style="text-align:right; margin-top:16px; padding-top:12px; border-top:1px solid #334155;">
+        <button class="btn btn-primary" onclick="closeModal('m-settings'); toast('设置已保存')">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-mask" id="m-feedback">
+  <div class="modal" style="width:480px;">
+    <span class="close-x" onclick="closeModal('m-feedback')">×</span>
+    <h3>反馈问题</h3>
+    <div style="margin-top:12px;">
+      <div style="background:#0f172a; border-radius:6px; padding:10px; margin-bottom:14px; font-family:Consolas,monospace; font-size:11px; color:#94a3b8; line-height:1.8;">
+        OS: Windows 11<br>DiskWarden: v0.1.0<br>C盘剩余: 2.8 GB
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn btn-ghost btn-sm" onclick="toast('诊断信息已复制')">复制诊断</button>
+        <button class="btn btn-primary btn-sm" onclick="toast('跳转 GitHub Issues')">提 Issue</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-mask" id="m-migrate">
+  <div class="modal">
+    <h3 style="margin-bottom:12px;">确认迁移？</h3>
+    <div style="background:#0f172a; border-radius:6px; padding:10px; margin-bottom:14px; font-size:12px; line-height:1.8;">
+      <div><b>软件：</b>Cursor</div>
+      <div><b>从：</b>C:\...\Cursor</div>
+      <div><b>到：</b>D:\DiskWarden\Cursor</div>
+      <div><b>释放：</b><span style="color:#22c55e; font-weight:600;">8.4 GB</span></div>
+    </div>
+    <div style="font-size:11.5px; color:#ef4444; margin-bottom:14px;">⚠ 请先关闭 Cursor！</div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('m-migrate')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal('m-migrate'); openModal('m-progress')">开始迁移</button>
+    </div>
+  </div>
+</div>
+<div class="modal-mask" id="m-progress">
+  <div class="modal">
+    <h3 style="margin-bottom:14px;">正在迁移...</h3>
+    <div style="background:#334155; border-radius:4px; height:8px; margin-bottom:10px; overflow:hidden;">
+      <div style="background:#3b82f6; height:100%; width:45%;"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#94a3b8;">
+      <span>复制文件中...</span><span>45%</span>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const DATA = {
+  ide: [
+    {name:'Kiro', size:'17.2 GB', loc:'D', color:'#f59e0b'},
+    {name:'Cursor', size:'8.4 GB', loc:'C', color:'#000'},
+    {name:'Trae CN', size:'5.1 GB', loc:'C', color:'#3b82f6'},
+    {name:'Trae', size:'3.8 GB', loc:'C', color:'#3b82f6'},
+    {name:'VS Code', size:'2.2 GB', loc:'C', color:'#0ea5e9'},
+    {name:'Windsurf', size:'3.5 GB', loc:'D', color:'#8b5cf6'},
+    {name:'Claude Code', size:'0.6 GB', loc:'C', color:'#d97706'},
+  ]
+};
+let currentNav = 'ide';
+function switchNav(t, el) {
+  currentNav = t;
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  const titles = {ide:'IDE 数据', proj:'项目目录', disk:'C 盘全景', rules:'规则学习', hist:'操作历史'};
+  document.getElementById('page-title').textContent = titles[t];
+  renderList(); renderDetail();
+}
+function renderList() {
+  const list = document.getElementById('list');
+  if (currentNav === 'hist' || currentNav === 'rules' || currentNav === 'disk') {
+    list.innerHTML = '<div style="color:#64748b; font-size:12px; padding:20px; text-align:center;">无列表</div>';
+    return;
+  }
+  list.innerHTML = DATA.ide.map(i => `
+    <div class="ide-item" onclick="this.classList.toggle('active')">
+      <div class="ide-left">
+        <div class="dot" style="background:${i.color}"></div>
+        <div class="ide-name">${i.name}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="ide-size">${i.size}</div>
+        <span class="badge ${i.loc==='D'?'badge-d':'badge-c'}">${i.loc==='D'?'已迁D':'在C盘'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+function renderDetail() {
+  const detail = document.getElementById('detail');
+  if (currentNav === 'rules') {
+    detail.innerHTML = `
+      <h2 style="font-size:15px; color:#f1f5f9; margin-bottom:12px;">规则学习</h2>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11.5px; color:#22c55e; font-weight:700; margin-bottom:6px;">✅ 可迁（可再生）</div>
+        <div style="background:#0f172a; padding:10px; border-radius:6px; font-size:12px; color:#cbd5e1;">Cache / GPUCache / logs / sessions / index</div>
+      </div>
+      <div>
+        <div style="font-size:11.5px; color:#ef4444; font-weight:700; margin-bottom:6px;">🔴 不可动</div>
+        <div style="background:#0f172a; padding:10px; border-radius:6px; font-size:12px; color:#cbd5e1;">settings.json / plugins / login</div>
+      </div>`;
+    return;
+  }
+  if (currentNav === 'hist') {
+    detail.innerHTML = `
+      <h2 style="font-size:15px; color:#f1f5f9; margin-bottom:12px;">操作历史</h2>
+      <div style="font-size:12.5px; line-height:2; color:#cbd5e1;">
+        <div>2026-10-16 · 迁移 Kiro → D盘 · 释放 17.2 GB</div>
+        <div>2026-10-15 · 清理 Cursor Cache · 释放 2.1 GB</div>
+      </div>`;
+    return;
+  }
+  if (currentNav === 'disk') {
+    detail.innerHTML = `
+      <h2 style="font-size:15px; color:#f1f5f9; margin-bottom:12px;">C 盘全景</h2>
+      <div class="rows">
+        <div class="row"><span style="font-size:12.5px;">Windows 更新缓存</span><span class="size">3.2 GB</span></div>
+        <div class="row"><span style="font-size:12.5px;">临时文件</span><span class="size">1.8 GB</span></div>
+        <div class="row"><span style="font-size:12.5px;">浏览器缓存</span><span class="size">2.5 GB</span></div>
+      </div>`;
+    return;
+  }
+  detail.innerHTML = `
+    <div class="detail-head">
+      <h2>Cursor</h2>
+      <div class="detail-path">%APPDATA%\Cursor</div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-row"><span class="k">目标位置</span><span class="v">D:\DiskWarden</span></div>
+      <div class="preview-row"><span class="k">释放 C 盘</span><span class="v ok">8.4 GB</span></div>
+      <div class="preview-row"><span class="k">目标盘剩余</span><span class="v ok">21.7 GB · 足够</span></div>
+    </div>
+    <div class="section-label">分项</div>
+    <div class="rows">
+      <div class="row">
+        <div><div class="name">globalStorage 索引缓存 <span class="safe">可再生</span></div><div class="desc">可安全清理</div></div>
+        <div class="size">8.4 GB</div>
+      </div>
+      <div class="row">
+        <div><div class="name">Cache / GPUCache <span class="safe">可再生</span></div><div class="desc">可安全清理</div></div>
+        <div class="size">3.2 GB</div>
+      </div>
+      <div class="row">
+        <div><div class="name">对话历史</div><div class="desc">保留</div></div>
+        <div class="size">0.7 GB</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary btn-sm" onclick="openModal('m-migrate')">迁移到目标盘</button>
+      <button class="btn btn-ghost btn-sm">清理缓存</button>
+      <button class="btn btn-ghost btn-sm">打开目录</button>
+    </div>`;
+}
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+renderList(); renderDetail();
+</script>
+</body>
+</html>
