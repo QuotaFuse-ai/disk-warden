@@ -1,290 +1,2836 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Disk Warden</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
-    background:#0f172a; color:#e2e8f0; height:100vh; overflow:hidden; display:flex;
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --panel-2:#172033; --line:#334155; --line-soft:#263248;
+    --text:#e2e8f0; --muted:#94a3b8; --dim:#64748b;
+    --blue:#3b82f6; --blue-2:#2563eb; --green:#22c55e; --red:#ef4444; --amber:#f59e0b;
+    --violet:#8b5cf6; --cyan:#0ea5e9;
+    --radius:10px; --radius-sm:6px;
+    --shadow:0 20px 60px rgba(0,0,0,.45);
   }
-  .sidebar { width:200px; background:#1e293b; padding:16px 0; display:flex; flex-direction:column; flex-shrink:0; }
-  .logo { padding:0 20px 20px; font-size:16px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px; border-bottom:1px solid #334155; margin-bottom:12px; }
-  .logo-badge { background:#3b82f6; color:#fff; font-size:11px; font-weight:700; padding:3px 7px; border-radius:4px; }
-  .nav-item { padding:10px 20px; font-size:13px; color:#94a3b8; cursor:pointer; display:flex; align-items:center; gap:10px; transition:all .15s; }
-  .nav-item:hover { background:#334155; color:#e2e8f0; }
-  .nav-item.active { background:#3b82f6; color:#fff; }
-  .main { flex:1; padding:20px; overflow-y:auto; }
-  .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-  .topbar h1 { font-size:18px; font-weight:600; color:#f1f5f9; }
-  .top-actions { display:flex; align-items:center; gap:10px; }
-  .btn { padding:7px 14px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer; border:none; transition:all .15s; }
-  .btn-primary { background:#3b82f6; color:#fff; }
-  .btn-primary:hover { background:#2563eb; }
-  .btn-ghost { background:#334155; color:#cbd5e1; }
-  .btn-ghost:hover { background:#475569; }
-  .btn-sm { padding:4px 10px; font-size:11.5px; }
-  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
-  .stat { background:#1e293b; border-radius:10px; padding:16px; }
-  .stat .label { font-size:11.5px; color:#94a3b8; margin-bottom:6px; }
-  .stat .value { font-size:24px; font-weight:700; }
-  .stat .sub { font-size:10.5px; color:#64748b; margin-top:4px; }
-  .value.red { color:#ef4444; }
-  .value.blue { color:#3b82f6; }
-  .value.green { color:#22c55e; }
-  .content { display:grid; grid-template-columns:280px 1fr; gap:14px; }
-  .panel { background:#1e293b; border-radius:10px; padding:16px; }
-  .ide-list { display:flex; flex-direction:column; gap:4px; }
-  .ide-item { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:6px; cursor:pointer; }
-  .ide-item:hover { background:#334155; }
-  .ide-item.active { background:#3b82f633; border-left:3px solid #3b82f6; }
-  .ide-left { display:flex; align-items:center; gap:8px; }
-  .dot { width:8px; height:8px; border-radius:50%; }
-  .ide-name { font-size:12.5px; color:#e2e8f0; }
-  .ide-size { font-size:11.5px; color:#94a3b8; font-family:Consolas,monospace; }
-  .badge { font-size:10px; padding:2px 6px; border-radius:3px; font-weight:600; }
-  .badge-d { background:#22c55e22; color:#22c55e; }
-  .badge-c { background:#ef444422; color:#ef4444; }
-  .detail-head { margin-bottom:16px; }
-  .detail-head h2 { font-size:15px; color:#f1f5f9; margin-bottom:4px; }
-  .detail-path { font-size:11px; color:#64748b; font-family:Consolas,monospace; }
-  .preview-card { background:#3b82f618; border:1px solid #3b82f633; border-radius:8px; padding:12px; margin-bottom:16px; }
-  .preview-row { display:flex; justify-content:space-between; font-size:11.5px; padding:3px 0; }
-  .preview-row .k { color:#94a3b8; }
-  .preview-row .v { font-weight:600; font-family:Consolas,monospace; color:#e2e8f0; }
-  .ok { color:#22c55e; }
-  .section-label { font-size:11px; color:#94a3b8; font-weight:700; margin:16px 0 8px; }
-  .rows { display:grid; gap:6px; }
-  .row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#0f172a; border-radius:6px; }
-  .row .name { font-weight:500; font-size:12.5px; color:#e2e8f0; }
-  .row .desc { font-size:10.5px; color:#64748b; margin-top:2px; }
-  .row .size { font-weight:600; font-family:Consolas,monospace; font-size:12.5px; color:#cbd5e1; }
-  .safe { font-size:10px; color:#22c55e; margin-left:6px; }
-  .actions { display:flex; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid #334155; }
-  .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:100; display:none; }
-  .modal-mask.show { display:flex; align-items:center; justify-content:center; }
-  .modal { background:#1e293b; border-radius:10px; padding:20px 22px; width:420px; box-shadow:0 20px 60px rgba(0,0,0,.4); display:none; }
-  .modal.show { display:block; }
-  .modal h3 { font-size:14px; margin-bottom:10px; color:#f1f5f9; }
-  .close-x { cursor:pointer; color:#64748b; font-size:16px; float:right; }
-  .close-x:hover { color:#e2e8f0; }
-  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#334155; color:#fff; padding:8px 16px; border-radius:6px; font-size:12px; opacity:0; transition:all .2s; z-index:200; }
-  .toast.show { opacity:1; }
-  .switch { width:32px; height:18px; background:#475569; border-radius:9px; position:relative; cursor:pointer; }
-  .switch::after { content:''; position:absolute; width:14px; height:14px; background:#fff; border-radius:50%; top:2px; left:2px; transition:left .2s; }
-  .switch.on { background:#22c55e; }
-  .switch.on::after { left:16px; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    background:var(--bg); color:var(--text); overflow:hidden; font-size:13px;
+  }
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+  button{cursor:pointer}
+  a{color:var(--blue);text-decoration:none}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#334155;border-radius:5px;border:2px solid var(--bg)}
+  ::-webkit-scrollbar-track{background:transparent}
+  :focus-visible{outline:2px solid #60a5fa;outline-offset:2px;border-radius:4px}
+
+  .app{display:flex;height:100vh;min-width:1080px}
+  .sidebar{width:212px;flex-shrink:0;background:#162032;border-right:1px solid var(--line-soft);display:flex;flex-direction:column;padding:18px 12px 14px}
+  .logo{display:flex;align-items:center;gap:9px;padding:0 8px 16px;border-bottom:1px solid var(--line-soft);margin-bottom:14px}
+  .logo-badge{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;letter-spacing:.5px}
+  .logo-name{font-size:14px;font-weight:700;color:#f8fafc;line-height:1.1}
+  .logo-sub{font-size:9.5px;color:var(--dim);margin-top:2px;letter-spacing:.6px;text-transform:uppercase}
+  .nav-label{font-size:10px;font-weight:700;color:#475569;letter-spacing:1.2px;text-transform:uppercase;padding:0 10px 6px}
+  .nav{display:flex;flex-direction:column;gap:3px;margin-bottom:16px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;background:none;border:none;color:var(--muted);font-size:12.5px;text-align:left;transition:background .15s,color .15s;width:100%}
+  .nav-item:hover{background:#1f2c42;color:var(--text)}
+  .nav-item.active{background:#1d3a63;color:#fff;box-shadow:inset 2px 0 0 var(--blue)}
+  .nav-ico{width:20px;text-align:center;font-size:13px;opacity:.9}
+  .nav-count{margin-left:auto;font-size:10px;color:var(--dim);background:#0f172a;padding:1px 6px;border-radius:10px}
+  .nav-item.active .nav-count{color:#bfdbfe;background:#1e3a5f}
+  .side-foot{margin-top:auto;padding:12px 8px 0;border-top:1px solid var(--line-soft);display:flex;flex-direction:column;gap:8px}
+  .side-meta{font-size:10.5px;color:var(--dim);display:flex;justify-content:space-between;align-items:center}
+  .lang-chip{border:1px solid var(--line);background:#1e293b;border-radius:20px;padding:2px 9px;font-size:10.5px;color:var(--muted)}
+  .lang-chip:hover{color:#fff;border-color:#475569}
+
+  .main{flex:1;min-width:0;overflow-y:auto;padding:18px 22px 26px}
+  .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .topbar h1{font-size:19px;font-weight:650;color:#f8fafc;letter-spacing:.2px}
+  .scan-meta{font-size:11px;color:var(--dim);margin-top:4px;display:flex;align-items:center;gap:6px}
+  .scan-meta .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+  .top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 13px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid transparent;transition:background .15s,border-color .15s,opacity .15s;white-space:nowrap}
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:hover{background:var(--blue-2)}
+  .btn-ghost{background:#273449;color:#cbd5e1;border-color:#3b4b63}
+  .btn-ghost:hover{background:#334155;color:#fff}
+  .btn-danger{background:#7f1d1d;color:#fecaca;border-color:#991b1b}
+  .btn-danger:hover{background:#991b1b;color:#fff}
+  .btn-soft{background:rgba(59,130,246,.14);color:#93c5fd;border-color:rgba(59,130,246,.35)}
+  .btn-soft:hover{background:rgba(59,130,246,.24)}
+  .btn-sm{padding:4px 9px;font-size:11px;border-radius:5px}
+  .btn-xs{padding:2px 7px;font-size:10.5px;border-radius:4px}
+  .btn[disabled],.btn.disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.35)}
+  .btn[disabled]:hover,.btn.disabled:hover{background:inherit;color:inherit}
+
+  .statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  .stat{background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--radius);padding:14px 16px;min-width:0}
+  .stat .label{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:7px}
+  .stat .value{font-size:23px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat .sub{font-size:10.5px;color:var(--dim);margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+  .v-red{color:var(--red)} .v-blue{color:#60a5fa} .v-green{color:var(--green)} .v-amber{color:var(--amber)} .v-violet{color:#a78bfa}
+  .mini-bar{height:3px;background:#0b1322;border-radius:2px;margin-top:9px;overflow:hidden}
+  .mini-bar i{display:block;height:100%;border-radius:2px}
+
+  .content{display:grid;grid-template-columns:302px minmax(0,1fr);gap:14px;align-items:start}
+  .panel{background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--radius);min-width:0}
+  .panel-head{padding:13px 15px 10px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .panel-head h2{font-size:12.5px;font-weight:650;color:#f1f5f9}
+  .panel-head .hint{font-size:10.5px;color:var(--dim)}
+  .panel-body{padding:12px 14px}
+  .toolbar{display:flex;gap:6px;align-items:center;margin-bottom:9px;flex-wrap:wrap}
+  .search{flex:1;min-width:110px;background:#0f172a;border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:11.5px;color:var(--text)}
+  .search::placeholder{color:#475569}
+  .search:focus{outline:none;border-color:var(--blue)}
+
+  .legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:10.5px;color:var(--muted)}
+  .legend .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px}
+  .dot-green{background:var(--green)} .dot-red{background:var(--red)} .dot-amber{background:var(--amber)} .dot-blue{background:var(--blue)} .dot-gray{background:#64748b}
+
+  .ide-list{display:flex;flex-direction:column;gap:4px;max-height:calc(100vh - 258px);overflow-y:auto;padding-right:2px}
+  .ide-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:7px;border:1px solid transparent;background:none;text-align:left;width:100%;transition:background .15s,border-color .15s;position:relative}
+  .ide-item:hover{background:#243249}
+  .ide-item.active{background:rgba(59,130,246,.13);border-color:rgba(59,130,246,.45)}
+  .ide-mark{width:26px;height:26px;flex-shrink:0;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;letter-spacing:.2px}
+  .ide-main{min-width:0;flex:1}
+  .ide-name{font-size:12.5px;font-weight:600;color:#e8eef7;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ide-sub{font-size:10px;color:var(--dim);margin-top:3px;display:flex;align-items:center;gap:5px}
+  .ide-right{text-align:right;flex-shrink:0}
+  .ide-size{font-size:11.5px;font-family:Consolas,"SFMono-Regular",monospace;color:#cbd5e1;font-variant-numeric:tabular-nums}
+  .ide-flag{margin-top:3px;display:flex;justify-content:flex-end}
+  .run-dot{width:5px;height:5px;border-radius:50%;background:var(--amber);display:inline-block;margin-right:3px}
+
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;padding:1.5px 6px;border-radius:4px;line-height:1.5;white-space:nowrap}
+  .b-green{background:rgba(34,197,94,.14);color:#4ade80;border:1px solid rgba(34,197,94,.28)}
+  .b-red{background:rgba(239,68,68,.13);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+  .b-amber{background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+  .b-blue{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.32)}
+  .b-gray{background:#273449;color:#94a3b8;border:1px solid #3b4b63}
+  .b-violet{background:rgba(139,92,246,.16);color:#c4b5fd;border:1px solid rgba(139,92,246,.32)}
+  .b-plain{background:transparent;color:var(--muted);border:1px solid var(--line);font-weight:600}
+
+  .detail{display:flex;flex-direction:column;gap:12px;padding:16px 18px 18px}
+  .detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+  .detail-title{display:flex;align-items:center;gap:10px;min-width:0}
+  .detail-title h2{font-size:16px;font-weight:650;color:#f8fafc}
+  .detail-path{font-size:10.5px;color:var(--dim);font-family:Consolas,monospace;margin-top:5px;word-break:break-all}
+  .detail-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}
+
+  .banner{display:flex;gap:10px;padding:10px 12px;border-radius:7px;font-size:11.5px;line-height:1.6;border:1px solid}
+  .banner .b-ico{flex-shrink:0;font-size:14px;line-height:1.3}
+  .banner.warn{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.32);color:#fcd34d}
+  .banner.danger{background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.32);color:#fca5a5}
+  .banner.info{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.28);color:#bfdbfe}
+  .banner.ok{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.28);color:#bbf7d0}
+  .banner b{font-weight:700}
+  .banner .btn{margin-top:6px}
+  .banner-actions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+
+  .preview-card{background:linear-gradient(180deg,rgba(59,130,246,.1),rgba(59,130,246,.03));border:1px solid rgba(59,130,246,.28);border-radius:8px;padding:12px 14px}
+  .preview-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .preview-top .t{font-size:11px;font-weight:700;color:#93c5fd;letter-spacing:.3px}
+  .kv{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:11.5px;padding:3px 0}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-family:Consolas,monospace;color:#e2e8f0;font-weight:600;text-align:right;word-break:break-all}
+  .kv .v.ok{color:var(--green)}
+  .kv .v.warn{color:var(--amber)}
+
+  .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px}
+  .section-title h3{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.7px;text-transform:uppercase}
+  .section-title .sub{font-size:10.5px;color:var(--dim)}
+  .rows{display:flex;flex-direction:column;gap:5px}
+  .row{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--panel-2);border:1px solid transparent;border-radius:7px;transition:border-color .15s}
+  .row:hover{border-color:var(--line)}
+  .row.risk-green{box-shadow:inset 2px 0 0 var(--green)}
+  .row.risk-red{box-shadow:inset 2px 0 0 var(--red);background:#201c2a}
+  .row.risk-yellow{box-shadow:inset 2px 0 0 var(--amber)}
+  .row-check{flex-shrink:0;width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+  .row-main{flex:1;min-width:0}
+  .row-name{font-size:12px;font-weight:550;color:#e8eef7;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .row-desc{font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.45;word-break:break-all}
+  .row-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+  .row-size{font-size:11.5px;font-family:Consolas,monospace;color:#cbd5e1;font-variant-numeric:tabular-nums}
+  .lock{font-size:12px;color:#f87171;flex-shrink:0;width:15px;text-align:center}
+  .sw{width:30px;height:17px;border-radius:9px;background:#475569;position:relative;border:none;flex-shrink:0;transition:background .15s}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:left .16s}
+  .sw.on{background:var(--green)}
+  .sw.on::after{left:15px}
+
+  .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:13px;border-top:1px solid var(--line-soft)}
+  .actions .spacer{flex:1}
+  .actions .note{font-size:10.5px;color:var(--dim)}
+
+  .tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);background:#273449;border:1px solid #3b4b63;border-radius:4px;padding:1px 6px;white-space:nowrap}
+  .tag-code{font-family:Consolas,monospace;font-size:9.5px;color:#93c5fd;background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3)}
+
+  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 24px;gap:10px}
+  .empty-ico{width:62px;height:62px;border-radius:16px;background:#233149;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:4px}
+  .empty h3{font-size:15px;color:#e8eef7;font-weight:650}
+  .empty p{font-size:11.5px;color:var(--muted);line-height:1.7;max-width:440px}
+  .empty .actions{border:none;padding-top:8px}
+  .empty-list{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:2px}
+
+  .scanning{padding:18px 20px}
+  .scanning h3{font-size:14px;color:#f1f5f9;margin-bottom:4px}
+  .scanning .lead{font-size:11.5px;color:var(--muted);margin-bottom:14px}
+  .progress{height:7px;background:#0b1322;border-radius:4px;overflow:hidden;border:1px solid #22304a}
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:3px;transition:width .4s ease}
+  .progress-meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);margin-top:7px}
+  .stage-list{display:flex;flex-direction:column;gap:2px;margin-top:16px}
+  .stage{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:6px;font-size:11.5px;color:var(--dim)}
+  .stage .s-ico{width:16px;height:16px;border-radius:50%;border:1.5px solid #334155;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+  .stage.done{color:#86efac}
+  .stage.done .s-ico{border-color:var(--green);background:rgba(34,197,94,.15);color:var(--green)}
+  .stage.active{background:#233149;color:#e2e8f0}
+  .stage.active .s-ico{border-color:var(--blue);border-top-color:transparent;animation:spin 1s linear infinite}
+  .stage .s-meta{margin-left:auto;font-size:10px;color:var(--dim);font-family:Consolas,monospace}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .skeleton{margin-top:16px;display:flex;flex-direction:column;gap:6px;opacity:.6}
+  .sk-row{height:30px;border-radius:6px;background:linear-gradient(90deg,#233149 25%,#2b3a53 37%,#233149 63%);background-size:400% 100%;animation:shimmer 1.4s infinite}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+  .split{display:grid;grid-template-columns:250px minmax(0,1fr);gap:14px;align-items:start}
+  .list-col{display:flex;flex-direction:column;gap:4px}
+  .item-btn{display:flex;align-items:center;gap:8px;padding:10px;border-radius:7px;background:none;border:1px solid transparent;text-align:left;width:100%;transition:background .15s,border-color .15s}
+  .item-btn:hover{background:#243249}
+  .item-btn.active{background:rgba(59,130,246,.13);border-color:rgba(59,130,246,.45)}
+  .item-btn .t{font-size:12px;font-weight:600;color:#e8eef7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item-btn .s{font-size:10px;color:var(--dim);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item-btn .r{margin-left:auto;text-align:right;flex-shrink:0}
+
+  .table{width:100%;border-collapse:collapse;font-size:11.5px}
+  .table th{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .table td{padding:9px 8px;border-bottom:1px solid var(--line-soft);color:#cbd5e1;vertical-align:middle}
+  .table tr:last-child td{border-bottom:none}
+  .table tr:hover td{background:#22304a}
+  .table .mono{font-family:Consolas,monospace;font-size:11px;color:#e2e8f0}
+  .table .num{text-align:right;font-variant-numeric:tabular-nums;font-family:Consolas,monospace}
+  .table .right{text-align:right}
+  .table-wrap{overflow-x:auto}
+
+  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:10.5px;color:var(--muted);font-weight:600}
+  .field input,.field select{background:#0f172a;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--text);width:100%}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--blue)}
+  .field .hint{font-size:10px;color:var(--dim)}
+  .field.full{grid-column:1/-1}
+
+  .diskbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:#0b1322;border:1px solid #22304a}
+  .diskbar span{height:100%}
+  .disk-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:9px;font-size:10.5px;color:var(--muted)}
+  .disk-legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px}
+
+  .timeline{display:flex;flex-direction:column;gap:0;padding-left:4px}
+  .tl-item{display:flex;gap:11px;position:relative;padding-bottom:14px}
+  .tl-item:not(:last-child)::before{content:"";position:absolute;left:7px;top:16px;bottom:0;width:1px;background:#334155}
+  .tl-dot{width:15px;height:15px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;border:1.5px solid #475569;background:#1e293b;color:#94a3b8;z-index:1}
+  .tl-dot.ok{border-color:var(--green);background:rgba(34,197,94,.15);color:var(--green)}
+  .tl-dot.err{border-color:var(--red);background:rgba(239,68,68,.15);color:var(--red)}
+  .tl-dot.now{border-color:var(--blue);background:rgba(59,130,246,.18);color:#93c5fd}
+  .tl-body{flex:1;min-width:0;padding-top:0}
+  .tl-title{font-size:11.5px;color:#e2e8f0;font-weight:550;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .tl-meta{font-size:10px;color:var(--dim);margin-top:3px;line-height:1.5;word-break:break-all}
+  .tl-code{font-family:Consolas,monospace;font-size:10px;color:#fca5a5;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);padding:2px 5px;border-radius:3px;display:inline-block;margin-top:4px}
+
+  .modal-mask{position:fixed;inset:0;background:rgba(2,6,23,.68);backdrop-filter:blur(2px);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;animation:fade .15s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{background:#1b263b;border:1px solid #34445e;border-radius:12px;box-shadow:var(--shadow);width:520px;max-width:100%;max-height:86vh;display:flex;flex-direction:column;animation:pop .16s ease}
+  @keyframes pop{from{transform:translateY(6px) scale(.99);opacity:.6}to{transform:none;opacity:1}}
+  .modal.wide{width:660px}
+  .modal-head{padding:16px 20px 13px;border-bottom:1px solid var(--line-soft);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .modal-head h3{font-size:14px;font-weight:650;color:#f8fafc}
+  .modal-head .sub{font-size:11px;color:var(--dim);margin-top:4px;line-height:1.5}
+  .modal-x{background:none;border:none;color:var(--dim);font-size:18px;line-height:1;padding:2px 4px;border-radius:4px}
+  .modal-x:hover{color:#fff;background:#334155}
+  .modal-body{padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+  .modal-foot{padding:12px 20px;border-top:1px solid var(--line-soft);display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+  .modal-foot .left{margin-right:auto;font-size:10.5px;color:var(--dim)}
+
+  .sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .sum-box{background:#0f172a;border:1px solid var(--line-soft);border-radius:7px;padding:9px 11px}
+  .sum-box .k{font-size:10px;color:var(--dim)}
+  .sum-box .v{font-size:14px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+
+  .settings-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+  .settings-row:last-child{border-bottom:none}
+  .settings-row .k{font-size:12px;color:#e2e8f0}
+  .settings-row .d{font-size:10.5px;color:var(--dim);margin-top:3px}
+  .settings-row .ctrl{flex-shrink:0}
+  .settings-row select,.settings-row input[type=text]{background:#0f172a;border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:11.5px;color:var(--text)}
+  .settings-row input[type=text]{width:260px;font-family:Consolas,monospace}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,10px);background:#243249;border:1px solid #475569;color:#f1f5f9;padding:9px 16px;border-radius:7px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:300;max-width:70vw}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  .proto-fab{position:fixed;right:18px;bottom:18px;z-index:90;background:#1b263b;border:1px solid #3b4b63;color:#94a3b8;font-size:10.5px;font-weight:600;padding:7px 11px;border-radius:20px;box-shadow:0 6px 20px rgba(0,0,0,.35);display:flex;align-items:center;gap:6px}
+  .proto-fab:hover{color:#fff;border-color:#64748b}
+  .proto-fab .p-dot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+  .proto-panel{position:fixed;right:18px;bottom:58px;z-index:91;width:272px;background:#1b263b;border:1px solid #3b4b63;border-radius:10px;box-shadow:var(--shadow);padding:12px;display:none}
+  .proto-panel.show{display:block}
+  .proto-panel h4{font-size:11px;color:#cbd5e1;margin-bottom:3px}
+  .proto-panel p{font-size:10px;color:var(--dim);line-height:1.5;margin-bottom:9px}
+  .proto-routes{display:flex;flex-direction:column;gap:2px;max-height:50vh;overflow-y:auto}
+  .proto-route{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:5px;background:none;border:none;color:#b6c2d4;font-size:11px;text-align:left}
+  .proto-route:hover{background:#273449;color:#fff}
+  .proto-route.active{background:rgba(59,130,246,.18);color:#bfdbfe}
+  .proto-route .pr-k{font-family:Consolas,monospace;font-size:9px;color:#64748b;margin-left:auto}
+  .proto-sep{height:1px;background:var(--line-soft);margin:6px 0}
+
+  .muted{color:var(--muted)} .dim{color:var(--dim)} .ok{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--red)}
+  .mono{font-family:Consolas,"SFMono-Regular",monospace;font-variant-numeric:tabular-nums}
+  .nowrap{white-space:nowrap} .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row-flex{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .mt-2{margin-top:8px} .mt-3{margin-top:12px} .mt-4{margin-top:16px}
+  .center{text-align:center}
+  .divider{height:1px;background:var(--line-soft);margin:2px 0}
+
+  @media (max-width:1280px){
+    .content{grid-template-columns:270px minmax(0,1fr)}
+    .stat .value{font-size:20px}
+    .main{padding:16px 16px 24px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  }
 </style>
 </head>
 <body>
-<div class="sidebar">
-  <div class="logo"><span class="logo-badge">DW</span> Disk Warden</div>
-  <div class="nav-item active" onclick="switchNav('ide',this)">💾 IDE 数据</div>
-  <div class="nav-item" onclick="switchNav('proj',this)">📁 项目目录</div>
-  <div class="nav-item" onclick="switchNav('disk',this)">💽 C 盘全景</div>
-  <div class="nav-item" onclick="switchNav('rules',this)">📖 规则学习</div>
-  <div class="nav-item" onclick="switchNav('hist',this)">📜 操作历史</div>
-  <div style="flex:1;"></div>
-  <div class="nav-item" onclick="openModal('m-settings')">⚙️ 设置</div>
-</div>
-<div class="main">
-  <div class="topbar">
-    <h1 id="page-title">IDE 数据</h1>
-    <div class="top-actions">
-      <button class="btn btn-ghost btn-sm" onclick="openModal('m-feedback')">反馈问题</button>
-      <button class="btn btn-primary btn-sm" onclick="toast('已重新扫描')">重新扫描</button>
-    </div>
-  </div>
-  <div class="stats">
-    <div class="stat"><div class="label">C盘剩余</div><div class="value red">2.8 GB</div><div class="sub">已用 97.6%</div></div>
-    <div class="stat"><div class="label">目标盘可用</div><div class="value blue">21.7 GB</div><div class="sub">D/E/F 盘可选</div></div>
-    <div class="stat"><div class="label">可释放总量</div><div class="value blue">31.6 GB</div><div class="sub">缓存清理 + 迁移</div></div>
-    <div class="stat"><div class="label">累计已释放</div><div class="value green">17.2 GB</div><div class="sub">Kiro 已迁出</div></div>
-  </div>
-  <div class="content">
-    <div class="panel"><div id="list"></div></div>
-    <div class="panel"><div id="detail"></div></div>
-  </div>
-</div>
-<div class="modal-mask" id="m-settings">
-  <div class="modal">
-    <span class="close-x" onclick="closeModal('m-settings')">×</span>
-    <h3>设置</h3>
-    <div style="margin-top:12px;">
-      <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:12.5px;">开机自启</span><div class="switch" onclick="this.classList.toggle('on')"></div></div>
-      <div style="margin-bottom:14px;">
-        <div style="font-size:12.5px; margin-bottom:6px;">目标存储根目录</div>
-        <input type="text" value="D:\DiskWarden\" style="width:100%; padding:7px 10px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; font-size:12px; font-family:Consolas,monospace;">
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="page-title">Disk Warden</h1>
+        <div class="scan-meta" id="scan-meta"></div>
       </div>
-      <div style="margin-bottom:14px;">
-        <div style="font-size:12.5px; margin-bottom:6px;">语言</div>
-        <select style="width:100%; padding:7px 10px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; font-size:12px;">
-          <option>English（默认）</option><option selected>中文</option>
-        </select>
-      </div>
-      <div style="text-align:right; margin-top:16px; padding-top:12px; border-top:1px solid #334155;">
-        <button class="btn btn-primary" onclick="closeModal('m-settings'); toast('设置已保存')">保存</button>
-      </div>
-    </div>
-  </div>
+      <div class="top-actions" id="top-actions"></div>
+    </header>
+    <div id="view"></div>
+  </main>
 </div>
-<div class="modal-mask" id="m-feedback">
-  <div class="modal" style="width:480px;">
-    <span class="close-x" onclick="closeModal('m-feedback')">×</span>
-    <h3>反馈问题</h3>
-    <div style="margin-top:12px;">
-      <div style="background:#0f172a; border-radius:6px; padding:10px; margin-bottom:14px; font-family:Consolas,monospace; font-size:11px; color:#94a3b8; line-height:1.8;">
-        OS: Windows 11<br>DiskWarden: v0.1.0<br>C盘剩余: 2.8 GB
-      </div>
-      <div style="display:flex; gap:8px; justify-content:flex-end;">
-        <button class="btn btn-ghost btn-sm" onclick="toast('诊断信息已复制')">复制诊断</button>
-        <button class="btn btn-primary btn-sm" onclick="toast('跳转 GitHub Issues')">提 Issue</button>
-      </div>
-    </div>
-  </div>
+<div id="modal-root"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<button class="proto-fab" id="proto-fab" type="button"><span class="p-dot"></span><span id="proto-fab-label">原型状态</span></button>
+<div class="proto-panel" id="proto-panel" role="dialog" aria-label="Prototype state switcher">
+  <h4 id="proto-title">原型状态</h4>
+  <p id="proto-desc">仅用于评审：直接跳转到各交互状态，不影响产品逻辑。</p>
+  <div class="proto-routes" id="proto-routes"></div>
 </div>
-<div class="modal-mask" id="m-migrate">
-  <div class="modal">
-    <h3 style="margin-bottom:12px;">确认迁移？</h3>
-    <div style="background:#0f172a; border-radius:6px; padding:10px; margin-bottom:14px; font-size:12px; line-height:1.8;">
-      <div><b>软件：</b>Cursor</div>
-      <div><b>从：</b>C:\...\Cursor</div>
-      <div><b>到：</b>D:\DiskWarden\Cursor</div>
-      <div><b>释放：</b><span style="color:#22c55e; font-weight:600;">8.4 GB</span></div>
-    </div>
-    <div style="font-size:11.5px; color:#ef4444; margin-bottom:14px;">⚠ 请先关闭 Cursor！</div>
-    <div style="display:flex; gap:8px; justify-content:flex-end;">
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('m-migrate')">取消</button>
-      <button class="btn btn-primary btn-sm" onclick="closeModal('m-migrate'); openModal('m-progress')">开始迁移</button>
-    </div>
-  </div>
-</div>
-<div class="modal-mask" id="m-progress">
-  <div class="modal">
-    <h3 style="margin-bottom:14px;">正在迁移...</h3>
-    <div style="background:#334155; border-radius:4px; height:8px; margin-bottom:10px; overflow:hidden;">
-      <div style="background:#3b82f6; height:100%; width:45%;"></div>
-    </div>
-    <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#94a3b8;">
-      <span>复制文件中...</span><span>45%</span>
-    </div>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
 <script>
-const DATA = {
-  ide: [
-    {name:'Kiro', size:'17.2 GB', loc:'D', color:'#f59e0b'},
-    {name:'Cursor', size:'8.4 GB', loc:'C', color:'#000'},
-    {name:'Trae CN', size:'5.1 GB', loc:'C', color:'#3b82f6'},
-    {name:'Trae', size:'3.8 GB', loc:'C', color:'#3b82f6'},
-    {name:'VS Code', size:'2.2 GB', loc:'C', color:'#0ea5e9'},
-    {name:'Windsurf', size:'3.5 GB', loc:'D', color:'#8b5cf6'},
-    {name:'Claude Code', size:'0.6 GB', loc:'C', color:'#d97706'},
+/* ============================================================
+   Disk Warden — 高保真交互原型（纯静态，无构建依赖）
+   所有界面文案集中在 I18N 对象中，键名见 docs/specs/界面交互说明-v1.0.md
+   ============================================================ */
+const I18N = {};
+I18N['zh-CN'] = {
+  'app.tagline': 'AI IDE 磁盘管家',
+  'nav.group.work': '工作台',
+  'nav.group.system': '系统',
+  'nav.ide': 'IDE 数据',
+  'nav.projects': '项目目录',
+  'nav.disk': 'C 盘全景',
+  'nav.rules': '规则学习',
+  'nav.history': '操作历史',
+  'nav.settings': '设置',
+  'nav.version': 'v0.1.0 原型',
+  'page.ide.title': 'IDE 数据',
+  'page.ide.desc': '扫描本机 AI IDE / CLI 的数据目录，安全迁移可再生的缓存与会话。',
+  'page.projects.title': '项目目录',
+  'page.projects.desc': '检查各项目的依赖与构建产物，只清理可再生的部分。',
+  'page.disk.title': 'C 盘全景',
+  'page.disk.desc': '按类别查看 C 盘占用，找到可以安全搬走的大块空间。',
+  'page.rules.title': '规则学习',
+  'page.rules.desc': '规则命中即分类；不确定的目录交给用户确认，确认结果本地生效。',
+  'page.history.title': '操作历史',
+  'page.history.desc': '每一次迁移、清理与回滚都可追溯，且可回滚的操作保留恢复路径。',
+  'meta.lastScan': '上次扫描 {time} · 用时 {dur}',
+  'meta.neverScan': '尚未扫描',
+  'meta.scanning': '正在扫描…',
+  'meta.scope': '范围：%APPDATA% · %USERPROFILE% · %LOCALAPPDATA%',
+  'action.rescan': '重新扫描',
+  'action.feedback': '反馈问题',
+  'action.settings': '设置',
+  'action.cancel': '取消',
+  'action.close': '关闭',
+  'action.back': '返回',
+  'action.confirm': '确认',
+  'action.save': '保存',
+  'action.retry': '重试',
+  'action.viewLog': '查看日志',
+  'action.openFolder': '打开目录',
+  'action.clean': '清理缓存',
+  'action.migrate': '迁移到目标盘',
+  'action.startMigrate': '开始迁移',
+  'action.rollback': '迁回 C 盘',
+  'action.rollbackNow': '立即回滚',
+  'action.details': '详情',
+  'action.viewHistory': '查看操作历史',
+  'action.done': '完成',
+  'action.add': '添加',
+  'action.delete': '删除',
+  'action.ignore': '忽略',
+  'action.markGreen': '标为可迁',
+  'action.markRed': '标为不可动',
+  'action.confirmYellow': '确认此目录',
+  'action.scanAgain': '重新扫描',
+  'action.cancelScan': '取消扫描',
+  'action.copyDiagnostics': '复制诊断',
+  'action.issue': '提 Issue',
+  'action.export': '导出记录',
+  'action.learnMore': '查看规则说明',
+  'action.viewLocation': '查看位置',
+  'action.howTo': '处理方式',
+  'action.apply': '应用',
+  'action.selectAll': '全选可迁',
+  'action.clear': '清空选择',
+  'action.refresh': '刷新',
+  'common.green': '可迁',
+  'common.red': '不可动',
+  'common.yellow': '未知',
+  'common.migrated': '已迁移',
+  'common.onC': '在 C 盘',
+  'common.running': '运行中',
+  'common.protected': '受保护',
+  'common.confirmed': '已确认',
+  'common.needsConfirm': '需确认',
+  'common.total': '合计',
+  'common.items': '{n} 项',
+  'common.selected': '已选 {n} 项',
+  'common.files': '{n} 个文件',
+  'common.simulated': '原型模拟',
+  'common.required': '必填',
+  'common.optional': '可选',
+  'common.none': '无',
+  'common.yes': '是',
+  'common.no': '否',
+  'common.unknown': '未知',
+  'common.enabled': '已启用',
+  'common.disabled': '已停用',
+  'common.size': '大小',
+  'common.path': '路径',
+  'common.name': '名称',
+  'common.type': '类型',
+  'common.safety': '风险',
+  'common.status': '状态',
+  'common.time': '时间',
+  'common.result': '结果',
+  'common.reason': '判定原因',
+  'common.progress': '进度',
+  'common.legend': '风险分级',
+  'legend.green': '可再生，可迁移',
+  'legend.red': '凭证/配置，绝不迁移',
+  'legend.yellow': '未知，需你确认',
+  'stats.cFree': 'C 盘剩余',
+  'stats.cFreeSub': '已用 {pct}% · 共 {total}',
+  'stats.targetFree': '目标盘可用',
+  'stats.targetFreeSub': '{drive} · 迁移目标根目录',
+  'stats.reclaimable': '可释放总量',
+  'stats.reclaimableSub': '缓存清理 + 迁移估算',
+  'stats.freed': '累计已释放',
+  'stats.freedSub': '{n} 次操作 · 近 30 天',
+  'stats.scanTime': '扫描耗时',
+  'stats.rollbackable': '可回滚',
+  'stats.ides': '已识别软件',
+  'stats.idesSub': '含 IDE / CLI / 插件',
+  'stats.dirs': '已分类目录',
+  'stats.dirsSub': '绿 {green} · 红 {red} · 黄 {yellow}',
+  'stats.risk': '受保护路径',
+  'stats.riskSub': '凭证与配置不参与迁移',
+  'ide.search': '搜索软件或路径…',
+  'ide.filter.all': '全部',
+  'ide.filter.c': '在 C 盘',
+  'ide.filter.migrated': '已迁移',
+  'ide.filter.running': '运行中',
+  'ide.listTitle': '软件列表',
+  'ide.listHint': '{n} 个已识别',
+  'ide.listEmpty': '没有符合筛选条件的软件。',
+  'ide.detailEmpty': '从左侧选择一个软件查看目录明细。',
+  'ide.kind.ide': 'IDE',
+  'ide.kind.cli': 'CLI',
+  'ide.kind.extension': '插件',
+  'ide.kind.tool': '工具',
+  'ide.itemsTitle': '目录明细',
+  'ide.itemsHint': '按最长路径优先判定风险',
+  'ide.notesTitle': '官方说明与注意事项',
+  'ide.target': '迁移目标',
+  'ide.needSpace': '需要空间',
+  'ide.spaceEnough': '目标盘空间充足',
+  'ide.spaceShort': '目标盘空间不足，请清理或更换目标盘',
+  'ide.estimatedFree': '预计释放 C 盘',
+  'ide.migratable': '可迁项',
+  'ide.migratableValue': '{n} 项 · {size}',
+  'ide.redExcluded': '{n} 个受保护项已自动排除，不会迁移',
+  'ide.redLocked': '受保护，无迁移入口',
+  'ide.yellowHint': '未知目录默认不参与迁移；确认后可手动勾选。',
+  'ide.yellowLocked': '需先确认此目录的用途',
+  'ide.processTitle': '检测到进程正在运行',
+  'ide.processBody': '迁移前必须退出 {app}，否则文件会被占用。Disk Warden 不会强制结束进程。',
+  'ide.processBlock': '检测到 {n} 个进程正在使用该目录，迁移已阻断。',
+  'ide.noSelection': '请至少选择一个可迁目录',
+  'ide.alreadyMigrated': '该软件的数据已位于目标盘，通过 junction 链接回原路径。',
+  'ide.allGreenSelected': '全选可迁',
+  'ide.cleanHint': '仅清理 Chromium / 编译缓存，不触碰会话与配置。',
+  'ide.openHint': '已在资源管理器中打开（原型模拟）',
+  'ide.selectIde': '请选择软件',
+  'reason.chatDb': 'AI 对话与 agent 状态数据库，可再生',
+  'reason.workspace': '各项目工作区索引，可再生',
+  'reason.chromeCache': 'Chromium 浏览器缓存，可再生',
+  'reason.codeCache': 'JS 编译缓存，可再生',
+  'reason.gpuCache': 'GPU 着色器缓存，可再生',
+  'reason.logs': '运行日志，可再生',
+  'reason.extCache': '扩展缓存，可再生',
+  'reason.login': '登录凭证，动了需要重新登录',
+  'reason.localState': '本地加密密钥，不可移动',
+  'reason.settings': '用户配置，不可移动',
+  'reason.snapshot': 'AI 快照文件，官方确认可删除',
+  'reason.agentData': 'agent 运行数据，可再生',
+  'reason.globalMemory': '全局记忆与导出，动了会丢失上下文',
+  'reason.session': '会话记录，可再生',
+  'reason.toolResults': 'MCP 工具输出，可再生',
+  'reason.fileHistory': '文件编辑快照，可再生',
+  'reason.imageCache': '粘贴图片缓存，可再生',
+  'reason.pasteCache': '大段粘贴内容缓存，可再生',
+  'reason.uploads': '上传文件副本，可再生',
+  'reason.plans': '计划文件，可再生',
+  'reason.shell': 'shell 快照，可再生',
+  'reason.usage': '用量报告，可再生',
+  'reason.mcpLogs': 'MCP server 日志，可再生',
+  'reason.credentials': '登录凭证，绝不迁移',
+  'reason.oauth': 'OAuth / MCP 状态，绝不迁移',
+  'reason.autoMemory': '自动记忆，动了会丢失',
+  'reason.codexLogs': '诊断日志数据库，bug 时可能异常膨胀',
+  'reason.worktrees': '并行 agent 自动创建的仓库副本，可再生',
+  'reason.tmp': '临时文件，可再生',
+  'reason.runtime': '运行时依赖缓存，可再生',
+  'reason.auth': '登录凭证，绝不迁移',
+  'reason.config': '配置文件，绝不迁移',
+  'reason.cascade': 'Cascade 对话历史，可再生',
+  'reason.brain': '计划文件，可再生',
+  'reason.userMemory': '用户记忆，绝不迁移',
+  'reason.index': '向量索引，可再生',
+  'reason.kiroStorage': '索引缓存，可再生',
+  'reason.unknown': '规则未覆盖，需人工确认用途',
+  'reason.nodeModules': '依赖目录，可通过包管理器重新安装',
+  'reason.dist': '构建产物，可重新构建',
+  'reason.git': '版本历史，必须保留',
+  'reason.vscodeExt': '扩展安装目录，可通过 junction 迁移',
+  'reason.winUpdate': 'Windows 更新缓存，由系统管理',
+  'reason.temp': '系统临时文件，可安全清理',
+  'reason.browser': '浏览器缓存，可再生',
+  'reason.ollama': '本地模型文件，体积大且可重新下载',
+  'reason.npm': 'npm 包缓存，可再生',
+  'reason.jetbrains': '索引与系统缓存，官方支持改路径',
+  'reason.docker': 'Docker 虚拟磁盘，需在设置中迁移',
+  'reason.playwright': '浏览器二进制，可再生',
+  'reason.custom': '用户自定义规则',
+  'preview.title': '迁移预览',
+  'preview.sub': '确认迁移内容、目标位置与空间占用',
+  'preview.summary': '本次迁移',
+  'preview.from': '源目录',
+  'preview.to': '目标目录',
+  'preview.free': '释放 C 盘',
+  'preview.targetFree': '目标盘剩余',
+  'preview.junction': '迁移后将在原路径建立 junction 链接，软件无需改配置。',
+  'preview.willExcludeRed': '受保护项自动排除',
+  'preview.willExcludeRedDesc': '{n} 个红色目录不会被复制、删除或链接。',
+  'preview.yellowPending': '{n} 个黄色目录未确认，暂不迁移。',
+  'preview.checkboxGreen': '可迁目录',
+  'preview.start': '开始迁移',
+  'preview.back': '返回调整',
+  'preview.itemsTitle': '迁移清单',
+  'preview.spaceOk': '空间充足',
+  'preview.spaceBad': '空间不足',
+  'preview.targetRoot': '目标根目录',
+  'progress.title': '正在迁移',
+  'progress.keepOpen': '迁移过程中请不要关闭软件或打开目标软件。',
+  'progress.percent': '{pct}%',
+  'progress.files': '{done} / {total} 个文件',
+  'progress.stage.backup': '备份配置与凭证清单',
+  'progress.stage.copy': '复制目录到目标盘',
+  'progress.stage.verify': '校验文件数量与总字节',
+  'progress.stage.delete': '删除源目录',
+  'progress.stage.link': '建立 junction 链接',
+  'progress.stage.verifyLink': '读回链接目标并验证',
+  'progress.stage.done': '完成',
+  'progress.waiting': '等待',
+  'progress.running': '进行中',
+  'progress.done': '完成',
+  'progress.cancelDisabled': '迁移开始后不可取消，避免留下半迁移状态。',
+  'failed.title': '迁移失败',
+  'failed.sub': '源目录未删除，数据保持原样',
+  'failed.code': '错误码',
+  'failed.what': '发生了什么',
+  'failed.sourceSafe': '源目录仍然完整，未执行删除与建链。',
+  'failed.backup': '配置备份位于 {path}',
+  'failed.suggestion': '建议：关闭相关软件后重试；若反复失败，请导出日志并反馈。',
+  'failed.retry': '重试迁移',
+  'failed.rollback': '回滚到迁移前',
+  'failed.log': '查看日志',
+  'failed.verifyMsg': '校验未通过：目标端文件数或总字节与源端不一致。',
+  'success.title': '迁移完成',
+  'success.sub': '源路径已建立 junction，软件可照常启动',
+  'success.freed': '已释放 C 盘',
+  'success.junction': '链接目标',
+  'success.verified': '校验结果',
+  'success.verifiedValue': '文件数与字节数一致',
+  'success.duration': '耗时',
+  'success.viewHistory': '查看操作历史',
+  'success.done': '完成',
+  'rollback.title': '回滚到 C 盘？',
+  'rollback.sub': '撤销 junction，并把数据完整迁回原目录',
+  'rollback.desc': '将删除 {path} 处的 junction，把 {size} 数据迁回 C 盘，然后恢复迁移前的配置备份。',
+  'rollback.note': '回滚前请先退出 {app}，迁移期间不要启动它。',
+  'rollback.confirm': '确认回滚',
+  'rollback.cancel': '暂不回滚',
+  'rollback.source': '数据当前位置',
+  'rollback.target': '迁回位置',
+  'rollback.backup': '配置备份',
+  'blocked.title': '无法迁移：进程占用',
+  'blocked.sub': '{app} 正在运行，文件被占用',
+  'blocked.desc': '检测到以下进程正在使用该软件的目录。Disk Warden 不会强制结束进程，请手动退出后重试。',
+  'blocked.process': '进程',
+  'blocked.pid': 'PID',
+  'blocked.path': '占用路径',
+  'blocked.hint': '退出软件后点击「重新检测」，或稍后手动迁移。',
+  'blocked.recheck': '重新检测',
+  'blocked.manual': '仍要迁移（不推荐）',
+  'blocked.stillBlocked': '进程仍在运行，迁移继续被阻断。',
+  'blocked.forceWarn': '强制迁移可能导致文件损坏或软件异常，原型不提供该操作。',
+  'yellow.title': '确认未知目录',
+  'yellow.sub': '{path}',
+  'yellow.desc': '规则未覆盖该目录。请确认它的用途后再决定是否允许迁移。',
+  'yellow.warn': '如果它包含登录凭证、配置或记忆，请标为「不可动」。',
+  'yellow.size': '当前大小',
+  'yellow.detected': '识别依据',
+  'yellow.confirm': '确认可迁移',
+  'yellow.markRed': '标为不可动',
+  'yellow.later': '稍后再说',
+  'scan.title': '正在扫描本机数据目录',
+  'scan.lead': '扫描只读取目录结构与文件大小，不会修改任何文件。',
+  'scan.stage.enumerate': '枚举 %APPDATA% 与用户目录',
+  'scan.stage.match': '匹配已知 IDE / CLI',
+  'scan.stage.size': '统计目录大小',
+  'scan.stage.process': '检测进程占用',
+  'scan.stage.classify': '应用规则并分级',
+  'scan.stage.done': '生成扫描结果',
+  'scan.cancel': '取消扫描',
+  'scan.cancelled': '扫描已取消',
+  'scan.done': '扫描完成，识别到 {n} 个软件',
+  'scan.failed': '扫描失败',
+  'scan.retry': '重试扫描',
+  'empty.title': '没有检测到已知 IDE',
+  'empty.desc': '我们检查了 %APPDATA%、%USERPROFILE% 和 %LOCALAPPDATA%，没有发现支持的 AI IDE / CLI 数据目录。安装后重新扫描即可。',
+  'empty.supported': '已支持 20+ 款',
+  'empty.rescan': '重新扫描',
+  'empty.docs': '查看支持列表',
+  'settings.title': '设置',
+  'settings.sub': '目标路径与行为偏好，修改后立即生效',
+  'settings.language': '界面语言',
+  'settings.languageDesc': '原型内所有文案通过 i18n 键切换',
+  'settings.autoStart': '开机自启',
+  'settings.autoStartDesc': '登录 Windows 后自动在托盘运行',
+  'settings.targetRoot': '目标存储根目录',
+  'settings.targetRootDesc': '迁移后的目录、备份与日志都放在这里',
+  'settings.autoMaintenance': '自动维护',
+  'settings.autoMaintenanceDesc': '仅在托盘运行时清理可再生缓存，不迁移、不删会话',
+  'settings.uninstall': '卸载时如何处理已迁移数据',
+  'settings.uninstallDesc': '不会自动删除用户数据，除非你明确选择',
+  'settings.uninstall.keep': '保留数据并移除链接',
+  'settings.uninstall.remove': '同时删除迁移数据',
+  'settings.saved': '设置已保存',
+  'settings.langChanged': '界面语言已切换',
+  'settings.spaceCheck': '空间检查',
+  'settings.spaceCheckValue': 'D 盘剩余 21.7 GB · 需保留 2 GB 缓冲',
+  'feedback.title': '反馈问题',
+  'feedback.sub': '附上诊断信息可以更快定位问题',
+  'feedback.diagnostics': '诊断信息',
+  'feedback.copy': '复制诊断',
+  'feedback.issue': '提 Issue',
+  'feedback.copied': '诊断信息已复制',
+  'feedback.issueOpened': '已打开 Issue 页面（原型模拟）',
+  'feedback.note': '不会上传任何文件内容或凭证明文。',
+  'projects.listTitle': '项目',
+  'projects.listHint': '{n} 个最近活跃',
+  'projects.search': '搜索项目…',
+  'projects.path': '项目路径',
+  'projects.size': '占用',
+  'projects.reclaimable': '可回收',
+  'projects.reclaimableValue': '依赖 {deps} · 构建 {dist}',
+  'projects.deps': 'node_modules',
+  'projects.build': '构建产物',
+  'projects.git': '.git',
+  'projects.source': '源码',
+  'projects.ide': '关联 IDE',
+  'projects.lastActive': '最近活跃',
+  'projects.actions': '可执行操作',
+  'projects.cleanDeps': '清理依赖',
+  'projects.cleanBuild': '清理构建产物',
+  'projects.keep': '源码与 .git 永不清除',
+  'projects.note': '清理后需要重新 npm install / build，Disk Warden 不会自动执行。',
+  'projects.empty': '没有扫描到项目目录。',
+  'projects.select': '从左侧选择一个项目查看明细。',
+  'projects.total': '项目总占用',
+  'projects.totalSub': '源码 {src} · 可再生 {re}',
+  'projects.count': '项目数',
+  'projects.countSub': '位于 C 盘 {n} 个',
+  'projects.cleanable': '可回收空间',
+  'projects.cleanableSub': '仅依赖与构建产物',
+  'projects.danger': '受保护文件',
+  'projects.dangerSub': '源码 / .git / 配置',
+  'projects.safeTitle': '可安全清理',
+  'projects.keepTitle': '必须保留',
+  'disk.total': '总容量',
+  'disk.used': '已使用',
+  'disk.free': '可用空间',
+  'disk.reclaim': '可回收估算',
+  'disk.usedSub': '已用 {pct}%',
+  'disk.freeSub': '低于 10% 时系统会变慢',
+  'disk.reclaimSub': '迁移 + 清理后',
+  'disk.breakdown': '空间分布',
+  'disk.breakdownHint': '按可回收优先级排序',
+  'disk.category': '类别',
+  'disk.handling': '处理方式',
+  'disk.size': '大小',
+  'disk.action': '操作',
+  'disk.handling.junction': 'Junction 迁移',
+  'disk.handling.env-var': '改环境变量',
+  'disk.handling.app-config': '改应用配置',
+  'disk.handling.docker-settings': 'Docker 设置',
+  'disk.handling.system': '系统提供方',
+  'disk.handling.clean': '直接清理',
+  'disk.notIncluded': '系统文件、页面文件与受保护目录不在处理范围内；本工具不做杀毒或系统优化。',
+  'disk.refresh': '刷新占用',
+  'disk.ide': 'AI IDE 与 CLI',
+  'disk.ideDesc': '缓存、会话、索引与 worktree',
+  'disk.cli': '命令行工具',
+  'disk.cliDesc': 'Claude Code、Codex CLI 的会话与日志',
+  'disk.worktrees': 'Git worktree',
+  'disk.worktreesDesc': 'AI 工具创建的隔离工作副本',
+  'disk.dev': '开发工具缓存',
+  'disk.devDesc': 'npm / pip / Cargo / Gradle / JetBrains',
+  'disk.jetbrains': 'JetBrains 缓存',
+  'disk.jetbrainsDesc': '索引、编译输出与旧版本目录',
+  'disk.sys': '系统与浏览器',
+  'disk.sysDesc': 'Windows 更新、临时文件、浏览器缓存',
+  'disk.temp': '临时文件',
+  'disk.tempDesc': '安装残留、日志与崩溃转储',
+  'disk.models': '模型与大文件',
+  'disk.modelsDesc': 'Ollama 模型、Docker 虚拟磁盘',
+  'disk.other': '其他占用',
+  'disk.otherDesc': '程序、文档、媒体等不在回收范围内',
+  'disk.junctionNote': '迁移后原路径保留 junction，软件无感知。',
+  'disk.envNote': '通过环境变量改路径，需要重启终端或软件。',
+  'disk.configNote': '修改应用自己的配置项，官方支持。',
+  'disk.dockerNote': '需在 Docker Desktop 设置中迁移，不建议直接搬文件。',
+  'rules.statsRules': '生效规则',
+  'rules.statsRulesSub': '内置 {builtin} · 学习 {learned}',
+  'rules.statsHits': '今日命中',
+  'rules.statsHitsSub': '最近一次扫描 {n} 次',
+  'rules.statsPending': '待确认目录',
+  'rules.statsPendingSub': '黄色未知项',
+  'rules.statsConflict': '冲突策略',
+  'rules.statsConflictSub': '红色优先，绝不迁移',
+  'rules.redWins': '红色优先',
+  'rules.pending': '待确认目录',
+  'rules.pendingDesc': '规则未覆盖，确认后会写入本地 rules-learned.json',
+  'rules.pendingEmpty': '没有待确认的目录。',
+  'rules.table': '规则列表',
+  'rules.tableDesc': '按目录名匹配，红色优先',
+  'rules.match': '匹配',
+  'rules.type': '匹配方式',
+  'rules.type.exact': '精确',
+  'rules.type.glob': '通配',
+  'rules.type.regex': '正则',
+  'rules.safety': '判定',
+  'rules.source': '来源',
+  'rules.source.builtin': '内置',
+  'rules.source.user': '用户学习',
+  'rules.hits': '命中',
+  'rules.enabled': '启用',
+  'rules.addTitle': '新增规则',
+  'rules.addDesc': '示例：match = "Cache"，类型 = 精确，判定 = 可迁',
+  'rules.matchPh': '目录名或通配符，如 Cache / *.sqlite',
+  'rules.reasonPh': '判定原因（可留空）',
+  'rules.required': '请填写匹配条件',
+  'rules.matchType': '匹配方式',
+  'rules.add': '添加规则',
+  'rules.added': '规则已添加并立即生效',
+  'rules.toggled': '规则状态已更新',
+  'rules.deleted': '规则已删除',
+  'rules.conflict': '当多条规则命中同一路径时，红色永远优先。',
+  'rules.size': '大小',
+  'rules.path': '路径',
+  'rules.matched': '命中规则',
+  'rules.markedGreen': '已标为可迁',
+  'rules.markedRed': '已标为不可动',
+  'rules.ignored': '已忽略该目录',
+  'rules.noReason': '用户自定义',
+  'history.listTitle': '记录',
+  'history.listHint': '{n} 条',
+  'history.filter.all': '全部',
+  'history.filter.migrate': '迁移',
+  'history.filter.clean': '清理',
+  'history.filter.rollback': '回滚',
+  'history.type.migrate': '迁移',
+  'history.type.clean': '清理',
+  'history.type.rollback': '回滚',
+  'history.result.success': '成功',
+  'history.result.failed': '失败',
+  'history.result.rolledback': '已回滚',
+  'history.freed': '释放',
+  'history.duration': '耗时',
+  'history.target': '对象',
+  'history.detail': '操作详情',
+  'history.steps': '执行步骤',
+  'history.rollbackBtn': '迁回 C 盘',
+  'history.noRollback': '该操作不可回滚',
+  'history.canRollback': '此操作可回滚',
+  'history.rollbackSpace': '已释放的 C 盘空间不会因回滚丢失，回滚会重新占用 C 盘。',
+  'history.cleanNoRollback': '清理的缓存会由软件自动重建，无需回滚。',
+  'history.rollbackDone': '已迁回 C 盘并恢复原状。',
+  'history.rollbackWarn': '回滚会把数据从 {to} 迁回 C 盘并删除 junction。',
+  'history.empty': '还没有操作记录。',
+  'history.select': '从左侧选择一条记录。',
+  'history.summary': '{freed} · {dur}',
+  'history.exported': '记录已导出（原型模拟）',
+  'history.simulated': '原型中的记录为演示数据',
+  'history.migrateStep1': '备份配置与凭证清单',
+  'history.migrateStep2': '复制文件并校验',
+  'history.migrateStep3': '删除源目录',
+  'history.migrateStep4': '建立 junction 并验证',
+  'history.cleanStep1': '清理 Chromium / 编译缓存',
+  'history.rollbackStep1': '删除 junction',
+  'history.rollbackStep2': '数据迁回 C 盘并校验',
+  'history.rollbackStep3': '恢复配置备份',
+  'history.failedStep': '校验失败，已停止并保持源目录',
+  'toast.scanDone': '扫描完成',
+  'toast.scanCancelled': '已取消扫描',
+  'toast.copied': '已复制到剪贴板（原型模拟）',
+  'toast.opened': '已在资源管理器中打开（原型模拟）',
+  'toast.cleaned': '缓存清理完成，释放 {size}（原型模拟）',
+  'toast.ruleAdded': '规则已添加',
+  'toast.saved': '设置已保存',
+  'toast.yellowConfirmed': '已确认，可在迁移预览中勾选',
+  'toast.rollbackStarted': '回滚流程已启动（原型模拟）',
+  'toast.retry': '重试中（原型模拟）',
+  'toast.exported': '已导出（原型模拟）',
+  'toast.needSelect': '请先选择至少一个目录',
+  'toast.spaceShort': '目标盘空间不足',
+  'toast.blocked': '软件正在运行，无法迁移',
+  'toast.demoHint': '原型模式：此操作不会修改任何真实文件',
+  'proto.title': '原型状态',
+  'proto.desc': '仅用于评审：直接跳转到各交互状态，不修改真实数据。',
+  'proto.section.core': 'IDE 数据',
+  'proto.section.other': '其他页面',
+  'proto.section.states': '关键状态',
+  'proto.route.ide': 'IDE 列表（默认）',
+  'proto.route.scanning': '扫描中',
+  'proto.route.empty': '空态：未检测到 IDE',
+  'proto.route.preview': '迁移预览',
+  'proto.route.progress': '迁移进度',
+  'proto.route.failed': '迁移失败',
+  'proto.route.blocked': '进程占用阻断',
+  'proto.route.rollback': '回滚确认',
+  'proto.route.yellow': '确认未知目录',
+  'proto.route.success': '迁移成功',
+  'proto.route.projects': '项目目录',
+  'proto.route.disk': 'C 盘全景',
+  'proto.route.rules': '规则学习',
+  'proto.route.history': '操作历史',
+  'proto.route.settings': '设置弹窗',
+  'proto.route.feedback': '反馈弹窗',
+  'unit.hours': '小时',
+  'unit.minutes': '分钟',
+  'unit.seconds': '秒'
+};
+I18N['en'] = {
+  'app.tagline': 'Disk manager for AI IDEs',
+  'nav.group.work': 'Workspace',
+  'nav.group.system': 'System',
+  'nav.ide': 'IDE data',
+  'nav.projects': 'Projects',
+  'nav.disk': 'C: drive',
+  'nav.rules': 'Rule learning',
+  'nav.history': 'History',
+  'nav.settings': 'Settings',
+  'nav.version': 'v0.1.0 prototype',
+  'page.ide.title': 'IDE data',
+  'page.ide.desc': 'Scan data folders of AI IDEs and CLIs, then move regenerable caches and sessions safely.',
+  'page.projects.title': 'Projects',
+  'page.projects.desc': 'Inspect dependencies and build output of each project. Only regenerable parts are cleaned.',
+  'page.disk.title': 'C: drive overview',
+  'page.disk.desc': 'See C: usage by category and find large blocks that can be moved safely.',
+  'page.rules.title': 'Rule learning',
+  'page.rules.desc': 'Rules classify folders by name. Unknown folders are confirmed by you and learned locally.',
+  'page.history.title': 'History',
+  'page.history.desc': 'Every migration, clean and rollback is traceable. Reversible operations keep a recovery path.',
+  'meta.lastScan': 'Last scan {time} · took {dur}',
+  'meta.neverScan': 'Not scanned yet',
+  'meta.scanning': 'Scanning…',
+  'meta.scope': 'Scope: %APPDATA% · %USERPROFILE% · %LOCALAPPDATA%',
+  'action.rescan': 'Rescan',
+  'action.feedback': 'Feedback',
+  'action.settings': 'Settings',
+  'action.cancel': 'Cancel',
+  'action.close': 'Close',
+  'action.back': 'Back',
+  'action.confirm': 'Confirm',
+  'action.save': 'Save',
+  'action.retry': 'Retry',
+  'action.viewLog': 'View log',
+  'action.openFolder': 'Open folder',
+  'action.clean': 'Clean caches',
+  'action.migrate': 'Migrate to target drive',
+  'action.startMigrate': 'Start migration',
+  'action.rollback': 'Move back to C:',
+  'action.rollbackNow': 'Roll back now',
+  'action.details': 'Details',
+  'action.viewHistory': 'View history',
+  'action.done': 'Done',
+  'action.add': 'Add',
+  'action.delete': 'Delete',
+  'action.ignore': 'Ignore',
+  'action.markGreen': 'Mark migratable',
+  'action.markRed': 'Mark protected',
+  'action.confirmYellow': 'Confirm folder',
+  'action.scanAgain': 'Rescan',
+  'action.cancelScan': 'Cancel scan',
+  'action.copyDiagnostics': 'Copy diagnostics',
+  'action.issue': 'Open issue',
+  'action.export': 'Export',
+  'action.learnMore': 'Rule docs',
+  'action.viewLocation': 'Show location',
+  'action.howTo': 'How to move',
+  'action.apply': 'Apply',
+  'action.selectAll': 'Select all migratable',
+  'action.clear': 'Clear',
+  'action.refresh': 'Refresh',
+  'common.green': 'Migratable',
+  'common.red': 'Protected',
+  'common.yellow': 'Unknown',
+  'common.migrated': 'Migrated',
+  'common.onC': 'On C:',
+  'common.running': 'Running',
+  'common.protected': 'Protected',
+  'common.confirmed': 'Confirmed',
+  'common.needsConfirm': 'Needs review',
+  'common.total': 'Total',
+  'common.items': '{n} items',
+  'common.selected': '{n} selected',
+  'common.files': '{n} files',
+  'common.simulated': 'Simulated',
+  'common.required': 'Required',
+  'common.optional': 'Optional',
+  'common.none': 'None',
+  'common.yes': 'Yes',
+  'common.no': 'No',
+  'common.unknown': 'Unknown',
+  'common.enabled': 'Enabled',
+  'common.disabled': 'Disabled',
+  'common.size': 'Size',
+  'common.path': 'Path',
+  'common.name': 'Name',
+  'common.type': 'Type',
+  'common.safety': 'Risk',
+  'common.status': 'Status',
+  'common.time': 'Time',
+  'common.result': 'Result',
+  'common.reason': 'Reason',
+  'common.progress': 'Progress',
+  'common.legend': 'Risk levels',
+  'legend.green': 'Regenerable, safe to move',
+  'legend.red': 'Credentials / config, never move',
+  'legend.yellow': 'Unknown, needs your call',
+  'stats.cFree': 'C: free',
+  'stats.cFreeSub': '{pct}% used · {total} total',
+  'stats.targetFree': 'Target free',
+  'stats.targetFreeSub': '{drive} · migration root',
+  'stats.reclaimable': 'Reclaimable',
+  'stats.reclaimableSub': 'Cache clean + migration estimate',
+  'stats.freed': 'Freed so far',
+  'stats.freedSub': '{n} operations · last 30 days',
+  'stats.scanTime': 'Scan time',
+  'stats.rollbackable': 'Rollbackable',
+  'stats.ides': 'Apps detected',
+  'stats.idesSub': 'IDE / CLI / extensions',
+  'stats.dirs': 'Folders classified',
+  'stats.dirsSub': 'Green {green} · Red {red} · Yellow {yellow}',
+  'stats.risk': 'Protected paths',
+  'stats.riskSub': 'Credentials and config are never moved',
+  'ide.search': 'Search app or path…',
+  'ide.filter.all': 'All',
+  'ide.filter.c': 'On C:',
+  'ide.filter.migrated': 'Migrated',
+  'ide.filter.running': 'Running',
+  'ide.listTitle': 'Applications',
+  'ide.listHint': '{n} detected',
+  'ide.listEmpty': 'No app matches the current filter.',
+  'ide.detailEmpty': 'Select an app on the left to inspect its folders.',
+  'ide.kind.ide': 'IDE',
+  'ide.kind.cli': 'CLI',
+  'ide.kind.extension': 'Extension',
+  'ide.kind.tool': 'Tool',
+  'ide.itemsTitle': 'Folders',
+  'ide.itemsHint': 'Longest path wins when grading risk',
+  'ide.notesTitle': 'Notes from vendor docs',
+  'ide.target': 'Migration target',
+  'ide.needSpace': 'Space needed',
+  'ide.spaceEnough': 'Enough space on target',
+  'ide.spaceShort': 'Not enough space on target. Free space or pick another drive.',
+  'ide.estimatedFree': 'Estimated C: gain',
+  'ide.migratable': 'Migratable',
+  'ide.migratableValue': '{n} items · {size}',
+  'ide.redExcluded': '{n} protected items are excluded automatically',
+  'ide.redLocked': 'Protected, no migration entry',
+  'ide.yellowHint': 'Unknown folders are excluded until you confirm them.',
+  'ide.yellowLocked': 'Confirm what this folder is first',
+  'ide.processTitle': 'Running process detected',
+  'ide.processBody': 'Quit {app} before migrating, otherwise files are locked. Disk Warden never force-kills processes.',
+  'ide.processBlock': '{n} processes are using this folder. Migration is blocked.',
+  'ide.noSelection': 'Select at least one migratable folder',
+  'ide.alreadyMigrated': 'This app already lives on the target drive and is linked back with a junction.',
+  'ide.allGreenSelected': 'Select all migratable',
+  'ide.cleanHint': 'Only Chromium and compile caches are cleaned. Sessions and config stay.',
+  'ide.openHint': 'Opened in Explorer (prototype simulation)',
+  'ide.selectIde': 'Select an app',
+  'reason.chatDb': 'AI chat and agent state database, regenerable',
+  'reason.workspace': 'Per-project workspace index, regenerable',
+  'reason.chromeCache': 'Chromium browser cache, regenerable',
+  'reason.codeCache': 'JS compile cache, regenerable',
+  'reason.gpuCache': 'GPU shader cache, regenerable',
+  'reason.logs': 'Runtime logs, regenerable',
+  'reason.extCache': 'Extension cache, regenerable',
+  'reason.login': 'Login credentials. Moving it forces a re-login',
+  'reason.localState': 'Local encryption key, must not move',
+  'reason.settings': 'User settings, must not move',
+  'reason.snapshot': 'AI snapshots. Vendor confirms deletion is safe',
+  'reason.agentData': 'Agent runtime data, regenerable',
+  'reason.globalMemory': 'Global memory and exports. Moving loses context',
+  'reason.session': 'Session records, regenerable',
+  'reason.toolResults': 'MCP tool output, regenerable',
+  'reason.fileHistory': 'File edit snapshots, regenerable',
+  'reason.imageCache': 'Pasted image cache, regenerable',
+  'reason.pasteCache': 'Large paste cache, regenerable',
+  'reason.uploads': 'Uploaded file copies, regenerable',
+  'reason.plans': 'Plan files, regenerable',
+  'reason.shell': 'Shell snapshots, regenerable',
+  'reason.usage': 'Usage reports, regenerable',
+  'reason.mcpLogs': 'MCP server logs, regenerable',
+  'reason.credentials': 'Login credentials, never move',
+  'reason.oauth': 'OAuth / MCP state, never move',
+  'reason.autoMemory': 'Automatic memory, would be lost',
+  'reason.codexLogs': 'Diagnostic log database. Can balloon after a bug',
+  'reason.worktrees': 'Repo copies made by parallel agents, regenerable',
+  'reason.tmp': 'Temporary files, regenerable',
+  'reason.runtime': 'Runtime dependency cache, regenerable',
+  'reason.auth': 'Login credentials, never move',
+  'reason.config': 'Config file, never move',
+  'reason.cascade': 'Cascade chat history, regenerable',
+  'reason.brain': 'Plan files, regenerable',
+  'reason.userMemory': 'User memory, never move',
+  'reason.index': 'Vector index, regenerable',
+  'reason.kiroStorage': 'Index cache, regenerable',
+  'reason.unknown': 'Not covered by rules. Needs a human decision',
+  'reason.nodeModules': 'Dependency folder, reinstallable via package manager',
+  'reason.dist': 'Build output, rebuildable',
+  'reason.git': 'Version history, must be kept',
+  'reason.vscodeExt': 'Extension install folder, movable by junction',
+  'reason.winUpdate': 'Windows Update cache, managed by the system',
+  'reason.temp': 'System temp files, safe to clean',
+  'reason.browser': 'Browser cache, regenerable',
+  'reason.ollama': 'Local model files, large but re-downloadable',
+  'reason.npm': 'npm package cache, regenerable',
+  'reason.jetbrains': 'Index and system cache, official path config',
+  'reason.docker': 'Docker virtual disk, migrate in settings',
+  'reason.playwright': 'Browser binaries, regenerable',
+  'reason.custom': 'User-defined rule',
+  'preview.title': 'Migration preview',
+  'preview.sub': 'Confirm what moves, where it goes, and the space it needs',
+  'preview.summary': 'This migration',
+  'preview.from': 'From',
+  'preview.to': 'To',
+  'preview.free': 'Frees on C:',
+  'preview.targetFree': 'Target free',
+  'preview.junction': 'A junction is created at the original path, so the app needs no config change.',
+  'preview.willExcludeRed': 'Protected items excluded',
+  'preview.willExcludeRedDesc': '{n} red folders will not be copied, deleted or linked.',
+  'preview.yellowPending': '{n} unknown folders are unconfirmed and stay put.',
+  'preview.checkboxGreen': 'Migratable folder',
+  'preview.start': 'Start migration',
+  'preview.back': 'Back to adjust',
+  'preview.itemsTitle': 'Migration list',
+  'preview.spaceOk': 'Enough space',
+  'preview.spaceBad': 'Not enough space',
+  'preview.targetRoot': 'Target root',
+  'progress.title': 'Migrating',
+  'progress.keepOpen': 'Keep this window open and do not launch the app while migration runs.',
+  'progress.percent': '{pct}%',
+  'progress.files': '{done} / {total} files',
+  'progress.stage.backup': 'Back up config and credential list',
+  'progress.stage.copy': 'Copy folders to target drive',
+  'progress.stage.verify': 'Verify file count and total bytes',
+  'progress.stage.delete': 'Delete source folders',
+  'progress.stage.link': 'Create junction links',
+  'progress.stage.verifyLink': 'Read back link target and verify',
+  'progress.stage.done': 'Done',
+  'progress.waiting': 'Waiting',
+  'progress.running': 'Running',
+  'progress.done': 'Done',
+  'progress.cancelDisabled': 'Migration cannot be cancelled once started, to avoid a half-moved state.',
+  'failed.title': 'Migration failed',
+  'failed.sub': 'The source folder was not deleted. Your data is unchanged.',
+  'failed.code': 'Error code',
+  'failed.what': 'What happened',
+  'failed.sourceSafe': 'Source is intact. Delete and link steps were not run.',
+  'failed.backup': 'Config backup at {path}',
+  'failed.suggestion': 'Try again after quitting the app. If it keeps failing, export the log and report it.',
+  'failed.retry': 'Retry migration',
+  'failed.rollback': 'Roll back to before migration',
+  'failed.log': 'View log',
+  'failed.verifyMsg': 'Verification failed: file count or total bytes differ between source and target.',
+  'success.title': 'Migration complete',
+  'success.sub': 'The source path now holds a junction. The app starts normally.',
+  'success.freed': 'Freed on C:',
+  'success.junction': 'Link target',
+  'success.verified': 'Verification',
+  'success.verifiedValue': 'File count and bytes match',
+  'success.duration': 'Duration',
+  'success.viewHistory': 'View history',
+  'success.done': 'Done',
+  'rollback.title': 'Move back to C:?',
+  'rollback.sub': 'Remove the junction and move data back to the original folder',
+  'rollback.desc': 'The junction at {path} will be removed, {size} of data moved back to C:, and the pre-migration config backup restored.',
+  'rollback.note': 'Quit {app} first and do not launch it during rollback.',
+  'rollback.confirm': 'Confirm rollback',
+  'rollback.cancel': 'Not now',
+  'rollback.source': 'Data is now at',
+  'rollback.target': 'Move back to',
+  'rollback.backup': 'Config backup',
+  'blocked.title': 'Cannot migrate: process in use',
+  'blocked.sub': '{app} is running and holding files',
+  'blocked.desc': 'These processes are using the app folders. Disk Warden never force-kills them. Quit the app manually and retry.',
+  'blocked.process': 'Process',
+  'blocked.pid': 'PID',
+  'blocked.path': 'Folder in use',
+  'blocked.hint': 'After quitting, click Check again, or migrate manually later.',
+  'blocked.recheck': 'Check again',
+  'blocked.manual': 'Migrate anyway (not recommended)',
+  'blocked.stillBlocked': 'The process is still running. Migration stays blocked.',
+  'blocked.forceWarn': 'Force migration can corrupt files or break the app. The prototype does not offer it.',
+  'yellow.title': 'Confirm unknown folder',
+  'yellow.sub': '{path}',
+  'yellow.desc': 'No rule covers this folder. Confirm what it holds before allowing migration.',
+  'yellow.warn': 'If it stores credentials, config or memory, mark it protected.',
+  'yellow.size': 'Current size',
+  'yellow.detected': 'Why it was flagged',
+  'yellow.confirm': 'Confirm migratable',
+  'yellow.markRed': 'Mark protected',
+  'yellow.later': 'Ask me later',
+  'scan.title': 'Scanning data folders',
+  'scan.lead': 'The scan only reads folder structure and file sizes. Nothing is modified.',
+  'scan.stage.enumerate': 'Enumerate %APPDATA% and user folders',
+  'scan.stage.match': 'Match known IDE / CLI folders',
+  'scan.stage.size': 'Measure folder sizes',
+  'scan.stage.process': 'Check running processes',
+  'scan.stage.classify': 'Apply rules and grade risk',
+  'scan.stage.done': 'Build scan result',
+  'scan.cancel': 'Cancel scan',
+  'scan.cancelled': 'Scan cancelled',
+  'scan.done': 'Scan complete. {n} apps detected',
+  'scan.failed': 'Scan failed',
+  'scan.retry': 'Retry scan',
+  'empty.title': 'No known IDE detected',
+  'empty.desc': 'We checked %APPDATA%, %USERPROFILE% and %LOCALAPPDATA% and found no supported AI IDE / CLI data. Install one and rescan.',
+  'empty.supported': '20+ apps supported',
+  'empty.rescan': 'Rescan',
+  'empty.docs': 'See supported list',
+  'settings.title': 'Settings',
+  'settings.sub': 'Target path and behavior. Changes apply immediately.',
+  'settings.language': 'Language',
+  'settings.languageDesc': 'Every string in the prototype is switched via i18n keys',
+  'settings.autoStart': 'Start with Windows',
+  'settings.autoStartDesc': 'Run in the tray after sign-in',
+  'settings.targetRoot': 'Target storage root',
+  'settings.targetRootDesc': 'Migrated folders, backups and logs live here',
+  'settings.autoMaintenance': 'Auto maintenance',
+  'settings.autoMaintenanceDesc': 'Clean regenerable caches while in tray. Never migrates or deletes sessions.',
+  'settings.uninstall': 'Migrated data on uninstall',
+  'settings.uninstallDesc': 'User data is never deleted unless you choose so',
+  'settings.uninstall.keep': 'Keep data, remove links',
+  'settings.uninstall.remove': 'Delete migrated data too',
+  'settings.saved': 'Settings saved',
+  'settings.langChanged': 'Language switched',
+  'settings.spaceCheck': 'Space check',
+  'settings.spaceCheckValue': 'D: has 21.7 GB free · 2 GB buffer required',
+  'feedback.title': 'Send feedback',
+  'feedback.sub': 'Diagnostics help us locate the issue faster',
+  'feedback.diagnostics': 'Diagnostics',
+  'feedback.copy': 'Copy diagnostics',
+  'feedback.issue': 'Open issue',
+  'feedback.copied': 'Diagnostics copied',
+  'feedback.issueOpened': 'Issue page opened (prototype simulation)',
+  'feedback.note': 'No file content or credential plaintext is uploaded.',
+  'projects.listTitle': 'Projects',
+  'projects.listHint': '{n} recently active',
+  'projects.search': 'Search projects…',
+  'projects.path': 'Project path',
+  'projects.size': 'Size',
+  'projects.reclaimable': 'Reclaimable',
+  'projects.reclaimableValue': 'Deps {deps} · Build {dist}',
+  'projects.deps': 'node_modules',
+  'projects.build': 'Build output',
+  'projects.git': '.git',
+  'projects.source': 'Source',
+  'projects.ide': 'Linked IDE',
+  'projects.lastActive': 'Last active',
+  'projects.actions': 'Allowed actions',
+  'projects.cleanDeps': 'Clean dependencies',
+  'projects.cleanBuild': 'Clean build output',
+  'projects.keep': 'Source and .git are never removed',
+  'projects.note': 'You need to run npm install / build again afterward. Disk Warden does not do it.',
+  'projects.empty': 'No project folder found.',
+  'projects.select': 'Select a project on the left.',
+  'projects.total': 'Project footprint',
+  'projects.totalSub': 'Source {src} · Reclaimable {re}',
+  'projects.count': 'Projects',
+  'projects.countSub': '{n} on C:',
+  'projects.cleanable': 'Reclaimable space',
+  'projects.cleanableSub': 'Dependencies and build output only',
+  'projects.danger': 'Protected files',
+  'projects.dangerSub': 'Source / .git / config',
+  'projects.safeTitle': 'Safe to clean',
+  'projects.keepTitle': 'Must keep',
+  'disk.total': 'Capacity',
+  'disk.used': 'Used',
+  'disk.free': 'Free',
+  'disk.reclaim': 'Reclaimable estimate',
+  'disk.usedSub': '{pct}% used',
+  'disk.freeSub': 'Below 10% the system slows down',
+  'disk.reclaimSub': 'After migration and clean',
+  'disk.breakdown': 'Space breakdown',
+  'disk.breakdownHint': 'Sorted by reclaim priority',
+  'disk.category': 'Category',
+  'disk.handling': 'Handling',
+  'disk.size': 'Size',
+  'disk.action': 'Action',
+  'disk.handling.junction': 'Junction migration',
+  'disk.handling.env-var': 'Environment variable',
+  'disk.handling.app-config': 'App config',
+  'disk.handling.docker-settings': 'Docker settings',
+  'disk.handling.system': 'OS provider',
+  'disk.handling.clean': 'Clean up',
+  'disk.notIncluded': 'System files, page file and protected folders are out of scope. This tool does no antivirus or system tuning.',
+  'disk.refresh': 'Refresh usage',
+  'disk.ide': 'AI IDEs and CLIs',
+  'disk.ideDesc': 'Caches, sessions, indexes and worktrees',
+  'disk.cli': 'CLI tools',
+  'disk.cliDesc': 'Claude Code and Codex CLI sessions and logs',
+  'disk.worktrees': 'Git worktrees',
+  'disk.worktreesDesc': 'Isolated copies created by AI tools',
+  'disk.dev': 'Developer tool caches',
+  'disk.devDesc': 'npm / pip / Cargo / Gradle / JetBrains',
+  'disk.jetbrains': 'JetBrains caches',
+  'disk.jetbrainsDesc': 'Indexes, build output and old versions',
+  'disk.sys': 'System and browsers',
+  'disk.sysDesc': 'Windows Update, temp files, browser cache',
+  'disk.temp': 'Temp files',
+  'disk.tempDesc': 'Install leftovers, logs and crash dumps',
+  'disk.models': 'Models and large files',
+  'disk.modelsDesc': 'Ollama models, Docker virtual disk',
+  'disk.other': 'Everything else',
+  'disk.otherDesc': 'Apps, documents and media outside reclaim scope',
+  'disk.junctionNote': 'A junction stays at the original path, invisible to the app.',
+  'disk.envNote': 'Path is changed by environment variable. Restart the terminal or app.',
+  'disk.configNote': 'Edits the app own config, which the vendor supports.',
+  'disk.dockerNote': 'Move it in Docker Desktop settings. Do not copy files manually.',
+  'rules.statsRules': 'Active rules',
+  'rules.statsRulesSub': 'Built-in {builtin} · Learned {learned}',
+  'rules.statsHits': 'Hits today',
+  'rules.statsHitsSub': '{n} in the last scan',
+  'rules.statsPending': 'Pending folders',
+  'rules.statsPendingSub': 'Yellow unknown items',
+  'rules.statsConflict': 'Conflict policy',
+  'rules.statsConflictSub': 'Red wins, never migrate',
+  'rules.redWins': 'Red wins',
+  'rules.pending': 'Folders to confirm',
+  'rules.pendingDesc': 'Not covered by rules. Confirmation is written to local rules-learned.json.',
+  'rules.pendingEmpty': 'Nothing to confirm.',
+  'rules.table': 'Rules',
+  'rules.tableDesc': 'Matched by folder name, red wins',
+  'rules.match': 'Match',
+  'rules.type': 'Match type',
+  'rules.type.exact': 'Exact',
+  'rules.type.glob': 'Glob',
+  'rules.type.regex': 'Regex',
+  'rules.safety': 'Verdict',
+  'rules.source': 'Source',
+  'rules.source.builtin': 'Built-in',
+  'rules.source.user': 'Learned',
+  'rules.hits': 'Hits',
+  'rules.enabled': 'Enabled',
+  'rules.addTitle': 'Add rule',
+  'rules.addDesc': 'Example: match = "Cache", type = exact, verdict = migratable',
+  'rules.matchPh': 'Folder name or glob, e.g. Cache / *.sqlite',
+  'rules.reasonPh': 'Reason (optional)',
+  'rules.required': 'Enter a match pattern',
+  'rules.matchType': 'Match type',
+  'rules.add': 'Add rule',
+  'rules.added': 'Rule added and active',
+  'rules.toggled': 'Rule state updated',
+  'rules.deleted': 'Rule deleted',
+  'rules.conflict': 'When several rules hit the same path, red always wins.',
+  'rules.size': 'Size',
+  'rules.path': 'Path',
+  'rules.matched': 'Matched rule',
+  'rules.markedGreen': 'Marked migratable',
+  'rules.markedRed': 'Marked protected',
+  'rules.ignored': 'Folder ignored',
+  'rules.noReason': 'User defined',
+  'history.listTitle': 'Records',
+  'history.listHint': '{n} entries',
+  'history.filter.all': 'All',
+  'history.filter.migrate': 'Migrations',
+  'history.filter.clean': 'Cleans',
+  'history.filter.rollback': 'Rollbacks',
+  'history.type.migrate': 'Migration',
+  'history.type.clean': 'Clean',
+  'history.type.rollback': 'Rollback',
+  'history.result.success': 'Success',
+  'history.result.failed': 'Failed',
+  'history.result.rolledback': 'Rolled back',
+  'history.freed': 'Freed',
+  'history.duration': 'Duration',
+  'history.target': 'Target',
+  'history.detail': 'Operation detail',
+  'history.steps': 'Steps',
+  'history.rollbackBtn': 'Move back to C:',
+  'history.noRollback': 'This operation cannot be rolled back',
+  'history.canRollback': 'This operation can be rolled back',
+  'history.rollbackSpace': 'Freed C: space stays freed only until a rollback, which occupies C: again.',
+  'history.cleanNoRollback': 'Caches are rebuilt automatically by the app, so no rollback is needed.',
+  'history.rollbackDone': 'Moved back to C: and restored.',
+  'history.rollbackWarn': 'Rollback moves data from {to} back to C: and removes the junction.',
+  'history.empty': 'No operations yet.',
+  'history.select': 'Select a record on the left.',
+  'history.summary': '{freed} · {dur}',
+  'history.exported': 'History exported (prototype simulation)',
+  'history.simulated': 'Records here are demo data',
+  'history.migrateStep1': 'Back up config and credential list',
+  'history.migrateStep2': 'Copy files and verify',
+  'history.migrateStep3': 'Delete source folders',
+  'history.migrateStep4': 'Create junction and verify',
+  'history.cleanStep1': 'Clean Chromium / compile caches',
+  'history.rollbackStep1': 'Remove junction',
+  'history.rollbackStep2': 'Move data back to C: and verify',
+  'history.rollbackStep3': 'Restore config backup',
+  'history.failedStep': 'Verification failed. Stopped with source intact.',
+  'toast.scanDone': 'Scan complete',
+  'toast.scanCancelled': 'Scan cancelled',
+  'toast.copied': 'Copied to clipboard (prototype simulation)',
+  'toast.opened': 'Opened in Explorer (prototype simulation)',
+  'toast.cleaned': 'Cache cleaned, freed {size} (prototype simulation)',
+  'toast.ruleAdded': 'Rule added',
+  'toast.saved': 'Settings saved',
+  'toast.yellowConfirmed': 'Confirmed. You can select it in the preview.',
+  'toast.rollbackStarted': 'Rollback started (prototype simulation)',
+  'toast.retry': 'Retrying (prototype simulation)',
+  'toast.exported': 'Exported (prototype simulation)',
+  'toast.needSelect': 'Select at least one folder first',
+  'toast.spaceShort': 'Not enough space on target',
+  'toast.blocked': 'The app is running, cannot migrate',
+  'toast.demoHint': 'Prototype: this action does not modify real files',
+  'proto.title': 'Prototype states',
+  'proto.desc': 'For review only. Jump between states without touching real data.',
+  'proto.section.core': 'IDE data',
+  'proto.section.other': 'Other pages',
+  'proto.section.states': 'Key states',
+  'proto.route.ide': 'IDE list (default)',
+  'proto.route.scanning': 'Scanning',
+  'proto.route.empty': 'Empty: no IDE detected',
+  'proto.route.preview': 'Migration preview',
+  'proto.route.progress': 'Migration progress',
+  'proto.route.failed': 'Migration failed',
+  'proto.route.blocked': 'Blocked by process',
+  'proto.route.rollback': 'Rollback confirmation',
+  'proto.route.yellow': 'Confirm unknown directory',
+  'proto.route.success': 'Migration success',
+  'proto.route.projects': 'Projects',
+  'proto.route.disk': 'C: overview',
+  'proto.route.rules': 'Rule learning',
+  'proto.route.history': 'History',
+  'proto.route.settings': 'Settings modal',
+  'proto.route.feedback': 'Feedback modal',
+  'unit.hours': 'h',
+  'unit.minutes': 'min',
+  'unit.seconds': 's'
+};
+let LANG = 'zh-CN';
+function t(key, vars) {
+  const dict = I18N[LANG] || I18N['zh-CN'];
+  let s = dict[key];
+  if (s === undefined) s = I18N['zh-CN'][key];
+  if (s === undefined) return key;
+  if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] !== undefined ? vars[k] : m));
+  return s;
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function fmtGB(gb) {
+  if (!gb) return '0 MB';
+  if (gb >= 1) return gb.toFixed(1) + ' GB';
+  const mb = gb * 1024;
+  if (mb >= 1) return Math.round(mb) + ' MB';
+  return Math.max(1, Math.round(mb * 1024)) + ' KB';
+}
+const GIB = 1024 * 1024 * 1024;
+function fmtBytes(bytes) {
+  return fmtGB(bytes / GIB);
+}
+function sum(items, key) {
+  return items.reduce((a, b) => a + (b[key] || 0), 0);
+}
+
+/* 数据形状对齐 data/ide-catalog.json（T03）：ides[].directories[] 使用
+   path / type / safety / reason / handling；原型额外附加 size_bytes，
+   真实实现由扫描引擎填充。 */
+const CATALOG = {
+  schema_version: 1,
+  source: 'ui prototype (aligned with data/ide-catalog.json)',
+  platform: 'windows',
+  updated_at: '2026-10-19',
+  ides: [
+    {
+      id: 'cursor', name: 'Cursor', kind: 'ide', platform: 'windows',
+      processes: ['Cursor.exe'],
+      directories: [
+        { path: '%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb', type: 'file', safety: 'green', reason: 'reason.chatDb', handling: 'junction' },
+        { path: '%APPDATA%\\Cursor\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
+        { path: '%APPDATA%\\Cursor\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
+        { path: '%APPDATA%\\Cursor\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' },
+        { path: '%APPDATA%\\Cursor\\Local State', type: 'file', safety: 'red', reason: 'reason.localState' },
+        { path: '%APPDATA%\\Cursor\\User\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
+      ]
+    },
+    {
+      id: 'trae-cn', name: 'Trae CN', kind: 'ide', platform: 'windows',
+      processes: ['Trae CN.exe', 'TRAE SOLO CN.exe'],
+      directories: [
+        { path: '%APPDATA%\\TRAE SOLO CN\\ModularData\\ai-agent\\snapshot\\', type: 'dir', safety: 'green', reason: 'reason.snapshot', handling: 'junction' },
+        { path: '%APPDATA%\\TRAE SOLO CN\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
+        { path: '%APPDATA%\\TRAE SOLO CN\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
+        { path: '%USERPROFILE%\\.trae-cn\\', type: 'dir', safety: 'yellow', reason: 'reason.unknown' },
+        { path: '%APPDATA%\\TRAE SOLO CN\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' },
+        { path: '%APPDATA%\\TRAE SOLO CN\\User\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
+      ]
+    },
+    {
+      id: 'trae', name: 'Trae', kind: 'ide', platform: 'windows',
+      processes: ['Trae.exe'],
+      directories: [
+        { path: '%APPDATA%\\Trae\\ModularData\\ai-agent\\snapshot\\', type: 'dir', safety: 'green', reason: 'reason.snapshot', handling: 'junction' },
+        { path: '%APPDATA%\\Trae\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
+        { path: '%APPDATA%\\Trae\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
+        { path: '%USERPROFILE%\\.trae\\', type: 'dir', safety: 'yellow', reason: 'reason.unknown' },
+        { path: '%APPDATA%\\Trae\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
+      ]
+    },
+    {
+      id: 'windsurf', name: 'Windsurf', kind: 'ide', platform: 'windows',
+      processes: ['Windsurf.exe'],
+      directories: [
+        { path: '%APPDATA%\\Windsurf\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
+        { path: '%APPDATA%\\Windsurf\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
+        { path: '%USERPROFILE%\\.codeium\\windsurf\\cascade\\', type: 'dir', safety: 'green', reason: 'reason.cascade', handling: 'junction' },
+        { path: '%USERPROFILE%\\.codeium\\windsurf\\memories\\', type: 'dir', safety: 'red', reason: 'reason.userMemory' },
+        { path: '%APPDATA%\\Windsurf\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
+      ]
+    },
+    {
+      id: 'kiro', name: 'Kiro', kind: 'ide', platform: 'windows',
+      processes: ['Kiro.exe'],
+      directories: [
+        { path: '%APPDATA%\\Kiro\\User\\globalStorage\\', type: 'dir', safety: 'green', reason: 'reason.kiroStorage', handling: 'junction' },
+        { path: '%APPDATA%\\Kiro\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
+        { path: '%APPDATA%\\Kiro\\logs\\', type: 'dir', safety: 'green', reason: 'reason.logs', handling: 'junction' },
+        { path: '%USERPROFILE%\\.kiro\\settings\\', type: 'dir', safety: 'red', reason: 'reason.config' }
+      ]
+    },
+    {
+      id: 'vscode', name: 'VS Code', kind: 'ide', platform: 'windows',
+      processes: ['Code.exe'],
+      directories: [
+        { path: '%APPDATA%\\Code\\User\\globalStorage\\saoudrizwan.claude-dev\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
+        { path: '%APPDATA%\\Code\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
+        { path: '%APPDATA%\\Code\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
+        { path: '%APPDATA%\\Code\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
+      ]
+    },
+    {
+      id: 'claude-code', name: 'Claude Code', kind: 'cli', platform: 'windows',
+      processes: ['claude.exe', 'node.exe'],
+      directories: [
+        { path: '%USERPROFILE%\\.claude\\debug\\', type: 'dir', safety: 'green', reason: 'reason.logs', handling: 'junction' },
+        { path: '%USERPROFILE%\\.claude\\projects\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
+        { path: '%USERPROFILE%\\.claude\\file-history\\', type: 'dir', safety: 'green', reason: 'reason.fileHistory', handling: 'junction' },
+        { path: '%LOCALAPPDATA%\\claude-cli-nodejs\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.mcpLogs', handling: 'junction' },
+        { path: '%USERPROFILE%\\.claude\\.credentials.json', type: 'file', safety: 'red', reason: 'reason.credentials' },
+        { path: '%USERPROFILE%\\.claude\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
+      ]
+    },
+    {
+      id: 'codex-cli', name: 'Codex CLI', kind: 'cli', platform: 'windows',
+      processes: ['codex.exe'],
+      directories: [
+        { path: '%USERPROFILE%\\.codex\\sessions\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
+        { path: '%USERPROFILE%\\.codex\\logs_2.sqlite', type: 'file', safety: 'green', reason: 'reason.codexLogs', handling: 'junction' },
+        { path: '%USERPROFILE%\\.codex\\worktrees\\', type: 'dir', safety: 'green', reason: 'reason.worktrees', handling: 'junction' },
+        { path: '%USERPROFILE%\\.codex\\tmp\\', type: 'dir', safety: 'green', reason: 'reason.tmp', handling: 'junction' },
+        { path: '%USERPROFILE%\\.codex\\auth.json', type: 'file', safety: 'red', reason: 'reason.auth' },
+        { path: '%USERPROFILE%\\.codex\\config.toml', type: 'file', safety: 'red', reason: 'reason.config' }
+      ]
+    }
   ]
 };
-let currentNav = 'ide';
-function switchNav(t, el) {
-  currentNav = t;
-  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
-  el.classList.add('active');
-  const titles = {ide:'IDE 数据', proj:'项目目录', disk:'C 盘全景', rules:'规则学习', hist:'操作历史'};
-  document.getElementById('page-title').textContent = titles[t];
-  renderList(); renderDetail();
+
+/* 原型运行态：扫描结果 / 迁移状态 / 进程占用（真实实现由 T06–T08 填充） */
+const SIZE_TABLE = {
+  'cursor': [4.2, 3.1, 1.05, 0.003, 0.0002, 0.00001],
+  'trae-cn': [2.4, 1.3, 1.0, 0.4, 0.003, 0.00001],
+  'trae': [1.8, 0.9, 0.8, 0.3, 0.003],
+  'windsurf': [1.8, 0.8, 0.9, 0.005, 0.003],
+  'kiro': [16.0, 0.8, 0.4, 0.002],
+  'vscode': [1.1, 0.7, 0.4, 0.003],
+  'claude-code': [0.5, 0.06, 0.02, 0.02, 0.002, 0.001],
+  'codex-cli': [1.2, 0.8, 0.5, 0.1, 0.002, 0.001]
+};
+const RUNTIME = {
+  'cursor': { root: '%APPDATA%\\Cursor\\', location: 'C', migrated: false, running: [{ name: 'Cursor.exe', pid: 12844, lock: '%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb' }, { name: 'Cursor Helper.exe', pid: 15302, lock: '%APPDATA%\\Cursor\\Cache\\' }] },
+  'trae-cn': { root: '%APPDATA%\\TRAE SOLO CN\\', location: 'C', migrated: false, running: [] },
+  'trae': { root: '%APPDATA%\\Trae\\', location: 'C', migrated: false, running: [] },
+  'windsurf': { root: '%APPDATA%\\Windsurf\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\Windsurf', running: [] },
+  'kiro': { root: '%APPDATA%\\Kiro\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\Kiro', running: [] },
+  'vscode': { root: '%APPDATA%\\Code\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\VSCode', running: [] },
+  'claude-code': { root: '%USERPROFILE%\\.claude\\', location: 'C', migrated: false, running: [] },
+  'codex-cli': { root: '%USERPROFILE%\\.codex\\', location: 'C', migrated: false, running: [] }
+};
+
+CATALOG.ides.forEach(ide => {
+  const sizes = SIZE_TABLE[ide.id] || [];
+  ide.directories.forEach((d, i) => { d.size_bytes = Math.round((sizes[i] || 0) * GIB); });
+  ide.runtime = RUNTIME[ide.id];
+});
+
+const DRIVE = { totalGB: 120, usedGB: 117.2, freeGB: 2.8, targetFreeGB: 21.7, targetDrive: 'D:' };
+const KPI = { reclaimableGB: 31.6, freedGB: 22.9, freedOps: 3, lastScan: '2026-10-19 09:42', scanDuration: '3.4s' };
+
+const PROJECTS = [
+  { id: 'p1', name: 'disk-warden', path: '[local-path]\\disk-warden', deps: 0.9, dist: 0.1, git: 0.05, source: 0.02, ide: 'Cursor', active: '2026-10-19 09:12', location: 'D' },
+  { id: 'p2', name: 'acme-web', path: 'C:\\Users\\Administrator\\dev\\acme-web', deps: 2.4, dist: 1.1, git: 0.2, source: 0.06, ide: 'Trae CN', active: '2026-10-18 22:40', location: 'C' },
+  { id: 'p3', name: 'data-pipeline', path: 'C:\\Users\\Administrator\\dev\\data-pipeline', deps: 1.8, dist: 0.4, git: 0.12, source: 0.04, ide: 'VS Code', active: '2026-10-18 16:03', location: 'C' },
+  { id: 'p4', name: 'mobile-app', path: 'D:\\projects\\mobile-app', deps: 0.7, dist: 0.2, git: 0.08, source: 0.03, ide: 'Windsurf', active: '2026-10-17 11:25', location: 'D' }
+];
+
+const DISK_CATEGORIES = [
+  { id: 'ai-ide', name: 'disk.ide', desc: 'disk.ideDesc', gb: 12.8, handling: 'junction', color: '#3b82f6' },
+  { id: 'ai-cli', name: 'disk.cli', desc: 'disk.cliDesc', gb: 3.1, handling: 'junction', color: '#60a5fa' },
+  { id: 'worktrees', name: 'disk.worktrees', desc: 'disk.worktreesDesc', gb: 2.5, handling: 'junction', color: '#818cf8' },
+  { id: 'pkg', name: 'disk.dev', desc: 'disk.devDesc', gb: 3.6, handling: 'env-var', color: '#8b5cf6' },
+  { id: 'jetbrains', name: 'disk.jetbrains', desc: 'disk.jetbrainsDesc', gb: 1.8, handling: 'app-config', color: '#a78bfa' },
+  { id: 'sys', name: 'disk.sys', desc: 'disk.sysDesc', gb: 2.7, handling: 'system', color: '#f59e0b' },
+  { id: 'temp', name: 'disk.temp', desc: 'disk.tempDesc', gb: 1.9, handling: 'clean', color: '#fbbf24' },
+  { id: 'models', name: 'disk.models', desc: 'disk.modelsDesc', gb: 3.2, handling: 'env-var', color: '#22c55e' }
+];
+const DISK_SEGMENTS = [
+  { key: 'disk.ide', gb: 18.6, color: '#3b82f6' },
+  { key: 'disk.dev', gb: 6.4, color: '#8b5cf6' },
+  { key: 'disk.sys', gb: 7.5, color: '#f59e0b' },
+  { key: 'disk.models', gb: 5.2, color: '#22c55e' },
+  { key: 'disk.other', gb: 79.5, color: '#334155' },
+  { key: 'disk.free', gb: 2.8, color: '#0b1322' }
+];
+
+const RULES = [
+  { id: 'r1', match: 'Cache', type: 'exact', safety: 'green', source: 'builtin', hits: 812, enabled: true },
+  { id: 'r2', match: 'CachedData', type: 'exact', safety: 'green', source: 'builtin', hits: 144, enabled: true },
+  { id: 'r3', match: 'GPUCache', type: 'exact', safety: 'green', source: 'builtin', hits: 96, enabled: true },
+  { id: 'r4', match: 'Code Cache', type: 'exact', safety: 'green', source: 'builtin', hits: 87, enabled: true },
+  { id: 'r5', match: 'logs', type: 'exact', safety: 'green', source: 'builtin', hits: 231, enabled: true },
+  { id: 'r6', match: 'sessions', type: 'exact', safety: 'green', source: 'builtin', hits: 64, enabled: true },
+  { id: 'r7', match: 'workspaceStorage', type: 'exact', safety: 'green', source: 'builtin', hits: 58, enabled: true },
+  { id: 'r8', match: 'globalStorage', type: 'exact', safety: 'green', source: 'builtin', hits: 41, enabled: true },
+  { id: 'r9', match: '*.sqlite', type: 'glob', safety: 'green', source: 'builtin', hits: 37, enabled: true },
+  { id: 'r10', match: '*.log', type: 'glob', safety: 'green', source: 'builtin', hits: 122, enabled: true },
+  { id: 'r11', match: 'node_modules', type: 'exact', safety: 'green', source: 'builtin', hits: 18, enabled: true },
+  { id: 'r12', match: 'dist', type: 'exact', safety: 'green', source: 'builtin', hits: 12, enabled: true },
+  { id: 'r13', match: 'Login Data', type: 'exact', safety: 'red', source: 'builtin', hits: 24, enabled: true },
+  { id: 'r14', match: 'Local State', type: 'exact', safety: 'red', source: 'builtin', hits: 19, enabled: true },
+  { id: 'r15', match: 'settings.json', type: 'exact', safety: 'red', source: 'builtin', hits: 31, enabled: true },
+  { id: 'r16', match: '.credentials.json', type: 'exact', safety: 'red', source: 'builtin', hits: 6, enabled: true },
+  { id: 'r17', match: 'auth.json', type: 'exact', safety: 'red', source: 'builtin', hits: 5, enabled: true },
+  { id: 'r18', match: 'memory', type: 'exact', safety: 'red', source: 'builtin', hits: 9, enabled: true },
+  { id: 'r19', match: 'memories', type: 'exact', safety: 'red', source: 'builtin', hits: 7, enabled: true },
+  { id: 'r20', match: 'snapshot', type: 'exact', safety: 'green', source: 'user', hits: 22, enabled: true },
+  { id: 'r21', match: 'cascade', type: 'exact', safety: 'green', source: 'user', hits: 14, enabled: true },
+  { id: 'r22', match: '.trae-cn', type: 'exact', safety: 'red', source: 'user', hits: 3, enabled: false }
+];
+
+const PENDING = [
+  { id: 'pd1', path: '%USERPROFILE%\\.trae-cn\\', size_bytes: 4e8, hint: 'reason.globalMemory', ide: 'Trae CN' },
+  { id: 'pd2', path: '%USERPROFILE%\\.trae\\', size_bytes: 3e8, hint: 'reason.globalMemory', ide: 'Trae' },
+  { id: 'pd3', path: '%USERPROFILE%\\.dsh\\profiles\\', size_bytes: 8e8, hint: 'reason.unknown', ide: 'DeepSeek Harness' }
+];
+
+const HISTORY = [
+  { id: 'h1', at: '2026-10-18 16:42', type: 'migrate', app: 'Kiro', from: 'C:', to: 'D:\\DiskWarden\\Kiro', freed: 17.2, duration: '4m 12s', result: 'success', canRollback: false, note: 'history.rollbackSpace', steps: ['migrateStep1', 'migrateStep2', 'migrateStep3', 'migrateStep4'] },
+  { id: 'h2', at: '2026-10-17 10:05', type: 'clean', app: 'Cursor', from: '%APPDATA%\\Cursor\\Cache\\', to: '—', freed: 2.1, duration: '12s', result: 'success', canRollback: false, note: 'history.cleanNoRollback', steps: ['cleanStep1'] },
+  { id: 'h3', at: '2026-10-16 21:18', type: 'migrate', app: 'VS Code', from: 'C:', to: 'D:\\DiskWarden\\VSCode', freed: 2.2, duration: '1m 38s', result: 'success', canRollback: true, note: 'history.canRollback', steps: ['migrateStep1', 'migrateStep2', 'migrateStep3', 'migrateStep4'] },
+  { id: 'h4', at: '2026-10-16 14:20', type: 'migrate', app: 'Trae CN', from: 'C:', to: 'D:\\DiskWarden\\TraeCN', freed: 0, duration: '2m 05s', result: 'failed', canRollback: false, code: 'E_VERIFY_MISMATCH', note: 'failed.sourceSafe', steps: ['migrateStep1', 'migrateStep2', 'failedStep'] },
+  { id: 'h5', at: '2026-10-15 09:30', type: 'rollback', app: 'Windsurf', from: 'D:\\DiskWarden\\Windsurf', to: 'C:', freed: 0, duration: '2m 20s', result: 'rolledback', canRollback: false, note: 'history.rollbackDone', steps: ['rollbackStep1', 'rollbackStep2', 'rollbackStep3'] }
+];
+
+const state = {
+  route: 'ide', tab: 'ide', sub: '',
+  selectedIde: 'cursor', selectedProject: 'p1', selectedHistory: 'h1',
+  filter: 'all', search: '',
+  checked: {}, confirmed: {},
+  settings: { targetRoot: 'D:\\DiskWarden\\', autoStart: false, autoMaintenance: false, uninstall: 'keep' },
+  demo: { pct: 45, stage: 2, freeze: true, ide: 'trae-cn', filesDone: 7421, filesTotal: 16843 },
+  scanning: false, scanPct: 62,
+  pendingYellow: { ide: 'trae-cn', idx: 3 },
+  historyFilter: 'all',
+  returnHash: '',
+  protoOpen: false,
+  toastTimer: null
+};
+CATALOG.ides.forEach(ide => {
+  state.checked[ide.id] = {};
+  ide.directories.forEach((d, i) => { if (d.safety === 'green') state.checked[ide.id][i] = true; });
+});
+/* ---------- 路由与通用渲染 ---------- */
+const TABS = ['ide', 'projects', 'disk', 'rules', 'history'];
+
+function parseRoute() {
+  const raw = (location.hash || '').replace(/^#/, '');
+  if (raw === 'settings' || raw === 'feedback') return { tab: 'ide', sub: '', modal: raw };
+  const parts = raw.split('/');
+  const tab = TABS.indexOf(parts[0]) >= 0 ? parts[0] : 'ide';
+  return { tab: tab, sub: parts[1] || '', modal: '' };
 }
-function renderList() {
-  const list = document.getElementById('list');
-  if (currentNav === 'hist' || currentNav === 'rules' || currentNav === 'disk') {
-    list.innerHTML = '<div style="color:#64748b; font-size:12px; padding:20px; text-align:center;">无列表</div>';
-    return;
-  }
-  list.innerHTML = DATA.ide.map(i => `
-    <div class="ide-item" onclick="this.classList.toggle('active')">
-      <div class="ide-left">
-        <div class="dot" style="background:${i.color}"></div>
-        <div class="ide-name">${i.name}</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="ide-size">${i.size}</div>
-        <span class="badge ${i.loc==='D'?'badge-d':'badge-c'}">${i.loc==='D'?'已迁D':'在C盘'}</span>
-      </div>
-    </div>
-  `).join('');
+function getIde(id) { return CATALOG.ides.find(x => x.id === id) || CATALOG.ides[0]; }
+function ideSize(ide) { return sum(ide.directories, 'size_bytes'); }
+function safetyCount(ide, safety) { return ide.directories.filter(d => d.safety === safety).length; }
+function yellowKey(ideId, idx) { return ideId + '|' + idx; }
+function isConfirmed(ideId, idx) { return !!state.confirmed[yellowKey(ideId, idx)]; }
+function isChecked(ideId, idx, dir) {
+  if (dir.safety === 'red') return false;
+  if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return false;
+  return !!state.checked[ideId] && !!state.checked[ideId][idx];
 }
-function renderDetail() {
-  const detail = document.getElementById('detail');
-  if (currentNav === 'rules') {
-    detail.innerHTML = `
-      <h2 style="font-size:15px; color:#f1f5f9; margin-bottom:12px;">规则学习</h2>
-      <div style="margin-bottom:14px;">
-        <div style="font-size:11.5px; color:#22c55e; font-weight:700; margin-bottom:6px;">✅ 可迁（可再生）</div>
-        <div style="background:#0f172a; padding:10px; border-radius:6px; font-size:12px; color:#cbd5e1;">Cache / GPUCache / logs / sessions / index</div>
-      </div>
-      <div>
-        <div style="font-size:11.5px; color:#ef4444; font-weight:700; margin-bottom:6px;">🔴 不可动</div>
-        <div style="background:#0f172a; padding:10px; border-radius:6px; font-size:12px; color:#cbd5e1;">settings.json / plugins / login</div>
-      </div>`;
-    return;
+function selectedDirs(ide) {
+  return ide.directories.filter((d, i) => isChecked(ide.id, i, d));
+}
+function selectedSize(ide) { return sum(selectedDirs(ide), 'size_bytes'); }
+function targetAvailableGB() { return state.settings.targetRoot ? DRIVE.targetFreeGB : 0; }
+function needBytes(ide) { return Math.ceil(selectedSize(ide) * 1.05 + 64 * 1024 * 1024); }
+function needsGB(ide) { return needBytes(ide) / GIB; }
+function spaceOk(ide) { return needsGB(ide) <= targetAvailableGB(); }
+function targetPathFor(ide) { return (state.settings.targetRoot.replace(/\\$/, '') + '\\' + ide.name.replace(/\s+/g, '')); }
+function appTitle() { return document.title; }
+
+function render() {
+  const info = parseRoute();
+  state.tab = info.tab; state.sub = info.sub; state.modal = info.modal || '';
+  if (!modalKind()) state.returnHash = '';
+  if (state.sub) {
+    if (state.sub === 'process-blocked') {
+      const cur = getIde(state.selectedIde);
+      if (!cur.runtime.running.length) state.selectedIde = 'cursor';
+    } else if (state.sub === 'rollback-confirm') {
+      const cur = getIde(state.selectedIde);
+      if (!cur.runtime.migrated) { state.selectedIde = 'vscode'; state.selectedHistory = 'h3'; }
+    } else if (state.sub.indexOf('migrate-') === 0) {
+      const cur = getIde(state.selectedIde);
+      if (cur.runtime.migrated || cur.runtime.running.length) state.selectedIde = 'trae-cn';
+    }
   }
-  if (currentNav === 'hist') {
-    detail.innerHTML = `
-      <h2 style="font-size:15px; color:#f1f5f9; margin-bottom:12px;">操作历史</h2>
-      <div style="font-size:12.5px; line-height:2; color:#cbd5e1;">
-        <div>2026-10-16 · 迁移 Kiro → D盘 · 释放 17.2 GB</div>
-        <div>2026-10-15 · 清理 Cursor Cache · 释放 2.1 GB</div>
-      </div>`;
-    return;
-  }
-  if (currentNav === 'disk') {
-    detail.innerHTML = `
-      <h2 style="font-size:15px; color:#f1f5f9; margin-bottom:12px;">C 盘全景</h2>
-      <div class="rows">
-        <div class="row"><span style="font-size:12.5px;">Windows 更新缓存</span><span class="size">3.2 GB</span></div>
-        <div class="row"><span style="font-size:12.5px;">临时文件</span><span class="size">1.8 GB</span></div>
-        <div class="row"><span style="font-size:12.5px;">浏览器缓存</span><span class="size">2.5 GB</span></div>
-      </div>`;
-    return;
-  }
-  detail.innerHTML = `
-    <div class="detail-head">
-      <h2>Cursor</h2>
-      <div class="detail-path">%APPDATA%\Cursor</div>
+  renderSidebar();
+  renderTopbar();
+  renderStats();
+  let html = '';
+  if (state.tab === 'ide') {
+    if (state.sub === 'scanning') html = renderScanning();
+    else if (state.sub === 'empty') html = renderEmpty();
+    else html = renderIde();
+  } else if (state.tab === 'projects') html = renderProjects();
+  else if (state.tab === 'disk') html = renderDisk();
+  else if (state.tab === 'rules') html = renderRules();
+  else if (state.tab === 'history') html = renderHistory();
+  document.getElementById('view').innerHTML = html;
+  renderModal();
+  renderProtoPanel();
+  document.documentElement.lang = LANG;
+}
+
+function renderSidebar() {
+  const cIde = CATALOG.ides.length;
+  const items = [
+    { id: 'ide', ico: '▤', count: cIde },
+    { id: 'projects', ico: '▣', count: PROJECTS.length },
+    { id: 'disk', ico: '◔', count: '' },
+    { id: 'rules', ico: '⌁', count: PENDING.length },
+    { id: 'history', ico: '↺', count: HISTORY.length }
+  ];
+  document.getElementById('sidebar').innerHTML = `
+    <div class="logo">
+      <div class="logo-badge">DW</div>
+      <div><div class="logo-name">Disk Warden</div><div class="logo-sub">${esc(t('app.tagline'))}</div></div>
     </div>
-    <div class="preview-card">
-      <div class="preview-row"><span class="k">目标位置</span><span class="v">D:\DiskWarden</span></div>
-      <div class="preview-row"><span class="k">释放 C 盘</span><span class="v ok">8.4 GB</span></div>
-      <div class="preview-row"><span class="k">目标盘剩余</span><span class="v ok">21.7 GB · 足够</span></div>
-    </div>
-    <div class="section-label">分项</div>
-    <div class="rows">
-      <div class="row">
-        <div><div class="name">globalStorage 索引缓存 <span class="safe">可再生</span></div><div class="desc">可安全清理</div></div>
-        <div class="size">8.4 GB</div>
+    <div class="nav-label">${esc(t('nav.group.work'))}</div>
+    <nav class="nav">
+      ${items.map(it => `
+        <button type="button" class="nav-item ${state.tab === it.id ? 'active' : ''}" onclick="App.nav('${it.id}')">
+          <span class="nav-ico">${it.ico}</span><span>${esc(t('nav.' + it.id))}</span>
+          ${it.count !== '' ? `<span class="nav-count">${it.count}</span>` : ''}
+        </button>`).join('')}
+    </nav>
+    <div class="nav-label">${esc(t('nav.group.system'))}</div>
+    <button type="button" class="nav-item" onclick="App.openModal('settings')">
+      <span class="nav-ico">⚙</span><span>${esc(t('nav.settings'))}</span>
+    </button>
+    <div class="side-foot">
+      <div class="side-meta"><span>${esc(t('nav.version'))}</span>
+        <button type="button" class="lang-chip" onclick="App.toggleLang()">${LANG === 'zh-CN' ? 'EN' : '中文'}</button>
       </div>
-      <div class="row">
-        <div><div class="name">Cache / GPUCache <span class="safe">可再生</span></div><div class="desc">可安全清理</div></div>
-        <div class="size">3.2 GB</div>
-      </div>
-      <div class="row">
-        <div><div class="name">对话历史</div><div class="desc">保留</div></div>
-        <div class="size">0.7 GB</div>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="btn btn-primary btn-sm" onclick="openModal('m-migrate')">迁移到目标盘</button>
-      <button class="btn btn-ghost btn-sm">清理缓存</button>
-      <button class="btn btn-ghost btn-sm">打开目录</button>
     </div>`;
 }
-function openModal(id) { document.getElementById(id).classList.add('show'); }
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2000);
+
+function renderTopbar() {
+  const title = t('page.' + state.tab + '.title');
+  document.getElementById('page-title').textContent = title;
+  document.title = 'Disk Warden — ' + title;
+  const meta = document.getElementById('scan-meta');
+  if (state.tab === 'ide') {
+    if (state.sub === 'scanning') meta.innerHTML = `<span style="color:#fbbf24">${esc(t('meta.scanning'))}</span>`;
+    else meta.innerHTML = `<span class="live-dot"></span>${esc(t('meta.lastScan', { time: KPI.lastScan, dur: KPI.scanDuration }))}<span class="dim">·</span><span class="dim">${esc(t('meta.scope'))}</span>`;
+  } else {
+    meta.innerHTML = `<span class="dim">${esc(t('page.' + state.tab + '.desc'))}</span>`;
+  }
+  document.getElementById('top-actions').innerHTML = `
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.rescan()">${esc(t('action.rescan'))}</button>`;
 }
-renderList(); renderDetail();
+
+function renderStats() {
+  const el = document.getElementById('view');
+  const cards = statsFor(state.tab);
+  const html = `<div class="statgrid">${cards.map(c => `
+    <div class="stat">
+      <div class="label">${esc(c.label)}</div>
+      <div class="value ${c.cls || ''}">${esc(c.value)}</div>
+      <div class="sub"><span>${esc(c.sub || '')}</span>${c.bar ? `<span>${Math.round(c.bar * 100)}%</span>` : ''}</div>
+      ${c.bar !== undefined ? `<div class="mini-bar"><i style="width:${Math.round(c.bar * 100)}%;background:${c.color || '#3b82f6'}"></i></div>` : ''}
+    </div>`).join('')}</div>`;
+  el.dataset.stats = html;
+}
+
+function statsFor(tab) {
+  const pct = Math.round((DRIVE.usedGB / DRIVE.totalGB) * 1000) / 10;
+  const cFree = { label: t('stats.cFree'), value: DRIVE.freeGB.toFixed(1) + ' GB', cls: 'v-red', sub: t('stats.cFreeSub', { pct: pct, total: DRIVE.totalGB + ' GB' }), bar: DRIVE.usedGB / DRIVE.totalGB, color: '#ef4444' };
+  const target = { label: t('stats.targetFree'), value: DRIVE.targetFreeGB.toFixed(1) + ' GB', cls: 'v-blue', sub: t('stats.targetFreeSub', { drive: DRIVE.targetDrive }), bar: DRIVE.targetFreeGB / (DRIVE.targetFreeGB + 40), color: '#3b82f6' };
+  if (tab === 'projects') {
+    const deps = sum(PROJECTS, 'deps'), dist = sum(PROJECTS, 'dist'), src = sum(PROJECTS, 'source'), git = sum(PROJECTS, 'git');
+    const onC = PROJECTS.filter(p => p.location === 'C').length;
+    return [
+      { label: t('projects.total'), value: (deps + dist + src + git).toFixed(1) + ' GB', cls: 'v-blue', sub: t('projects.totalSub', { src: fmtGB(src + git), re: fmtGB(deps + dist) }), bar: 0.52, color: '#3b82f6' },
+      { label: t('projects.count'), value: String(PROJECTS.length), cls: '', sub: t('projects.countSub', { n: onC }), bar: onC / PROJECTS.length, color: '#8b5cf6' },
+      { label: t('projects.cleanable'), value: fmtGB(deps + dist), cls: 'v-green', sub: t('projects.cleanableSub'), bar: 0.41, color: '#22c55e' },
+      { label: t('projects.danger'), value: fmtGB(src + git), cls: 'v-amber', sub: t('projects.dangerSub'), bar: 0.05, color: '#f59e0b' }
+    ];
+  }
+  if (tab === 'disk') {
+    return [
+      { label: t('disk.total'), value: DRIVE.totalGB + ' GB', sub: 'C:', bar: 1, color: '#334155' },
+      { label: t('disk.used'), value: DRIVE.usedGB.toFixed(1) + ' GB', cls: 'v-red', sub: t('disk.usedSub', { pct: pct }), bar: DRIVE.usedGB / DRIVE.totalGB, color: '#ef4444' },
+      { label: t('disk.free'), value: DRIVE.freeGB.toFixed(1) + ' GB', cls: 'v-amber', sub: t('disk.freeSub'), bar: DRIVE.freeGB / DRIVE.totalGB, color: '#f59e0b' },
+      { label: t('disk.reclaim'), value: KPI.reclaimableGB + ' GB', cls: 'v-green', sub: t('disk.reclaimSub'), bar: KPI.reclaimableGB / DRIVE.usedGB, color: '#22c55e' }
+    ];
+  }
+  if (tab === 'rules') {
+    const enabled = RULES.filter(r => r.enabled);
+    const builtin = enabled.filter(r => r.source === 'builtin').length;
+    const user = enabled.filter(r => r.source === 'user').length;
+    const hits = RULES.reduce((a, r) => a + r.hits, 0);
+    return [
+      { label: t('rules.statsRules'), value: String(enabled.length), cls: 'v-blue', sub: t('rules.statsRulesSub', { builtin: builtin, learned: user }), bar: 0.78, color: '#3b82f6' },
+      { label: t('rules.statsHits'), value: String(hits), cls: 'v-green', sub: t('rules.statsHitsSub', { n: hits }), bar: 0.64, color: '#22c55e' },
+      { label: t('rules.statsPending'), value: String(PENDING.length), cls: 'v-amber', sub: t('rules.statsPendingSub'), bar: 0.2, color: '#f59e0b' },
+      { label: t('rules.statsConflict'), value: t('rules.redWins'), cls: 'v-red', sub: t('rules.statsConflictSub'), bar: 1, color: '#ef4444' }
+    ];
+  }
+  if (tab === 'history') {
+    const freed = HISTORY.reduce((a, h) => a + h.freed, 0);
+    const fails = HISTORY.filter(h => h.result === 'failed').length;
+    const rollbackable = HISTORY.filter(h => h.canRollback).length;
+    return [
+      { label: t('stats.freed'), value: fmtGB(freed), cls: 'v-green', sub: t('stats.freedSub', { n: HISTORY.length }), bar: 0.66, color: '#22c55e' },
+      { label: t('history.listTitle'), value: String(HISTORY.length), cls: 'v-blue', sub: t('history.listHint', { n: HISTORY.length }), bar: 0.5, color: '#3b82f6' },
+      { label: t('history.result.failed'), value: String(fails), cls: fails ? 'v-red' : '', sub: t('history.failedStep'), bar: fails ? 0.2 : 0, color: '#ef4444' },
+      { label: t('stats.rollbackable'), value: String(rollbackable), cls: 'v-amber', sub: t('history.canRollback'), bar: rollbackable ? 0.4 : 0, color: '#f59e0b' }
+    ];
+  }
+  return [
+    cFree,
+    target,
+    { label: t('stats.reclaimable'), value: KPI.reclaimableGB + ' GB', cls: 'v-blue', sub: t('stats.reclaimableSub'), bar: 0.58, color: '#3b82f6' },
+    { label: t('stats.freed'), value: KPI.freedGB + ' GB', cls: 'v-green', sub: t('stats.freedSub', { n: KPI.freedOps }), bar: 0.72, color: '#22c55e' }
+  ];
+}
+
+/* ---------- IDE 数据 ---------- */
+function renderIde() {
+  const stats = document.getElementById('view').dataset.stats || '';
+  const list = filteredIdes();
+  const ide = getIde(state.selectedIde);
+  return stats + `<div class="content">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>${esc(t('ide.listTitle'))}</h2>
+        <span class="hint">${esc(t('ide.listHint', { n: CATALOG.ides.length }))}</span>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar">
+          <input class="search" id="ide-search" placeholder="${esc(t('ide.search'))}" value="${esc(state.search)}" oninput="App.search(this.value)">
+        </div>
+        <div class="toolbar">
+          <div class="legend" style="flex:1">
+            ${['all', 'c', 'migrated', 'running'].map(f => `<button type="button" class="btn btn-xs ${state.filter === f ? 'btn-soft' : 'btn-ghost'}" onclick="App.setFilter('${f}')">${esc(t('ide.filter.' + f))}</button>`).join('')}
+          </div>
+        </div>
+        <div class="ide-list">
+          ${list.length ? list.map(i => ideRow(i)).join('') : `<div class="empty" style="padding:26px 10px"><p>${esc(t('ide.listEmpty'))}</p></div>`}
+        </div>
+        <div class="mt-3" style="padding-top:9px;border-top:1px solid #263248">
+          <div class="legend">
+            <span><i class="dot dot-green"></i>${esc(t('legend.green'))}</span>
+            <span><i class="dot dot-red"></i>${esc(t('legend.red'))}</span>
+            <span><i class="dot dot-amber"></i>${esc(t('legend.yellow'))}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="panel">${renderIdeDetail(ide)}</section>
+  </div>`;
+}
+
+function filteredIdes() {
+  const q = state.search.trim().toLowerCase();
+  return CATALOG.ides.filter(i => {
+    if (state.filter === 'c' && i.runtime.migrated) return false;
+    if (state.filter === 'migrated' && !i.runtime.migrated) return false;
+    if (state.filter === 'running' && !i.runtime.running.length) return false;
+    if (!q) return true;
+    return i.name.toLowerCase().indexOf(q) >= 0 || i.directories.some(d => d.path.toLowerCase().indexOf(q) >= 0);
+  });
+}
+
+function ideRow(ide) {
+  const g = safetyCount(ide, 'green'), r = safetyCount(ide, 'red'), y = safetyCount(ide, 'yellow');
+  return `<button type="button" class="ide-item ${state.selectedIde === ide.id ? 'active' : ''}" onclick="App.selectIde('${ide.id}')">
+    <span class="ide-mark" style="background:${ide.runtime.migrated ? '#166534' : '#1e3a8a'}">${esc(ide.name.slice(0, 2).toUpperCase())}</span>
+    <span class="ide-main">
+      <span class="ide-name">${esc(ide.name)}
+        ${ide.runtime.running.length ? `<span class="badge b-amber" title="${esc(t('common.running'))}"><i class="run-dot"></i>${esc(t('common.running'))}</span>` : ''}
+      </span>
+      <span class="ide-sub"><i class="dot dot-green"></i>${g} <i class="dot dot-red"></i>${r} ${y ? `<i class="dot dot-amber"></i>${y}` : ''} <span class="dim">· ${esc(t('ide.kind.' + ide.kind))}</span></span>
+    </span>
+    <span class="ide-right">
+      <span class="ide-size">${fmtGB(ideSize(ide) / GIB)}</span>
+      <span class="ide-flag"><span class="badge ${ide.runtime.migrated ? 'b-green' : 'b-gray'}">${esc(ide.runtime.migrated ? t('common.migrated') : t('common.onC'))}</span></span>
+    </span>
+  </button>`;
+}
+
+function renderIdeDetail(ide) {
+  const g = safetyCount(ide, 'green'), r = safetyCount(ide, 'red'), y = safetyCount(ide, 'yellow');
+  const sel = selectedDirs(ide);
+  const selSize = selectedSize(ide);
+  const need = needsGB(ide);
+  const enough = spaceOk(ide);
+  const running = ide.runtime.running;
+  const migrated = ide.runtime.migrated;
+  const redNote = r ? `<div class="banner danger" style="margin-top:2px"><span class="b-ico">⛨</span><div>${esc(t('ide.redExcluded', { n: r }))} <b>${esc(t('common.red'))}</b> · ${esc(t('ide.redLocked'))}</div></div>` : '';
+  const yellowNote = y ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div>${esc(t('ide.yellowHint'))}</div></div>` : '';
+  const runBanner = running.length ? `<div class="banner warn"><span class="b-ico">▲</span><div><b>${esc(t('ide.processTitle'))}</b><br>${esc(t('ide.processBody', { app: ide.name }))}<div class="banner-actions"><span class="tag mono">${running.map(p => esc(p.name) + ' · PID ' + p.pid).join(' | ')}</span></div></div></div>` : '';
+  const migratedBanner = migrated ? `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('ide.alreadyMigrated'))}<br><span class="mono" style="font-size:10.5px">${esc(ide.runtime.target || targetPathFor(ide))}</span></div></div>` : '';
+  return `<div class="detail">
+    <div class="detail-head">
+      <div class="detail-title">
+        <span class="ide-mark" style="background:${migrated ? '#166534' : '#1e3a8a'};width:32px;height:32px">${esc(ide.name.slice(0, 2).toUpperCase())}</span>
+        <div>
+          <h2>${esc(ide.name)}</h2>
+          <div class="detail-path">${esc(ide.runtime.root)}</div>
+        </div>
+      </div>
+      <div class="detail-badges">
+        <span class="badge b-plain">${esc(t('ide.kind.' + ide.kind))}</span>
+        <span class="badge ${migrated ? 'b-green' : 'b-gray'}">${esc(migrated ? t('common.migrated') : t('common.onC'))}</span>
+        ${running.length ? `<span class="badge b-amber"><i class="run-dot"></i>${esc(t('common.running'))}</span>` : ''}
+      </div>
+    </div>
+    ${migratedBanner}
+    ${runBanner}
+    <div class="preview-card">
+      <div class="preview-top"><span class="t">${esc(migrated ? t('rollback.source') : t('ide.target'))}</span><span class="badge b-blue">${esc(DRIVE.targetDrive)}</span></div>
+      <div class="kv"><span class="k">${esc(t('ide.target'))}</span><span class="v">${esc(migrated ? (ide.runtime.target || targetPathFor(ide)) : targetPathFor(ide))}</span></div>
+      <div class="kv"><span class="k">${esc(t('ide.estimatedFree'))}</span><span class="v ok">${fmtGB(selSize / GIB)}</span></div>
+      ${migrated ? '' : `<div class="kv"><span class="k">${esc(t('ide.needSpace'))}</span><span class="v">${fmtGB(need)}</span></div>
+      <div class="kv"><span class="k">${esc(t('preview.targetFree'))}</span><span class="v ${enough ? 'ok' : 'warn'}">${DRIVE.targetFreeGB.toFixed(1)} GB · ${esc(enough ? t('preview.spaceOk') : t('preview.spaceBad'))}</span></div>`}
+      ${!migrated ? `<div class="kv"><span class="k">${esc(t('ide.migratable'))}</span><span class="v">${esc(t('ide.migratableValue', { n: sel.length, size: fmtGB(selSize / GIB) }))}</span></div>` : ''}
+    </div>
+    ${redNote}${yellowNote}
+    <div class="section-title"><h3>${esc(t('ide.itemsTitle'))}</h3><span class="sub">${esc(t('ide.itemsHint'))}</span></div>
+    <div class="rows">
+      ${ide.directories.map((d, i) => itemRow(ide, d, i)).join('')}
+    </div>
+    <div class="actions">
+      ${migrated
+        ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.openRollback('${ide.id}')">${esc(t('action.rollback'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>`
+        : `<button type="button" class="btn btn-primary btn-sm" ${g ? '' : 'disabled'} onclick="App.startPreview('${ide.id}')">${esc(t('action.migrate'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" onclick="App.cleanCaches('${ide.id}')">${esc(t('action.clean'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>`}
+      <span class="spacer"></span>
+      <span class="note">${esc(migrated ? t('rollback.note', { app: ide.name }) : t('ide.cleanHint'))}</span>
+    </div>
+  </div>`;
+}
+
+function itemRow(ide, d, i) {
+  const checked = isChecked(ide.id, i, d);
+  const color = d.safety === 'green' ? 'var(--green)' : d.safety === 'red' ? 'var(--red)' : 'var(--amber)';
+  const badge = d.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>`
+    : d.safety === 'red' ? `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>`
+    : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`;
+  const left = d.safety === 'red'
+    ? `<span class="lock" title="${esc(t('ide.redLocked'))}" aria-label="${esc(t('ide.redLocked'))}">⛨</span>`
+    : `<input class="row-check" type="checkbox" ${checked ? 'checked' : ''} ${d.safety === 'yellow' && !isConfirmed(ide.id, i) ? 'disabled' : ''} onclick="App.toggleCheck('${ide.id}',${i})" aria-label="${esc(d.path)}">`;
+  const confirmed = d.safety === 'yellow' && isConfirmed(ide.id, i);
+  return `<div class="row risk-${d.safety === 'yellow' ? 'yellow' : d.safety}">
+    ${left}
+    <div class="row-main">
+      <div class="row-name">${esc(d.path)}</div>
+      <div class="row-desc">${esc(t(d.reason))}${d.safety === 'red' ? ' · ' + esc(t('ide.redLocked')) : ''}</div>
+    </div>
+    <div class="row-right">
+      <span class="row-size">${fmtBytes(d.size_bytes)}</span>
+      <span class="row-flex">${badge}
+        ${d.safety === 'yellow' && !confirmed ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.openYellow('${ide.id}',${i})">${esc(t('action.confirmYellow'))}</button>` : ''}
+        ${confirmed ? `<span class="badge b-gray">${esc(t('common.confirmed'))}</span>` : ''}
+        ${d.handling ? `<span class="tag tag-code">${esc(d.handling)}</span>` : ''}
+      </span>
+    </div>
+  </div>`;
+}
+
+function renderScanning() {
+  const pct = state.scanning ? state.scanPct : 62;
+  const stages = ['enumerate', 'match', 'size', 'process', 'classify', 'done'];
+  const active = pct < 18 ? 0 : pct < 38 ? 1 : pct < 68 ? 2 : pct < 84 ? 3 : pct < 96 ? 4 : 5;
+  return `<div class="content" style="grid-template-columns:minmax(0,760px)">
+    <section class="panel scanning">
+      <h3>${esc(t('scan.title'))}</h3>
+      <p class="lead">${esc(t('scan.lead'))}</p>
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="progress-meta"><span>${esc(t('common.progress'))} · ${pct}%</span><span>${esc(t('meta.scope'))}</span></div>
+      <div class="stage-list">
+        ${stages.map((s, i) => `<div class="stage ${i < active ? 'done' : i === active ? 'active' : ''}">
+          <span class="s-ico">${i < active ? '✓' : ''}</span><span>${esc(t('scan.stage.' + s))}</span>
+          <span class="s-meta">${i < active ? esc(t('progress.done')) : i === active ? esc(t('progress.running')) : esc(t('progress.waiting'))}</span>
+        </div>`).join('')}
+      </div>
+      <div class="sk-row skeleton" style="margin-top:16px"></div>
+      <div class="skeleton"><div class="sk-row"></div><div class="sk-row" style="width:82%"></div><div class="sk-row" style="width:64%"></div></div>
+      <div class="actions" style="border:none;padding-top:16px">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="App.cancelScan()">${esc(t('action.cancelScan'))}</button>
+        <span class="note">${esc(t('common.simulated'))}</span>
+      </div>
+    </section>
+  </div>`;
+}
+
+function renderEmpty() {
+  return `<div class="content" style="grid-template-columns:minmax(0,760px)">
+    <section class="panel">
+      <div class="empty">
+        <div class="empty-ico">⌕</div>
+        <h3>${esc(t('empty.title'))}</h3>
+        <p>${esc(t('empty.desc'))}</p>
+        <div class="empty-list">
+          ${['Cursor', 'Trae CN', 'Windsurf', 'Kiro', 'VS Code', 'Claude Code', 'Codex CLI'].map(n => `<span class="tag">${esc(n)}</span>`).join('')}
+          <span class="tag">${esc(t('empty.supported'))}</span>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-sm" onclick="App.rescan()">${esc(t('empty.rescan'))}</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>
+        </div>
+        <div class="note dim" style="font-size:10.5px">${esc(t('meta.scope'))}</div>
+      </div>
+    </section>
+  </div>`;
+}
+/* ---------- 项目目录 ---------- */
+function renderProjects() {
+  const stats = document.getElementById('view').dataset.stats || '';
+  const p = PROJECTS.find(x => x.id === state.selectedProject) || PROJECTS[0];
+  const total = p.deps + p.dist + p.git + p.source;
+  return stats + `<div class="content">
+    <section class="panel">
+      <div class="panel-head"><h2>${esc(t('projects.listTitle'))}</h2><span class="hint">${esc(t('projects.listHint', { n: PROJECTS.length }))}</span></div>
+      <div class="panel-body">
+        <div class="list-col">
+          ${PROJECTS.map(pr => `
+            <button type="button" class="item-btn ${pr.id === p.id ? 'active' : ''}" onclick="App.selectProject('${pr.id}')">
+              <span class="ide-mark" style="width:24px;height:24px;background:${pr.location === 'C' ? '#7f1d1d' : '#1e3a8a'}">${esc(pr.name.slice(0, 2).toUpperCase())}</span>
+              <span style="min-width:0;flex:1">
+                <span class="t">${esc(pr.name)}</span>
+                <span class="s">${esc(pr.path)}</span>
+              </span>
+              <span class="r">
+                <span class="mono" style="font-size:11px">${fmtGB(pr.deps + pr.dist + pr.git + pr.source)}</span><br>
+                <span class="badge ${pr.location === 'C' ? 'b-amber' : 'b-gray'}" style="margin-top:3px">${esc(pr.location)}:</span>
+              </span>
+            </button>`).join('')}
+        </div>
+        <div class="note dim" style="font-size:10px;margin-top:10px">${esc(t('projects.note'))}</div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="detail">
+        <div class="detail-head">
+          <div class="detail-title">
+            <span class="ide-mark" style="width:32px;height:32px;background:${p.location === 'C' ? '#7f1d1d' : '#1e3a8a'}">${esc(p.name.slice(0, 2).toUpperCase())}</span>
+            <div><h2>${esc(p.name)}</h2><div class="detail-path">${esc(p.path)}</div></div>
+          </div>
+          <div class="detail-badges">
+            <span class="badge b-plain">${esc(p.ide)}</span>
+            <span class="badge ${p.location === 'C' ? 'b-amber' : 'b-gray'}">${esc(t('projects.lastActive'))} · ${esc(p.active)}</span>
+          </div>
+        </div>
+        <div class="preview-card">
+          <div class="preview-top"><span class="t">${esc(t('projects.size'))}</span><span class="badge b-blue">${fmtGB(total)}</span></div>
+          <div class="kv"><span class="k">${esc(t('projects.deps'))}</span><span class="v">${fmtGB(p.deps)}</span></div>
+          <div class="kv"><span class="k">${esc(t('projects.build'))}</span><span class="v">${fmtGB(p.dist)}</span></div>
+          <div class="kv"><span class="k">${esc(t('projects.git'))}</span><span class="v">${fmtGB(p.git)}</span></div>
+          <div class="kv"><span class="k">${esc(t('projects.source'))}</span><span class="v">${fmtGB(p.source)}</span></div>
+        </div>
+        <div class="section-title"><h3>${esc(t('projects.safeTitle'))}</h3><span class="sub">${esc(t('projects.cleanable'))} · ${fmtGB(p.deps + p.dist)}</span></div>
+        <div class="rows">
+          <div class="row risk-green">
+            <span class="row-main"><span class="row-name">${esc(t('projects.deps'))}</span><span class="row-desc">${esc(t('reason.nodeModules'))}</span></span>
+            <span class="row-right"><span class="row-size">${fmtGB(p.deps)}</span><button type="button" class="btn btn-ghost btn-xs" onclick="App.cleanProject('deps')">${esc(t('projects.cleanDeps'))}</button></span>
+          </div>
+          <div class="row risk-green">
+            <span class="row-main"><span class="row-name">${esc(t('projects.build'))}</span><span class="row-desc">${esc(t('reason.dist'))}</span></span>
+            <span class="row-right"><span class="row-size">${fmtGB(p.dist)}</span><button type="button" class="btn btn-ghost btn-xs" onclick="App.cleanProject('dist')">${esc(t('projects.cleanBuild'))}</button></span>
+          </div>
+        </div>
+        <div class="section-title"><h3>${esc(t('projects.keepTitle'))}</h3><span class="sub">${esc(t('projects.keep'))}</span></div>
+        <div class="rows">
+          <div class="row risk-red">
+            <span class="lock">⛨</span>
+            <span class="row-main"><span class="row-name">${esc(t('projects.source'))}</span><span class="row-desc">${esc(t('projects.keep'))}</span></span>
+            <span class="row-right"><span class="row-size">${fmtGB(p.source)}</span></span>
+          </div>
+          <div class="row risk-red">
+            <span class="lock">⛨</span>
+            <span class="row-main"><span class="row-name">${esc(t('projects.git'))}</span><span class="row-desc">${esc(t('reason.git'))}</span></span>
+            <span class="row-right"><span class="row-size">${fmtGB(p.git)}</span></span>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-sm" onclick="App.cleanProject('all')">${esc(t('action.clean'))}</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>
+          <span class="spacer"></span><span class="note">${esc(t('projects.note'))}</span>
+        </div>
+      </div>
+    </section>
+  </div>`;
+}
+
+/* ---------- C 盘全景 ---------- */
+function renderDisk() {
+  const stats = document.getElementById('view').dataset.stats || '';
+  const segTotal = DISK_SEGMENTS.reduce((a, s) => a + s.gb, 0);
+  return stats + `<div class="content">
+    <section class="panel">
+      <div class="panel-head"><h2>${esc(t('disk.breakdown'))}</h2><span class="hint">${esc(t('disk.breakdownHint'))}</span></div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr>
+              <th>${esc(t('disk.category'))}</th><th class="right">${esc(t('disk.size'))}</th><th>${esc(t('disk.handling'))}</th><th></th>
+            </tr></thead>
+            <tbody>
+              ${DISK_CATEGORIES.map(c => `<tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:7px"><i class="dot" style="width:8px;height:8px;border-radius:2px;background:${c.color}"></i>
+                  <div><div style="color:#e8eef7;font-weight:600">${esc(t(c.name))}</div><div style="font-size:10px;color:#64748b;margin-top:2px">${esc(t(c.desc))}</div></div></div>
+                </td>
+                <td class="num">${c.gb.toFixed(1)} GB</td>
+                <td><span class="tag tag-code">${esc(t('disk.handling.' + c.handling))}</span></td>
+                <td class="right"><button type="button" class="btn btn-ghost btn-xs" onclick="App.toast(t('toast.opened'))">${esc(t('action.viewLocation'))}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>C: · ${DRIVE.totalGB} GB</h2><span class="hint">${esc(t('disk.usedSub', { pct: Math.round(DRIVE.usedGB / DRIVE.totalGB * 1000) / 10 }))}</span></div>
+      <div class="panel-body">
+        <div class="diskbar">
+          ${DISK_SEGMENTS.map(s => `<span style="width:${(s.gb / segTotal * 100).toFixed(2)}%;background:${s.color}" title="${esc(t(s.key))} · ${s.gb} GB"></span>`).join('')}
+        </div>
+        <div class="disk-legend">
+          ${DISK_SEGMENTS.map(s => `<span><i style="background:${s.color}"></i>${esc(t(s.key))} · ${s.gb.toFixed(1)} GB</span>`).join('')}
+        </div>
+        <div class="divider mt-3"></div>
+        <div class="rows mt-3">
+          <div class="row risk-green">
+            <span class="row-main"><span class="row-name">${esc(t('disk.ide'))}</span><span class="row-desc">${esc(t('disk.junctionNote'))}</span></span>
+            <span class="row-right"><span class="row-size">${fmtGB(12.8)}</span></span>
+          </div>
+          <div class="row risk-yellow">
+            <span class="row-main"><span class="row-name">${esc(t('disk.sys'))}</span><span class="row-desc">${esc(t('disk.notIncluded'))}</span></span>
+            <span class="row-right"><span class="badge b-amber">${esc(t('common.protected'))}</span></span>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button type="button" class="btn btn-primary btn-sm" onclick="App.toast(t('toast.scanDone'))">${esc(t('disk.refresh'))}</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="App.nav('ide')">${esc(t('nav.ide'))}</button>
+          <span class="spacer"></span><span class="note">${esc(t('disk.notIncluded'))}</span>
+        </div>
+      </div>
+    </section>
+  </div>`;
+}
+
+/* ---------- 规则学习 ---------- */
+function renderRules() {
+  const stats = document.getElementById('view').dataset.stats || '';
+  return stats + `<div class="content">
+    <section class="panel">
+      <div class="panel-head"><h2>${esc(t('rules.pending'))}</h2><span class="hint">${esc(t('common.items', { n: PENDING.length }))}</span></div>
+      <div class="panel-body">
+        <div class="note dim" style="font-size:10.5px;margin-bottom:9px">${esc(t('rules.pendingDesc'))}</div>
+        <div class="rows">
+          ${PENDING.length ? PENDING.map(pd => `<div class="row risk-yellow" style="flex-wrap:wrap">
+            <span class="row-main">
+              <span class="row-name"><span class="badge b-amber">? ${esc(t('common.yellow'))}</span>${esc(pd.path)}</span>
+              <span class="row-desc">${esc(t(pd.hint))} · ${esc(pd.ide)} · ${fmtBytes(pd.size_bytes)}</span>
+            </span>
+            <span class="row-right"><span class="row-flex">
+              <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','green')">${esc(t('action.markGreen'))}</button>
+              <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','red')">${esc(t('action.markRed'))}</button>
+              <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','ignore')">${esc(t('action.ignore'))}</button>
+            </span></span>
+          </div>`).join('') : `<div class="empty" style="padding:40px 10px"><p>${esc(t('rules.pendingEmpty'))}</p></div>`}
+        </div>
+        <div class="banner info mt-3"><span class="b-ico">i</span><div>${esc(t('rules.conflict'))}</div></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>${esc(t('rules.table'))}</h2><span class="hint">${esc(t('rules.tableDesc'))}</span></div>
+      <div class="panel-body">
+        <div class="form-grid" style="grid-template-columns:1.2fr .8fr .8fr 1.4fr auto;align-items:end">
+          <div class="field"><label>${esc(t('rules.match'))} <span class="bad">*</span></label><input id="rule-match" placeholder="${esc(t('rules.matchPh'))}"></div>
+          <div class="field"><label>${esc(t('rules.matchType'))}</label>
+            <select id="rule-type"><option value="exact">${esc(t('rules.type.exact'))}</option><option value="glob">${esc(t('rules.type.glob'))}</option><option value="regex">${esc(t('rules.type.regex'))}</option></select>
+          </div>
+          <div class="field"><label>${esc(t('rules.safety'))}</label>
+            <select id="rule-safety"><option value="green">${esc(t('common.green'))}</option><option value="red">${esc(t('common.red'))}</option></select>
+          </div>
+          <div class="field"><label>${esc(t('common.reason'))}</label><input id="rule-reason" placeholder="${esc(t('rules.reasonPh'))}"></div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="App.addRule()">${esc(t('rules.add'))}</button>
+        </div>
+        <div class="table-wrap mt-3">
+          <table class="table">
+            <thead><tr>
+              <th>${esc(t('rules.match'))}</th><th>${esc(t('rules.matchType'))}</th><th>${esc(t('rules.safety'))}</th><th>${esc(t('rules.source'))}</th><th class="num">${esc(t('rules.hits'))}</th><th>${esc(t('rules.enabled'))}</th><th></th>
+            </tr></thead>
+            <tbody>
+              ${RULES.map(r => `<tr>
+                <td class="mono">${esc(r.match)}${r.reason ? `<div style="font-family:inherit;font-size:10px;color:#64748b;margin-top:2px">${esc(r.reason)}</div>` : ''}</td>
+                <td>${esc(t('rules.type.' + r.type))}</td>
+                <td>${r.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>` : r.safety === 'red' ? `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>` : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`}</td>
+                <td><span class="tag">${esc(t('rules.source.' + r.source))}</span></td>
+                <td class="num">${r.hits}</td>
+                <td><button type="button" class="sw ${r.enabled ? 'on' : ''}" role="switch" aria-checked="${r.enabled}" aria-label="${esc(r.match)}" onclick="App.toggleRule('${r.id}')"></button></td>
+                <td class="right"><button type="button" class="btn btn-ghost btn-xs" onclick="App.deleteRule('${r.id}')">${esc(t('action.delete'))}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>`;
+}
+
+/* ---------- 操作历史 ---------- */
+function resultBadge(h) {
+  if (h.result === 'failed') return `<span class="badge b-red">${esc(t('history.result.failed'))}</span>`;
+  if (h.result === 'rolledback') return `<span class="badge b-violet">${esc(t('history.result.rolledback'))}</span>`;
+  return `<span class="badge b-green">✓ ${esc(t('history.result.success'))}</span>`;
+}
+function typeBadge(h) {
+  return `<span class="badge ${h.type === 'migrate' ? 'b-blue' : h.type === 'rollback' ? 'b-violet' : 'b-gray'}">${esc(t('history.type.' + h.type))}</span>`;
+}
+function renderHistory() {
+  const stats = document.getElementById('view').dataset.stats || '';
+  const items = HISTORY.filter(h => state.historyFilter === 'all' || h.type === state.historyFilter);
+  const h = HISTORY.find(x => x.id === state.selectedHistory) || HISTORY[0];
+  return stats + `<div class="content">
+    <section class="panel">
+      <div class="panel-head"><h2>${esc(t('history.listTitle'))}</h2><span class="hint">${esc(t('history.listHint', { n: items.length }))}</span></div>
+      <div class="panel-body">
+        <div class="toolbar">
+          ${['all', 'migrate', 'clean', 'rollback'].map(f => `<button type="button" class="btn btn-xs ${state.historyFilter === f ? 'btn-soft' : 'btn-ghost'}" onclick="App.setHistoryFilter('${f}')">${esc(t('history.filter.' + f))}</button>`).join('')}
+        </div>
+        <div class="list-col">
+          ${items.length ? items.map(it => `
+            <button type="button" class="item-btn ${it.id === h.id ? 'active' : ''}" onclick="App.selectHistory('${it.id}')" style="align-items:flex-start">
+              <span style="min-width:0;flex:1">
+                <span class="t">${esc(it.app)} · ${esc(t('history.type.' + it.type))}</span>
+                <span class="s">${esc(it.at)}</span>
+                <span class="row-flex" style="margin-top:5px">${resultBadge(it)}<span class="mono" style="font-size:10px;color:#94a3b8">${it.freed ? fmtGB(it.freed) : '—'}</span></span>
+              </span>
+            </button>`).join('') : `<div class="empty" style="padding:34px 10px"><p>${esc(t('history.empty'))}</p></div>`}
+        </div>
+        <div class="note dim" style="font-size:10px;margin-top:10px">${esc(t('history.simulated'))}</div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="detail">
+        <div class="detail-head">
+          <div class="detail-title">
+            <div>
+              <h2>${esc(h.app)}</h2>
+              <div class="detail-path">${esc(h.at)} · ${esc(h.duration)}</div>
+            </div>
+          </div>
+          <div class="detail-badges">${typeBadge(h)}${resultBadge(h)}</div>
+        </div>
+        <div class="sum">
+          <div class="sum-box"><div class="k">${esc(t('history.freed'))}</div><div class="v ${h.freed ? 'ok' : 'dim'}">${h.freed ? fmtGB(h.freed) : '—'}</div></div>
+          <div class="sum-box"><div class="k">${esc(t('history.duration'))}</div><div class="v">${esc(h.duration)}</div></div>
+          <div class="sum-box"><div class="k">${esc(t('history.type.' + h.type))}</div><div class="v" style="font-size:12px">${esc(h.type === 'rollback' ? t('rollback.target') : t('history.target'))}</div></div>
+        </div>
+        <div class="preview-card">
+          <div class="kv"><span class="k">${esc(t('preview.from'))}</span><span class="v">${esc(h.from)}</span></div>
+          <div class="kv"><span class="k">${esc(t('preview.to'))}</span><span class="v">${esc(h.to)}</span></div>
+          ${h.code ? `<div class="kv"><span class="k">${esc(t('failed.code'))}</span><span class="v bad">${esc(h.code)}</span></div>` : ''}
+        </div>
+        <div class="banner ${h.result === 'failed' ? 'danger' : h.result === 'rolledback' ? 'info' : 'ok'}"><span class="b-ico">${h.result === 'failed' ? '✕' : h.result === 'rolledback' ? '↺' : '✓'}</span><div>${esc(t(h.note))}</div></div>
+        <div class="section-title"><h3>${esc(t('history.steps'))}</h3><span class="sub">${esc(t('history.detail'))}</span></div>
+        <div class="timeline">
+          ${h.steps.map((s, i) => `<div class="tl-item">
+            <span class="tl-dot ${h.result === 'failed' && i === h.steps.length - 1 ? 'err' : 'ok'}">${h.result === 'failed' && i === h.steps.length - 1 ? '✕' : '✓'}</span>
+            <div class="tl-body"><div class="tl-title">${esc(t(s))}</div><div class="tl-meta">${esc(h.at)} · ${esc(h.app)}</div></div>
+          </div>`).join('')}
+        </div>
+        <div class="actions">
+          ${h.canRollback ? `<button type="button" class="btn btn-danger btn-sm" onclick="App.rollbackHistory('${h.id}')">${esc(t('history.rollbackBtn'))}</button>` : `<button type="button" class="btn btn-ghost btn-sm" disabled>${esc(t('history.noRollback'))}</button>`}
+          <button type="button" class="btn btn-ghost btn-sm" onclick="App.exportHistory()">${esc(t('action.export'))}</button>
+          <span class="spacer"></span><span class="note">${esc(h.canRollback ? t('history.canRollback') : t('history.simulated'))}</span>
+        </div>
+      </div>
+    </section>
+  </div>`;
+}
+/* ---------- 弹窗 ---------- */
+function modalKind() {
+  const info = parseRoute();
+  if (info.modal) return info.modal;
+  const subs = ['migrate-preview', 'migrate-progress', 'migrate-failed', 'migrate-success', 'rollback-confirm', 'process-blocked', 'yellow-confirm'];
+  return subs.indexOf(info.sub) >= 0 ? info.sub : '';
+}
+
+function modalShell(title, sub, body, foot, wide) {
+  return `<div class="modal-head">
+      <div><h3>${esc(title)}</h3>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>
+      <button type="button" class="modal-x" onclick="App.closeModal()" aria-label="${esc(t('action.close'))}">✕</button>
+    </div>
+    <div class="modal-body">${body}</div>
+    <div class="modal-foot">${foot}</div>`;
+}
+
+function renderModal() {
+  const kind = modalKind();
+  const root = document.getElementById('modal-root');
+  if (!kind) { root.innerHTML = ''; return; }
+  let html = '';
+  if (kind === 'settings') html = modalSettings();
+  else if (kind === 'feedback') html = modalFeedback();
+  else if (kind === 'migrate-preview') html = modalPreview();
+  else if (kind === 'migrate-progress') html = modalProgress();
+  else if (kind === 'migrate-failed') html = modalFailed();
+  else if (kind === 'migrate-success') html = modalSuccess();
+  else if (kind === 'rollback-confirm') html = modalRollback();
+  else if (kind === 'process-blocked') html = modalBlocked();
+  else if (kind === 'yellow-confirm') html = modalYellow();
+  if (!html) { root.innerHTML = ''; return; }
+  root.innerHTML = `<div class="modal-mask" onclick="App.closeModal()">
+    <div class="modal ${kind === 'migrate-preview' || kind === 'process-blocked' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
+  </div>`;
+}
+
+function modalSettings() {
+  const body = `
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.language'))}</div><div class="d">${esc(t('settings.languageDesc'))}</div></div>
+      <div class="ctrl"><select onchange="App.setLang(this.value)"><option value="zh-CN" ${LANG === 'zh-CN' ? 'selected' : ''}>中文</option><option value="en" ${LANG === 'en' ? 'selected' : ''}>English</option></select></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.targetRoot'))}</div><div class="d">${esc(t('settings.targetRootDesc'))}</div></div>
+      <div class="ctrl"><input type="text" id="settings-root" value="${esc(state.settings.targetRoot)}"></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.autoStart'))}</div><div class="d">${esc(t('settings.autoStartDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="sw ${state.settings.autoStart ? 'on' : ''}" role="switch" aria-checked="${state.settings.autoStart}" onclick="App.toggleSetting('autoStart')"></button></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.autoMaintenance'))}</div><div class="d">${esc(t('settings.autoMaintenanceDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="sw ${state.settings.autoMaintenance ? 'on' : ''}" role="switch" aria-checked="${state.settings.autoMaintenance}" onclick="App.toggleSetting('autoMaintenance')"></button></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.uninstall'))}</div><div class="d">${esc(t('settings.uninstallDesc'))}</div></div>
+      <div class="ctrl"><select id="settings-uninstall">
+        <option value="keep" ${state.settings.uninstall === 'keep' ? 'selected' : ''}>${esc(t('settings.uninstall.keep'))}</option>
+        <option value="remove" ${state.settings.uninstall === 'remove' ? 'selected' : ''}>${esc(t('settings.uninstall.remove'))}</option>
+      </select></div>
+    </div>
+    <div class="banner info"><span class="b-ico">i</span><div><b>${esc(t('settings.spaceCheck'))}</b> · ${esc(t('settings.spaceCheckValue'))}</div></div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.cancel'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.saveSettings()">${esc(t('action.save'))}</button>`;
+  return modalShell(t('settings.title'), t('settings.sub'), body, foot);
+}
+
+function modalFeedback() {
+  const diag = [
+    'Disk Warden v0.1.0 (prototype)',
+    'OS: Windows 10 22H2 x64',
+    'Locale: ' + LANG,
+    'Last scan: ' + KPI.lastScan + ' (' + KPI.scanDuration + ')',
+    'IDEs: ' + CATALOG.ides.length + ' · dirs: ' + CATALOG.ides.reduce((a, i) => a + i.directories.length, 0),
+    'Target root: ' + state.settings.targetRoot
+  ].join('\n');
+  const body = `<div class="field full"><label>${esc(t('feedback.diagnostics'))}</label>
+      <div class="mono" style="background:#0f172a;border:1px solid #263248;border-radius:7px;padding:10px;font-size:10.5px;white-space:pre-wrap;color:#94a3b8">${esc(diag)}</div>
+    </div>
+    <div class="banner warn"><span class="b-ico">△</span><div>${esc(t('feedback.note'))}</div></div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.copyDiagnostics()">${esc(t('feedback.copy'))}</button>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('feedback.issueOpened'))">${esc(t('feedback.issue'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>`;
+  return modalShell(t('feedback.title'), t('feedback.sub'), body, foot, true);
+}
+
+function modalPreview() {
+  const ide = getIde(state.selectedIde);
+  const dirs = selectedDirs(ide);
+  const size = selectedSize(ide);
+  const red = safetyCount(ide, 'red');
+  const yellow = safetyCount(ide, 'yellow');
+  const body = `
+    <div class="sum">
+      <div class="sum-box"><div class="k">${esc(t('preview.from'))}</div><div class="v" style="font-size:12px">C:</div></div>
+      <div class="sum-box"><div class="k">${esc(t('preview.to'))}</div><div class="v" style="font-size:12px">${esc(DRIVE.targetDrive)}</div></div>
+      <div class="sum-box"><div class="k">${esc(t('preview.free'))}</div><div class="v ok">${fmtGB(size / GIB)}</div></div>
+    </div>
+    <div class="preview-card">
+      <div class="kv"><span class="k">${esc(t('preview.targetRoot'))}</span><span class="v">${esc(state.settings.targetRoot)}</span></div>
+      <div class="kv"><span class="k">${esc(t('preview.to'))}</span><span class="v">${esc(targetPathFor(ide))}</span></div>
+      <div class="kv"><span class="k">${esc(t('preview.targetFree'))}</span><span class="v ${spaceOk(ide) ? 'ok' : 'warn'}">${DRIVE.targetFreeGB.toFixed(1)} GB · ${esc(spaceOk(ide) ? t('preview.spaceOk') : t('preview.spaceBad'))}</span></div>
+      <div class="kv"><span class="k">${esc(t('preview.junction'))}</span></div>
+    </div>
+    <div class="section-title"><h3>${esc(t('preview.itemsTitle'))}</h3><span class="sub">${esc(t('common.selected', { n: dirs.length }))} · ${fmtGB(size / GIB)}</span></div>
+    <div class="rows">
+      ${dirs.map(d => `<div class="row risk-green">
+        <span class="row-main"><span class="row-name">${esc(d.path)}</span><span class="row-desc">${esc(t(d.reason))}</span></span>
+        <span class="row-right"><span class="row-size">${fmtBytes(d.size_bytes)}</span></span>
+      </div>`).join('') || `<div class="note dim">${esc(t('ide.noSelection'))}</div>`}
+    </div>
+    ${red ? `<div class="banner danger"><span class="b-ico">⛨</span><div><b>${esc(t('preview.willExcludeRed'))}</b> · ${esc(t('preview.willExcludeRedDesc', { n: red }))}</div></div>` : ''}
+    ${yellow ? `<div class="banner warn"><span class="b-ico">?</span><div>${esc(t('preview.yellowPending', { n: yellow }))}</div></div>` : ''}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('preview.back'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" ${dirs.length && spaceOk(ide) ? '' : 'disabled'} onclick="App.go('#ide/migrate-progress')">${esc(t('preview.start'))}</button>`;
+  return modalShell(t('preview.title'), t('preview.sub'), body, foot);
+}
+
+function modalProgress() {
+  const ide = getIde(state.selectedIde);
+  const pct = state.demo.pct;
+  const stages = ['backup', 'copy', 'verify', 'delete', 'link', 'verifyLink'];
+  const active = 2;
+  const body = `
+    <div class="preview-card">
+      <div class="preview-top"><span class="t">${esc(ide.name)}</span><span class="badge b-blue">${pct}%</span></div>
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="progress-meta"><span>${esc(t('progress.files', { done: state.demo.filesDone.toLocaleString(), total: state.demo.filesTotal.toLocaleString() }))}</span><span>${esc(t('progress.percent', { pct: pct }))}</span></div>
+    </div>
+    <div class="stage-list">
+      ${stages.map((s, i) => `<div class="stage ${i < active ? 'done' : i === active ? 'active' : ''}">
+        <span class="s-ico">${i < active ? '✓' : ''}</span><span>${esc(t('progress.stage.' + s))}</span>
+        <span class="s-meta">${i < active ? esc(t('progress.done')) : i === active ? esc(t('progress.running')) : esc(t('progress.waiting'))}</span>
+      </div>`).join('')}
+    </div>
+    <div class="banner warn"><span class="b-ico">△</span><div>${esc(t('progress.keepOpen'))}</div></div>`;
+  const foot = `<span class="left">${esc(t('progress.cancelDisabled'))}</span>
+    <button type="button" class="btn btn-ghost btn-sm" disabled>${esc(t('action.cancel'))}</button>`;
+  return modalShell(t('progress.title'), ide.name + ' · ' + fmtGB(selectedSize(ide) / GIB), body, foot, true);
+}
+
+function modalFailed() {
+  const ide = getIde(state.selectedIde);
+  const body = `
+    <div class="banner danger"><span class="b-ico">✕</span><div><b>${esc(t('failed.what'))}</b><br>${esc(t('failed.verifyMsg'))}</div></div>
+    <div class="sum">
+      <div class="sum-box"><div class="k">${esc(t('failed.code'))}</div><div class="v bad" style="font-size:12px">E_VERIFY_MISMATCH</div></div>
+      <div class="sum-box"><div class="k">${esc(t('history.duration'))}</div><div class="v">2m 05s</div></div>
+      <div class="sum-box"><div class="k">${esc(t('history.freed'))}</div><div class="v dim">—</div></div>
+    </div>
+    <div class="preview-card">
+      <div class="kv"><span class="k">${esc(t('preview.from'))}</span><span class="v">${esc(ide.runtime.root)}</span></div>
+      <div class="kv"><span class="k">${esc(t('failed.backup', { path: 'D:\\DiskWarden\\.backup\\TraeCN\\2026-10-16-1420' }))}</span></div>
+    </div>
+    <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('failed.sourceSafe'))}</div></div>
+    <div class="note dim">${esc(t('failed.suggestion'))}</div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.viewLog()">${esc(t('failed.log'))}</button>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.rollbackFailed()">${esc(t('failed.rollback'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.retryMigrate()">${esc(t('failed.retry'))}</button>`;
+  return modalShell(t('failed.title'), t('failed.sub'), body, foot, true);
+}
+
+function modalSuccess() {
+  const ide = getIde(state.selectedIde);
+  const freed = selectedSize(ide) / GIB;
+  const body = `
+    <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('success.sub'))}</div></div>
+    <div class="sum">
+      <div class="sum-box"><div class="k">${esc(t('success.freed'))}</div><div class="v ok">${fmtGB(freed)}</div></div>
+      <div class="sum-box"><div class="k">${esc(t('success.verified'))}</div><div class="v ok" style="font-size:12px">${esc(t('success.verifiedValue'))}</div></div>
+      <div class="sum-box"><div class="k">${esc(t('success.duration'))}</div><div class="v">3m 41s</div></div>
+    </div>
+    <div class="preview-card">
+      <div class="kv"><span class="k">${esc(t('success.junction'))}</span><span class="v">${esc(targetPathFor(ide))}</span></div>
+      <div class="kv"><span class="k">${esc(t('preview.junction'))}</span></div>
+    </div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.nav('history')">${esc(t('success.viewHistory'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('success.done'))}</button>`;
+  return modalShell(t('success.title'), ide.name, body, foot, true);
+}
+
+function modalRollback() {
+  const ide = getIde(state.selectedIde);
+  const size = fmtGB(ideSize(ide) / GIB);
+  const target = ide.runtime.target || targetPathFor(ide);
+  const body = `
+    <div class="banner warn"><span class="b-ico">↺</span><div>${esc(t('rollback.desc', { path: target, size: size }))}</div></div>
+    <div class="preview-card">
+      <div class="kv"><span class="k">${esc(t('rollback.source'))}</span><span class="v">${esc(target)}</span></div>
+      <div class="kv"><span class="k">${esc(t('rollback.target'))}</span><span class="v">${esc(ide.runtime.root)}</span></div>
+      <div class="kv"><span class="k">${esc(t('rollback.backup'))}</span><span class="v">D:\\DiskWarden\\.backup\\${esc(ide.name.replace(/\s+/g, ''))}\\</span></div>
+    </div>
+    <div class="note dim">${esc(t('rollback.note', { app: ide.name }))}</div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('rollback.cancel'))}</button>
+    <button type="button" class="btn btn-danger btn-sm" onclick="App.confirmRollback()">${esc(t('rollback.confirm'))}</button>`;
+  return modalShell(t('rollback.title'), t('rollback.sub'), body, foot, true);
+}
+
+function modalBlocked() {
+  const ide = getIde(state.selectedIde);
+  const running = ide.runtime.running;
+  const body = `
+    <div class="banner danger"><span class="b-ico">▲</span><div>${esc(t('blocked.desc'))}</div></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>${esc(t('blocked.process'))}</th><th>${esc(t('blocked.pid'))}</th><th>${esc(t('blocked.path'))}</th></tr></thead>
+      <tbody>${running.map(p => `<tr><td class="mono">${esc(p.name)}</td><td class="num">${p.pid}</td><td class="mono" style="word-break:break-all">${esc(p.lock)}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <div class="banner warn"><span class="b-ico">i</span><div>${esc(t('blocked.hint'))}</div></div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.showForceWarn()">${esc(t('blocked.manual'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.recheckProcess()">${esc(t('blocked.recheck'))}</button>`;
+  return modalShell(t('blocked.title'), t('blocked.sub', { app: ide.name }), body, foot);
+}
+
+function modalYellow() {
+  const py = state.pendingYellow || { ide: 'trae-cn', idx: 3 };
+  const ide = getIde(py.ide);
+  const d = ide.directories[py.idx] || ide.directories[0];
+  const confirmed = isConfirmed(ide.id, py.idx);
+  const body = `
+    <div class="banner warn"><span class="b-ico">?</span><div>${esc(t('yellow.desc'))}<br>${esc(t('yellow.warn'))}</div></div>
+    <div class="sum">
+      <div class="sum-box"><div class="k">${esc(t('yellow.size'))}</div><div class="v">${fmtBytes(d.size_bytes)}</div></div>
+      <div class="sum-box"><div class="k">${esc(t('yellow.detected'))}</div><div class="v" style="font-size:12px">${esc(t(d.reason))}</div></div>
+      <div class="sum-box"><div class="k">${esc(t('common.safety'))}</div><div class="v" style="font-size:12px">${esc(t('common.yellow'))}</div></div>
+    </div>
+    <div class="preview-card"><div class="kv"><span class="k">${esc(t('common.path'))}</span><span class="v">${esc(d.path)}</span></div></div>
+    ${confirmed ? `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('common.confirmed'))}</div></div>` : ''}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.confirmYellow('later')">${esc(t('yellow.later'))}</button>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.confirmYellow('red')">${esc(t('yellow.markRed'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.confirmYellow('green')">${esc(t('yellow.confirm'))}</button>`;
+  return modalShell(t('yellow.title'), t('yellow.sub', { path: d.path }), body, foot, true);
+}
+
+/* ---------- 原型状态切换 ---------- */
+function renderProtoPanel() {
+  const panel = document.getElementById('proto-panel');
+  const fab = document.getElementById('proto-fab');
+  if (!panel) return;
+  panel.classList.toggle('show', !!state.protoOpen);
+  if (fab) fab.classList.toggle('active', !!state.protoOpen);
+  const current = (location.hash || '#ide').replace(/^#/, '');
+  const groups = [
+    { key: 'proto.section.core', items: [
+      { h: 'ide', k: 'proto.route.ide' },
+      { h: 'projects', k: 'proto.route.projects' },
+      { h: 'disk', k: 'proto.route.disk' },
+      { h: 'rules', k: 'proto.route.rules' },
+      { h: 'history', k: 'proto.route.history' }
+    ] },
+    { key: 'proto.section.states', items: [
+      { h: 'ide/scanning', k: 'proto.route.scanning' },
+      { h: 'ide/empty', k: 'proto.route.empty' },
+      { h: 'ide/migrate-preview', k: 'proto.route.preview' },
+      { h: 'ide/migrate-progress', k: 'proto.route.progress' },
+      { h: 'ide/migrate-failed', k: 'proto.route.failed' },
+      { h: 'ide/migrate-success', k: 'proto.route.success' },
+      { h: 'ide/process-blocked', k: 'proto.route.blocked' },
+      { h: 'ide/rollback-confirm', k: 'proto.route.rollback' },
+      { h: 'ide/yellow-confirm', k: 'proto.route.yellow' }
+    ] },
+    { key: 'proto.section.other', items: [
+      { h: 'settings', k: 'proto.route.settings' },
+      { h: 'feedback', k: 'proto.route.feedback' }
+    ] }
+  ];
+  panel.innerHTML = `<h4>${esc(t('proto.title'))}</h4><p>${esc(t('proto.desc'))}</p>
+    <div class="proto-routes">
+      ${groups.map((g, gi) => `${gi ? '<div class="proto-sep"></div>' : ''}<div class="nav-label" style="padding:2px 7px 4px">${esc(t(g.key))}</div>
+        ${g.items.map(it => `<button type="button" class="proto-route ${current === it.h ? 'active' : ''}" onclick="App.go('#${it.h}')"><span>${esc(t(it.k))}</span><span class="pr-k">#${esc(it.h)}</span></button>`).join('')}`).join('')}
+    </div>`;
+  document.getElementById('proto-fab-label').textContent = t('proto.title');
+}
+/* ---------- 交互动作（原型，不改真实文件） ---------- */
+const App = {
+  go(hash) {
+    state.protoOpen = false;
+    if (location.hash === hash) { render(); return; }
+    location.hash = hash;
+  },
+  nav(tab) {
+    state.returnHash = '';
+    this.go('#' + tab);
+  },
+  openModal(kind) {
+    const activeKind = modalKind();
+    if (!activeKind) state.returnHash = location.hash || '#ide';
+    this.go('#' + kind);
+  },
+  closeModal() {
+    const back = state.returnHash;
+    state.returnHash = '';
+    this.go(back && back !== location.hash ? back : '#ide');
+  },
+  toggleLang() {
+    this.setLang(LANG === 'zh-CN' ? 'en' : 'zh-CN');
+  },
+  setLang(lang) {
+    if (lang !== 'en' && lang !== 'zh-CN') return;
+    LANG = lang;
+    try { localStorage.setItem('dw-lang', lang); } catch (e) {}
+    render();
+  },
+  toggleSetting(key) {
+    const root = document.getElementById('settings-root');
+    if (root) state.settings.targetRoot = root.value;
+    state.settings[key] = !state.settings[key];
+    render();
+  },
+  saveSettings() {
+    const root = document.getElementById('settings-root');
+    if (root) state.settings.targetRoot = root.value.trim() || 'D:\\DiskWarden\\';
+    const un = document.getElementById('settings-uninstall');
+    if (un) state.settings.uninstall = un.value;
+    this.toast(t('toast.saved'));
+    this.closeModal();
+  },
+  rescan() {
+    state.scanning = true;
+    state.scanPct = 62;
+    this.go('#ide/scanning');
+  },
+  cancelScan() {
+    state.scanning = false;
+    this.toast(t('toast.scanCancelled'));
+    this.go('#ide');
+  },
+  search(value) {
+    state.search = value;
+    const list = filteredIdes();
+    const el = document.querySelector('.ide-list');
+    if (!el) return;
+    el.innerHTML = list.length
+      ? list.map(i => ideRow(i)).join('')
+      : `<div class="empty" style="padding:26px 10px"><p>${esc(t('ide.listEmpty'))}</p></div>`;
+  },
+  setFilter(filter) {
+    state.filter = filter;
+    render();
+  },
+  selectIde(id) {
+    state.selectedIde = id;
+    render();
+  },
+  toggleCheck(ideId, idx) {
+    const ide = getIde(ideId);
+    const dir = ide.directories[idx];
+    if (!dir || dir.safety === 'red') return;
+    if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return;
+    state.checked[ideId] = state.checked[ideId] || {};
+    state.checked[ideId][idx] = !state.checked[ideId][idx];
+    render();
+  },
+  openYellow(ideId, idx) {
+    state.selectedIde = ideId;
+    state.pendingYellow = { ide: ideId, idx: idx };
+    state.returnHash = '#ide';
+    this.go('#ide/yellow-confirm');
+  },
+  confirmYellow(action) {
+    const py = state.pendingYellow;
+    const ide = getIde(py.ide);
+    const dir = ide.directories[py.idx];
+    state.selectedIde = ide.id;
+    if (!dir) { this.go('#ide'); return; }
+    if (action === 'green') {
+      state.confirmed[yellowKey(ide.id, py.idx)] = true;
+      state.checked[ide.id] = state.checked[ide.id] || {};
+      state.checked[ide.id][py.idx] = true;
+      this.toast(t('toast.yellowConfirmed'));
+    } else if (action === 'red') {
+      dir.safety = 'red';
+      if (state.checked[ide.id]) delete state.checked[ide.id][py.idx];
+      this.toast(t('rules.markedRed'));
+    }
+    this.go('#ide');
+  },
+  startPreview(ideId) {
+    const ide = getIde(ideId);
+    state.selectedIde = ide.id;
+    if (!selectedDirs(ide).length) { this.toast(t('toast.needSelect')); return; }
+    state.returnHash = '#ide';
+    if (ide.runtime.running.length) { this.go('#ide/process-blocked'); return; }
+    if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
+    this.go('#ide/migrate-preview');
+  },
+  cleanCaches(ideId) {
+    const ide = getIde(ideId);
+    const total = sum(ide.directories.filter(d => d.safety === 'green'), 'size_bytes') / GIB;
+    this.toast(t('toast.cleaned', { size: fmtGB(total) }));
+  },
+  openRollback(ideId) {
+    state.selectedIde = ideId;
+    state.returnHash = '#ide';
+    this.go('#ide/rollback-confirm');
+  },
+  confirmRollback() {
+    const ide = getIde(state.selectedIde);
+    const target = ide.runtime.target || targetPathFor(ide);
+    ide.runtime.migrated = false;
+    ide.runtime.location = 'C';
+    delete ide.runtime.target;
+    HISTORY.unshift({
+      id: 'h' + Date.now(), at: '2026-10-19 10:05', type: 'rollback', app: ide.name,
+      from: target, to: 'C:', freed: 0, duration: '2m 20s', result: 'rolledback',
+      canRollback: false, note: 'history.rollbackDone',
+      steps: ['rollbackStep1', 'rollbackStep2', 'rollbackStep3']
+    });
+    state.selectedHistory = HISTORY[0].id;
+    state.historyFilter = 'all';
+    state.returnHash = '';
+    this.toast(t('toast.rollbackStarted'));
+    this.go('#history');
+  },
+  retryMigrate() {
+    this.toast(t('toast.retry'));
+    this.go('#ide/migrate-progress');
+  },
+  rollbackFailed() {
+    this.toast(t('toast.rollbackStarted'));
+    this.go('#ide');
+  },
+  recheckProcess() {
+    this.toast(t('blocked.stillBlocked'));
+  },
+  showForceWarn() {
+    this.toast(t('blocked.forceWarn'));
+  },
+  viewLog() {
+    this.toast(t('toast.copied'));
+  },
+  selectProject(id) {
+    state.selectedProject = id;
+    render();
+  },
+  cleanProject(kind) {
+    const p = PROJECTS.find(x => x.id === state.selectedProject);
+    if (!p) return;
+    let freed = 0;
+    if (kind === 'deps' || kind === 'all') { freed += p.deps; p.deps = 0; }
+    if (kind === 'dist' || kind === 'all') { freed += p.dist; p.dist = 0; }
+    this.toast(t('toast.cleaned', { size: fmtGB(freed) }));
+    render();
+  },
+  selectHistory(id) {
+    state.selectedHistory = id;
+    render();
+  },
+  setHistoryFilter(filter) {
+    state.historyFilter = filter;
+    const current = HISTORY.find(x => x.id === state.selectedHistory);
+    const visible = filter === 'all' || (current && current.type === filter);
+    if (!visible) {
+      const first = HISTORY.find(x => filter === 'all' || x.type === filter);
+      if (first) state.selectedHistory = first.id;
+    }
+    render();
+  },
+  exportHistory() {
+    this.toast(t('history.exported'));
+  },
+  rollbackHistory(id) {
+    const h = HISTORY.find(x => x.id === id);
+    if (!h || !h.canRollback) return;
+    state.selectedHistory = h.id;
+    const ide = CATALOG.ides.find(x => x.name === h.app);
+    if (ide) state.selectedIde = ide.id;
+    state.returnHash = '#history';
+    this.go('#ide/rollback-confirm');
+  },
+  addRule() {
+    const matchEl = document.getElementById('rule-match');
+    const match = matchEl ? matchEl.value.trim() : '';
+    if (!match) {
+      if (matchEl) matchEl.focus();
+      this.toast(t('rules.required'));
+      return;
+    }
+    const typeEl = document.getElementById('rule-type');
+    const safetyEl = document.getElementById('rule-safety');
+    const reasonEl = document.getElementById('rule-reason');
+    RULES.unshift({
+      id: 'r' + Date.now(), match: match,
+      type: typeEl ? typeEl.value : 'exact',
+      safety: safetyEl ? safetyEl.value : 'green',
+      source: 'user', hits: 0, enabled: true,
+      reason: reasonEl && reasonEl.value.trim() ? reasonEl.value.trim() : ''
+    });
+    render();
+    this.toast(t('rules.added'));
+  },
+  toggleRule(id) {
+    const r = RULES.find(x => x.id === id);
+    if (!r) return;
+    r.enabled = !r.enabled;
+    render();
+  },
+  deleteRule(id) {
+    const i = RULES.findIndex(x => x.id === id);
+    if (i < 0) return;
+    RULES.splice(i, 1);
+    render();
+    this.toast(t('rules.deleted'));
+  },
+  resolvePending(id, action) {
+    const i = PENDING.findIndex(x => x.id === id);
+    if (i < 0) return;
+    const pd = PENDING[i];
+    PENDING.splice(i, 1);
+    if (action === 'green' || action === 'red') {
+      const name = pd.path.replace(/[\\/]+$/, '').split(/[\\/]/).pop() || pd.path;
+      RULES.unshift({ id: 'r' + Date.now(), match: name, type: 'exact', safety: action, source: 'user', hits: 0, enabled: true });
+      this.toast(t(action === 'green' ? 'rules.markedGreen' : 'rules.markedRed'));
+    } else {
+      this.toast(t('rules.ignored'));
+    }
+    render();
+  },
+  copyDiagnostics() {
+    const diag = [
+      'Disk Warden v0.1.0 (prototype)',
+      'OS: Windows 10 22H2 x64',
+      'Locale: ' + LANG,
+      'Last scan: ' + KPI.lastScan + ' (' + KPI.scanDuration + ')',
+      'IDEs: ' + CATALOG.ides.length + ' · dirs: ' + CATALOG.ides.reduce((a, i) => a + i.directories.length, 0),
+      'Target root: ' + state.settings.targetRoot
+    ].join('\n');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(diag).catch(() => {});
+    }
+    this.toast(t('feedback.copied'));
+  },
+  toast(message) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = message;
+    el.classList.add('show');
+    clearTimeout(state.toastTimer);
+    state.toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+};
+
+/* ---------- 初始化 ---------- */
+function init() {
+  let saved = null;
+  try { saved = localStorage.getItem('dw-lang'); } catch (e) {}
+  const query = new URLSearchParams(location.search).get('lang');
+  const initial = query || saved;
+  if (initial === 'en' || initial === 'zh-CN') LANG = initial;
+
+  if (!location.hash) {
+    try { history.replaceState(null, '', location.pathname + location.search + '#ide'); }
+    catch (e) { location.hash = 'ide'; }
+  }
+
+  window.addEventListener('hashchange', render);
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (modalKind()) App.closeModal();
+    else if (state.protoOpen) { state.protoOpen = false; renderProtoPanel(); }
+  });
+  document.getElementById('proto-fab').addEventListener('click', e => {
+    e.stopPropagation();
+    state.protoOpen = !state.protoOpen;
+    renderProtoPanel();
+  });
+  document.addEventListener('click', e => {
+    if (!state.protoOpen) return;
+    if (e.target.closest('#proto-panel') || e.target.closest('#proto-fab')) return;
+    state.protoOpen = false;
+    renderProtoPanel();
+  });
+
+  render();
+}
+
+init();
 </script>
 </body>
 </html>

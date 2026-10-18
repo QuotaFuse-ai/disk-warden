@@ -1,0 +1,1291 @@
+{
+  "schema_version": 1,
+  "source": "docs/目录清单.md",
+  "platform": "windows",
+  "updated_at": "2026-10-18",
+  "ides": [
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Cursor.exe"],
+      "notes": "worktrees 由 Parallel Agents 自动创建，官方不支持改路径；globalStorage 为绿色但迁移时需注意其中可能包含登录态。",
+      "directories": [
+        {
+          "path": "%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb",
+          "type": "file",
+          "safety": "green",
+          "reason": "AI 对话/agent 数据库，体积可达数十 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\User\\workspaceStorage\\*.pack",
+          "type": "glob",
+          "safety": "green",
+          "reason": "语言服务器包文件，单文件可超 1 GB，累计可达 72 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\User\\workspaceStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "各项目工作区数据，3~40 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\CachedData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "编译缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Chromium 浏览器缓存，1~5 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\Code Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "JS 编译缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\GPUCache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "GPU 着色器缓存，0.2~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "运行日志，0.1~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\CachedExtensions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "扩展缓存，1~3 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\Login Data",
+          "type": "file",
+          "safety": "red",
+          "reason": "登录凭证，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\Local State",
+          "type": "file",
+          "safety": "red",
+          "reason": "Chromium 加密密钥，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\Cursor\\User\\settings.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "用户配置，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.cursor\\worktrees\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Parallel Agents 自动创建的仓库副本，累计可达 140 GB，可迁"
+        }
+      ]
+    },
+    {
+      "id": "trae-cn",
+      "name": "Trae CN / TRAE SOLO CN",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Trae CN.exe", "TRAE SOLO CN.exe"],
+      "notes": "2026-10-08 产品改名为 TRAE SOLO CN，数据目录由 %APPDATA%\\Trae CN\\ 变为 %APPDATA%\\TRAE SOLO CN\\；扫描与迁移必须同时识别新旧两个根目录。",
+      "directories": [
+        {
+          "path": "%APPDATA%\\TRAE SOLO CN\\ModularData\\ai-agent\\snapshot\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "AI 快照，1~5 GB，官方确认清理/迁移可解决问题"
+        },
+        {
+          "path": "%APPDATA%\\TRAE SOLO CN\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Chromium 缓存，1~3 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\TRAE SOLO CN\\CachedData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "编译缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\TRAE SOLO CN\\GPUCache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "GPU 缓存，0.2~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\TRAE SOLO CN\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "运行日志，0.1~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\TRAE SOLO CN\\User\\workspaceStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "项目工作区数据，2~10 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.trae-cn\\",
+          "type": "dir",
+          "safety": "yellow",
+          "reason": "全局记忆、chat-export，内容未确认，需用户自行判断"
+        },
+        {
+          "path": "%APPDATA%\\TRAE SOLO CN\\Login Data",
+          "type": "file",
+          "safety": "red",
+          "reason": "登录凭证，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\TRAE SOLO CN\\User\\settings.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "用户配置，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\ModularData\\ai-agent\\snapshot\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "改名前的 AI 快照旧目录，1~5 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "改名前的 Chromium 缓存旧目录，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\CachedData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "改名前的编译缓存旧目录，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\GPUCache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "改名前的 GPU 缓存旧目录，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "改名前的运行日志旧目录，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\User\\workspaceStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "改名前的项目工作区旧目录，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\Login Data",
+          "type": "file",
+          "safety": "red",
+          "reason": "改名前的登录凭证旧文件，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\User\\settings.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "改名前的用户配置旧文件，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\Trae CN\\ModularData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Trae Work 的 worktree 目录，官方确认可积累至 84 GB，可迁"
+        }
+      ]
+    },
+    {
+      "id": "trae",
+      "name": "Trae 国际版",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Trae.exe"],
+      "notes": "目录结构与 Trae CN 一致，根目录为 %APPDATA%\\Trae\\ 和 %USERPROFILE%\\.trae\\。",
+      "directories": [
+        {
+          "path": "%APPDATA%\\Trae\\ModularData\\ai-agent\\snapshot\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "AI 快照，官方确认可清理/迁移"
+        },
+        {
+          "path": "%APPDATA%\\Trae\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Chromium 缓存，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Trae\\CachedData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "编译缓存，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Trae\\GPUCache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "GPU 缓存，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Trae\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "运行日志，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Trae\\User\\workspaceStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "项目工作区数据，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.trae\\",
+          "type": "dir",
+          "safety": "yellow",
+          "reason": "全局记忆、chat-export，内容未确认，需用户自行判断"
+        },
+        {
+          "path": "%APPDATA%\\Trae\\Login Data",
+          "type": "file",
+          "safety": "red",
+          "reason": "登录凭证，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\Trae\\User\\settings.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "用户配置，禁止迁移"
+        }
+      ]
+    },
+    {
+      "id": "windsurf",
+      "name": "Windsurf",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Windsurf.exe"],
+      "notes": "Devin 改名后旧路径 %APPDATA%\\Windsurf\\ 仍可读；.codeium 与 .windsurf 下的数据由 Windsurf/Devin 共用，统一列在本条目，Devin 条目不重复列出。",
+      "directories": [
+        {
+          "path": "%APPDATA%\\Windsurf\\User\\workspaceStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "项目缓存、embeddings，3~10 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Windsurf\\User\\globalStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "全局状态，2~5 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Windsurf\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Chromium 缓存，1~3 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Windsurf\\CachedData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "编译缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.codeium\\windsurf\\cascade\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Cascade 对话历史，2~15 GB，最大占用，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codeium\\windsurf\\brain\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "计划文件，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codeium\\windsurf\\memories\\",
+          "type": "dir",
+          "safety": "red",
+          "reason": "用户记忆，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\Windsurf\\Login Data",
+          "type": "file",
+          "safety": "red",
+          "reason": "登录凭证，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.windsurf\\worktrees\\<仓库名>\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Cascade agent 自动创建的仓库副本，单个 2 GB+，可迁"
+        }
+      ]
+    },
+    {
+      "id": "kiro",
+      "name": "Kiro",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Kiro.exe"],
+      "notes": "%USERPROFILE%\\.kiro\\ 下含 AWS SSO 认证文件，整目录按不可动处理；settings 子目录单独列出以便扫描器展示。",
+      "directories": [
+        {
+          "path": "%APPDATA%\\Kiro\\User\\globalStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "索引缓存，用户实测 5~20 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Kiro\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Chromium 缓存，1~3 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Kiro\\CachedData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "编译缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Kiro\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "运行日志，0.1~1 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.kiro\\settings\\",
+          "type": "dir",
+          "safety": "red",
+          "reason": "配置与 MCP 设置，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.kiro\\",
+          "type": "dir",
+          "safety": "red",
+          "reason": "AWS SSO 登录凭证所在目录，禁止迁移"
+        }
+      ]
+    },
+    {
+      "id": "vscode",
+      "name": "VS Code",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Code.exe"],
+      "notes": "含 Cline、Roo Code 等 AI 插件的 checkpoint 与索引数据；VS Code 扩展目录一并列在本条目。",
+      "directories": [
+        {
+          "path": "%APPDATA%\\Code\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "浏览器缓存，1~3 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Code\\CachedData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "编译缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Code\\GPUCache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "GPU 缓存，0.2~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Code\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "运行日志，0.1~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Code\\User\\workspaceStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "项目工作区数据，2~10 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Code\\User\\globalStorage\\saoudrizwan.claude-dev\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Cline checkpoints，4~30 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Code\\User\\globalStorage\\rooveterinaryinc.roo-cline\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Roo Code 索引数据库，2~10 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Code\\Login Data",
+          "type": "file",
+          "safety": "red",
+          "reason": "登录凭证，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.vscode\\extensions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "扩展安装位置，1~10 GB，微软官方 Q&A 支持 junction，可迁"
+        }
+      ]
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["claude.exe"],
+      "notes": "projects 父目录为绿色，但其下的 memory 子目录为红色；迁移实现必须按更长路径优先，不能整体搬移 projects 根目录。",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.claude\\debug\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "调试日志，事故中曾达 472 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\projects\\<项目>\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话记录 jsonl，2~30 GB，可迁；需排除 memory 子目录"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\projects\\<项目>\\<session>\\tool-results\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "MCP 工具大输出，可达数十 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\file-history\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "文件编辑快照，1~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\image-cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "粘贴图片缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\paste-cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "大段粘贴内容缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\uploads\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "上传文件缓存，0.5~3 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\plans\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "计划文件，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\shell-snapshots\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "shell 快照，体积小，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\usage-data\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "用量报告，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%LOCALAPPDATA%\\claude-cli-nodejs\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "MCP server 日志，实测可达数十 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\.credentials.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "登录凭证，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\settings.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "配置，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "OAuth/MCP 状态，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.claude\\projects\\<项目>\\memory\\",
+          "type": "dir",
+          "safety": "red",
+          "reason": "自动记忆，禁止迁移"
+        }
+      ]
+    },
+    {
+      "id": "codex",
+      "name": "Codex CLI / Codex 桌面版",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["Codex.exe"],
+      "notes": "CLI 与桌面版共用 %USERPROFILE%\\.codex\\，重复路径已合并；桌面版另有 %APPDATA%\\Codex\\web\\。Windows 进程名不区分大小写，CLI 进程 codex 与桌面版 Codex 合并为 Codex.exe。",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.codex\\sessions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话记录，1~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\logs_2.sqlite",
+          "type": "file",
+          "safety": "green",
+          "reason": "诊断日志，bug 时可达 TB 级（37 TB 事故元凶），可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\worktrees\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "临时 worktree，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\tmp\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "临时文件，0.1~0.5 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.cache\\codex-runtimes\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Codex 运行时依赖，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\auth.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "登录凭证，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\config.toml",
+          "type": "file",
+          "safety": "red",
+          "reason": "配置，禁止迁移"
+        },
+        {
+          "path": "%APPDATA%\\Codex\\web\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Codex 桌面版 web 数据，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\sqlite\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "SQLite 数据库目录，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\state_5.sqlite",
+          "type": "file",
+          "safety": "green",
+          "reason": "状态数据库，1~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\memories_1.sqlite",
+          "type": "file",
+          "safety": "green",
+          "reason": "记忆数据库，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\queue_1.sqlite",
+          "type": "file",
+          "safety": "green",
+          "reason": "队列数据库，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\thread_history_1.sqlite",
+          "type": "file",
+          "safety": "green",
+          "reason": "线程历史，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.codex\\backups\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "备份数据，0.5~2 GB，可迁"
+        }
+      ]
+    },
+    {
+      "id": "kimi",
+      "name": "Kimi CLI",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["kimi.exe"],
+      "notes": "Kimi CLI 的数据目录是 %USERPROFILE%\\.kimi\\，不要与 .kimi-code 混淆。",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.kimi\\sessions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话记录，1~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.kimi\\logs\\kimi.log",
+          "type": "file",
+          "safety": "green",
+          "reason": "运行日志，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.kimi\\input-history\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "输入历史，体积小，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.kimi\\kimi.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "配置，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.kimi\\config.toml",
+          "type": "file",
+          "safety": "red",
+          "reason": "配置，禁止迁移"
+        }
+      ]
+    },
+    {
+      "id": "kimi-code",
+      "name": "Kimi Code CLI",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["kimi-code.exe"],
+      "notes": "数据目录是 %USERPROFILE%\\.kimi-code\\，支持 KIMI_CODE_HOME 环境变量改路径。",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.kimi-code\\sessions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话记录，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.kimi-code\\config.toml",
+          "type": "file",
+          "safety": "red",
+          "reason": "配置，禁止迁移"
+        }
+      ]
+    },
+    {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["gemini.exe"],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.gemini\\sessions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话记录，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.gemini\\tmp\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "临时文件，0.1~0.5 GB，可再生"
+        }
+      ]
+    },
+    {
+      "id": "continue",
+      "name": "Continue",
+      "kind": "extension",
+      "platform": "windows",
+      "processes": [],
+      "notes": "VS Code 插件，无独立进程；数据目录与其他插件共享 VS Code 进程。",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.continue\\index\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "向量索引，1~6 GB，可再生"
+        }
+      ]
+    },
+    {
+      "id": "factory-ai",
+      "name": "Factory AI",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["droid.exe"],
+      "notes": "Droid 的资源缓存统一放在 %USERPROFILE%\\.factory\\。",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.factory\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "缓存 droid 资源，2~10 GB，可迁"
+        }
+      ]
+    },
+    {
+      "id": "devin",
+      "name": "Devin",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Devin.exe"],
+      "notes": "Windsurf 新名；官方文档确认旧路径 %APPDATA%\\Windsurf\\ 仍可读，新路径 %APPDATA%\\Devin\\ 读写。.codeium 与 .windsurf 共用数据已在 windsurf 条目列出，此处不重复。",
+      "directories": [
+        {
+          "path": "%APPDATA%\\Devin\\User\\workspaceStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "项目缓存、embeddings，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Devin\\User\\globalStorage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "全局状态，可迁"
+        },
+        {
+          "path": "%APPDATA%\\Devin\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Chromium 缓存，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Devin\\CachedData\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "编译缓存，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Devin\\Login Data",
+          "type": "file",
+          "safety": "red",
+          "reason": "登录凭证，禁止迁移"
+        }
+      ]
+    },
+    {
+      "id": "deepseek-cli",
+      "name": "DeepSeek CLI",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["deepseek.exe"],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.deepseek\\sessions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话记录，1~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.deepseek\\file-history\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "文件历史，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.deepseek\\tasks\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "任务记录，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.deepseek\\tmp\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "临时文件，0.1~0.5 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.deepseek\\skills\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "技能数据，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.deepseek\\config.toml",
+          "type": "file",
+          "safety": "red",
+          "reason": "配置，禁止迁移"
+        }
+      ]
+    },
+    {
+      "id": "deepseek-harness",
+      "name": "DeepSeek Harness",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["dsh.exe"],
+      "notes": "桌面版 GUI；支持 DSH_HOME 环境变量改数据根目录。",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.dsh\\sessions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话记录，1~10 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.dsh\\storages\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "存储数据，0.5~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.dsh\\profiles\\",
+          "type": "dir",
+          "safety": "yellow",
+          "reason": "用户配置，内容未确认，需用户自行判断"
+        },
+        {
+          "path": "%USERPROFILE%\\.dsh\\desktop\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "桌面版配置数据，0.1~0.5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.dsh\\settings.yaml",
+          "type": "file",
+          "safety": "red",
+          "reason": "配置，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.dsh\\.credentials.yaml",
+          "type": "file",
+          "safety": "red",
+          "reason": "凭证，禁止迁移"
+        }
+      ]
+    },
+    {
+      "id": "qoder",
+      "name": "Qoder",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Qoder.exe"],
+      "notes": "桌面版数据在 %APPDATA%\\com.qoder.app.stable\\，CLI 数据在 %USERPROFILE%\\.Qoder\\，国内版在 %USERPROFILE%\\.qoder-cn\\，三处互不重叠。",
+      "directories": [
+        {
+          "path": "%APPDATA%\\com.qoder.app.stable\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Chromium 缓存，1~3 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\com.qoder.app.stable\\Code Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "JS 编译缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\com.qoder.app.stable\\GPUCache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "GPU 缓存，0.2~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\com.qoder.app.stable\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "运行日志，0.1~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\com.qoder.app.stable\\Local Storage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "本地存储，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\com.qoder.app.stable\\Partitions\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "分区数据，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%APPDATA%\\com.qoder.app.stable\\Session Storage\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话存储，0.1~0.5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.Qoder\\projects\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "会话 jsonl，1~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.Qoder\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "日志，0.1~1 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.Qoder\\plugins\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "插件，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.Qoder\\file-history\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "文件历史，0.5~2 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.Qoder\\tasks\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "任务数据，0.1~1 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.Qoder\\tmp\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "临时文件，0.1~0.5 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.Qoder\\shell-snapshots\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "shell 快照，体积小，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.Qoder\\settings.json",
+          "type": "file",
+          "safety": "red",
+          "reason": "配置，禁止迁移"
+        },
+        {
+          "path": "%USERPROFILE%\\.qoder-cn\\projects\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "国内版会话，1~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.qoder-cn\\logs\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "国内版日志，0.1~1 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.qoder-cn\\file-history\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "国内版文件历史，0.5~2 GB，可迁"
+        }
+      ]
+    },
+    {
+      "id": "claude-desktop",
+      "name": "Claude 桌面版",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["Claude.exe"],
+      "notes": "不是 Claude Code CLI；桌面版数据分布在 %APPDATA%\\Claude\\ 与 %LOCALAPPDATA%\\Claude-3p\\。",
+      "directories": [
+        {
+          "path": "%LOCALAPPDATA%\\Claude-3p\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Chromium 缓存，1~3 GB，可再生"
+        },
+        {
+          "path": "%LOCALAPPDATA%\\Claude-3p\\Code Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "JS 编译缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%LOCALAPPDATA%\\Claude-3p\\GPUCache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "GPU 缓存，0.2~1 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Claude\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "浏览器缓存，1~3 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Claude\\Code Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "JS 缓存，0.5~2 GB，可再生"
+        },
+        {
+          "path": "%APPDATA%\\Claude\\IndexedDB\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "索引数据库，0.5~2 GB，可迁"
+        }
+      ]
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "kind": "cli",
+      "platform": "windows",
+      "processes": ["opencode.exe"],
+      "notes": "遵循 XDG 标准，数据根目录为 %USERPROFILE%\\.local\\share\\opencode\\，与其他 CLI 不同。",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.local\\share\\opencode\\log\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "运行日志，0.1~1 GB，可再生"
+        },
+        {
+          "path": "%USERPROFILE%\\.local\\share\\opencode\\repos\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "项目仓库数据，1~10 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.local\\share\\opencode\\opencode.db",
+          "type": "file",
+          "safety": "green",
+          "reason": "SQLite 会话数据库，0.5~5 GB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.local\\share\\opencode\\opencode.db-shm",
+          "type": "file",
+          "safety": "green",
+          "reason": "SQLite 共享内存，几十 MB，可迁"
+        },
+        {
+          "path": "%USERPROFILE%\\.local\\share\\opencode\\opencode.db-wal",
+          "type": "file",
+          "safety": "green",
+          "reason": "SQLite 预写日志，几百 MB 至数 GB，可迁"
+        }
+      ]
+    },
+    {
+      "id": "jetbrains",
+      "name": "JetBrains 系（IntelliJ/PyCharm/WebStorm 等）",
+      "kind": "ide",
+      "platform": "windows",
+      "processes": ["idea64.exe", "pycharm64.exe", "webstorm64.exe", "goland64.exe", "clion64.exe"],
+      "notes": "官方支持通过 idea.properties 修改 idea.system.path、idea.config.path、idea.plugins.path 迁移，不做 junction。实际路径中的 <产品><版本> 为单个目录名，例如 IntelliJIdea2025.2。",
+      "directories": [
+        {
+          "path": "%LOCALAPPDATA%\\JetBrains\\<产品><版本>\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "app-config",
+          "reason": "系统缓存，5~30 GB；官方支持改 idea.system.path 迁移"
+        },
+        {
+          "path": "%APPDATA%\\JetBrains\\<产品><版本>\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "app-config",
+          "reason": "配置数据，0.5~2 GB；官方支持改 idea.config.path 迁移"
+        }
+      ]
+    },
+    {
+      "id": "npm-cache",
+      "name": "npm 缓存",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": [],
+      "notes": "清单标题为 npm/pnpm/yarn 缓存，但仅确认了 npm-cache 路径；pnpm/yarn 的 store 路径待后续实测补充。",
+      "directories": [
+        {
+          "path": "%LOCALAPPDATA%\\npm-cache\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "env-var",
+          "reason": "包缓存，1~10 GB；设 npm_config_cache 环境变量迁移"
+        }
+      ]
+    },
+    {
+      "id": "pip",
+      "name": "pip 缓存",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": [],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%LOCALAPPDATA%\\pip\\cache\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "env-var",
+          "reason": "包缓存，1~5 GB；设 PIP_CACHE_DIR 环境变量迁移"
+        }
+      ]
+    },
+    {
+      "id": "cargo",
+      "name": "Cargo（Rust）",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": [],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.cargo\\registry\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "env-var",
+          "reason": "crate 缓存，1~10 GB；设 CARGO_HOME 环境变量迁移"
+        }
+      ]
+    },
+    {
+      "id": "go-modules",
+      "name": "Go modules",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": [],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\go\\pkg\\mod\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "env-var",
+          "reason": "模块缓存，1~10 GB；设 GOMODCACHE 环境变量迁移"
+        }
+      ]
+    },
+    {
+      "id": "maven",
+      "name": "Maven 本地仓库",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": [],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.m2\\repository\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "env-var",
+          "reason": "依赖仓库，2~20 GB；通过 settings.xml 的 localRepository 迁移"
+        }
+      ]
+    },
+    {
+      "id": "gradle",
+      "name": "Gradle 缓存",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": [],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.gradle\\caches\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "env-var",
+          "reason": "构建缓存，1~10 GB；设 GRADLE_USER_HOME 环境变量迁移"
+        }
+      ]
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama 模型",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": ["ollama.exe"],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%USERPROFILE%\\.ollama\\models\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "env-var",
+          "reason": "本地模型，5~200 GB；设 OLLAMA_MODELS 环境变量迁移"
+        }
+      ]
+    },
+    {
+      "id": "docker-desktop",
+      "name": "Docker Desktop",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": ["Docker Desktop.exe"],
+      "notes": "迁移应使用 Docker Desktop 自带的磁盘镜像位置设置，不直接 junction 运行中的 WSL 数据。",
+      "directories": [
+        {
+          "path": "%LOCALAPPDATA%\\Docker\\wsl\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "docker-settings",
+          "reason": "WSL 磁盘镜像，5~50 GB；在 Docker 设置中修改磁盘镜像位置迁移"
+        }
+      ]
+    },
+    {
+      "id": "playwright",
+      "name": "Playwright 浏览器",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": [],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%LOCALAPPDATA%\\ms-playwright\\",
+          "type": "dir",
+          "safety": "green",
+          "handling": "env-var",
+          "reason": "浏览器二进制，0.5~2 GB；设 PLAYWRIGHT_BROWSERS_PATH 环境变量迁移"
+        }
+      ]
+    },
+    {
+      "id": "electron",
+      "name": "Electron 下载缓存",
+      "kind": "tool",
+      "platform": "windows",
+      "processes": [],
+      "notes": "",
+      "directories": [
+        {
+          "path": "%LOCALAPPDATA%\\electron\\Cache\\",
+          "type": "dir",
+          "safety": "green",
+          "reason": "Electron 二进制下载缓存，0.5~2 GB，可直接 junction"
+        }
+      ]
+    }
+  ]
+}
