@@ -1,0 +1,95 @@
+# ============================================================
+# Disk Warden .gitignore
+# 规则说明见 docs/dev/协作规范.md「禁止提交清单」
+# 个人临时忽略请写入 .git/info/exclude，不要改本文件
+# ============================================================
+
+# ---------- 凭据类临时脚本（严禁入库，保留在工作区） ----------
+# check*.py / upload*.py / test_ssh.py / clean.py 内含服务器 root 明文密码
+/check*.py
+/upload*.py
+/test_ssh.py
+/clean.py
+
+# 截图类临时脚本与产物（本地调试用，不属于产品代码）
+/shot*.py
+/screenshot.py
+/ui*.png
+/screen*.png
+/screenshot*.png
+/shot*.png
+**/_shots/
+
+# ---------- 密钥、证书与本地配置 ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa*
+id_ed25519*
+.credentials.*
+*local.json
+settings.local.json
+config.local.*
+.claude/
+.vscode/
+.idea/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.spec
+
+# ---------- 构建产物 ----------
+build/
+dist/
+out/
+*.exe
+*.msi
+*.dmg
+*.iso
+*.zip
+*.7z
+*.rar
+
+# ---------- Node / 前端 ----------
+node_modules/
+.npm/
+.pnpm-store/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# ---------- 日志、数据库与本地数据 ----------
+*.log
+logs/
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+backup/
+
+# ---------- 系统与编辑器杂项 ----------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+*.swo
+*~
