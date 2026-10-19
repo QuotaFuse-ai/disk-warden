@@ -153,11 +153,11 @@ a{color:var(--blue);text-decoration:none}
 .content > .cols.cols-disk{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
 .content > .cols > .panel{min-height:0;max-height:100%}
 .panel-scroll .scroll-y.scroll-fit{flex:0 1 auto}
-.cols .trow.pend{grid-template-columns:minmax(0,1fr) auto;row-gap:3px;align-items:center;white-space:normal;padding:9px 12px}
-.cols .trow.pend .tcell.tpath{grid-column:1;grid-row:1}
-.cols .trow.pend .tcell.tsize{grid-column:2;grid-row:1;justify-self:end}
-.cols .trow.pend .tcell.tdesc,.cols .trow.pend .tcell.wrap{grid-column:1/-1;grid-row:2}
-.cols .trow.pend .tcell.acts{grid-column:1/-1;grid-row:3;justify-content:flex-end}
+.cols .trow.pend,.modal .trow.pend{grid-template-columns:minmax(0,1fr) auto;row-gap:3px;align-items:center;white-space:normal;padding:9px 12px}
+.cols .trow.pend .tcell.tpath,.modal .trow.pend .tcell.tpath{grid-column:1;grid-row:1}
+.cols .trow.pend .tcell.tsize,.modal .trow.pend .tcell.tsize{grid-column:2;grid-row:1;justify-self:end}
+.cols .trow.pend .tcell.tdesc,.modal .trow.pend .tcell.tdesc,.cols .trow.pend .tcell.wrap,.modal .trow.pend .tcell.wrap{grid-column:1/-1;grid-row:2}
+.cols .trow.pend .tcell.acts,.modal .trow.pend .tcell.acts{grid-column:1/-1;grid-row:3;justify-content:flex-end}
 .rule-form{grid-template-columns:1.2fr .8fr .8fr 1.3fr 1.1fr auto;align-items:end}
 .cols .rule-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);row-gap:8px;align-items:end}
 .cols .rule-form > button{justify-self:end;white-space:nowrap}
@@ -414,6 +414,7 @@ a{color:var(--blue);text-decoration:none}
 .modal-x{background:none;border:none;color:#a2abb4;font-size:var(--fs-page);line-height:1;padding:4px 6px;border-radius:3px}
 .modal-x:hover{color:#2f3439;background:#eef2f5}
 .modal-body{padding:14px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.modal-body > *{flex-shrink:0}
 .modal-foot{padding:10px 18px;border-top:1px solid var(--line-soft);display:flex;gap:7px;justify-content:flex-end;align-items:center;flex-wrap:wrap;background:#fbfcfd}
 .modal-foot .left{margin-right:auto;font-size:var(--fs-meta);color:var(--dim)}
 
@@ -449,24 +450,24 @@ a{color:var(--blue);text-decoration:none}
 .proto-sep{height:1px;background:var(--line-soft);margin:5px 0}
 .nav-label{font-size:var(--fs-micro);font-weight:700;color:#a0a9b2;letter-spacing:.6px;padding:4px 6px 3px}
 
-/* ---------- 规则：按软件分组 ---------- */
-.appgrp{border:1px solid #e7ecf1;border-radius:4px;background:#fff;overflow:hidden}
-.appgrp + .appgrp{margin-top:6px}
-.appgrp.open{border-color:var(--green-line)}
-.appgrp.open .ag-head{background:#fafcfb;border-bottom:1px solid var(--line-soft)}
-.ag-head{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;background:#fff;text-align:left;transition:background .12s}
-.ag-head:hover{background:#f6f9fb}
-.ag-mark{width:28px;height:28px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:var(--fs-micro);font-weight:700;letter-spacing:.3px}
+/* ---------- 规则：按软件列表（扁平行，点击开弹窗） ---------- */
+.appgrp{background:transparent;border-bottom:1px solid var(--line-soft)}
+.appgrp:last-child{border-bottom:none}
+.ag-head{display:flex;align-items:center;gap:10px;width:100%;padding:10px 8px;background:transparent;border:none;text-align:left;border-radius:4px;transition:background .12s}
+.ag-head:hover{background:#f4f8f6}
+.ag-mark{width:26px;height:26px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:var(--fs-micro);font-weight:700;letter-spacing:.3px;opacity:.9}
 .ag-main{flex:1;min-width:0}
 .ag-name{display:block;font-size:var(--fs-strong);font-weight:600;color:#33383d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ag-sub{display:block;font-size:var(--fs-meta);color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ag-stats{display:flex;align-items:center;gap:9px;flex-shrink:0;font-size:var(--fs-meta);color:var(--muted)}
 .ag-dot{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
 .ag-hits{font-family:Consolas,monospace;font-variant-numeric:tabular-nums;color:#4a545e;white-space:nowrap}
-.ag-go{font-size:var(--fs-meta);color:#2f8e35;flex-shrink:0;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
-.ag-caret{font-style:normal;display:inline-block;transition:transform .12s}
-.appgrp.open .ag-caret{transform:rotate(180deg)}
-.ag-body{padding:10px 12px 12px;background:#fcfdfd}
+.ag-go{font-size:var(--fs-meta);color:#2f8e35;flex-shrink:0;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.ag-caret{font-style:normal;display:inline-block;font-weight:700;transition:transform .12s}
+.ag-head:hover .ag-caret{transform:translateX(2px)}
+.rule-form.mform{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);row-gap:8px;align-items:end}
+.mform > .mwide{grid-column:span 2}
+.mform > button{justify-self:end;white-space:nowrap}
 
 /* ---------- AI 识别 ---------- */
 .btn-ai{background:#f5f1ff;color:#6f4bd8;border-color:#ddd0fb}
@@ -989,15 +990,23 @@ I18N['zh-CN'] = {
   'rules.conflict': '当多条规则命中同一路径时，红色永远优先。',
   'rules.viewApp': '按软件',
   'rules.viewRule': '按规则',
-  'rules.groupHint': '点开一个软件，看它自己学到的规则',
+  'rules.groupHint': '点一个软件，弹窗里直接看和改它的规则',
   'rules.groupEmpty': '这个软件还没有自己的规则',
+  'rules.modalSub': '{n} 条规则 · 内置 {b} · 你确认的 {u} · 命中 {h} 次',
+  'rules.modalAdd': '为「{app}」新增规则',
+  'rules.modalCount': '规则条数',
+  'rules.modalAddSub': '添加后立即对该软件生效，只写入本机 rules-learned.json',
+  'rules.modalRules': '规则明细',
+  'rules.modalPending': '{app} 的待确认目录',
+  'rules.modalPendingSub': '在这里确认，等同于在左侧列表里确认',
+  'rules.modalLocal': '弹窗里的开关与删除立即生效，不会改动磁盘上的目录',
   'rules.groupCount': '{n} 条规则',
   'rules.groupBreakdown': '内置 {b} · 你确认的 {u}',
   'rules.groupHits': '命中 {n} 次',
   'rules.groupProtected': '{n} 条保护',
-  'rules.viewDetail': '查看详情',
-  'rules.collapse': '收起',
+  'rules.viewDetail': '查看规则',
   'rules.appAll': '所有软件',
+  'rules.viewAll': '按规则平铺查看全部',
   'rules.appCol': '适用软件',
   'rules.shared': '所有软件通用',
   'rules.sharedSub': '不区分软件的公共规则',
@@ -1568,15 +1577,23 @@ I18N['en'] = {
   'rules.conflict': 'When several rules hit the same path, red always wins.',
   'rules.viewApp': 'By app',
   'rules.viewRule': 'By rule',
-  'rules.groupHint': 'Open one app to see the rules it learned',
+  'rules.groupHint': 'Pick an app to view and edit its rules in a dialog',
   'rules.groupEmpty': 'This app has no rules of its own',
+  'rules.modalSub': '{n} rules · {b} built-in · {u} you confirmed · {h} hits',
+  'rules.modalAdd': 'Add a rule for {app}',
+  'rules.modalCount': 'Rules',
+  'rules.modalAddSub': 'Takes effect for this app right away; written only to the local rules-learned.json',
+  'rules.modalRules': 'Rule details',
+  'rules.modalPending': 'Pending folders for {app}',
+  'rules.modalPendingSub': 'Confirming here is the same as confirming in the list on the left',
+  'rules.modalLocal': 'Switches and deletes here apply at once and never touch folders on disk',
   'rules.groupCount': '{n} rules',
   'rules.groupBreakdown': '{b} built-in · {u} you confirmed',
   'rules.groupHits': '{n} hits',
   'rules.groupProtected': '{n} protected',
   'rules.viewDetail': 'View rules',
-  'rules.collapse': 'Collapse',
   'rules.appAll': 'All apps',
+  'rules.viewAll': 'Show all rules flat',
   'rules.appCol': 'Applies to',
   'rules.shared': 'Shared across all apps',
   'rules.sharedSub': 'Rules that are not app specific',
@@ -1969,6 +1986,7 @@ function parseRoute() {
   const raw = (location.hash || '').replace(/^#/, '');
   if (raw === 'settings' || raw === 'feedback' || raw === 'ai') return { tab: state.tab || 'projects', sub: '', modal: raw };
   const parts = raw.split('/');
+  if (parts[0] === 'rules-app') return { tab: 'rules', sub: '', modal: 'rules-app', app: parts[1] === 'all' ? '*' : (parts[1] || '') };
   const tab = TABS.indexOf(parts[0]) >= 0 ? parts[0] : 'projects';
   return { tab: tab, sub: parts[1] || '', modal: '' };
 }
@@ -2436,6 +2454,12 @@ function appIdOf(name) { if (name === '*') return '*'; const i = CATALOG.ides.fi
 function aiModelName() { return state.settings.aiProvider === 'relay' ? (state.settings.aiModel || t('ai.modelAuto')) : (state.settings.aiModel || t('ai.modelAuto')); }
 function rulesOfApp(app) { return RULES.filter(r => r.apps && r.apps.indexOf(app) >= 0); }
 function rulesShared() { return RULES.filter(r => r.apps && r.apps.indexOf('*') >= 0); }
+function groupById(id) {
+  if (id === '*') return { id: '*', name: t('rules.shared'), sub: t('rules.sharedSub'), rules: rulesShared() };
+  const i = CATALOG.ides.find(x => x.id === id);
+  if (!i) return null;
+  return { id: i.id, name: i.name, sub: t('ide.kind.' + i.kind), rules: RULES.filter(r => r.apps && r.apps.indexOf(i.name) >= 0 && r.apps.indexOf('*') < 0) };
+}
 function appGroups() {
   const groups = [{ id: '*', name: t('rules.shared'), sub: t('rules.sharedSub'), rules: rulesShared() }];
   CATALOG.ides.forEach(i => {
@@ -2465,7 +2489,6 @@ function ruleTable(rows) {
   </div>`;
 }
 function appGroupRow(g) {
-  const open = state.rulesApp === g.id;
   const green = g.rules.filter(r => r.safety === 'green').length;
   const red = g.rules.filter(r => r.safety === 'red').length;
   const hits = g.rules.reduce((a, r) => a + r.hits, 0);
@@ -2474,8 +2497,8 @@ function appGroupRow(g) {
   const mark = g.id === '*' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5z"/><path d="M12 12v8M4 7.5 12 12l8-4.5"/></svg>'
     : esc(g.name.slice(0, 2).toUpperCase());
   const markBg = g.id === '*' ? '#6f4bd8' : (APP_MARK[g.name] || '#2f8bf5');
-  return `<div class="appgrp ${open ? 'open' : ''}">
-    <button type="button" class="ag-head" aria-expanded="${open}" onclick="App.toggleRuleApp('${esc(g.id)}')">
+  return `<div class="appgrp">
+    <button type="button" class="ag-head" aria-haspopup="dialog" title="${esc(t('rules.viewDetail'))}" onclick="App.openRuleModal('${esc(g.id)}')">
       <span class="ag-mark" style="background:${markBg}">${mark}</span>
       <span class="ag-main">
         <span class="ag-name">${esc(g.name)}</span>
@@ -2486,9 +2509,8 @@ function appGroupRow(g) {
         <span class="ag-dot" title="${esc(t('common.red'))}"><i class="dot dot-red"></i>${red}</span>
         <span class="ag-hits">${esc(t('rules.groupHits', { n: hits }))}</span>
       </span>
-      <span class="ag-go">${esc(t(open ? 'rules.collapse' : 'rules.viewDetail'))}<i class="ag-caret">▾</i></span>
+      <span class="ag-go">${esc(t('rules.viewDetail'))}<i class="ag-caret">›</i></span>
     </button>
-    ${open ? `<div class="ag-body">${ruleTable(g.rules)}</div>` : ''}
   </div>`;
 }
 function pendingRow(pd) {
@@ -2677,6 +2699,7 @@ function renderModal() {
   if (kind === 'settings') html = modalSettings();
   else if (kind === 'ai') html = modalAi();
   else if (kind === 'feedback') html = modalFeedback();
+  else if (kind === 'rules-app') html = modalRulesApp();
   else if (kind === 'migrate-preview') html = modalPreview();
   else if (kind === 'migrate-progress') html = modalProgress();
   else if (kind === 'migrate-failed') html = modalFailed();
@@ -2686,8 +2709,46 @@ function renderModal() {
   else if (kind === 'yellow-confirm') html = modalYellow();
   if (!html) { root.innerHTML = ''; return; }
   root.innerHTML = `<div class="modal-mask" onclick="App.closeModal()">
-    <div class="modal ${kind === 'migrate-preview' || kind === 'process-blocked' || kind === 'settings' || kind === 'ai' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
+    <div class="modal ${kind === 'migrate-preview' || kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'rules-app' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
   </div>`;
+}
+
+function modalRulesApp() {
+  const info = parseRoute();
+  const groups = appGroups();
+  const g = groupById(info.app || state.rulesApp) || groups[0] || groupById('*');
+  const close = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>`;
+  if (!g) return modalShell(t('rules.table'), '', `<div class="note dim">${esc(t('rules.groupEmpty'))}</div>`, close);
+  const green = g.rules.filter(r => r.safety === 'green').length;
+  const red = g.rules.filter(r => r.safety === 'red').length;
+  const hits = g.rules.reduce((a, r) => a + r.hits, 0);
+  const user = g.rules.filter(r => r.source === 'user').length;
+  const builtin = g.rules.length - user;
+  const known = CATALOG.ides.map(i => i.name);
+  const pend = g.id === '*' ? PENDING.filter(pd => known.indexOf(pd.ide) < 0) : PENDING.filter(pd => pd.ide === g.name);
+  const appValue = g.id === '*' ? '*' : g.name;
+  const body = `<div class="kvbar">
+      <div class="kv-item"><span class="k">${esc(t('rules.modalCount'))}</span><span class="v">${g.rules.length}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('common.green'))}</span><span class="v ok">${green}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('common.red'))}</span><span class="v ${red ? 'warn' : ''}">${red}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('rules.hits'))}</span><span class="v">${hits}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${pend.length ? 'warn' : 'ok'}">${pend.length}</span></div>
+    </div>
+    ${pend.length ? `<div class="section-title"><h3>${esc(t('rules.modalPending', { app: g.name }))}</h3><span class="sub">${esc(t('rules.modalPendingSub'))}</span></div><div class="rows">${pend.map(pendingRow).join('')}</div>` : ''}
+    <div class="section-title"><h3>${esc(t('rules.modalAdd', { app: g.name }))}</h3><span class="sub">${esc(t('rules.modalAddSub'))}</span></div>
+    <div class="form-grid rule-form mform">
+      <div class="field"><label>${esc(t('rules.match'))} <span class="bad">*</span></label><input id="rule-match-m" placeholder="${esc(t('rules.matchPh'))}"></div>
+      <div class="field"><label>${esc(t('rules.matchType'))}</label><select id="rule-type-m"><option value="exact">${esc(t('rules.type.exact'))}</option><option value="glob">${esc(t('rules.type.glob'))}</option><option value="regex">${esc(t('rules.type.regex'))}</option></select></div>
+      <div class="field"><label>${esc(t('rules.safety'))}</label><select id="rule-safety-m"><option value="green">${esc(t('common.green'))}</option><option value="red">${esc(t('common.red'))}</option></select></div>
+      <div class="field mwide"><label>${esc(t('common.reason'))}</label><input id="rule-reason-m" placeholder="${esc(t('rules.reasonPh'))}"></div>
+      <button type="button" class="btn btn-primary btn-sm" onclick="App.addRule('m','${esc(appValue)}')">${esc(t('rules.add'))}</button>
+    </div>
+    <div class="section-title"><h3>${esc(t('rules.modalRules'))}</h3><span class="sub">${esc(t('rules.groupBreakdown', { b: builtin, u: user }))}</span></div>
+    ${g.rules.length ? ruleTable(g.rules) : `<div class="note dim">${esc(t('rules.groupEmpty'))}</div>`}
+    <div class="banner info"><span class="b-ico">i</span><div>${esc(t('rules.conflict'))} · ${esc(t('rules.modalLocal'))}</div></div>`;
+  const foot = close + `<button type="button" class="btn btn-ghost btn-sm" onclick="App.showAllRules()">${esc(t('rules.viewAll'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('action.done'))}</button>`;
+  return modalShell(g.name, t('rules.modalSub', { n: g.rules.length, b: builtin, u: user, h: hits }), body, foot, true);
 }
 
 function modalSettings() {
@@ -2980,6 +3041,7 @@ function renderProtoPanel() {
     ] },
     { key: 'proto.section.other', items: [
       { h: 'ai', k: 'ai.title' },
+      { h: 'rules-app/cursor', k: 'rules.modalRules' },
       { h: 'settings', k: 'proto.route.settings' },
       { h: 'feedback', k: 'proto.route.feedback' }
     ] }
@@ -3189,7 +3251,12 @@ const App = {
     this.go('#ide/rollback-confirm');
   },
   setRulesView(v) { state.rulesView = v; render(); },
-  toggleRuleApp(id) { state.rulesApp = state.rulesApp === id ? '' : id; render(); },
+  openRuleModal(id) {
+    state.rulesView = 'app';
+    state.rulesApp = id;
+    this.openModal('rules-app/' + (id === '*' ? 'all' : id));
+  },
+  showAllRules() { state.rulesView = 'rule'; this.closeModal(); },
   toggleAiFilter() { state.aiFilter = !state.aiFilter; render(); },
   aiIdentify(id) {
     if (!aiReady()) { this.toast(t('ai.needKey')); this.openModal('ai'); return; }
@@ -3216,7 +3283,7 @@ const App = {
     const name = pd.path.replace(/[\\/]+$/, '').split(/[\\/]/).pop() || pd.path;
     RULES.unshift({ id: 'r' + Date.now(), match: name, type: 'exact', safety: pd.suggest.safety, source: 'user', hits: 0, enabled: true, reason: t(pd.suggest.reason), apps: [pd.ide] });
     state.rulesView = 'app';
-    state.rulesApp = appIdOf(pd.ide);
+    if (modalKind() === 'rules-app') state.rulesApp = appIdOf(pd.ide);
     render();
     this.toast(t('ai.adopted'));
   },
@@ -3246,29 +3313,32 @@ const App = {
   aiTest() {
     this.toast(aiReady() ? t('ai.testOk') : t('ai.testBad'));
   },
-  addRule() {
-    const matchEl = document.getElementById('rule-match');
+  addRule(scope, appValue) {
+    const suf = scope ? '-' + scope : '';
+    const el = (k) => document.getElementById(k + suf);
+    const matchEl = el('rule-match');
     const match = matchEl ? matchEl.value.trim() : '';
     if (!match) {
       if (matchEl) matchEl.focus();
       this.toast(t('rules.required'));
       return;
     }
-    const typeEl = document.getElementById('rule-type');
-    const safetyEl = document.getElementById('rule-safety');
-    const reasonEl = document.getElementById('rule-reason');
-    const appEl = document.getElementById('rule-app');
+    const typeEl = el('rule-type');
+    const safetyEl = el('rule-safety');
+    const reasonEl = el('rule-reason');
+    const appEl = el('rule-app');
     RULES.unshift({
       id: 'r' + Date.now(), match: match,
       type: typeEl ? typeEl.value : 'exact',
       safety: safetyEl ? safetyEl.value : 'green',
       source: 'user', hits: 0, enabled: true,
       reason: reasonEl && reasonEl.value.trim() ? reasonEl.value.trim() : '',
-      apps: [appEl ? appEl.value : '*']
+      apps: [appEl ? appEl.value : (appValue || '*')]
     });
     state.rulesView = 'app';
-    state.rulesApp = appEl ? appIdOf(appEl.value) : '*';
-    render();
+    state.rulesApp = appEl ? appIdOf(appEl.value) : appIdOf(appValue);
+    if (scope) { render(); this.toast(t('rules.added')); return; }
+    this.openRuleModal(state.rulesApp);
     this.toast(t('rules.added'));
   },
   toggleRule(id) {
