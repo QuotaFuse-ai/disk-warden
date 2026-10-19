@@ -1135,7 +1135,67 @@ I18N['zh-CN'] = {
   'proto.route.feedback': '反馈弹窗',
   'unit.hours': '小时',
   'unit.minutes': '分钟',
-  'unit.seconds': '秒'
+  'unit.seconds': '秒',
+  'ai.consentTitle': '启用 AI 分析？',
+  'ai.consentBody': '启用后，目录名称、体积与分级结果等目录信息会发送给第三方 AI 服务用于分析。API Key 只从环境变量读取，不会写入本地。',
+  'ai.consentAccept': '同意并启用',
+  'ai.consentDecline': '暂不启用',
+  'ai.consentDone': 'AI 分析已启用',
+  'blocked.planTitle': '迁移计划被阻断',
+  'blocked.planDesc': '以下目录无法迁移，请先处理后再试。',
+  'blocked.accessErrors': '{n} 个文件无法读取',
+  'blocked.reparse': '该路径是重解析点（junction / symlink）',
+  'blocked.space': '目标盘空间不足：需要 {need}，可用 {free}',
+  'blocked.ntfs': '目标盘文件系统为 {fs}，需要 NTFS',
+  'blocked.close': '关闭',
+  'conn.connecting': '正在连接本地服务…',
+  'conn.hostTitle': '本地服务不可用',
+  'conn.hostBody': '无法与本地桥接服务通信，请确认应用已正常启动。',
+  'conn.unavailable': '本地服务不可用',
+  'conn.retry': '重新连接',
+  'failed.items': '失败项',
+  'history.job': '任务',
+  'history.exportEmpty': '当前筛选下没有可导出的记录',
+  'progress.stage.prepare': '准备迁移计划',
+  'progress.stage.swap': '切换目录',
+  'progress.stage.link_verify': '读回链接目标并验证',
+  'progress.stage.cleanup': '清理临时文件',
+  'progress.stage.precheck': '回滚前检查',
+  'progress.stage.restore': '迁回原目录',
+  'progress.stage.config': '恢复配置备份',
+  'progress.stage.record': '写入回滚记录',
+  'progress.stage.recover': '恢复中断的迁移',
+  'recovery.title': '发现未完成的迁移',
+  'recovery.count': '共 {n} 项',
+  'recovery.desc': '这些任务在上次运行中中断，需要恢复或回滚后才能继续迁移。',
+  'recovery.needsHuman': '需要人工处理',
+  'recovery.recover': '恢复',
+  'recovery.rollback': '回滚',
+  'recovery.running': '正在处理…',
+  'recovery.done': '恢复完成',
+  'recovery.successHint': '中断的任务已恢复，可以重新扫描确认状态。',
+  'recovery.failed': '恢复失败',
+  'recovery.failedHint': '请检查日志后重试，或联系技术支持。',
+  'rollback.progressTitle': '正在回滚',
+  'rollback.progressKeepOpen': '回滚期间请不要退出 Disk Warden。',
+  'rollback.successTitle': '回滚完成',
+  'rollback.successSub': '数据已迁回 C 盘，junction 与配置已恢复。',
+  'rollback.failedTitle': '回滚失败',
+  'rollback.blockedTitle': '暂时无法回滚',
+  'rollback.residualTitle': '需要确认清理残留',
+  'rollback.residualBody': '源目录中仍有部分文件，继续回滚将删除这些残留。',
+  'rollback.residualConfirm': '确认删除残留并继续',
+  'rollback.stage.precheck': '检查回滚条件',
+  'rollback.stage.link_remove': '移除 junction',
+  'rollback.stage.copy': '复制数据回原目录',
+  'rollback.stage.verify': '校验文件数量与总字节',
+  'rollback.stage.restore': '替换回原目录',
+  'rollback.stage.config': '恢复配置备份',
+  'rollback.stage.cleanup': '清理迁移目录',
+  'rollback.stage.record': '写入回滚记录',
+  'rollback.stage.done': '完成',
+  'success.rollbackable': '可在历史记录中随时回滚',
+  'toast.noGreen': '没有可迁移的目录'
 };
 I18N['en'] = {
   'app.tagline': 'Disk manager for AI IDEs',
@@ -1722,7 +1782,67 @@ I18N['en'] = {
   'proto.route.feedback': 'Feedback modal',
   'unit.hours': 'h',
   'unit.minutes': 'min',
-  'unit.seconds': 's'
+  'unit.seconds': 's',
+  'ai.consentTitle': 'Enable AI analysis?',
+  'ai.consentBody': 'When enabled, folder names, sizes and risk results are sent to a third-party AI service for analysis. The API key is read from an environment variable and never stored locally.',
+  'ai.consentAccept': 'Agree and enable',
+  'ai.consentDecline': 'Not now',
+  'ai.consentDone': 'AI analysis enabled',
+  'blocked.planTitle': 'Migration plan blocked',
+  'blocked.planDesc': 'These folders cannot be migrated yet. Resolve the issues below and retry.',
+  'blocked.accessErrors': '{n} files could not be read',
+  'blocked.reparse': 'This path is a reparse point (junction / symlink)',
+  'blocked.space': 'Not enough space on the target drive: need {need}, available {free}',
+  'blocked.ntfs': 'Target drive is {fs}; NTFS is required',
+  'blocked.close': 'Close',
+  'conn.connecting': 'Connecting to the local service…',
+  'conn.hostTitle': 'Local service unavailable',
+  'conn.hostBody': 'Cannot reach the local bridge service. Make sure the app started correctly.',
+  'conn.unavailable': 'Local service unavailable',
+  'conn.retry': 'Reconnect',
+  'failed.items': 'Failed items',
+  'history.job': 'Job',
+  'history.exportEmpty': 'No records to export under the current filter',
+  'progress.stage.prepare': 'Prepare migration plan',
+  'progress.stage.swap': 'Swap folders',
+  'progress.stage.link_verify': 'Read back link target and verify',
+  'progress.stage.cleanup': 'Clean up temporary files',
+  'progress.stage.precheck': 'Pre-rollback checks',
+  'progress.stage.restore': 'Restore original folder',
+  'progress.stage.config': 'Restore config backup',
+  'progress.stage.record': 'Write rollback record',
+  'progress.stage.recover': 'Recover interrupted migration',
+  'recovery.title': 'Unfinished migration detected',
+  'recovery.count': '{n} item(s)',
+  'recovery.desc': 'These jobs were interrupted in a previous run. Recover or roll them back before migrating again.',
+  'recovery.needsHuman': 'Needs manual attention',
+  'recovery.recover': 'Recover',
+  'recovery.rollback': 'Roll back',
+  'recovery.running': 'Working…',
+  'recovery.done': 'Recovery complete',
+  'recovery.successHint': 'The interrupted job is recovered. Rescan to confirm the state.',
+  'recovery.failed': 'Recovery failed',
+  'recovery.failedHint': 'Check the logs and retry, or contact support.',
+  'rollback.progressTitle': 'Rolling back',
+  'rollback.progressKeepOpen': 'Keep Disk Warden open while rollback runs.',
+  'rollback.successTitle': 'Rollback complete',
+  'rollback.successSub': 'Data is back on C:, and the junction and config are restored.',
+  'rollback.failedTitle': 'Rollback failed',
+  'rollback.blockedTitle': 'Cannot roll back yet',
+  'rollback.residualTitle': 'Confirm residual cleanup',
+  'rollback.residualBody': 'Some files remain in the source folder. Continuing will delete these leftovers.',
+  'rollback.residualConfirm': 'Delete leftovers and continue',
+  'rollback.stage.precheck': 'Check rollback preconditions',
+  'rollback.stage.link_remove': 'Remove junction',
+  'rollback.stage.copy': 'Copy data back',
+  'rollback.stage.verify': 'Verify file count and bytes',
+  'rollback.stage.restore': 'Replace original folder',
+  'rollback.stage.config': 'Restore config backup',
+  'rollback.stage.cleanup': 'Clean up migration folder',
+  'rollback.stage.record': 'Write rollback record',
+  'rollback.stage.done': 'Done',
+  'success.rollbackable': 'You can roll back from History at any time',
+  'toast.noGreen': 'No migratable folders selected'
 };
 let LANG = 'zh-CN';
 function t(key, vars) {
@@ -1963,13 +2083,17 @@ const state = {
   route: 'projects', tab: 'projects', sub: '',
   selectedIde: 'cursor', selectedProject: 'p1', selectedHistory: 'h1',
   filter: 'all', search: '',
-  checked: {}, confirmed: {},
+  checked: {}, confirmed: {}, ignored: {},
   settings: { targetRoot: 'D:\\DiskWarden\\', autoStart: false, autoMaintenance: false, uninstall: 'keep',
     aiEnabled: true, aiProvider: 'relay', aiBaseUrl: '', aiModel: 'Qwen3.8-Flash', aiKeySet: true, aiLimit: 20 },
   rulesView: 'app', rulesApp: '', aiFilter: false,
+  connected: false, booting: true, bootError: '', aiAsk: false,
+  data: { settings: null, disk: null, snapshot: null, learned: null, scanJob: null, scanTimer: null,
+    scanError: '', history: null, historyError: '', historyLoading: false,
+    recovery: null, recoveryRun: null, recoveryTimer: null, flow: null, jobTimer: null },
+  scanning: false, scanPct: 0,
   demo: { pct: 45, stage: 2, freeze: true, ide: 'trae-cn', filesDone: 7421, filesTotal: 16843 },
-  scanning: false, scanPct: 62,
-  pendingYellow: { ide: 'trae-cn', idx: 3 },
+  pendingYellow: null,
   historyFilter: 'all',
   returnHash: '',
   protoOpen: false,
@@ -1990,47 +2114,903 @@ function parseRoute() {
   const tab = TABS.indexOf(parts[0]) >= 0 ? parts[0] : 'projects';
   return { tab: tab, sub: parts[1] || '', modal: '' };
 }
-function getIde(id) { return CATALOG.ides.find(x => x.id === id) || CATALOG.ides[0]; }
+function getIde(id) { return CATALOG.ides.find(x => x.id === id) || CATALOG.ides[0] || { id: '', name: '', kind: 'ide', directories: [], runtime: { root: '', location: 'C', migrated: false, running: [] } }; }
 function ideSize(ide) { return sum(ide.directories, 'size_bytes'); }
 function safetyCount(ide, safety) { return ide.directories.filter(d => d.safety === safety).length; }
 function yellowKey(ideId, idx) { return ideId + '|' + idx; }
-function isConfirmed(ideId, idx) { return !!state.confirmed[yellowKey(ideId, idx)]; }
+function dirAt(ideId, idx) { const ide = getIde(ideId); return ide && ide.directories ? ide.directories[idx] : null; }
+function dirKey(ideId, idx) { const d = dirAt(ideId, idx); return d && d.item_id ? 'item:' + d.item_id : yellowKey(ideId, idx); }
+function isConfirmed(ideId, idx) { return !!state.confirmed[dirKey(ideId, idx)]; }
 function isChecked(ideId, idx, dir) {
   if (dir.safety === 'red') return false;
+  if (dir.item_id && dir.can_migrate === false) return false;
+  if (dir.item_id && state.ignored[dir.item_id]) return false;
   if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return false;
+  if (dir.item_id) return !!state.checked[dir.item_id];
   return !!state.checked[ideId] && !!state.checked[ideId][idx];
 }
 function selectedDirs(ide) {
   return ide.directories.filter((d, i) => isChecked(ide.id, i, d));
 }
 function selectedSize(ide) { return sum(selectedDirs(ide), 'size_bytes'); }
-function targetAvailableGB() { return state.settings.targetRoot ? DRIVE.targetFreeGB : 0; }
+function targetAvailableGB() {
+  const free = state.data.disk && state.data.disk.target && state.data.disk.target.available
+    ? state.data.disk.target.free : null;
+  return free != null ? free / GIB : (state.settings.targetRoot ? DRIVE.targetFreeGB : 0);
+}
 function needBytes(ide) { return Math.ceil(selectedSize(ide) * 1.05 + 64 * 1024 * 1024); }
 function needsGB(ide) { return needBytes(ide) / GIB; }
 function spaceOk(ide) { return needsGB(ide) <= targetAvailableGB(); }
-function targetPathFor(ide) { return (state.settings.targetRoot.replace(/\\$/, '') + '\\' + ide.name.replace(/\s+/g, '')); }
+function targetPathFor(ide) {
+  const it = selectedDirs(ide)[0] || ide.directories[0];
+  if (it && it.target_path) {
+    const m = String(it.target_path).match(/^(.*)[\\/][^\\/]+$/);
+    if (m) return m[1];
+  }
+  return (state.settings.targetRoot.replace(/\\$/, '') + '\\' + ide.name.replace(/\s+/g, ''));
+}
 function appTitle() { return document.title; }
+
+
+/* ---------- RPC 传输层 ----------
+   请求：{v:1,id,method,params}；成功：{ok:true,result}；失败：{ok:false,error}。
+   bridge.rpc 接收并返回 JSON 字符串，这里统一解析并按 error 结构抛出。 */
+class RpcError extends Error {
+  constructor(err) {
+    const e = err || {};
+    super(e.message_key || e.code || 'error.INTERNAL');
+    this.code = e.code || 'INTERNAL';
+    this.message_key = e.message_key || ('error.' + this.code);
+    this.detail = e.detail || {};
+    this.retryable = !!e.retryable;
+  }
+}
+
+let rpcSeq = 0;
+function rpc(method, params) {
+  const api = window.pywebview && window.pywebview.api;
+  if (!api || typeof api.rpc !== 'function') {
+    return Promise.reject(new RpcError({ code: 'INTERNAL', detail: { reason: 'host unavailable' } }));
+  }
+  const req = { v: 1, id: 'ui-' + (++rpcSeq), method: method, params: params || {} };
+  return api.rpc(JSON.stringify(req)).then(raw => {
+    let res;
+    try { res = typeof raw === 'string' ? JSON.parse(raw) : raw; }
+    catch (e) { throw new RpcError({ code: 'INTERNAL', detail: { reason: 'invalid response' } }); }
+    if (!res || res.ok !== true) throw new RpcError(res && res.error);
+    return res.result;
+  });
+}
+
+function errText(err) {
+  if (!err) return '';
+  return t(err.message_key || ('error.' + (err.code || 'INTERNAL')));
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    return String(iso).replace('T', ' ').replace(/\.\d+/, '').replace(/Z$/, '');
+  }
+  const p = n => (n < 10 ? '0' : '') + n;
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function normPath(p) {
+  return String(p == null ? '' : p).replace(/\//g, '\\').replace(/\\+$/, '').toLowerCase();
+}
+
+function driveOf(p) {
+  const m = String(p || '').match(/^([A-Za-z]:)/);
+  return m ? m[1].toUpperCase() : '';
+}
+
+const TARGET_DEFAULT = 'D:\\DiskWarden\\';
+
+/* ---------- 真实扫描数据（scan.result）读取辅助 ---------- */
+function snapshot() { return state.data.snapshot; }
+function allTools() { const s = snapshot(); return (s && s.tools) || []; }
+function allItems() { const s = snapshot(); return (s && s.items) || []; }
+function toolList() { return allTools().filter(x => x.counts && x.counts.present > 0); }
+function toolById(id) { return allTools().find(x => x.id === id) || null; }
+function itemsFor(tool) { return allItems().filter(x => x.tool_id === tool.id); }
+function runningProcs(tool) { const rt = tool && tool.runtime; return (rt && rt.processes) || []; }
+function migratedItems(tool) { return itemsFor(tool).filter(x => !!x.migrated_job_id); }
+function isToolMigrated(tool) { return migratedItems(tool).length > 0; }
+function migratedTarget(tool) {
+  const it = migratedItems(tool)[0];
+  return it ? (it.target_path || '') : '';
+}
+function itemCounts(tool) {
+  const items = itemsFor(tool);
+  return {
+    green: items.filter(x => x.safety === 'green').length,
+    red: items.filter(x => x.safety === 'red').length,
+    yellow: items.filter(x => x.safety === 'yellow').length
+  };
+}
+function toolRoot(tool) {
+  const items = itemsFor(tool);
+  if (!items.length) {
+    const dirs = ((tool && tool.directories) || []).filter(d => d.resolved && d.resolved.length);
+    return dirs.length ? String(dirs[0].resolved[0]).replace(/[\\/][^\\/]*$/, '') : '';
+  }
+  let parts = String(items[0].source_path).replace(/\//g, '\\').split('\\');
+  parts.pop();
+  items.slice(1).forEach(it => {
+    const seg = String(it.source_path).replace(/\//g, '\\').split('\\');
+    const max = Math.min(parts.length, seg.length);
+    let i = 0;
+    while (i < max && parts[i].toLowerCase() === seg[i].toLowerCase()) i++;
+    parts = parts.slice(0, i);
+  });
+  return parts.join('\\');
+}
+function targetFreeBytes() {
+  const d = state.data.disk && state.data.disk.target;
+  return d && d.available ? (d.free || 0) : 0;
+}
+function targetDriveOf() {
+  const d = state.data.disk && state.data.disk.target;
+  return driveOf(d && d.path) || DRIVE.targetDrive || 'D:';
+}
+
+/* ---------- 扫描快照 → 已验收 CATALOG 形状（数组） ---------- */
+function adapterDir(item) {
+  return {
+    path: item.source_path || '',
+    target_path: item.target_path || '',
+    type: item.kind || 'dir',
+    safety: item.safety || 'yellow',
+    reason: item.reason || item.blocked_reason || item.reason_key || '',
+    handling: item.rule_id || item.blocked_code || '',
+    size_bytes: item.bytes || 0,
+    item_id: item.item_id,
+    can_migrate: item.can_migrate !== false && !item.migrated_job_id,
+    requires_confirm: !!item.requires_confirm,
+    blocked_code: item.blocked_code || '',
+    blocked_reason: item.blocked_reason || '',
+    migrated: !!item.migrated_job_id,
+    migrated_job_id: item.migrated_job_id || '',
+    source: item.source || '',
+    rule_id: item.rule_id || '',
+    file_count: item.file_count || 0,
+    access_errors: item.access_errors || 0,
+    is_reparse: !!item.is_reparse,
+    target_exists: !!item.target_exists
+  };
+}
+
+function synthDirectories(tool) {
+  const out = [];
+  ((tool && tool.directories) || []).forEach(d => {
+    const paths = (d.resolved && d.resolved.length) ? d.resolved : [];
+    paths.forEach(p => {
+      out.push({
+        path: String(p), target_path: '', type: d.type || 'dir',
+        safety: d.safety || 'yellow', reason: d.reason || d.reason_key || '',
+        handling: d.handling || d.status_label || '', size_bytes: 0,
+        item_id: '', can_migrate: d.safety !== 'red', requires_confirm: d.safety === 'yellow',
+        blocked_code: '', blocked_reason: '', migrated: false, source: '', rule_id: '',
+        file_count: 0, access_errors: 0, is_reparse: false, target_exists: false
+      });
+    });
+  });
+  return out;
+}
+
+function adapterIde(tool) {
+  const items = itemsFor(tool);
+  const root = toolRoot(tool);
+  const target = String(migratedTarget(tool) || '').replace(/[\\/][^\\/]*$/, '');
+  return {
+    id: tool.id,
+    name: tool.name,
+    kind: tool.kind || 'ide',
+    platform: 'windows',
+    processes: ((tool.runtime && tool.runtime.catalog_names) || []),
+    directories: items.length ? items.map(adapterDir) : synthDirectories(tool),
+    runtime: {
+      root: root,
+      location: driveOf(root).replace(':', '') || 'C',
+      migrated: isToolMigrated(tool),
+      target: target,
+      running: runningProcs(tool).map(p => ({ name: p.name, pid: p.pid, lock: '' }))
+    }
+  };
+}
+
+function preselectGreen() {
+  state.checked = {};
+  state.confirmed = {};
+  state.ignored = {};
+  state.pendingYellow = null;
+  allItems().forEach(it => {
+    if (it.safety === 'green' && it.can_migrate !== false && !it.migrated_job_id && !it.blocked_reason) {
+      state.checked[it.item_id] = true;
+    }
+  });
+}
+
+function setSnapshot(snap) {
+  state.data.snapshot = snap || null;
+  const ides = toolList().map(adapterIde);
+  CATALOG.ides.length = 0;
+  Array.prototype.push.apply(CATALOG.ides, ides);
+  if (!CATALOG.ides.some(x => x.id === state.selectedIde)) {
+    state.selectedIde = CATALOG.ides.length ? CATALOG.ides[0].id : '';
+  }
+  preselectGreen();
+  syncKpi();
+  syncDiskView();
+}
+
+function applySettings(s) {
+  if (!s) return;
+  state.data.settings = s;
+  const ai = s.ai || null;
+  state.settings = {
+    targetRoot: s.target_root || TARGET_DEFAULT,
+    autoStart: !!s.launch_at_startup,
+    autoMaintenance: !!s.auto_maintenance,
+    uninstall: s.uninstall_policy === 'rollback' ? 'remove' : (s.uninstall_policy || 'keep'),
+    dataRoot: s.data_root || '',
+    appVersion: s.app_version || '',
+    ai: ai,
+    aiEnabled: !!(ai && ai.enabled),
+    aiProvider: ai && ai.enabled ? (ai.base_url ? 'custom' : 'relay') : 'none',
+    aiBaseUrl: (ai && ai.base_url) || '',
+    aiModel: (ai && ai.model) || '',
+    aiKeySet: !!(ai && ai.api_key_set),
+    aiLimit: 20
+  };
+}
+
+function applyDisk(d) {
+  if (!d) return;
+  state.data.disk = d;
+  const src = d.source || {};
+  const tgt = d.target || {};
+  DRIVE.totalGB = src.available ? (src.total || 0) / GIB : 0;
+  DRIVE.usedGB = src.available ? (src.used || 0) / GIB : 0;
+  DRIVE.freeGB = src.available ? (src.free || 0) / GIB : 0;
+  DRIVE.targetFreeGB = tgt.available ? (tgt.free || 0) / GIB : 0;
+  DRIVE.targetDrive = driveOf(tgt.path) || DRIVE.targetDrive;
+  syncDiskView();
+}
+
+function setSeg(key, gb) {
+  const s = DISK_SEGMENTS.find(x => x.key === key);
+  if (s) s.gb = Math.max(0, gb || 0);
+}
+
+function syncDiskView() {
+  const tools = {};
+  allTools().forEach(t => { tools[t.id] = t; });
+  const bucket = { 'ai-ide': 0, 'ai-cli': 0, 'pkg': 0, 'jetbrains': 0, 'models': 0 };
+  allItems().forEach(it => {
+    const tool = tools[it.tool_id];
+    const kind = (tool && tool.kind) || 'ide';
+    const rel = String(it.rel_path || '').toLowerCase();
+    let cat = kind === 'ide' ? 'ai-ide' : 'ai-cli';
+    if (/(^|[\\/])(npm|npm-cache|pnpm|yarn|pip|cargo|m2|gradle)([\\/]|$)/.test(rel)) cat = 'pkg';
+    else if (/jetbrains|\.idea/.test(rel)) cat = 'jetbrains';
+    else if (/ollama|huggingface/.test(rel)) cat = 'models';
+    bucket[cat] += it.bytes || 0;
+  });
+  DISK_CATEGORIES.forEach(c => { c.gb = (bucket[c.id] || 0) / GIB; });
+  const ideGB = (bucket['ai-ide'] + bucket['ai-cli']) / GIB;
+  const devGB = (bucket.pkg + bucket.jetbrains) / GIB;
+  const modelsGB = bucket.models / GIB;
+  setSeg('disk.ide', ideGB);
+  setSeg('disk.dev', devGB);
+  setSeg('disk.sys', 0);
+  setSeg('disk.models', modelsGB);
+  setSeg('disk.other', Math.max(0, DRIVE.usedGB - ideGB - devGB - modelsGB));
+  setSeg('disk.free', DRIVE.freeGB);
+}
+
+function syncKpi() {
+  const snap = snapshot();
+  const st = (snap && snap.stats) || {};
+  KPI.reclaimableGB = (st.migratable_bytes || 0) / GIB;
+  KPI.lastScan = snap && snap.scanned_at ? fmtDate(snap.scanned_at) : '';
+  const migrates = historyItems().filter(x => x.type === 'migrate' && x.result === 'success');
+  KPI.freedGB = migrates.reduce((a, x) => a + (x.freed || 0), 0) / GIB;
+  KPI.freedOps = migrates.length;
+}
+
+/* ---------- 启动握手 ---------- */
+function hostReady() {
+  const has = () => !!(window.pywebview && window.pywebview.api && typeof window.pywebview.api.rpc === 'function');
+  if (has()) return Promise.resolve(true);
+  return new Promise(resolve => {
+    let settled = false;
+    let tries = 0;
+    const finish = ok => {
+      if (settled) return;
+      settled = true;
+      clearInterval(timer);
+      window.removeEventListener('pywebviewready', onReady);
+      resolve(ok);
+    };
+    const onReady = () => finish(has());
+    window.addEventListener('pywebviewready', onReady);
+    const timer = setInterval(() => {
+      tries++;
+      if (has()) finish(true);
+      else if (tries >= 120) finish(false);
+    }, 100);
+  });
+}
+
+function bootstrap() {
+  state.booting = true;
+  state.bootError = '';
+  return hostReady().then(ok => {
+    if (!ok) {
+      state.booting = false;
+      state.connected = false;
+      state.bootError = t('conn.hostBody');
+      return null;
+    }
+    return rpc('app.hello').then(hello => {
+      applySettings(hello.settings);
+      applyDisk(hello.disk || null);
+      state.data.recovery = hello.recovery || null;
+      state.connected = true;
+      const scan = hello.scan || {};
+      const ready = scan.available
+        ? rpc('scan.result').then(snap => setSnapshot(snap)).catch(() => {})
+        : Promise.resolve();
+      return ready
+        .then(() => rpc('rules.learned.list')).then(l => { state.data.learned = l; }).catch(() => {})
+        .then(() => rpc('job.list', { active_only: true })).catch(() => ({ jobs: [] }))
+        .then(list => {
+          const active = (list && list.jobs && list.jobs[0]) || null;
+          if (active && active.kind === 'scan' && ['queued', 'running', 'cancelling'].indexOf(active.state) >= 0) {
+            state.data.scanJob = active;
+            state.scanning = true;
+            state.scanPct = scanPercent(active);
+            startScanPolling(active.job_id);
+          }
+        })
+        .then(() => refreshRecovery())
+        .then(() => loadHistory());
+    }).catch(err => {
+      state.connected = false;
+      state.bootError = errText(err);
+    }).then(() => { state.booting = false; });
+  }).then(() => { render(); });
+}
+
+/* ---------- 扫描任务 ---------- */
+const SCAN_STAGES = ['discover', 'measure', 'classify', 'done'];
+
+function scanStage(job) {
+  const p = (job && job.progress) || {};
+  const s = p.stage || p.step || 'discover';
+  return SCAN_STAGES.indexOf(s) >= 0 ? s : 'discover';
+}
+
+function scanPercent(job) {
+  if (!job) return 0;
+  if (job.state === 'done') return 100;
+  const p = job.progress || {};
+  const stage = p.stage || p.step || '';
+  if (stage === 'measure') {
+    const total = p.targets_total || 0, done = p.targets_done || 0;
+    if (total > 0) return Math.min(88, 10 + Math.round(done / total * 78));
+    return 15;
+  }
+  if (stage === 'classify') return 92;
+  if (stage === 'discover') return 6;
+  return job.state === 'running' ? 10 : 3;
+}
+
+function stopScanPolling() {
+  if (state.data.scanTimer) {
+    clearInterval(state.data.scanTimer);
+    state.data.scanTimer = null;
+  }
+}
+
+function startScanPolling(jobId) {
+  stopScanPolling();
+  state.data.scanTimer = setInterval(() => pollScan(jobId), 350);
+  pollScan(jobId);
+}
+
+function scanFailed(err) {
+  state.data.scanError = errText(err) || t('scan.failed');
+  state.scanning = false;
+  App.toast(t('scan.failed') + ': ' + state.data.scanError);
+  if (state.tab !== 'ide' || state.sub !== 'scanning') App.go('#ide/scanning');
+  else render();
+}
+
+function pollScan(jobId) {
+  if (!jobId) return Promise.resolve();
+  return rpc('scan.status', { job_id: jobId }).then(res => {
+    const job = res && res.job ? res.job : null;
+    if (!job) { stopScanPolling(); return; }
+    state.data.scanJob = job;
+    state.scanPct = scanPercent(job);
+    if (job.state === 'done') {
+      stopScanPolling();
+      KPI.scanDuration = fmtDuration(jobDuration(job));
+      return rpc('scan.result').then(snap => {
+        setSnapshot(snap);
+        state.scanning = false;
+        state.data.scanJob = null;
+        state.scanPct = 100;
+        const n = (snap && snap.stats && snap.stats.tools_present) || 0;
+        App.toast(t('scan.done', { n: n }));
+        return rpc('disk.info').then(applyDisk).catch(() => {});
+      }).then(() => {
+        App.go('#ide' + (CATALOG.ides.length ? '' : '/empty'));
+      }).catch(scanFailed);
+    }
+    if (job.state === 'cancelled') {
+      stopScanPolling();
+      state.scanning = false;
+      state.data.scanJob = null;
+      App.toast(t('scan.cancelled'));
+      App.go('#ide' + (snapshot() ? '' : '/empty'));
+      return;
+    }
+    if (job.state === 'failed') {
+      stopScanPolling();
+      freshRenderIfScanning();
+      scanFailed(job.error);
+      return;
+    }
+    freshRenderIfScanning();
+  }).catch(err => {
+    stopScanPolling();
+    scanFailed(err);
+  });
+}
+
+function freshRenderIfScanning() {
+  if (state.tab === 'ide' && state.sub === 'scanning') render();
+}
+
+/* ---------- 操作历史（src/core/store/history） ---------- */
+function historyItems() {
+  const h = state.data.history;
+  return (h && h.items) || [];
+}
+function historyStats() {
+  const h = state.data.history;
+  return (h && h.stats) || {};
+}
+function fmtDuration(sec) {
+  if (sec === null || sec === undefined || isNaN(sec)) return '—';
+  const s = Math.max(0, Math.round(Number(sec)));
+  const m = Math.floor(s / 60);
+  return m ? m + 'm ' + (s % 60) + 's' : s + 's';
+}
+function jobDuration(job) {
+  if (!job || !job.started_at) return null;
+  const end = job.finished_at || job.updated_at;
+  const a = Date.parse(job.started_at), b = Date.parse(end);
+  if (isNaN(a) || isNaN(b)) return null;
+  return Math.max(0, Math.round((b - a) / 1000));
+}
+
+function applyHistory(res) {
+  const items = (res && res.items) || [];
+  HISTORY.length = 0;
+  items.forEach(h => {
+    const type = h.type === 'rollback' ? 'rollback' : (h.type === 'clean' ? 'clean' : 'migrate');
+    const failed = h.result === 'failed';
+    const steps = type === 'rollback'
+      ? ['rollbackStep1', 'rollbackStep2', failed ? 'failedStep' : 'rollbackStep3']
+      : type === 'clean'
+        ? ['cleanStep1']
+        : ['migrateStep1', 'migrateStep2', 'migrateStep3', failed ? 'failedStep' : 'migrateStep4'];
+    let note;
+    if (failed) note = 'failed.sourceSafe';
+    else if (type === 'rollback') note = 'history.rollbackDone';
+    else if (h.can_rollback) note = 'history.canRollback';
+    else note = 'history.noRollback';
+    HISTORY.push({
+      id: h.id,
+      at: fmtDate(h.at),
+      type: type,
+      app: h.app || h.tool_id || '',
+      from: h.from || '',
+      to: h.to || '',
+      freed: (h.freed || 0) / GIB,
+      duration: fmtDuration(h.duration_seconds),
+      result: h.result === 'rolledback' ? 'rolledback' : (failed ? 'failed' : 'success'),
+      canRollback: !!h.can_rollback,
+      code: h.code || '',
+      note: note,
+      steps: steps,
+      job_id: h.job_id || '',
+      tool_id: h.tool_id || ''
+    });
+  });
+  if (!HISTORY.some(x => x.id === state.selectedHistory)) {
+    state.selectedHistory = HISTORY.length ? HISTORY[0].id : '';
+  }
+  syncKpi();
+}
+
+function loadHistory() {
+  if (state.data.historyLoading) return Promise.resolve();
+  state.data.historyLoading = true;
+  return rpc('history.list', { filter: 'all', limit: 500 }).then(res => {
+    state.data.history = res || { items: [], count: 0, stats: {} };
+    state.data.historyError = '';
+    applyHistory(state.data.history);
+  }).catch(err => {
+    state.data.historyError = errText(err);
+    applyHistory({ items: [] });
+  }).then(res => {
+    state.data.historyLoading = false;
+    return res;
+  });
+}
+
+/* ---------- 迁移 / 回滚任务流 ---------- */
+const MIGRATE_STAGES = ['prepare', 'backup', 'copy', 'verify', 'swap', 'link', 'link_verify', 'cleanup', 'done'];
+const ROLLBACK_STAGES = ['precheck', 'link_remove', 'copy', 'verify', 'restore', 'config', 'cleanup', 'record', 'done'];
+
+function flowOpen(kind) { return !!(state.data.flow && state.data.flow.kind === kind); }
+function flowBusy() {
+  const f = state.data.flow;
+  return !!(f && (f.phase === 'loading' || f.phase === 'starting' || f.phase === 'progress'));
+}
+function stopFlowPolling() {
+  if (state.data.jobTimer) {
+    clearInterval(state.data.jobTimer);
+    state.data.jobTimer = null;
+  }
+}
+function closeFlow() {
+  stopFlowPolling();
+  state.data.flow = null;
+}
+function refreshAfterJob() {
+  return Promise.all([
+    rpc('scan.result').then(snap => setSnapshot(snap)).catch(() => {}),
+    rpc('disk.info').then(applyDisk).catch(() => {}),
+    loadHistory()
+  ]);
+}
+
+/* ---------- 启动恢复（journal 状态由 src/app 判定，UI 只负责展示与发起） ---------- */
+function recoveryItems() {
+  const r = state.data.recovery;
+  return (r && r.items) || [];
+}
+function refreshRecovery() {
+  return rpc('recovery.list').then(r => {
+    state.data.recovery = r || { items: [], count: 0, warnings: [] };
+    return state.data.recovery;
+  }).catch(() => state.data.recovery);
+}
+function stopRecoveryPolling() {
+  if (state.data.recoveryTimer) {
+    clearInterval(state.data.recoveryTimer);
+    state.data.recoveryTimer = null;
+  }
+}
+function recoveryPct(job) {
+  if (!job) return 4;
+  if (job.state === 'done') return 100;
+  const p = job.progress || {};
+  if (p.done) return 100;
+  const stages = ['precheck', 'copy', 'verify', 'swap', 'link', 'link_verify', 'restore', 'config', 'cleanup', 'record', 'recover'];
+  const idx = stages.indexOf(p.stage || '');
+  if (idx < 0) return 35;
+  return Math.max(5, Math.min(96, Math.round((idx + 1) / (stages.length + 1) * 100)));
+}
+function recoveryStageText(job) {
+  const p = (job && job.progress) || {};
+  const stage = p.stage || p.step;
+  if (!stage || stage === 'done') return t('recovery.running');
+  const key = 'progress.stage.' + stage;
+  const label = t(key);
+  return label === key ? String(stage) : label;
+}
+function startRecoveryPolling(runnerJobId) {
+  stopRecoveryPolling();
+  state.data.recoveryTimer = setInterval(() => pollRecovery(runnerJobId), 400);
+  pollRecovery(runnerJobId);
+}
+function pollRecovery(runnerJobId) {
+  return rpc('job.status', { job_id: runnerJobId }).then(res => {
+    const run = state.data.recoveryRun;
+    if (!run || run.runnerJobId !== runnerJobId) return;
+    const job = res && res.job;
+    if (!job) { render(); return; }
+    run.job = job;
+    if (job.state === 'done') {
+      stopRecoveryPolling();
+      run.summary = job.summary || {};
+      run.phase = run.summary.ok === false ? 'failed' : 'success';
+      if (run.phase === 'failed') {
+        run.error = {
+          code: run.summary.error_code || 'RECOVERY_REQUIRED',
+          detail: { message: run.summary.error_message || '' }
+        };
+      }
+      refreshAfterJob().then(() => refreshRecovery()).then(() => render());
+      return;
+    }
+    if (job.state === 'failed' || job.state === 'cancelled') {
+      stopRecoveryPolling();
+      run.phase = 'failed';
+      run.error = job.error || { code: 'INTERNAL', detail: {} };
+      refreshAfterJob().then(() => refreshRecovery()).then(() => render());
+      return;
+    }
+    render();
+  }).catch(err => {
+    stopRecoveryPolling();
+    const run = state.data.recoveryRun;
+    if (run && run.runnerJobId === runnerJobId) {
+      run.phase = 'failed';
+      run.error = err;
+      render();
+    }
+  });
+}
+function recoveryBanner() {
+  const items = recoveryItems();
+  const run = state.data.recoveryRun;
+  if (!items.length && !run) return '';
+  let html = '';
+  if (items.length) {
+    const busy = !!(run && (run.phase === 'starting' || run.phase === 'progress'));
+    const rows = items.map(it => {
+      const actions = (it.actions && it.actions.length ? it.actions : ['recover']);
+      const buttons = actions.map(a => `<button type="button" class="btn btn-xs ${a === 'rollback' ? 'btn-ghost' : 'btn-soft'}" ${busy ? 'disabled' : ''} onclick="App.recoveryStart('${esc(it.job_id)}','${esc(a)}')">${esc(t(a === 'rollback' ? 'recovery.rollback' : 'recovery.recover'))}</button>`).join('');
+      const human = it.needs_human ? ` · <b>${esc(t('recovery.needsHuman'))}</b>` : '';
+      return `<div class="kv-item wide">
+        <span class="k">${esc(it.tool_name || it.tool_id || '')} · ${esc(it.label || it.state_label || it.state || '')}${human}${it.type === 'rollback' ? ' · ' + esc(t('history.type.rollback')) : ''}</span>
+        <span class="v" style="font-weight:500;white-space:normal;font-size:var(--fs-meta)">${esc(it.source_path || '')}</span>
+        <span class="dim" style="font-size:var(--fs-meta)">${esc(fmtBytes(it.bytes || 0))} · ${esc(fmtDate(it.updated_at))}</span>
+        <div class="banner-actions">${buttons}</div>
+      </div>`;
+    }).join('');
+    html += `<div class="banner danger" style="margin-bottom:10px;align-items:flex-start">
+      <span class="b-ico">⛨</span>
+      <div style="flex:1;min-width:0">
+        <b>${esc(t('recovery.title'))}</b> · ${esc(t('recovery.count', { n: items.length }))}
+        <div style="margin-top:2px">${esc(t('recovery.desc'))}</div>
+        <div class="kvbar mt-3" style="flex-direction:column;background:#fff8f7;border-color:#f2c9c6">${rows}</div>
+      </div>
+    </div>`;
+  }
+  if (run) {
+    const phase = run.phase;
+    if (phase === 'starting' || phase === 'progress') {
+      const pct = recoveryPct(run.job);
+      html += `<div class="banner info" style="margin-bottom:10px;align-items:flex-start">
+        <span class="b-ico">i</span>
+        <div style="flex:1;min-width:0">
+          <b>${esc(t('recovery.running'))}</b>
+          <div class="progress mt-3"><i style="width:${pct}%"></i></div>
+          <div class="progress-meta"><span>${esc(t('progress.percent', { pct: pct }))}</span><span>${esc(recoveryStageText(run.job))}</span></div>
+        </div>
+      </div>`;
+    } else if (phase === 'success') {
+      const s = run.summary || {};
+      html += `<div class="banner ok" style="margin-bottom:10px;align-items:flex-start">
+        <span class="b-ico">✓</span>
+        <div style="flex:1;min-width:0">
+          <b>${esc(t('recovery.done'))}</b><br>${esc(t('recovery.successHint'))}
+          <div class="mono" style="font-size:var(--fs-meta);margin-top:2px">${esc(s.source_path || run.sourcePath || '')}</div>
+          <div class="banner-actions"><button type="button" class="btn btn-ghost btn-xs" onclick="App.dismissRecovery()">${esc(t('action.close'))}</button></div>
+        </div>
+      </div>`;
+    } else {
+      const err = run.error || {};
+      const msg = (err.detail && err.detail.message) || (run.summary && run.summary.error_message) || '';
+      html += `<div class="banner danger" style="margin-bottom:10px;align-items:flex-start">
+        <span class="b-ico">✕</span>
+        <div style="flex:1;min-width:0">
+          <b>${esc(t('recovery.failed'))}</b>${err.code ? ` · <span class="mono">${esc(err.code)}</span>` : ''}<br>${esc(msg || t('recovery.failedHint'))}
+          <div class="banner-actions">
+            <button type="button" class="btn btn-ghost btn-xs" onclick="App.retryRecovery()">${esc(run.action === 'rollback' ? t('recovery.rollback') : t('recovery.recover'))}</button>
+            <button type="button" class="btn btn-ghost btn-xs" onclick="App.dismissRecovery()">${esc(t('action.close'))}</button>
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+  return html;
+}
+
+/* ---------- 迁移 / 回滚轮询 ---------- */
+function startFlowPolling(kind, jobId) {
+  stopFlowPolling();
+  state.data.jobTimer = setInterval(() => pollFlow(kind, jobId), 350);
+  pollFlow(kind, jobId);
+}
+function pollFlow(kind, jobId) {
+  return rpc('job.status', { job_id: jobId }).then(res => {
+    const job = res && res.job;
+    const flow = state.data.flow;
+    if (!flow || flow.kind !== kind || (flow.runnerJobId || flow.jobId) !== jobId) return;
+    if (!job) { render(); return; }
+    flow.job = job;
+    if (job.state === 'done') {
+      stopFlowPolling();
+      flow.summary = job.summary || {};
+      const ok = kind === 'rollback'
+        ? flow.summary.ok !== false
+        : !flow.summary.failed && !flow.summary.cancelled;
+      flow.phase = ok ? 'success' : 'failed';
+      if (!ok) {
+        flow.errorScope = 'job';
+        if (kind === 'rollback') {
+          flow.error = {
+            code: flow.summary.error_code || 'ROLLBACK_FAILED',
+            detail: { message: flow.summary.error_message || '' }
+          };
+        } else {
+          const first = (flow.summary.items || []).find(x => !x.ok) || {};
+          flow.error = {
+            code: first.state || 'MIGRATION_FAILED',
+            detail: { message: first.error_message || '' }
+          };
+        }
+      }
+      refreshAfterJob().then(() => render());
+      return;
+    }
+    if (job.state === 'failed' || job.state === 'cancelled') {
+      stopFlowPolling();
+      flow.phase = 'failed';
+      flow.errorScope = 'job';
+      flow.error = job.error || { code: 'INTERNAL', detail: {} };
+      refreshAfterJob().then(() => render());
+      return;
+    }
+    render();
+  }).catch(err => {
+    stopFlowPolling();
+    const flow = state.data.flow;
+    if (flow && flow.kind === kind && (flow.runnerJobId || flow.jobId) === jobId) {
+      flow.phase = 'failed';
+      flow.error = err;
+      render();
+    }
+  });
+}
+function migratePct(flow) {
+  const job = flow.job || {};
+  const p = job.progress || {};
+  if (job.state === 'done' || p.done) return 100;
+  const total = Math.max(1, p.items_total || ((flow.plan && flow.plan.items && flow.plan.items.length) || 1));
+  const done = Math.max(p.items_done || 0, p.index || 0);
+  const idx = Math.max(0, MIGRATE_STAGES.indexOf(p.stage || 'prepare'));
+  const span = MIGRATE_STAGES.length - 1;
+  const partial = Math.min(1, (idx + (p.status === 'done' ? 1 : 0.4)) / span);
+  return Math.min(99, Math.max(2, Math.round((done + partial) / total * 100)));
+}
+function rollbackPct(flow) {
+  const job = flow.job || {};
+  const p = job.progress || {};
+  if (job.state === 'done' || p.stage === 'done') return 100;
+  const idx = Math.max(0, ROLLBACK_STAGES.indexOf(p.stage || 'precheck'));
+  return Math.min(99, Math.max(3, Math.round(idx / (ROLLBACK_STAGES.length - 1) * 100)));
+}
+function stageRows(stages, current, doneFlag, prefix) {
+  const active = Math.max(0, stages.indexOf(current || stages[0]));
+  return stages.map((s, i) => {
+    const done = doneFlag || i < active;
+    const act = !done && i === active;
+    return `<div class="stage ${done ? 'done' : act ? 'active' : ''}">
+      <span class="s-ico">${done ? '✓' : ''}</span><span>${esc(t(prefix + s))}</span>
+      <span class="s-meta">${done ? esc(t('progress.done')) : act ? esc(t('progress.running')) : esc(t('progress.waiting'))}</span>
+    </div>`;
+  }).join('');
+}
+function errorDetailLines(err) {
+  if (!err) return [];
+  const d = err.detail || {};
+  const code = err.code || '';
+  const lines = [];
+  if (code === 'BLOCKED_PROCESS') {
+    (d.items || []).forEach(it => {
+      const proc = it.process || {};
+      const names = (proc.processes || []).map(p => (p.name || '') + ' · PID ' + (p.pid || '')).join(' | ');
+      lines.push([it.tool_name || it.tool_id || '', it.source_path || '', names].filter(Boolean).join(' · '));
+    });
+  } else if (code === 'BLOCKED_RED_PATH') {
+    (d.items || []).forEach(it => lines.push([it.tool_id || '', it.source_path || '', it.reason || ''].filter(Boolean).join(' · ')));
+  } else if (code === 'PERMISSION_DENIED') {
+    (d.items || []).forEach(it => {
+      const errs = it.access_errors;
+      const count = Array.isArray(errs) ? errs.length : (typeof errs === 'number' ? errs : 0);
+      lines.push([
+        it.source_path || '',
+        count ? t('blocked.accessErrors', { n: count }) : '',
+        it.is_reparse ? t('blocked.reparse') : ''
+      ].filter(Boolean).join(' · '));
+    });
+  } else if (code === 'INSUFFICIENT_SPACE') {
+    lines.push(t('blocked.space', { free: fmtBytes(d.free_bytes || 0), need: fmtBytes(d.required_bytes || 0) }));
+  } else if (code === 'DUPLICATE_TARGET') {
+    (d.duplicates || []).forEach(x => lines.push((x.target_path || '') + ' × ' + ((x.items || []).length)));
+    (d.existing || []).forEach(x => lines.push([x.source_path, x.target_path].filter(Boolean).join(' → ')));
+  } else if (code === 'TARGET_NOT_NTFS') {
+    lines.push(t('blocked.ntfs', { fs: d.fs || '?' }));
+  } else if (d.message) {
+    lines.push(String(d.message));
+  } else if (d.reason) {
+    lines.push(String(d.reason));
+  }
+  return lines.filter(Boolean);
+}
+
+/* ---------- 展示辅助 ---------- */
+function reasonText(dir) {
+  if (!dir) return '';
+  const key = dir.reason || '';
+  if (key) {
+    const label = t(key);
+    if (label !== key) return label;
+  }
+  return dir.blocked_reason || key || t('reason.unknown');
+}
+
+function diagnosticsText() {
+  const s = state.data.settings || {};
+  const st = (snapshot() && snapshot().stats) || {};
+  return [
+    'Disk Warden v' + (s.app_version || '0.1.0'),
+    'Protocol: ' + (s.protocol_version || '-'),
+    'OS: ' + (navigator.userAgent || 'unknown'),
+    'Locale: ' + LANG,
+    'Last scan: ' + (KPI.lastScan || t('meta.neverScan')) + ' (' + (KPI.scanDuration || '—') + ')',
+    'IDEs: ' + (st.tools_present || 0) + ' · dirs: ' + (st.items || 0),
+    'Target root: ' + state.settings.targetRoot,
+    'Data root: ' + (s.data_root || '-')
+  ].join('\n');
+}
+
+function copyText(text) {
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).then(() => true).catch(fallback);
+  }
+  return Promise.resolve(fallback());
+}
 
 function render() {
   const info = parseRoute();
   state.tab = info.tab; state.sub = info.sub; state.modal = info.modal || '';
   if (!modalKind()) state.returnHash = '';
-  if (state.sub) {
-    if (state.sub === 'process-blocked') {
-      const cur = getIde(state.selectedIde);
-      if (!cur.runtime.running.length) state.selectedIde = 'cursor';
-    } else if (state.sub === 'rollback-confirm') {
-      const cur = getIde(state.selectedIde);
-      if (!cur.runtime.migrated) { state.selectedIde = 'vscode'; state.selectedHistory = 'h3'; }
-    } else if (state.sub.indexOf('migrate-') === 0) {
-      const cur = getIde(state.selectedIde);
-      if (cur.runtime.migrated || cur.runtime.running.length) state.selectedIde = 'trae-cn';
-    }
+  if (state.connected && state.tab === 'history' && state.data.history === null && !state.data.historyLoading) {
+    loadHistory().then(() => { if (state.tab === 'history') render(); });
   }
   renderTopnav();
   renderTopbar();
   let html = '';
-  if (state.tab === 'ide') {
+  if (state.booting) html = renderConnecting();
+  else if (!state.connected) html = renderHostDown();
+  else if (state.tab === 'ide') {
     if (state.sub === 'scanning') html = renderScanning();
     else if (state.sub === 'empty') html = renderEmpty();
     else html = renderIde();
@@ -2039,9 +3019,28 @@ function render() {
   else if (state.tab === 'rules') html = renderRules();
   else if (state.tab === 'history') html = renderHistory();
   document.getElementById('view').innerHTML = html;
+  const host = document.querySelector('#view .content');
+  if (host && state.connected) host.insertAdjacentHTML('afterbegin', recoveryBanner());
   renderModal();
   renderProtoPanel();
   document.documentElement.lang = LANG;
+}
+
+function renderConnecting() {
+  return `<div class="content"><div class="empty">
+    <div class="empty-ico">◌</div>
+    <div class="empty-title">${esc(t('conn.connecting'))}</div>
+    <div class="empty-sub">${esc(t('conn.hostBody'))}</div>
+  </div></div>`;
+}
+
+function renderHostDown() {
+  return `<div class="content"><div class="empty">
+    <div class="empty-ico">⚠</div>
+    <div class="empty-title">${esc(t('conn.hostTitle'))}</div>
+    <div class="empty-sub">${esc(state.bootError || t('conn.hostBody'))}</div>
+    <div style="margin-top:14px"><button type="button" class="btn btn-primary btn-sm" onclick="App.reconnect()">${esc(t('conn.retry'))}</button></div>
+  </div></div>`;
 }
 
 const NAV_ICONS = {
@@ -2090,7 +3089,8 @@ function renderTopnav() {
 }
 
 function topActions() {
-  return `<button type="button" class="btn btn-primary btn-sm" onclick="App.rescan()">${esc(t('action.rescan'))}</button>`;
+  const bus = state.scanning || !state.connected;
+  return `<button type="button" class="btn btn-primary btn-sm" ${bus ? 'disabled' : ''} onclick="App.rescan()">${esc(t('action.rescan'))}</button>`;
 }
 
 function renderTopbar() {
@@ -2098,8 +3098,12 @@ function renderTopbar() {
   document.getElementById('page-title').textContent = title;
   document.title = 'Disk Warden — ' + title;
   const meta = document.getElementById('scan-meta');
-  if (state.tab === 'ide') {
-    if (state.sub === 'scanning') meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))}</span>`;
+  if (state.booting) {
+    meta.innerHTML = `<span class="warn">${esc(t('conn.connecting'))}</span>`;
+  } else if (!state.connected) {
+    meta.innerHTML = `<span class="warn">${esc(t('conn.unavailable'))}</span>`;
+  } else if (state.tab === 'ide') {
+    if (state.sub === 'scanning' || state.scanning) meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))}</span>`;
     else meta.innerHTML = `<span class="live-dot"></span>${esc(t('meta.lastScan', { time: KPI.lastScan, dur: KPI.scanDuration }))}<span class="dim">·</span><span class="dim">${esc(t('meta.scope'))}</span>`;
   } else {
     meta.innerHTML = `<span class="dim">${esc(t('page.' + state.tab + '.desc'))}</span>`;
@@ -2231,7 +3235,7 @@ function itemRow(ide, d, i) {
     ? `<span class="tcell lockcell"><span class="lock" title="${esc(t('ide.redLocked'))}" aria-label="${esc(t('ide.redLocked'))}">⛨</span></span>`
     : `<span class="tcell lockcell"><input class="row-check" type="checkbox" ${checked ? 'checked' : ''} ${d.safety === 'yellow' && !isConfirmed(ide.id, i) ? 'disabled' : ''} onclick="App.toggleCheck('${ide.id}',${i})" aria-label="${esc(d.path)}"></span>`;
   const confirmed = d.safety === 'yellow' && isConfirmed(ide.id, i);
-  const reason = t(d.reason) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
+  const reason = reasonText(d) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
   const act = d.safety === 'yellow' && !confirmed
     ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.openYellow('${ide.id}',${i})">${esc(t('action.confirmYellow'))}</button>`
     : confirmed ? `<span class="badge b-gray">${esc(t('common.confirmed'))}</span>`
@@ -2245,10 +3249,18 @@ function itemRow(ide, d, i) {
   </div>`;
 }
 
+function scanDisplayStage(stage) {
+  if (stage === 'discover') return 'enumerate';
+  if (stage === 'measure') return 'size';
+  return stage;
+}
+
 function renderScanning() {
-  const pct = state.scanning ? state.scanPct : 62;
+  const job = state.data.scanJob;
+  const bridgeStage = scanStage(job);
+  const pct = state.scanning ? (state.scanPct || 0) : (job && job.state === 'done' ? 100 : (job && job.progress && job.progress.done ? 100 : 0));
   const stages = ['enumerate', 'match', 'size', 'process', 'classify', 'done'];
-  const active = pct < 18 ? 0 : pct < 38 ? 1 : pct < 68 ? 2 : pct < 84 ? 3 : pct < 96 ? 4 : 5;
+  const active = Math.max(0, stages.indexOf(scanDisplayStage(bridgeStage)));
   return `<div class="content narrow">
     <section class="panel scanning">
       <h3>${esc(t('scan.title'))}</h3>
@@ -2265,7 +3277,6 @@ function renderScanning() {
       <div class="skeleton"><div class="sk-row"></div><div class="sk-row" style="width:82%"></div><div class="sk-row" style="width:64%"></div></div>
       <div class="actions" style="border:none;padding-top:16px">
         <button type="button" class="btn btn-ghost btn-sm" onclick="App.cancelScan()">${esc(t('action.cancelScan'))}</button>
-        <span class="note">${esc(t('common.simulated'))}</span>
       </div>
     </section>
   </div>`;
@@ -2382,7 +3393,8 @@ function renderProjects() {
 
 /* ---------- C 盘全景 ---------- */
 function renderDisk() {
-  const segTotal = DISK_SEGMENTS.reduce((a, s) => a + s.gb, 0);
+  const segTotal = Math.max(1, DISK_SEGMENTS.reduce((a, s) => a + s.gb, 0));
+  const ideSeg = DISK_SEGMENTS.filter(s => s.key === 'disk.ide').reduce((a, s) => a + s.gb, 0);
   return `<div class="content">
    <div class="cols cols-disk">
     <section class="panel panel-scroll">
@@ -2426,7 +3438,7 @@ function renderDisk() {
           <div class="trow cap risk-green">
             <span class="tcell tpath" style="font-family:inherit">${esc(t('disk.ide'))}</span>
             <span class="tcell tdesc" title="${esc(t('disk.junctionNote'))}">${esc(t('disk.junctionNote'))}</span>
-            <span class="tcell tsize">${fmtGB(12.8)}</span>
+            <span class="tcell tsize">${fmtGB(ideSeg)}</span>
             <span class="tcell acts"><span class="tag tag-code">junction</span></span>
           </div>
           <div class="trow cap risk-yellow">
@@ -2438,7 +3450,7 @@ function renderDisk() {
         </div>
        </div>
         <div class="actions">
-          <button type="button" class="btn btn-primary btn-sm" onclick="App.toast(t('toast.scanDone'))">${esc(t('disk.refresh'))}</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="App.refreshDisk()">${esc(t('disk.refresh'))}</button>
           <button type="button" class="btn btn-ghost btn-sm" onclick="App.nav('ide')">${esc(t('nav.ide'))}</button>
           <span class="spacer"></span><span class="note">${esc(t('disk.notIncluded'))}</span>
         </div>
@@ -2610,20 +3622,9 @@ function typeBadge(h) {
 }
 function renderHistory() {
   const items = HISTORY.filter(h => state.historyFilter === 'all' || h.type === state.historyFilter);
-  const h = HISTORY.find(x => x.id === state.selectedHistory) || HISTORY[0];
-  return `<div class="content split-layout">
-    <section class="bar">
-      <div class="bar-top">
-        <span class="bar-title">${esc(t('history.listTitle'))}</span>
-        <span class="bar-hint">${esc(t('history.listHint', { n: items.length }))}</span>
-        <div class="chip-row">
-          ${['all', 'migrate', 'clean', 'rollback'].map(f => `<button type="button" class="btn btn-xs ${state.historyFilter === f ? 'btn-soft' : 'btn-ghost'}" onclick="App.setHistoryFilter('${f}')">${esc(t('history.filter.' + f))}</button>`).join('')}
-        </div>
-        <span class="bar-hint">${esc(t('history.simulated'))}</span>
-      </div>
-      <div class="hist-bar">
-        ${items.length ? items.map(it => `
-          <button type="button" class="hist-card ${it.id === h.id ? 'active' : ''}" title="${esc(it.app)} · ${esc(it.at)}" onclick="App.selectHistory('${it.id}')">
+  const h = items.find(x => x.id === state.selectedHistory) || items[0] || null;
+  const cards = items.length ? items.map(it => `
+          <button type="button" class="hist-card ${h && it.id === h.id ? 'active' : ''}" title="${esc(it.app)} · ${esc(it.at)}" onclick="App.selectHistory('${esc(it.id)}')">
             <span class="hc-top">
               <span class="hc-name">${esc(it.app)}</span>
               ${typeBadge(it)}
@@ -2633,10 +3634,10 @@ function renderHistory() {
               ${resultBadge(it)}
               <span class="hc-size">${it.freed ? fmtGB(it.freed) : '—'}</span>
             </span>
-          </button>`).join('') : `<div class="note dim" style="padding:10px 2px">${esc(t('history.empty'))}</div>`}
-      </div>
-    </section>
-    <section class="panel">
+          </button>`).join('') : `<div class="note dim" style="padding:10px 2px">${esc(t('history.empty'))}</div>`;
+  let detail;
+  if (h) {
+    detail = `<section class="panel">
       <div class="detail">
         <div class="detail-head">
           <div class="detail-title">
@@ -2656,6 +3657,7 @@ function renderHistory() {
           <div class="kv-item wide"><span class="k">${esc(t('preview.from'))}</span><span class="v" title="${esc(h.from)}">${esc(h.from)}</span></div>
           <div class="kv-item wide"><span class="k">${esc(t('preview.to'))}</span><span class="v" title="${esc(h.to)}">${esc(h.to)}</span></div>
           ${h.code ? `<div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v" style="color:#d9363e">${esc(h.code)}</span></div>` : ''}
+          ${h.job_id ? `<div class="kv-item wide"><span class="k">${esc(t('history.job'))}</span><span class="v mono">${esc(h.job_id)}</span></div>` : ''}
         </div>
         <div class="banner ${h.result === 'failed' ? 'danger' : h.result === 'rolledback' ? 'info' : 'ok'}"><span class="b-ico">${h.result === 'failed' ? '✕' : h.result === 'rolledback' ? '↺' : '✓'}</span><div>${esc(t(h.note))}</div></div>
         <div class="section-title"><h3>${esc(t('history.steps'))}</h3><span class="sub">${esc(t('history.detail'))}</span></div>
@@ -2668,24 +3670,44 @@ function renderHistory() {
         <div class="actions">
           ${h.canRollback ? `<button type="button" class="btn btn-danger btn-sm" onclick="App.rollbackHistory('${h.id}')">${esc(t('history.rollbackBtn'))}</button>` : `<button type="button" class="btn btn-ghost btn-sm" disabled>${esc(t('history.noRollback'))}</button>`}
           <button type="button" class="btn btn-ghost btn-sm" onclick="App.exportHistory()">${esc(t('action.export'))}</button>
-          <span class="spacer"></span><span class="note">${esc(h.canRollback ? t('history.canRollback') : t('history.simulated'))}</span>
+          <span class="spacer"></span><span class="note">${esc(h.canRollback ? t('history.canRollback') : t('history.noRollback'))}</span>
         </div>
       </div>
+    </section>`;
+  } else {
+    detail = `<section class="panel"><div class="panel-body"><div class="note dim">${esc(t('history.select'))}</div></div></section>`;
+  }
+  const errorBanner = state.data.historyError
+    ? `<div class="banner danger mt-3"><span class="b-ico">✕</span><div>${esc(state.data.historyError)}</div></div>`
+    : '';
+  return `<div class="content split-layout">
+    <section class="bar">
+      <div class="bar-top">
+        <span class="bar-title">${esc(t('history.listTitle'))}</span>
+        <span class="bar-hint">${esc(t('history.listHint', { n: items.length }))}</span>
+        <div class="chip-row">
+          ${['all', 'migrate', 'clean', 'rollback'].map(f => `<button type="button" class="btn btn-xs ${state.historyFilter === f ? 'btn-soft' : 'btn-ghost'}" onclick="App.setHistoryFilter('${f}')">${esc(t('history.filter.' + f))}</button>`).join('')}
+        </div>
+      </div>
+      <div class="hist-bar">${cards}</div>
+      ${errorBanner}
     </section>
+    ${detail}
   </div>`;
 }
 /* ---------- 弹窗 ---------- */
 function modalKind() {
+  if (state.data.flow) return state.data.flow.kind;
   const info = parseRoute();
   if (info.modal) return info.modal;
   const subs = ['migrate-preview', 'migrate-progress', 'migrate-failed', 'migrate-success', 'rollback-confirm', 'process-blocked', 'yellow-confirm'];
   return subs.indexOf(info.sub) >= 0 ? info.sub : '';
 }
 
-function modalShell(title, sub, body, foot, wide) {
+function modalShell(title, sub, body, foot, wide, closeable) {
   return `<div class="modal-head">
       <div><h3>${esc(title)}</h3>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>
-      <button type="button" class="modal-x" onclick="App.closeModal()" aria-label="${esc(t('action.close'))}">✕</button>
+      ${closeable === false ? '' : `<button type="button" class="modal-x" onclick="App.closeModal()" aria-label="${esc(t('action.close'))}">✕</button>`}
     </div>
     <div class="modal-body">${body}</div>
     <div class="modal-foot">${foot}</div>`;
@@ -2707,9 +3729,11 @@ function renderModal() {
   else if (kind === 'rollback-confirm') html = modalRollback();
   else if (kind === 'process-blocked') html = modalBlocked();
   else if (kind === 'yellow-confirm') html = modalYellow();
+  else if (kind === 'migrate') html = modalMigrateFlow();
+  else if (kind === 'rollback') html = modalRollbackFlow();
   if (!html) { root.innerHTML = ''; return; }
   root.innerHTML = `<div class="modal-mask" onclick="App.closeModal()">
-    <div class="modal ${kind === 'migrate-preview' || kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'rules-app' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
+    <div class="modal ${kind === 'migrate-preview' || kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'rules-app' || kind === 'migrate' || kind === 'rollback' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
   </div>`;
 }
 
@@ -2793,6 +3817,7 @@ function modalSettings() {
 function modalAi() {
   const s = state.settings;
   const ready = aiReady();
+  const aiConsent = state.aiAsk ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div><b>${esc(t('ai.consentTitle'))}</b><br>${esc(t('ai.consentBody'))}<div class="banner-actions"><button type="button" class="btn btn-primary btn-xs" onclick="App.confirmAiEnable()">${esc(t('ai.consentAccept'))}</button><button type="button" class="btn btn-ghost btn-xs" onclick="App.cancelAiAsk()">${esc(t('ai.consentDecline'))}</button></div></div></div>` : '';
   const body = `
     <div class="kvbar">
       <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : 'warn'}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
@@ -2804,6 +3829,7 @@ function modalAi() {
       <div><div class="k">${esc(t('ai.enable'))}</div><div class="d">${esc(t('ai.enableDesc'))}</div></div>
       <div class="ctrl"><button type="button" class="sw ${s.aiEnabled ? 'on' : ''}" role="switch" aria-checked="${s.aiEnabled}" onclick="App.toggleAi()"></button></div>
     </div>
+    ${aiConsent}
     <div class="form-grid">
       <div class="field"><label>${esc(t('ai.provider'))}</label>
         <select id="ai-provider">
@@ -2828,14 +3854,7 @@ function modalAi() {
 }
 
 function modalFeedback() {
-  const diag = [
-    'Disk Warden v0.1.0 (prototype)',
-    'OS: Windows 10 22H2 x64',
-    'Locale: ' + LANG,
-    'Last scan: ' + KPI.lastScan + ' (' + KPI.scanDuration + ')',
-    'IDEs: ' + CATALOG.ides.length + ' · dirs: ' + CATALOG.ides.reduce((a, i) => a + i.directories.length, 0),
-    'Target root: ' + state.settings.targetRoot
-  ].join('\n');
+  const diag = diagnosticsText();
   const body = `<div class="field full"><label>${esc(t('feedback.diagnostics'))}</label>
       <div class="mono" style="background:#f7f9fb;border:1px solid #e4eaef;border-radius:5px;padding:10px;font-size:var(--fs-meta);white-space:pre-wrap;color:#5b646d">${esc(diag)}</div>
     </div>
@@ -2995,6 +4014,11 @@ function modalYellow() {
   const py = state.pendingYellow || { ide: 'trae-cn', idx: 3 };
   const ide = getIde(py.ide);
   const d = ide.directories[py.idx] || ide.directories[0];
+  if (!d) {
+    return modalShell(t('yellow.title'), t('yellow.sub', { path: '' }),
+      `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('ide.listEmpty'))}</div></div>`,
+      `<button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>`, true);
+  }
   const confirmed = isConfirmed(ide.id, py.idx);
   const body = `
     <div class="banner warn"><span class="b-ico">?</span><div>${esc(t('yellow.desc'))}<br>${esc(t('yellow.warn'))}</div></div>
@@ -3010,6 +4034,216 @@ function modalYellow() {
     <button type="button" class="btn btn-ghost btn-sm" onclick="App.confirmYellow('red')">${esc(t('yellow.markRed'))}</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="App.confirmYellow('green')">${esc(t('yellow.confirm'))}</button>`;
   return modalShell(t('yellow.title'), t('yellow.sub', { path: d.path }), body, foot, true);
+}
+
+/* ---------- 迁移 / 回滚任务流弹窗 ---------- */
+function flowPlanErrorBody(err) {
+  const lines = errorDetailLines(err);
+  return `<div class="banner danger"><span class="b-ico">✕</span><div><b>${esc(t('blocked.planTitle'))}</b><br>${esc(t('blocked.planDesc'))}</div></div>
+    ${lines.length ? `<div class="kvbar mt-3">${lines.map(line => `<div class="kv-item wide"><span class="v mono">${esc(line)}</span></div>`).join('')}</div>` : ''}`;
+}
+
+function modalMigrateFlow() {
+  const f = state.data.flow;
+  if (!f) return '';
+  const ide = getIde(f.toolId);
+  const toolName = (f.plan && f.plan.items && f.plan.items[0] && f.plan.items[0].tool_name) || (ide && ide.name) || f.toolId || '';
+  if (f.phase === 'loading') {
+    return modalShell(t('preview.title'), t('preview.sub'),
+      `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('progress.stage.prepare'))}</div></div>`,
+      `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.cancel'))}</button>`, true);
+  }
+  if (f.phase === 'confirm' || f.phase === 'starting') return modalMigrateConfirm(f, ide, toolName);
+  if (f.phase === 'progress') return modalMigrateProgress(f, toolName);
+  if (f.phase === 'success') return modalMigrateSuccess(f, toolName);
+  return modalMigrateFailed(f, toolName);
+}
+
+function modalMigrateConfirm(f, ide, toolName) {
+  const plan = f.plan || { items: [] };
+  const items = plan.items || [];
+  const total = plan.total_bytes || 0;
+  const need = plan.need_bytes || 0;
+  const free = plan.free_bytes || 0;
+  const enough = need <= free;
+  const yellow = items.filter(it => it.requires_confirm || it.safety === 'yellow');
+  const pending = yellow.filter(it => !f.yellowConfirmed[it.item_id]);
+  const busy = f.phase === 'starting';
+  const reds = ide ? safetyCount(ide, 'red') : 0;
+  const rows = items.map(it => `<tr>
+      <td><span class="mono">${esc(it.source_path)}</span></td>
+      <td><span class="mono">${esc(it.final_path)}</span></td>
+      <td>${it.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>` : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`}</td>
+      <td>${esc(fmtBytes(it.bytes || 0))}</td>
+    </tr>`).join('');
+  const yellowBlock = yellow.length ? `<div class="banner warn mt-3"><span class="b-ico">△</span><div>
+      <div>${esc(t('preview.yellowPending', { n: pending.length }))}</div>
+      ${yellow.map(it => `<label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:var(--fs-meta)">
+        <input type="checkbox" ${f.yellowConfirmed[it.item_id] ? 'checked' : ''} onchange="App.toggleYellowConfirm('${esc(it.item_id)}')">
+        <span class="mono">${esc(it.source_path)}</span>
+      </label>`).join('')}
+    </div></div>` : '';
+  const redBlock = reds ? `<div class="banner info mt-3"><span class="b-ico">⛨</span><div>${esc(t('preview.willExcludeRedDesc', { n: reds }))}</div></div>` : '';
+  const errBlock = f.error ? `<div class="mt-3">${flowPlanErrorBody(f.error)}</div>` : '';
+  const body = `
+    <div class="kvbar">
+      <div class="kv-item"><span class="k">${esc(t('preview.summary'))}</span><span class="v">${esc(t('common.items', { n: items.length }))} · ${esc(fmtBytes(total))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ide.needSpace'))}</span><span class="v">${esc(fmtBytes(need))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('preview.targetFree'))}</span><span class="v ${enough ? 'ok' : 'warn'}">${esc(fmtBytes(free))} · ${esc(enough ? t('preview.spaceOk') : t('preview.spaceBad'))}</span></div>
+    </div>
+    <div class="table-wrap mt-3"><table class="table">
+      <thead><tr><th>${esc(t('preview.from'))}</th><th>${esc(t('preview.to'))}</th><th>${esc(t('common.safety'))}</th><th>${esc(t('common.size'))}</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    ${redBlock}${yellowBlock}
+    <div class="banner info mt-3"><span class="b-ico">i</span><div>${esc(t('preview.junction'))}</div></div>
+    ${errBlock}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" ${busy ? 'disabled' : ''} onclick="App.closeFlow()">${esc(t('preview.back'))}</button>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-primary btn-sm" ${busy || pending.length ? 'disabled' : ''} title="${esc(pending.length ? t('preview.yellowPending', { n: pending.length }) : '')}" onclick="App.confirmMigrate()">${esc(t('preview.start'))}</button>`;
+  return modalShell(t('preview.title'), toolName + ' · ' + t('preview.sub'), body, foot, true, !busy);
+}
+
+function modalMigrateProgress(f, toolName) {
+  const job = f.job || {};
+  const p = job.progress || {};
+  const pct = migratePct(f);
+  const done = !!(p.done || job.state === 'done');
+  const total = p.items_total || ((f.plan && f.plan.items && f.plan.items.length) || 0);
+  const body = `
+    <div class="progress"><i style="width:${pct}%"></i></div>
+    <div class="progress-meta"><span>${esc(t('progress.percent', { pct: pct }))}</span><span>${esc(t('common.items', { n: (p.items_done || 0) + ' / ' + total }))}</span></div>
+    <div class="stage-list mt-3">${stageRows(MIGRATE_STAGES, p.stage || 'prepare', done, 'progress.stage.')}</div>
+    <div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('progress.keepOpen'))}</div></div>`;
+  const foot = `<span class="note">${esc(t('progress.cancelDisabled'))}</span>`;
+  return modalShell(t('progress.title'), toolName, body, foot, true, false);
+}
+
+function modalMigrateSuccess(f, toolName) {
+  const summary = f.summary || {};
+  const plan = f.plan || {};
+  const bytes = summary.bytes || plan.total_bytes || 0;
+  const junction = (plan.items && plan.items[0] && plan.items[0].final_path) || '';
+  const body = `
+    <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('success.sub'))}</div></div>
+    <div class="kvbar mt-3">
+      <div class="kv-item"><span class="k">${esc(t('success.freed'))}</span><span class="v ok">${esc(fmtBytes(bytes))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('success.verified'))}</span><span class="v">${esc(t('success.verifiedValue'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('success.duration'))}</span><span class="v">${esc(fmtDuration(jobDuration(f.job)))}</span></div>
+      <div class="kv-item wide"><span class="k">${esc(t('success.junction'))}</span><span class="v mono">${esc(junction)}</span></div>
+    </div>
+    <div class="note mt-3">${esc(t('success.rollbackable'))}</div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.gotoHistory()">${esc(t('success.viewHistory'))}</button>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('success.done'))}</button>`;
+  return modalShell(t('success.title'), toolName, body, foot, true);
+}
+
+function modalMigrateFailed(f, toolName) {
+  const summary = f.summary || {};
+  const failed = (summary.items || []).filter(x => !x.ok);
+  const err = f.error || {};
+  const fromPlan = f.errorScope === 'plan';
+  const code = err.code || (failed[0] && failed[0].state) || '';
+  const lines = errorDetailLines(err);
+  const failedRows = failed.map(it => `<div class="kv-item wide"><span class="k mono">${esc(it.source_path || '')}</span><span class="v">${esc(it.error_message || it.state_label || it.state || '')}</span></div>`).join('');
+  const body = `
+    <div class="banner danger"><span class="b-ico">✕</span><div>${esc(fromPlan ? t('blocked.planDesc') : t('failed.sub'))}</div></div>
+    ${code || lines.length ? `<div class="kvbar mt-3">
+      ${code ? `<div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v mono" style="color:#d9363e">${esc(code)}</span></div>` : ''}
+      ${lines.map(line => `<div class="kv-item wide"><span class="v mono">${esc(line)}</span></div>`).join('')}
+    </div>` : ''}
+    ${failed.length ? `<div class="section-title mt-3"><h3>${esc(t('failed.items'))}</h3></div><div class="kvbar">${failedRows}</div>` : ''}
+    ${fromPlan ? '' : `<div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('failed.sourceSafe'))}<br>${esc(t('failed.suggestion'))}</div></div>`}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.close'))}</button>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.retryMigrate()">${esc(t('failed.retry'))}</button>`;
+  return modalShell(t(fromPlan ? 'blocked.planTitle' : 'failed.title'), toolName, body, foot, true);
+}
+
+function modalRollbackFlow() {
+  const f = state.data.flow;
+  if (!f) return '';
+  const p = f.preview || {};
+  const ide = getIde(f.toolId);
+  const toolName = p.tool_name || (ide && ide.name) || f.toolId || '';
+  if (f.phase === 'loading') {
+    return modalShell(t('rollback.title'), toolName,
+      `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('rollback.stage.precheck'))}</div></div>`,
+      `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.cancel'))}</button>`, true);
+  }
+  if (f.phase === 'residual') {
+    const body = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('rollback.residualBody', { size: fmtBytes(p.restore_bytes || 0) }))}</div></div>
+      <div class="kvbar mt-3">
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.source'))}</span><span class="v mono">${esc(p.final_path || '')}</span></div>
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(p.source_path || '')}</span></div>
+      </div>`;
+    const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.cancel'))}</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-primary btn-sm" onclick="App.confirmResidual()">${esc(t('rollback.residualConfirm'))}</button>`;
+    return modalShell(t('rollback.residualTitle'), toolName, body, foot, true);
+  }
+  if (f.phase === 'blocked') {
+    const code = (f.error && f.error.code) || p.error_code || '';
+    const message = (f.error && f.error.detail && f.error.detail.message) || p.error_message || '';
+    const detail = f.noticeKey
+      ? `<div class="banner info"><span class="b-ico">i</span><div>${esc(t(f.noticeKey))}</div></div>`
+      : `<div class="banner danger"><span class="b-ico">✕</span><div>${esc(message || t('blocked.planDesc'))}</div></div>`;
+    const body = `${detail}
+      ${code ? `<div class="kvbar mt-3"><div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v mono" style="color:#d9363e">${esc(code)}</span></div></div>` : ''}`;
+    const foot = `<button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('blocked.close'))}</button>`;
+    return modalShell(t('rollback.blockedTitle'), toolName, body, foot, true);
+  }
+  if (f.phase === 'confirm' || f.phase === 'starting') {
+    const busy = f.phase === 'starting';
+    const body = `<div class="note">${esc(t('rollback.desc', { path: p.final_path || '', size: fmtBytes(p.restore_bytes || 0) }))}</div>
+      <div class="kvbar mt-3">
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.source'))}</span><span class="v mono">${esc(p.final_path || '')}</span></div>
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(p.source_path || '')}</span></div>
+      </div>
+      <div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('rollback.note', { app: toolName }))}</div></div>
+      ${f.error ? `<div class="mt-3">${flowPlanErrorBody(f.error)}</div>` : ''}`;
+    const foot = `<button type="button" class="btn btn-ghost btn-sm" ${busy ? 'disabled' : ''} onclick="App.closeFlow()">${esc(t('rollback.cancel'))}</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-primary btn-sm" ${busy ? 'disabled' : ''} onclick="App.startRollback()">${esc(t('rollback.confirm'))}</button>`;
+    return modalShell(t('rollback.title'), toolName, body, foot, true, !busy);
+  }
+  if (f.phase === 'progress') {
+    const job = f.job || {};
+    const pr = job.progress || {};
+    const pct = rollbackPct(f);
+    const done = job.state === 'done' || pr.stage === 'done';
+    const body = `
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="progress-meta"><span>${esc(t('progress.percent', { pct: pct }))}</span><span>${esc(t('common.progress'))}</span></div>
+      <div class="stage-list mt-3">${stageRows(ROLLBACK_STAGES, pr.stage || 'precheck', done, 'rollback.stage.')}</div>
+      <div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('rollback.progressKeepOpen'))}</div></div>`;
+    return modalShell(t('rollback.progressTitle'), toolName, body, `<span class="note">${esc(t('progress.cancelDisabled'))}</span>`, true, false);
+  }
+  if (f.phase === 'success') {
+    const s = f.summary || {};
+    const body = `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('rollback.successSub'))}</div></div>
+      <div class="kvbar mt-3">
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(s.source_path || p.source_path || '')}</span></div>
+        <div class="kv-item"><span class="k">${esc(t('success.duration'))}</span><span class="v">${esc(fmtDuration(jobDuration(f.job)))}</span></div>
+      </div>`;
+    const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.gotoHistory()">${esc(t('success.viewHistory'))}</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('action.done'))}</button>`;
+    return modalShell(t('rollback.successTitle'), toolName, body, foot, true);
+  }
+  const s = f.summary || {};
+  const err = f.error || {};
+  const code = err.code || s.error_code || '';
+  const message = (err.detail && err.detail.message) || s.error_message || '';
+  const lines = errorDetailLines(err);
+  const body = `<div class="banner danger"><span class="b-ico">✕</span><div>${esc(message || t('failed.sub'))}</div></div>
+    ${code || lines.length ? `<div class="kvbar mt-3">
+      ${code ? `<div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v mono" style="color:#d9363e">${esc(code)}</span></div>` : ''}
+      ${lines.map(line => `<div class="kv-item wide"><span class="v mono">${esc(line)}</span></div>`).join('')}
+    </div>` : ''}`;
+  const foot = `<button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('action.close'))}</button>`;
+  return modalShell(t('rollback.failedTitle'), toolName, body, foot, true);
 }
 
 /* ---------- 原型状态切换 ---------- */
@@ -3070,6 +4304,8 @@ const App = {
     this.go('#' + kind);
   },
   closeModal() {
+    if (state.data.flow) { this.closeFlow(); return; }
+    state.aiAsk = false;
     const back = state.returnHash;
     state.returnHash = '';
     this.go(back && back !== location.hash ? back : '#ide');
@@ -3082,6 +4318,7 @@ const App = {
     LANG = lang;
     try { localStorage.setItem('dw-lang', lang); } catch (e) {}
     render();
+    rpc('settings.set', { language: lang }).catch(() => {});
   },
   toggleSetting(key) {
     const root = document.getElementById('settings-root');
@@ -3091,21 +4328,60 @@ const App = {
   },
   saveSettings() {
     const root = document.getElementById('settings-root');
-    if (root) state.settings.targetRoot = root.value.trim() || 'D:\\DiskWarden\\';
     const un = document.getElementById('settings-uninstall');
-    if (un) state.settings.uninstall = un.value;
-    this.toast(t('toast.saved'));
-    this.closeModal();
+    const rootVal = root ? (root.value.trim() || 'D:\\DiskWarden\\') : state.settings.targetRoot;
+    const uninstall = un ? un.value : state.settings.uninstall;
+    const patch = {
+      launch_at_startup: !!state.settings.autoStart,
+      auto_maintenance: !!state.settings.autoMaintenance,
+      uninstall_policy: uninstall === 'remove' ? 'rollback' : uninstall
+    };
+    if (rootVal && normPath(rootVal) !== normPath(state.settings.targetRoot)) patch.target_root = rootVal;
+    rpc('settings.set', patch).then(s => {
+      applySettings(s);
+      this.toast(t('settings.saved'));
+      this.closeModal();
+    }).catch(err => this.toast(errText(err)));
+  },
+  reconnect() {
+    bootstrap();
   },
   rescan() {
-    state.scanning = true;
-    state.scanPct = 62;
-    this.go('#ide/scanning');
+    if (state.scanning) { this.go('#ide/scanning'); return; }
+    rpc('scan.start').then(res => {
+      const jobId = res && res.job_id;
+      state.scanning = true;
+      state.data.scanError = '';
+      state.scanPct = 3;
+      state.data.scanJob = jobId ? { job_id: jobId, state: (res && res.state) || 'queued' } : null;
+      this.go('#ide/scanning');
+      if (jobId) startScanPolling(jobId);
+    }).catch(err => {
+      if (err && err.code === 'BUSY') {
+        rpc('job.list', { active_only: true }).then(list => {
+          const job = list && list.jobs && list.jobs[0];
+          if (job && job.kind === 'scan') {
+            state.scanning = true;
+            state.data.scanJob = job;
+            state.scanPct = scanPercent(job);
+            this.go('#ide/scanning');
+            startScanPolling(job.job_id);
+            return;
+          }
+          this.toast(errText(err));
+        }).catch(() => this.toast(errText(err)));
+        return;
+      }
+      this.toast(errText(err));
+    });
   },
   cancelScan() {
-    state.scanning = false;
-    this.toast(t('toast.scanCancelled'));
-    this.go('#ide');
+    const job = state.data.scanJob;
+    if (!job || !job.job_id) return;
+    rpc('scan.cancel', { job_id: job.job_id }).then(j => {
+      if (j) state.data.scanJob = j;
+      render();
+    }).catch(err => this.toast(errText(err)));
   },
   search(value) {
     state.search = value;
@@ -3127,10 +4403,14 @@ const App = {
   toggleCheck(ideId, idx) {
     const ide = getIde(ideId);
     const dir = ide.directories[idx];
-    if (!dir || dir.safety === 'red') return;
+    if (!dir || dir.safety === 'red' || dir.can_migrate === false) return;
     if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return;
-    state.checked[ideId] = state.checked[ideId] || {};
-    state.checked[ideId][idx] = !state.checked[ideId][idx];
+    if (dir.item_id) {
+      state.checked[dir.item_id] = !state.checked[dir.item_id];
+    } else {
+      state.checked[ideId] = state.checked[ideId] || {};
+      state.checked[ideId][idx] = !state.checked[ideId][idx];
+    }
     render();
   },
   openYellow(ideId, idx) {
@@ -3141,20 +4421,26 @@ const App = {
   },
   confirmYellow(action) {
     const py = state.pendingYellow;
+    if (!py) { this.go('#ide'); return; }
     const ide = getIde(py.ide);
     const dir = ide.directories[py.idx];
     state.selectedIde = ide.id;
     if (!dir) { this.go('#ide'); return; }
     if (action === 'green') {
-      state.confirmed[yellowKey(ide.id, py.idx)] = true;
-      state.checked[ide.id] = state.checked[ide.id] || {};
-      state.checked[ide.id][py.idx] = true;
+      state.confirmed[dirKey(ide.id, py.idx)] = true;
+      if (dir.item_id) state.checked[dir.item_id] = true;
+      else {
+        state.checked[ide.id] = state.checked[ide.id] || {};
+        state.checked[ide.id][py.idx] = true;
+      }
       this.toast(t('toast.yellowConfirmed'));
     } else if (action === 'red') {
       dir.safety = 'red';
-      if (state.checked[ide.id]) delete state.checked[ide.id][py.idx];
+      if (dir.item_id) delete state.checked[dir.item_id];
+      else if (state.checked[ide.id]) delete state.checked[ide.id][py.idx];
       this.toast(t('rules.markedRed'));
     }
+    state.pendingYellow = null;
     this.go('#ide');
   },
   startPreview(ideId) {
@@ -3164,43 +4450,252 @@ const App = {
     state.returnHash = '#ide';
     if (ide.runtime.running.length) { this.go('#ide/process-blocked'); return; }
     if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
-    this.go('#ide/migrate-preview');
+    this._beginMigrate(ideId);
   },
   cleanCaches(ideId) {
     const ide = getIde(ideId);
     const total = sum(ide.directories.filter(d => d.safety === 'green'), 'size_bytes') / GIB;
     this.toast(t('toast.cleaned', { size: fmtGB(total) }));
   },
+  refreshDisk() {
+    rpc('disk.info').then(disk => {
+      applyDisk(disk || null);
+      render();
+    }).catch(err => this.toast(errText(err)));
+  },
   openRollback(ideId) {
-    state.selectedIde = ideId;
-    state.returnHash = '#ide';
-    this.go('#ide/rollback-confirm');
+    this.rollbackTool(ideId);
   },
   confirmRollback() {
-    const ide = getIde(state.selectedIde);
-    const target = ide.runtime.target || targetPathFor(ide);
-    ide.runtime.migrated = false;
-    ide.runtime.location = 'C';
-    delete ide.runtime.target;
-    HISTORY.unshift({
-      id: 'h' + Date.now(), at: '2026-10-19 10:05', type: 'rollback', app: ide.name,
-      from: target, to: 'C:', freed: 0, duration: '2m 20s', result: 'rolledback',
-      canRollback: false, note: 'history.rollbackDone',
-      steps: ['rollbackStep1', 'rollbackStep2', 'rollbackStep3']
+    this.startRollback();
+  },
+  startMigrate(ideId) {
+    this._beginMigrate(ideId);
+  },
+  _beginMigrate(ideId) {
+    const ide = getIde(ideId);
+    const dirs = selectedDirs(ide);
+    const items = dirs.filter(d => d.item_id);
+    if (!ide || !items.length) { this.toast(t('toast.noGreen')); return; }
+    if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
+    if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
+    if (!state.data.flow) state.returnHash = state.returnHash || location.hash || '#ide';
+    state.data.flow = {
+      kind: 'migrate', phase: 'loading', toolId: ideId,
+      plan: null, yellowConfirmed: {}, error: null, errorScope: '',
+      jobId: null, runnerJobId: null, job: null, summary: null
+    };
+    if (location.hash === '#ide/migrate-preview') render(); else this.go('#ide/migrate-preview');
+    rpc('plan.preview', {
+      item_ids: items.map(d => d.item_id),
+      confirmed_item_ids: items.filter(d => !!state.confirmed['item:' + d.item_id]).map(d => d.item_id)
+    }).then(plan => {
+      const f = state.data.flow;
+      if (!f || f.kind !== 'migrate' || f.toolId !== ideId) return;
+      f.plan = plan || {};
+      f.phase = 'confirm';
+      render();
+    }).catch(err => {
+      const f = state.data.flow;
+      if (!f || f.kind !== 'migrate' || f.toolId !== ideId) return;
+      f.phase = 'failed';
+      f.errorScope = 'plan';
+      f.error = err;
+      render();
     });
-    state.selectedHistory = HISTORY[0].id;
-    state.historyFilter = 'all';
+  },
+  toggleYellowConfirm(itemId) {
+    const f = state.data.flow;
+    if (!f || f.kind !== 'migrate') return;
+    if (f.yellowConfirmed[itemId]) delete f.yellowConfirmed[itemId];
+    else f.yellowConfirmed[itemId] = true;
+    render();
+  },
+  confirmMigrate() {
+    const f = state.data.flow;
+    if (!f || f.kind !== 'migrate' || f.phase !== 'confirm' || !f.plan) return;
+    const plan = f.plan;
+    const all = plan.items || [];
+    const isYellow = it => !!(it.requires_confirm || it.safety === 'yellow');
+    const accepted = all.filter(it => !isYellow(it) || f.yellowConfirmed[it.item_id]);
+    const acceptedYellow = accepted.filter(isYellow).map(it => it.item_id);
+    if (!accepted.length) { this.toast(t('toast.noGreen')); return; }
+    f.phase = 'starting';
+    f.error = null;
+    render();
+    const preview = accepted.length === all.length
+      ? Promise.resolve(plan)
+      : rpc('plan.preview', { item_ids: accepted.map(it => it.item_id), confirmed_item_ids: acceptedYellow });
+    preview.then(fresh => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'migrate') return null;
+      cur.plan = fresh || cur.plan;
+      return rpc('migrate.start', {
+        plan_id: cur.plan.plan_id,
+        confirm_token: cur.plan.confirm_token,
+        confirmed_item_ids: acceptedYellow
+      });
+    }).then(res => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'migrate' || !res) return;
+      cur.phase = 'progress';
+      cur.jobId = res.job_id;
+      cur.runnerJobId = res.job_id;
+      cur.job = { job_id: res.job_id, state: res.state || 'queued', progress: {} };
+      render();
+      startFlowPolling('migrate', res.job_id);
+    }).catch(err => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'migrate') return;
+      cur.phase = 'failed';
+      cur.errorScope = 'plan';
+      cur.error = err;
+      render();
+    });
+  },
+  rollbackTool(ideId) {
+    const ide = getIde(ideId);
+    const it = ide.directories.filter(d => !!d.migrated_job_id)[0];
+    if (!it) { this.toast(t('history.noRollback')); return; }
+    if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
+    this._openRollback(it.migrated_job_id);
+  },
+  historyRollback(id) {
+    const h = HISTORY.find(x => x.id === id);
+    if (!h) return;
+    this._openRollback(h.job_id || h.id);
+  },
+  _openRollback(jobId) {
+    if (!jobId) { this.toast(t('history.noRollback')); return; }
+    if (!state.data.flow) state.returnHash = state.tab === 'history' ? '#history' : (location.hash || '#ide');
+    state.data.flow = {
+      kind: 'rollback', phase: 'loading', jobId: jobId, runnerJobId: null,
+      preview: null, error: null, noticeKey: '', job: null, summary: null
+    };
+    if (location.hash === '#ide/rollback-confirm') render(); else this.go('#ide/rollback-confirm');
+    this._previewRollback(false);
+  },
+  confirmResidual() {
+    this._previewRollback(true);
+  },
+  _previewRollback(confirmResidual) {
+    const f = state.data.flow;
+    if (!f || f.kind !== 'rollback') return;
+    const jobId = f.jobId;
+    f.phase = 'loading';
+    f.error = null;
+    render();
+    rpc('rollback.preview', {
+      job_id: jobId,
+      confirm_residual_delete: !!confirmResidual
+    }).then(p => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'rollback' || cur.jobId !== jobId) return;
+      cur.preview = p || {};
+      if (p && p.tool_id) cur.toolId = p.tool_id;
+      if (!p || !p.can_proceed) {
+        cur.phase = 'blocked';
+        cur.noticeKey = p && p.mode === 'already_rolled_back' ? 'rollback.alreadyDone' : '';
+        cur.error = cur.noticeKey ? null : {
+          code: (p && p.error_code) || 'PRECHECK_FAILED',
+          detail: { message: (p && p.error_message) || '' }
+        };
+        render();
+        return;
+      }
+      cur.phase = p.requires_residual_confirm ? 'residual' : 'confirm';
+      render();
+    }).catch(err => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'rollback' || cur.jobId !== jobId) return;
+      cur.phase = 'blocked';
+      cur.noticeKey = '';
+      cur.error = err;
+      render();
+    });
+  },
+  startRollback() {
+    const f = state.data.flow;
+    if (!f || f.kind !== 'rollback' || f.phase !== 'confirm') return;
+    const p = f.preview || {};
+    if (!p.plan_id || !p.confirm_token) { this.toast(t('toast.blocked')); return; }
+    f.phase = 'starting';
+    f.error = null;
+    render();
+    rpc('rollback.start', { plan_id: p.plan_id, confirm_token: p.confirm_token }).then(res => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'rollback' || !res) return;
+      cur.phase = 'progress';
+      cur.runnerJobId = res.job_id;
+      cur.job = { job_id: res.job_id, state: res.state || 'queued', progress: {} };
+      render();
+      startFlowPolling('rollback', res.job_id);
+    }).catch(err => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'rollback') return;
+      cur.phase = 'failed';
+      cur.error = err;
+      render();
+    });
+  },
+  closeFlow() {
+    if (flowBusy()) return;
+    const back = state.returnHash || ('#' + (state.tab || 'ide'));
     state.returnHash = '';
-    this.toast(t('toast.rollbackStarted'));
-    this.go('#history');
+    closeFlow();
+    this.go(back);
+  },
+  gotoHistory() {
+    stopFlowPolling();
+    state.data.flow = null;
+    state.returnHash = '';
+    this.nav('history');
+  },
+  recoveryStart(jobId, action) {
+    if (!jobId) return;
+    if (action !== 'recover' && action !== 'rollback') return;
+    const run = state.data.recoveryRun;
+    if (run && (run.phase === 'starting' || run.phase === 'progress')) return;
+    if (flowBusy()) { this.toast(t('toast.blocked')); return; }
+    const item = recoveryItems().find(x => x.job_id === jobId) || {};
+    state.data.recoveryRun = {
+      targetJobId: jobId, sourcePath: item.source_path || '', action: action,
+      phase: 'starting', runnerJobId: null, job: null, summary: null, error: null
+    };
+    render();
+    rpc('recovery.run', { job_id: jobId, action: action }).then(res => {
+      const cur = state.data.recoveryRun;
+      if (!cur || cur.targetJobId !== jobId || cur.action !== action) return;
+      cur.runnerJobId = res && res.job_id;
+      cur.phase = 'progress';
+      cur.job = { job_id: cur.runnerJobId, state: (res && res.state) || 'queued', progress: {} };
+      render();
+      if (cur.runnerJobId) startRecoveryPolling(cur.runnerJobId);
+    }).catch(err => {
+      const cur = state.data.recoveryRun;
+      if (!cur || cur.targetJobId !== jobId) return;
+      cur.phase = 'failed';
+      cur.error = err;
+      render();
+    });
+  },
+  retryRecovery() {
+    const run = state.data.recoveryRun;
+    if (!run || run.phase === 'starting' || run.phase === 'progress') return;
+    this.recoveryStart(run.targetJobId, run.action);
+  },
+  dismissRecovery() {
+    stopRecoveryPolling();
+    state.data.recoveryRun = null;
+    render();
   },
   retryMigrate() {
-    this.toast(t('toast.retry'));
-    this.go('#ide/migrate-progress');
+    const f = state.data.flow;
+    if (!f || f.kind !== 'migrate') { this._beginMigrate(state.selectedIde); return; }
+    this._beginMigrate(f.toolId);
   },
   rollbackFailed() {
-    this.toast(t('toast.rollbackStarted'));
-    this.go('#ide');
+    this.closeFlow();
   },
   recheckProcess() {
     this.toast(t('blocked.stillBlocked'));
@@ -3239,7 +4734,11 @@ const App = {
     render();
   },
   exportHistory() {
-    this.toast(t('history.exported'));
+    const items = HISTORY.filter(h => state.historyFilter === 'all' || h.type === state.historyFilter);
+    if (!items.length) { this.toast(t('history.exportEmpty')); return; }
+    copyText(JSON.stringify(items, null, 2)).then(ok => {
+      this.toast(t(ok ? 'history.exported' : 'toast.copyFailed'));
+    });
   },
   rollbackHistory(id) {
     const h = HISTORY.find(x => x.id === id);
@@ -3247,8 +4746,7 @@ const App = {
     state.selectedHistory = h.id;
     const ide = CATALOG.ides.find(x => x.name === h.app);
     if (ide) state.selectedIde = ide.id;
-    state.returnHash = '#history';
-    this.go('#ide/rollback-confirm');
+    this.historyRollback(id);
   },
   setRulesView(v) { state.rulesView = v; render(); },
   openRuleModal(id) {
@@ -3292,23 +4790,48 @@ const App = {
     this.toast(t('ai.adopted'));
   },
   toggleAi() {
-    state.settings.aiEnabled = !state.settings.aiEnabled;
+    const ai = (state.settings && state.settings.ai) || {};
+    if (ai.enabled) {
+      rpc('settings.set', { ai: { enabled: false } }).then(s => {
+        applySettings(s);
+        state.aiAsk = false;
+        render();
+        this.toast(t('ai.statusOff'));
+      }).catch(err => this.toast(errText(err)));
+      return;
+    }
+    state.aiAsk = true;
     render();
   },
+  cancelAiAsk() {
+    state.aiAsk = false;
+    render();
+  },
+  confirmAiEnable() {
+    state.aiAsk = false;
+    render();
+    rpc('ai.consent').then(() => rpc('settings.set', { ai: { enabled: true } })).then(s => {
+      applySettings(s);
+      render();
+      this.toast(t('ai.consentDone'));
+    }).catch(err => {
+      render();
+      this.toast(errText(err));
+    });
+  },
   saveAi() {
-    const s = state.settings;
     const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-    const provider = val('ai-provider');
-    if (provider) s.aiProvider = provider;
-    s.aiBaseUrl = val('ai-base');
-    s.aiModel = val('ai-model') || s.aiModel;
-    const limit = parseInt(val('ai-limit'), 10);
-    if (limit > 0) s.aiLimit = limit;
-    const key = val('ai-key');
-    if (key === '') s.aiKeySet = false;
-    else if (key !== 'stored') s.aiKeySet = true;
-    this.toast(t('toast.saved'));
-    this.closeModal();
+    const provider = val('ai-provider') || state.settings.aiProvider;
+    const patch = {
+      enabled: provider !== 'none' && !!state.settings.aiEnabled,
+      base_url: provider === 'custom' ? val('ai-base') : '',
+      model: val('ai-model') || state.settings.aiModel
+    };
+    rpc('settings.set', { ai: patch }).then(s => {
+      applySettings(s);
+      this.toast(t('toast.saved'));
+      this.closeModal();
+    }).catch(err => this.toast(errText(err)));
   },
   aiTest() {
     this.toast(aiReady() ? t('ai.testOk') : t('ai.testBad'));
@@ -3369,18 +4892,9 @@ const App = {
     render();
   },
   copyDiagnostics() {
-    const diag = [
-      'Disk Warden v0.1.0 (prototype)',
-      'OS: Windows 10 22H2 x64',
-      'Locale: ' + LANG,
-      'Last scan: ' + KPI.lastScan + ' (' + KPI.scanDuration + ')',
-      'IDEs: ' + CATALOG.ides.length + ' · dirs: ' + CATALOG.ides.reduce((a, i) => a + i.directories.length, 0),
-      'Target root: ' + state.settings.targetRoot
-    ].join('\n');
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(diag).catch(() => {});
-    }
-    this.toast(t('feedback.copied'));
+    copyText(diagnosticsText()).then(ok => {
+      this.toast(t(ok ? 'feedback.copied' : 'toast.copyFailed'));
+    });
   },
   toast(message) {
     const el = document.getElementById('toast');
@@ -3424,6 +4938,7 @@ function init() {
   });
 
   render();
+  bootstrap();
 }
 
 init();
