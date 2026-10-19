@@ -149,6 +149,18 @@ a{color:var(--blue);text-decoration:none}
 .panel-scroll > .panel-body > *{flex-shrink:0}
 .panel-scroll .scroll-y{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:3px}
 .panel-scroll .scroll-y > .table thead th{position:sticky;top:0;z-index:1;box-shadow:inset 0 -1px 0 var(--line)}
+.content > .cols{display:grid;gap:12px;flex:1;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch;grid-template-columns:minmax(0,1fr) minmax(0,1.22fr)}
+.content > .cols.cols-disk{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.content > .cols > .panel{min-height:0;max-height:100%}
+.panel-scroll .scroll-y.scroll-fit{flex:0 1 auto}
+.cols .trow.pend{grid-template-columns:minmax(0,1fr) auto;row-gap:3px;align-items:center;white-space:normal;padding:9px 12px}
+.cols .trow.pend .tcell.tpath{grid-column:1;grid-row:1}
+.cols .trow.pend .tcell.tsize{grid-column:2;grid-row:1;justify-self:end}
+.cols .trow.pend .tcell.tdesc,.cols .trow.pend .tcell.wrap{grid-column:1/-1;grid-row:2}
+.cols .trow.pend .tcell.acts{grid-column:1/-1;grid-row:3;justify-content:flex-end}
+.rule-form{grid-template-columns:1.2fr .8fr .8fr 1.3fr 1.1fr auto;align-items:end}
+.cols .rule-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);row-gap:8px;align-items:end}
+.cols .rule-form > button{justify-self:end;white-space:nowrap}
 .toolbar{display:flex;gap:6px;align-items:center;margin-bottom:9px;flex-wrap:wrap}
 .search{flex:1;min-width:100px;background:#fff;border:1px solid #d7dee4;border-radius:3px;padding:7px 9px;font-size:var(--fs-body);color:var(--text);transition:border-color .12s}
 .search::placeholder{color:#aab3bc}
@@ -495,6 +507,12 @@ a{color:var(--blue);text-decoration:none}
   .split-layout .bar-top .legend{font-size:var(--fs-meta)}
   .kvbar .kv-item{padding:9px 10px}
   .kvbar .v{font-size:var(--fs-strong)}
+}
+@media (max-width:1239px){
+  .content > .cols{display:flex;flex-direction:column;flex:none;min-height:0}
+  .content > .cols > .panel.panel-scroll{flex:none}
+  .content > .cols > .panel.panel-scroll > .panel-body{overflow:visible;flex:none}
+  .content > .cols .scroll-y{overflow:visible;flex:none}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
@@ -2348,10 +2366,11 @@ function renderProjects() {
 function renderDisk() {
   const segTotal = DISK_SEGMENTS.reduce((a, s) => a + s.gb, 0);
   return `<div class="content">
-    <section class="panel">
+   <div class="cols cols-disk">
+    <section class="panel panel-scroll">
       <div class="panel-head"><h2>${esc(t('disk.breakdown'))}</h2><span class="hint">${esc(t('disk.breakdownHint'))}</span></div>
       <div class="panel-body">
-        <div class="table-wrap">
+        <div class="table-wrap scroll-y">
           <table class="table">
             <thead><tr>
               <th>${esc(t('disk.category'))}</th><th class="right">${esc(t('disk.size'))}</th><th>${esc(t('disk.handling'))}</th><th></th>
@@ -2374,9 +2393,10 @@ function renderDisk() {
         </div>
       </div>
     </section>
-    <section class="panel">
+    <section class="panel panel-scroll">
       <div class="panel-head"><h2>C: · ${DRIVE.totalGB} GB</h2><span class="hint">${esc(t('disk.usedSub', { pct: Math.round(DRIVE.usedGB / DRIVE.totalGB * 1000) / 10 }))}</span></div>
       <div class="panel-body">
+       <div class="scroll-y scroll-fit">
         <div class="diskbar">
           ${DISK_SEGMENTS.map(s => `<span style="width:${(s.gb / segTotal * 100).toFixed(2)}%;background:${s.color}" title="${esc(t(s.key))} · ${s.gb} GB"></span>`).join('')}
         </div>
@@ -2398,13 +2418,15 @@ function renderDisk() {
             <span class="tcell acts"><span class="badge b-amber">${esc(t('common.protected'))}</span></span>
           </div>
         </div>
-        <div class="actions" style="margin-top:12px">
+       </div>
+        <div class="actions">
           <button type="button" class="btn btn-primary btn-sm" onclick="App.toast(t('toast.scanDone'))">${esc(t('disk.refresh'))}</button>
           <button type="button" class="btn btn-ghost btn-sm" onclick="App.nav('ide')">${esc(t('nav.ide'))}</button>
           <span class="spacer"></span><span class="note">${esc(t('disk.notIncluded'))}</span>
         </div>
       </div>
     </section>
+   </div>
   </div>`;
 }
 
@@ -2499,7 +2521,7 @@ function pendingRow(pd) {
 
 function ruleForm() {
   const apps = ['*'].concat(CATALOG.ides.map(i => i.name));
-  return `<div class="form-grid" style="grid-template-columns:1.2fr .8fr .8fr 1.3fr 1.1fr auto;align-items:end">
+  return `<div class="form-grid rule-form">
     <div class="field"><label>${esc(t('rules.match'))} <span class="bad">*</span></label><input id="rule-match" placeholder="${esc(t('rules.matchPh'))}"></div>
     <div class="field"><label>${esc(t('rules.matchType'))}</label>
       <select id="rule-type"><option value="exact">${esc(t('rules.type.exact'))}</option><option value="glob">${esc(t('rules.type.glob'))}</option><option value="regex">${esc(t('rules.type.regex'))}</option></select>
@@ -2518,7 +2540,8 @@ function renderRules() {
   const pending = PENDING.filter(pd => !state.aiFilter || pd.suggest);
   const groups = appGroups();
   return `<div class="content">
-    <section class="panel">
+   <div class="cols">
+    <section class="panel panel-scroll">
       <div class="panel-head"><h2>${esc(t('rules.pending'))}</h2><span class="hint">${esc(t('common.items', { n: PENDING.length }))}</span></div>
       <div class="panel-body">
         <div class="row-flex" style="justify-content:space-between">
@@ -2528,10 +2551,10 @@ function renderRules() {
             ${PENDING.some(pd => !pd.suggest) ? `<button type="button" class="btn btn-ai btn-xs" onclick="App.aiIdentifyAll()">${esc(t('ai.identifyAll', { n: PENDING.filter(pd => !pd.suggest).length }))}</button>` : ''}
           </div>
         </div>
-        <div class="rows">
+        <div class="rows scroll-y">
           ${pending.length ? pending.map(pendingRow).join('') : `<div class="empty" style="padding:40px 10px"><p>${esc(t(state.aiFilter && PENDING.length ? 'ai.noneLeft' : 'rules.pendingEmpty'))}</p></div>`}
         </div>
-        <div class="banner info mt-3"><span class="b-ico">i</span><div>${esc(t('rules.conflict'))}</div></div>
+        <div class="banner info"><span class="b-ico">i</span><div>${esc(t('rules.conflict'))}</div></div>
       </div>
     </section>
     <section class="panel panel-scroll">
@@ -2550,6 +2573,7 @@ function renderRules() {
           : `<div class="scroll-y mt-2">${ruleTable(RULES)}</div>`}
       </div>
     </section>
+   </div>
   </div>`;
 }
 
