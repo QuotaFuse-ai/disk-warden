@@ -84,7 +84,7 @@ tools/             drills and validation scripts
 
 ## License
 
-[PolyForm Noncommercial License 1.0.0](LICENSE). Free for personal, study, research and nonprofit use. **Any commercial use — including internal use by a company — requires a separate commercial license.** Contact 44062290+QuotaFuse-ai@users.noreply.github.com.
+[PolyForm Noncommercial License 1.0.0](LICENSE). Copyright (c) 2026 huangtao. Free for personal, study, research and nonprofit use. **Any commercial use — including internal use by a company — requires a separate commercial license.** Contact 44062290+QuotaFuse-ai@users.noreply.github.com.
 
 This is a source-available license, not an OSI-approved open-source license.
 
