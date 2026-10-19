@@ -1,4 +1,4 @@
-// 界面原型一键回滚入口（双击仓库根目录的 回滚界面原型.bat）
+// 界面原型一键回滚入口（双击仓库根目录的 rollback-ui.bat）
 // 只回滚界面原型的两个文件，回滚前自动备份当前版本，可随时撤销。
 import { execFileSync, execFile } from 'node:child_process';
 import fs from 'node:fs';
