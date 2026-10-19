@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "source": "docs/目录清单.md 第三章 规则引擎匹配规则",
+  "updated_at": "2026-10-18",
+  "name_scope": "basename",
+  "case_sensitive": false,
+  "conflict_resolution": "red_wins",
+  "default": {
+    "safety": "yellow",
+    "reason": "规则未收录，未知目录，需用户自行判断"
+  },
+  "rules": [
+    {
+      "match": "Cache",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "Chromium 标准缓存，可再生"
+    },
+    {
+      "match": "CachedData",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "Chromium 标准编译缓存，可再生"
+    },
+    {
+      "match": "GPUCache",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "GPU 着色器缓存，可再生"
+    },
+    {
+      "match": "Code Cache",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "Chromium 的 JS 编译缓存，可再生"
+    },
+    {
+      "match": "logs",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "运行日志，可再生"
+    },
+    {
+      "match": "debug",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "调试日志，可再生"
+    },
+    {
+      "match": "*.log",
+      "match_type": "glob",
+      "safety": "green",
+      "reason": "日志文件，可再生"
+    },
+    {
+      "match": "*.sqlite",
+      "match_type": "glob",
+      "safety": "green",
+      "reason": "SQLite 会话/状态数据库，可迁"
+    },
+    {
+      "match": "sessions",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "会话记录，可迁"
+    },
+    {
+      "match": "projects",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "会话/项目记录，可迁"
+    },
+    {
+      "match": "tool-results",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "工具输出记录，可迁"
+    },
+    {
+      "match": "checkpoints",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "检查点数据，可迁"
+    },
+    {
+      "match": "workspaceStorage",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "工作区索引数据，可迁"
+    },
+    {
+      "match": "globalStorage",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "全局索引数据，可迁；其中的配置/凭证仍按红色规则优先"
+    },
+    {
+      "match": "image-cache",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "图片缓存，可再生"
+    },
+    {
+      "match": "paste-cache",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "粘贴内容缓存，可再生"
+    },
+    {
+      "match": "uploads",
+      "match_type": "exact",
+      "safety": "green",
+      "reason": "上传文件缓存，可迁"
+    },
+    {
+      "match": "Login Data",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "登录凭证，禁止迁移"
+    },
+    {
+      "match": "Local State",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "Chromium 加密密钥，禁止迁移"
+    },
+    {
+      "match": "settings.json",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "用户配置，禁止迁移"
+    },
+    {
+      "match": "settings.local.json",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "本地用户配置，禁止迁移"
+    },
+    {
+      "match": ".credentials.json",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "登录凭证，禁止迁移"
+    },
+    {
+      "match": ".credentials.yaml",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "登录凭证，禁止迁移"
+    },
+    {
+      "match": "auth.json",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "认证凭证，禁止迁移"
+    },
+    {
+      "match": ".env",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "环境变量与密钥，禁止迁移"
+    },
+    {
+      "match": "memory",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "用户记忆，禁止迁移"
+    },
+    {
+      "match": "memories",
+      "match_type": "exact",
+      "safety": "red",
+      "reason": "用户记忆，禁止迁移"
+    }
+  ]
+}
