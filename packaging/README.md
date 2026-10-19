@@ -7,6 +7,10 @@ PyInstaller onedir 目录，压缩为 `DiskWarden-<version>-win-x64.zip`，解�
 ## 产物构成
 
 - 入口：`packaging/launcher.py` → `src.app.main`（pywebview + WebView2 主界面）
+- 根目录附带 `DiskWarden.exe.config`：从浏览器下载的 zip 解压后所有文件带
+  Mark-of-the-Web，.NET Framework 默认拒绝 `Assembly.LoadFrom` 加载
+  `pythonnet/runtime/Python.Runtime.dll`，表现为
+  `Failed to resolve Python.Runtime.Loader.Initialize`；该配置允许 load-from-remote
 - `ui/index.html` 与 `data/ide-catalog.json`、`data/rules.json` 被打进应用根目录，
   冻结后仍沿用 `src/app` 里的 `REPO_ROOT` 查找逻辑
 - 版本资源：`packaging/version_info.txt`（默认 `0.1.0-dev`）
