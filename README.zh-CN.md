@@ -84,7 +84,7 @@ tools/             演练与校验脚本
 
 ## 许可证
 
-[PolyForm Noncommercial License 1.0.0](LICENSE)。个人、学习、研究与非营利使用免费。**任何商业用途，包括公司内部自用，都需要单独取得商业授权**，联系 44062290+QuotaFuse-ai@users.noreply.github.com。
+[PolyForm Noncommercial License 1.0.0](LICENSE)。版权所有 (c) 2026 huangtao。个人、学习、研究与非营利使用免费。**任何商业用途，包括公司内部自用，都需要单独取得商业授权**，联系 44062290+QuotaFuse-ai@users.noreply.github.com。
 
 该许可证属于 source-available（源码公开），不是 OSI 认可的开源许可证。
 
