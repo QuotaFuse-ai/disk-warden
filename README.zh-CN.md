@@ -82,6 +82,12 @@ tools/             演练与校验脚本
 4. `docs/目录清单.md` — 规则引擎的数据基础
 5. `docs/dev/协作规范.md` — 目录归属、分支与提交规则
 
+## 许可证
+
+[PolyForm Noncommercial License 1.0.0](LICENSE)。个人、学习、研究与非营利使用免费。**任何商业用途，包括公司内部自用，都需要单独取得商业授权**，联系 44062290+QuotaFuse-ai@users.noreply.github.com。
+
+该许可证属于 source-available（源码公开），不是 OSI 认可的开源许可证。
+
 ## 安全与隐私
 
 - 迁移只复制、不递归删除源数据；删除只针对已校验的副本与失效链接

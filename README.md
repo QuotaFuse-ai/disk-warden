@@ -82,6 +82,12 @@ tools/             drills and validation scripts
 4. [IDE directory catalog](docs/目录清单.md) — data behind the rule engine
 5. [Collaboration guidelines](docs/dev/协作规范.md) — ownership, branching and commit rules
 
+## License
+
+[PolyForm Noncommercial License 1.0.0](LICENSE). Free for personal, study, research and nonprofit use. **Any commercial use — including internal use by a company — requires a separate commercial license.** Contact 44062290+QuotaFuse-ai@users.noreply.github.com.
+
+This is a source-available license, not an OSI-approved open-source license.
+
 ## Safety and privacy
 
 - Migration copies only; the source is never recursively deleted. Deletion targets verified copies and stale links only
