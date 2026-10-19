@@ -14,6 +14,7 @@ import uuid
 
 JOB_ID_RE = re.compile(r"^[0-9a-f]{8,32}$")
 PARTIAL_DIR_RE = re.compile(r"^\.dw-partial-([0-9a-f]{8})$")
+RESTORE_DIR_RE = re.compile(r"^\.dw-restore-([0-9a-f]{8})$")
 TOMBSTONE_DIR_RE = re.compile(r"^\.dwtombstone-([0-9a-f]{8})$")
 OWNER_MARKER_RE = re.compile(r"^\.dw-owner-([0-9a-f]{8})\.json$")
 BACKUP_DIR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}_\d{6}_.+_([0-9a-f]{8})$")
@@ -92,6 +93,18 @@ def tombstone_path(source_path, job_id):
     return os.path.join(parent, ".dwtombstone-%s" % job_prefix(job_id))
 
 
+def restore_dir_name(job_id):
+    # type: (str) -> str
+    return ".dw-restore-%s" % job_prefix(job_id)
+
+
+def restore_path(source_path, job_id):
+    # type: (str, str) -> str
+    """Same-parent slot a rollback copies the target into (architecture 6.7)."""
+    parent = os.path.dirname(os.path.abspath(os.path.normpath(source_path)))
+    return os.path.join(parent, restore_dir_name(job_id))
+
+
 def owner_marker_name(job_id):
     # type: (str) -> str
     return ".dw-owner-%s.json" % job_prefix(job_id)
@@ -111,6 +124,12 @@ def is_owner_marker_name(name):
 def is_partial_dir_name(name, job_id):
     # type: (str, str) -> bool
     match = PARTIAL_DIR_RE.match(name or "")
+    return bool(match and match.group(1) == job_prefix(job_id))
+
+
+def is_restore_dir_name(name, job_id):
+    # type: (str, str) -> bool
+    match = RESTORE_DIR_RE.match(name or "")
     return bool(match and match.group(1) == job_prefix(job_id))
 
 
@@ -149,6 +168,7 @@ __all__ = [
     "OWNER_MARKER_RE",
     "PARTIAL_DIR_RE",
     "PathValidationError",
+    "RESTORE_DIR_RE",
     "TOMBSTONE_DIR_RE",
     "backup_dir",
     "final_path",
@@ -156,10 +176,13 @@ __all__ = [
     "is_inside",
     "is_owner_marker_name",
     "is_partial_dir_name",
+    "is_restore_dir_name",
     "is_tombstone_name",
     "job_prefix",
     "new_job_id",
     "owner_marker_name",
+    "restore_dir_name",
+    "restore_path",
     "same_path",
     "source_basename",
     "staging_parent",
