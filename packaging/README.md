@@ -38,9 +38,23 @@ Get-FileHash -Algorithm SHA256 dist\DiskWarden-0.1.0-dev-win-x64.zip
 
 1. 在未安装 Python 的机器上解压，双击 `DiskWarden.exe`，主界面出现且无控制台窗口。
 2. 点击「重新扫描」，扫描页列出本机真实 IDE 目录与体积；扫描只读，不触发迁移。
-3. 关闭窗口后进程退出；日志位于数据根目录的 `logs/app.log`
-   （默认 `%LOCALAPPDATA%\DiskWarden`，若存在 `bootstrap.json` 则以其中 `data_root` 为准）。
+3. 关闭窗口后进程退出；日志位于数据根目录的 `logs/app.log`（选择顺序见下节）。
 4. 首次运行可能出现 SmartScreen 提示（未签名），按 T15 的说明走「更多信息 → 仍要运行」。
+
+## 数据根目录（启动时选择）
+
+`launcher.py` 在加载主程序前逐个探测候选目录，选第一个**可写**的作为
+`DISKWARDEN_DATA_ROOT`，因此 `D:` 不可写或被安全软件拦截时不会静默退出：
+
+1. `DISKWARDEN_DATA_ROOT`（显式覆盖）
+2. 平台默认目录（Windows 为 `D:\DiskWarden`）
+3. `%LOCALAPPDATA%\DiskWarden`
+4. `%APPDATA%\DiskWarden`
+5. `%USERPROFILE%\DiskWarden`
+6. `%TEMP%\DiskWarden`
+
+全部不可写时弹出错误框（无控制台的窗口版也能看到），列出已尝试的路径后退出。
+同一机器多次启动应保持同一根目录；若根目录临时不可写而落到下一项，日志会出现在新位置。
 
 ## 注意事项
 
