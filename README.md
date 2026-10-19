@@ -84,7 +84,7 @@ tools/             drills and validation scripts
 
 ## License
 
-[PolyForm Noncommercial License 1.0.0](LICENSE). Free for personal, study, research and nonprofit use. **Any commercial use — including internal use by a company — requires a separate commercial license.** Contact 13439731205@163.com.
+[PolyForm Noncommercial License 1.0.0](LICENSE). Copyright (c) 2026 huangtao. Free for personal, study, research and nonprofit use. **Any commercial use — including internal use by a company — requires a separate commercial license.** Contact 13439731205@163.com or +86 134 3973 1205.
 
 This is a source-available license, not an OSI-approved open-source license.
 
