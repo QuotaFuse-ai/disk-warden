@@ -1,0 +1,8 @@
+# Build dependencies are pinned for Python 3.8 (decision 0005).
+# Install with: python -m pip install -r packaging/requirements-build.txt
+pywebview==4.4.1
+pythonnet==3.0.5
+clr_loader==0.2.10
+psutil==5.9.8
+pyinstaller==5.13.2
+pyinstaller-hooks-contrib==2023.6
