@@ -45,6 +45,7 @@ __pycache__/
 *.egg-info/
 .eggs/
 .venv/
+.venv-build/
 venv/
 env/
 .pytest_cache/
@@ -54,6 +55,8 @@ env/
 .coverage.*
 htmlcov/
 *.spec
+# 打包脚本的 spec 需要入库
+!packaging/*.spec
 
 # ---------- 构建产物 ----------
 build/
