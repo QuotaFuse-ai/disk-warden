@@ -23,6 +23,7 @@ a = Analysis(
         (os.path.join(ROOT, "ui", "index.html"), "ui"),
         (os.path.join(ROOT, "data", "ide-catalog.json"), "data"),
         (os.path.join(ROOT, "data", "rules.json"), "data"),
+        (os.path.join(ROOT, "packaging", "DiskWarden.exe.config"), "."),
     ],
     hiddenimports=[
         "psutil",
