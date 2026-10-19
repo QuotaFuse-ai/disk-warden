@@ -1,6 +1,6 @@
 # Disk Warden
 
-English | [简体中文](README.zh-CN.md)
+English | [Chinese](README.zh-CN.md)
 
 **Disk Warden** is a storage manager for AI coding tools. It finds the data directories of Cursor, Trae, Claude Code and other AI IDEs on your machine, moves the reproducible bulk (caches, indexes, logs) to another drive, and keeps the original paths working — so your system drive stops filling up.
 
@@ -76,11 +76,11 @@ tools/             drills and validation scripts
 
 ## Documentation
 
-1. `docs/tasks/TASK-001/项目现状总结.md` — asset inventory, completeness, risks
-2. `docs/decisions/` — decision records (append-only)
-3. `docs/功能需求.md` — product requirements
-4. `docs/目录清单.md` — data behind the rule engine
-5. `docs/dev/协作规范.md` — ownership, branching and commit rules
+1. [Project status summary](docs/tasks/TASK-001/项目现状总结.md) — asset inventory, completeness, risks
+2. [Decision records](docs/decisions/) — append-only, one file per decision
+3. [Product requirements](docs/功能需求.md)
+4. [IDE directory catalog](docs/目录清单.md) — data behind the rule engine
+5. [Collaboration guidelines](docs/dev/协作规范.md) — ownership, branching and commit rules
 
 ## Safety and privacy
 
@@ -92,4 +92,4 @@ tools/             drills and validation scripts
 ## Contributing
 
 - All changes start from a Multica issue; report outputs and risks in the issue comment when done
-- Branching, commit messages and directory ownership: `docs/dev/协作规范.md`
+- Branching, commit messages and directory ownership: [collaboration guidelines](docs/dev/协作规范.md)
