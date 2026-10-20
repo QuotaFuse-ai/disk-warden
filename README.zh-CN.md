@@ -29,10 +29,11 @@
 | 数据搬运、校验、建链、崩溃恢复（T09–T10） | 已完成 |
 | 回滚引擎与本地存储：journal / 历史 / 设置 / 学习规则（T11） | 已完成，已合入 `main` |
 | AI 分析接口（T22） | 已完成，默认关闭 |
-| 界面接入真实引擎（T12） | 已完成，已合入 `main` |
-| Windows / macOS 打包（T15 / T21） | 未开始 |
+| 界面接入真实引擎、AI 密钥配置（T12、T25） | 已完成，已合入 `main` |
+| Windows 打包（T15） | 已有未签名的开发版 zip |
+| macOS 打包（T21） | 未开始 |
 
-已完成的模块由 **594 个单元测试**覆盖，CI 会在每次 push 时自动运行。
+已完成的模块由 **649 个单元测试**覆盖，CI 会在每次 push 时自动运行。
 
 ## 平台支持
 
@@ -41,13 +42,13 @@
 
 ## 技术栈
 
-- Python 3.8+ 为代码基线，正式发布基线为 3.12（决策 0005）
+- Python 3.12 为正式构建工具链（决策 0012）；CI 在 3.10 与 3.12 上跑测试
 - 界面：原生 HTML/JS 单页（`ui/index.html`），由 pywebview 承载（Windows WebView2 / macOS WKWebView）
-- 打包：PyInstaller onedir；macOS 产物由 CI 构建
+- 打包：PyInstaller 6 onedir；macOS 产物由 CI 构建
 
 ## 开发
 
-环境要求：Python 3.8 及以上。
+环境要求：Python 3.10 及以上。
 
 ```bash
 # 全量单元测试
@@ -61,7 +62,7 @@ python tools/migrate_drill_b.py
 # 直接用浏览器打开 ui/index.html
 ```
 
-桌面应用本体（真实数据 + 桌面外壳）在 T12、T15 完成后可运行；`main.py` 是早期 Tkinter 试验品，已弃用，仅作历史参考。
+桌面应用可直接用 `python -m src.app.main` 从源码启动，或使用 `packaging/build.ps1` 打出的未签名 Windows zip；`main.py` 是早期 Tkinter 试验品，仅作历史参考。
 
 ## 目录结构
 
