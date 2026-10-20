@@ -20,6 +20,7 @@ ERROR_CODES = {
     "RECOVERY_REQUIRED": False,
     "CONFIRM_REQUIRED": False,
     "DUPLICATE_TARGET": False,
+    "ALREADY_MIGRATED": False,
     "AI_CONSENT_REQUIRED": False,
     "INTERNAL": False,
 }

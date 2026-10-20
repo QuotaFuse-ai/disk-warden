@@ -121,6 +121,12 @@ class AIAvailabilityTest(AISettingsTestBase):
         self.assertEqual(ai["base_url"], AI_PATCH["base_url"])
         self.assertEqual(ai["model"], AI_PATCH["model"])
 
+    def test_api_key_is_detected_while_ai_is_disabled(self):
+        ai = self.service.settings_get()["ai"]
+        self.assertFalse(ai["enabled"])
+        self.assertTrue(ai["api_key_set"])
+        self.assertEqual(ai["disabled_reason"], "disabled")
+
     def test_missing_key_keeps_ai_unavailable(self):
         service = make_service(self)
         service.ai_consent()

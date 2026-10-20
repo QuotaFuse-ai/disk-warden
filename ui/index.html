@@ -686,6 +686,8 @@ I18N['zh-CN'] = {
   'ide.migratableValue': '{n} 项 · {size}',
   'ide.redExcluded': '{n} 个受保护项已自动排除，不会迁移',
   'ide.redLocked': '受保护，无迁移入口',
+  'ide.migratedLocked': '已迁移，不能重复迁移',
+  'ide.migratedRowReason': '已迁移到目标盘，可随时回滚',
   'ide.yellowHint': '未知目录默认不参与迁移；确认后可手动勾选。',
   'ide.yellowLocked': '需先确认此目录的用途',
   'ide.processTitle': '检测到进程正在运行',
@@ -992,23 +994,22 @@ I18N['zh-CN'] = {
   'ai.enable': '启用 AI 辅助识别',
   'ai.enableDesc': '关闭后，未知目录只能手动确认。',
   'ai.provider': '接入方式',
-  'ai.provider.relay': '用当前 Multica 助手的模型',
   'ai.provider.custom': '自定义 OpenAI 兼容接口',
   'ai.provider.none': '不对接（只用本地规则）',
   'ai.baseUrl': '接口地址',
   'ai.baseUrlDesc': '例：https://api.example.com/v1',
   'ai.model': '模型',
-  'ai.modelAuto': '跟随助手设置',
+  'ai.modelAuto': '服务端默认模型',
   'ai.key': '密钥',
-  'ai.keyDesc': '只从环境变量 DEEPSEEK_API_KEY 读取，不写入本机文件，不进日志、不进反馈内容',
+  'ai.keyDesc': '可选高级配置：仅从环境变量 DISK_WARDEN_AI_API_KEY 读取，不写入本机文件，不进日志、不进反馈内容',
   'ai.test': '测试连接',
   'ai.testUnavailable': '连接测试将在后续版本提供。',
   'ai.keyEnvSet': '已从环境变量读取',
-  'ai.keyEnvMissing': '未检测到环境变量',
+  'ai.keyEnvMissing': '未设置，仅使用本地规则',
   'ai.testOk': '连接可用 · 延迟 0.8s',
   'ai.testBad': '连接失败：密钥无效',
   'ai.statusOn': '已对接',
-  'ai.statusOff': '未对接',
+  'ai.statusOff': '仅使用本地规则',
   'ai.scope': 'AI 能看到什么',
   'ai.scopeValue': '只有目录路径与文件名；不读文件内容，不上传任何文件',
   'ai.limit': '每次扫描最多调用',
@@ -1023,8 +1024,8 @@ I18N['zh-CN'] = {
   'ai.adopted': '已采纳，写入规则表',
   'ai.done': '本轮识别完成：{n} 项已给出建议',
   'ai.allDone': '待确认目录都已识别',
-  'ai.needKey': '先接好 AI 模型，再接着识别',
-  'ai.needModel': '请填写模型名称，或改用当前助手的模型',
+  'ai.needKey': '未配置 AI 接口或密钥，当前仅使用本地规则',
+  'ai.needModel': '请填写模型名称',
   'ai.noneLeft': '没有需要识别的目录了',
   'ai.filter': 'AI 已给建议',
   'ai.note': 'AI 识别结果仅作为建议，不会自动迁移任何文件。',
@@ -1091,6 +1092,7 @@ I18N['zh-CN'] = {
   'error.NOT_FOUND': '目录不存在',
   'error.PERMISSION_DENIED': '没有权限访问该目录',
   'error.IO_ERROR': '系统未能打开资源管理器',
+  'error.ALREADY_MIGRATED': '这些目录已经迁移，无需重复迁移',
   'error.INTERNAL': '主机端内部错误',
   'toast.cleaned': '缓存清理完成，释放 {size}',
   'toast.ruleAdded': '规则已添加',
@@ -1100,6 +1102,9 @@ I18N['zh-CN'] = {
   'toast.retry': '重试中',
   'toast.exported': '已导出',
   'toast.needSelect': '请先选择至少一个目录',
+  'toast.needSelectAllRed': '没有可迁目录：受保护项已自动排除',
+  'toast.needSelectMigrated': '没有可迁目录：都已迁移，可先回滚再迁移',
+  'toast.needSelectYellow': '没有可勾选目录：待确认项需先确认用途',
   'toast.spaceShort': '目标盘空间不足',
   'toast.blocked': '软件正在运行，无法迁移',
   'toast.unavailable': '该功能尚未接入主机端，将在后续版本提供',
@@ -1308,6 +1313,8 @@ I18N['en'] = {
   'ide.migratableValue': '{n} items · {size}',
   'ide.redExcluded': '{n} protected items are excluded automatically',
   'ide.redLocked': 'Protected, no migration entry',
+  'ide.migratedLocked': 'Migrated, cannot migrate again',
+  'ide.migratedRowReason': 'Migrated to the target drive; rollback is available',
   'ide.yellowHint': 'Unknown folders are excluded until you confirm them.',
   'ide.yellowLocked': 'Confirm what this folder is first',
   'ide.processTitle': 'Running process detected',
@@ -1614,23 +1621,22 @@ I18N['en'] = {
   'ai.enable': 'Use AI assistance',
   'ai.enableDesc': 'Off means unknown folders need your manual call.',
   'ai.provider': 'Connection',
-  'ai.provider.relay': 'Use this Multica agent model',
   'ai.provider.custom': 'Custom OpenAI-compatible endpoint',
   'ai.provider.none': 'No connection (local rules only)',
   'ai.baseUrl': 'Endpoint',
   'ai.baseUrlDesc': 'e.g. https://api.example.com/v1',
   'ai.model': 'Model',
-  'ai.modelAuto': 'Follow agent settings',
+  'ai.modelAuto': 'Server default model',
   'ai.key': 'Key',
-  'ai.keyDesc': 'Read only from the DEEPSEEK_API_KEY environment variable. Never written to disk, logs or feedback.',
+  'ai.keyDesc': 'Optional advanced setup: read only from the DISK_WARDEN_AI_API_KEY environment variable. Never written to disk, logs or feedback.',
   'ai.test': 'Test connection',
   'ai.testUnavailable': 'Connection test arrives in a later version.',
   'ai.keyEnvSet': 'Read from environment variable',
-  'ai.keyEnvMissing': 'Environment variable not set',
+  'ai.keyEnvMissing': 'Not set — local rules only',
   'ai.testOk': 'Connection OK · 0.8s',
   'ai.testBad': 'Connection failed: invalid key',
   'ai.statusOn': 'Connected',
-  'ai.statusOff': 'Not connected',
+  'ai.statusOff': 'Local rules only',
   'ai.scope': 'What AI can see',
   'ai.scopeValue': 'Folder paths and file names only. File contents are never read or uploaded.',
   'ai.limit': 'Call limit per scan',
@@ -1645,8 +1651,8 @@ I18N['en'] = {
   'ai.adopted': 'Adopted and added to rules',
   'ai.done': 'Done: suggestions ready for {n} folders',
   'ai.allDone': 'Every pending folder has a suggestion',
-  'ai.needKey': 'Connect a model first',
-  'ai.needModel': 'Enter a model name, or use the agent model',
+  'ai.needKey': 'No AI endpoint or key configured — local rules only for now',
+  'ai.needModel': 'Enter a model name',
   'ai.noneLeft': 'Nothing left to identify',
   'ai.filter': 'AI suggested',
   'ai.note': 'AI results are suggestions only. No file is migrated automatically.',
@@ -1713,6 +1719,7 @@ I18N['en'] = {
   'error.NOT_FOUND': 'Folder does not exist',
   'error.PERMISSION_DENIED': 'Access to the folder was denied',
   'error.IO_ERROR': 'The system could not open the file manager',
+  'error.ALREADY_MIGRATED': 'These folders are already migrated',
   'error.INTERNAL': 'Host internal error',
   'toast.cleaned': 'Cache cleaned, freed {size}',
   'toast.ruleAdded': 'Rule added',
@@ -1722,6 +1729,9 @@ I18N['en'] = {
   'toast.retry': 'Retrying',
   'toast.exported': 'Exported',
   'toast.needSelect': 'Select at least one folder first',
+  'toast.needSelectAllRed': 'Nothing to migrate: protected folders are excluded automatically',
+  'toast.needSelectMigrated': 'Nothing to migrate: all folders are already migrated — roll back one first',
+  'toast.needSelectYellow': 'Nothing checked yet: confirm the pending folders first',
   'toast.spaceShort': 'Not enough space on target',
   'toast.blocked': 'The app is running, cannot migrate',
   'toast.unavailable': 'This feature is not connected to the host yet and will arrive in a later version',
@@ -1893,6 +1903,7 @@ function dirAt(ideId, idx) { const ide = getIde(ideId); return ide && ide.direct
 function dirKey(ideId, idx) { const d = dirAt(ideId, idx); return d && d.item_id ? 'item:' + d.item_id : yellowKey(ideId, idx); }
 function isConfirmed(ideId, idx) { return !!state.confirmed[dirKey(ideId, idx)]; }
 function isChecked(ideId, idx, dir) {
+  if (dir.migrated) return false;
   if (dir.safety === 'red') return false;
   if (dir.item_id && dir.can_migrate === false) return false;
   if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return false;
@@ -1903,6 +1914,19 @@ function selectedDirs(ide) {
   return ide.directories.filter((d, i) => isChecked(ide.id, i, d));
 }
 function selectedSize(ide) { return sum(selectedDirs(ide), 'size_bytes'); }
+/* Explain an empty selection instead of a generic "select something" toast. */
+function emptySelectionKey(ide) {
+  const dirs = (ide && ide.directories) || [];
+  if (!dirs.length) return 'toast.needSelect';
+  const nonRed = dirs.filter(d => d.safety !== 'red');
+  if (!nonRed.length) return 'toast.needSelectAllRed';
+  if (nonRed.every(d => d.migrated)) return 'toast.needSelectMigrated';
+  if (
+    nonRed.some(d => !d.migrated && d.safety === 'yellow') &&
+    nonRed.every(d => d.migrated || d.safety === 'yellow')
+  ) return 'toast.needSelectYellow';
+  return 'toast.needSelect';
+}
 function targetAvailableGB() {
   const free = state.data.disk && state.data.disk.target && state.data.disk.target.available
     ? state.data.disk.target.free : null;
@@ -1989,7 +2013,12 @@ function toolById(id) { return allTools().find(x => x.id === id) || null; }
 function itemsFor(tool) { return allItems().filter(x => x.tool_id === tool.id); }
 function runningProcs(tool) { const rt = tool && tool.runtime; return (rt && rt.processes) || []; }
 function migratedItems(tool) { return itemsFor(tool).filter(x => !!x.migrated_job_id); }
-function isToolMigrated(tool) { return migratedItems(tool).length > 0; }
+/* A tool counts as migrated only when nothing is left to migrate; a partial
+   migration keeps the migrate action so the remaining folders stay reachable. */
+function isToolMigrated(tool) {
+  const actionable = itemsFor(tool).filter(x => x.safety !== 'red');
+  return actionable.length > 0 && actionable.every(x => !!x.migrated_job_id);
+}
 function migratedTarget(tool) {
   const it = migratedItems(tool)[0];
   return it ? (it.target_path || '') : '';
@@ -2126,7 +2155,7 @@ function applySettings(s) {
     appVersion: s.app_version || '',
     ai: ai,
     aiEnabled: !!(ai && ai.enabled),
-    aiProvider: ai && ai.enabled ? (ai.base_url ? 'custom' : 'relay') : 'none',
+    aiProvider: ai && ai.enabled && ai.base_url ? 'custom' : 'none',
     aiBaseUrl: (ai && ai.base_url) || '',
     aiModel: (ai && ai.model) || '',
     aiKeySet: !!(ai && ai.api_key_set)
@@ -3011,19 +3040,26 @@ function renderIdeDetail(ide) {
 
 function itemRow(ide, d, i) {
   const checked = isChecked(ide.id, i, d);
-  const badge = d.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>`
+  const badge = d.migrated ? `<span class="badge b-green">✓ ${esc(t('common.migrated'))}</span>`
+    : d.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>`
     : d.safety === 'red' ? `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>`
     : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`;
-  const left = d.safety === 'red'
+  const left = d.migrated
+    ? `<span class="tcell lockcell"><span class="lock" title="${esc(t('ide.migratedLocked'))}" aria-label="${esc(t('ide.migratedLocked'))}">✓</span></span>`
+    : d.safety === 'red'
     ? `<span class="tcell lockcell"><span class="lock" title="${esc(t('ide.redLocked'))}" aria-label="${esc(t('ide.redLocked'))}">⛨</span></span>`
     : `<span class="tcell lockcell"><input class="row-check" type="checkbox" ${checked ? 'checked' : ''} ${d.safety === 'yellow' && !isConfirmed(ide.id, i) ? 'disabled' : ''} onclick="App.toggleCheck('${ide.id}',${i})" aria-label="${esc(d.path)}"></span>`;
   const confirmed = d.safety === 'yellow' && isConfirmed(ide.id, i);
-  const reason = reasonText(d) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
-  const act = d.safety === 'yellow' && !confirmed
+  const reason = d.migrated
+    ? t('ide.migratedRowReason')
+    : reasonText(d) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
+  const act = d.migrated
+    ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.rollbackDir('${ide.id}',${i})">${esc(t('action.rollback'))}</button>`
+    : d.safety === 'yellow' && !confirmed
     ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.openYellow('${ide.id}',${i})">${esc(t('action.confirmYellow'))}</button>`
     : confirmed ? `<span class="badge b-gray">${esc(t('common.confirmed'))}</span>`
     : d.handling ? `<span class="tag tag-code">${esc(d.handling)}</span>` : '';
-  return `<div class="trow dir risk-${d.safety}" title="${esc(d.path)} · ${esc(reason)}">
+  return `<div class="trow dir risk-${d.migrated ? 'green' : d.safety}" title="${esc(d.path)} · ${esc(reason)}">
     ${left}
     <span class="tcell tpath badged">${badge}<span class="tp" title="${esc(d.path)}">${esc(d.path)}</span></span>
     <span class="tcell tdesc">${esc(reason)}</span>
@@ -3177,7 +3213,7 @@ function renderDisk() {
 }
 
 /* ---------- 规则学习 ---------- */
-function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && (!!state.settings.aiKeySet || state.settings.aiProvider === 'relay'); }
+function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && !!state.settings.aiKeySet; }
 function aiModelName() { return state.settings.aiModel || t('ai.modelAuto'); }
 
 function itemReason(it) {
@@ -3436,9 +3472,9 @@ function modalAi() {
   const aiConsent = state.aiAsk ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div><b>${esc(t('ai.consentTitle'))}</b><br>${esc(t('ai.consentBody'))}<div class="banner-actions"><button type="button" class="btn btn-primary btn-xs" onclick="App.confirmAiEnable()">${esc(t('ai.consentAccept'))}</button><button type="button" class="btn btn-ghost btn-xs" onclick="App.cancelAiAsk()">${esc(t('ai.consentDecline'))}</button></div></div></div>` : '';
   const body = `
     <div class="kvbar">
-      <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : 'warn'}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : ''}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('ai.model'))}</span><span class="v">${esc(aiModelName())}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : 'warn'}">${esc(s.aiKeySet ? t('ai.keyEnvSet') : t('ai.keyEnvMissing'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : ''}">${esc(s.aiKeySet ? t('ai.keyEnvSet') : t('ai.keyEnvMissing'))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${pendingCount ? 'warn' : 'ok'}">${pendingCount}</span></div>
     </div>
     <div class="settings-row">
@@ -3449,7 +3485,6 @@ function modalAi() {
     <div class="form-grid">
       <div class="field"><label>${esc(t('ai.provider'))}</label>
         <select id="ai-provider">
-          <option value="relay" ${s.aiProvider === 'relay' ? 'selected' : ''}>${esc(t('ai.provider.relay'))}</option>
           <option value="custom" ${s.aiProvider === 'custom' ? 'selected' : ''}>${esc(t('ai.provider.custom'))}</option>
           <option value="none" ${s.aiProvider === 'none' ? 'selected' : ''}>${esc(t('ai.provider.none'))}</option>
         </select>
@@ -3950,7 +3985,7 @@ const App = {
   startPreview(ideId) {
     const ide = getIde(ideId);
     state.selectedIde = ide.id;
-    if (!selectedDirs(ide).length) { this.toast(t('toast.needSelect')); return; }
+    if (!selectedDirs(ide).length) { this.toast(t(emptySelectionKey(ide))); return; }
     state.returnHash = '#ide';
     if (ide.runtime.running.length) { this.go('#ide/process-blocked'); return; }
     if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
@@ -4055,6 +4090,13 @@ const App = {
     if (!it) { this.toast(t('history.noRollback')); return; }
     if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
     this._openRollback(it.migrated_job_id);
+  },
+  rollbackDir(ideId, idx) {
+    const ide = getIde(ideId);
+    const d = dirAt(ideId, idx);
+    if (!d || !d.migrated_job_id) { this.toast(t('history.noRollback')); return; }
+    if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
+    this._openRollback(d.migrated_job_id);
   },
   historyRollback(id) {
     const h = HISTORY.find(x => x.id === id);
