@@ -43,6 +43,7 @@ if sys.platform.startswith("win"):
         rename_dir,
         volume_info,
     )
+    from .win.handles import find_dir_holders
 else:
     from .posix.link import (
         create_junction,
@@ -54,6 +55,11 @@ else:
         volume_info,
     )
 
+    def find_dir_holders(path):
+        # type: (str) -> list
+        """POSIX renames do not fail because of open handles; nothing to find."""
+        return []
+
 __all__ = [
     "LinkError",
     "ProcessEnumerationError",
@@ -64,6 +70,7 @@ __all__ = [
     "VolumeInfo",
     "create_junction",
     "enumerate_processes",
+    "find_dir_holders",
     "is_junction",
     "is_link",
     "is_reparse_point",
