@@ -1988,6 +1988,11 @@ class AppService(object):
 
     def _apply_rollback_to_snapshot(self, job_id, tool_id, source_path):
         # type: (str, str, str) -> None
+        # Rollback restores the directory to its pre-migration shape, so the
+        # row must look exactly like a fresh scan: keep the classified safety
+        # (migration never changes it) and only clear the migrated/blocked
+        # flags.  Forcing SAFETY_RED here made the restored row read as
+        # protected, excluding it from selection until the next scan.
         with self._lock:
             if self._snapshot is None:
                 return
@@ -2001,10 +2006,7 @@ class AppService(object):
                     item["migrated_job_id"] = ""
                     item["blocked_code"] = ""
                     item["blocked_reason"] = ""
-                    item["can_migrate"] = True
-                    item["safety"] = SAFETY_RED
-                    item["reason"] = "已回滚，需人工确认后才能再次迁移"
-                    item["requires_confirm"] = True
+                    item["can_migrate"] = item.get("safety") != SAFETY_RED
                     break
             snapshot = self._snapshot
         try:

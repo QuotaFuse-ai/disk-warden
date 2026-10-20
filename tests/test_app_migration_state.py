@@ -266,7 +266,61 @@ class MigratedSnapshotBehaviourTest(unittest.TestCase):
         self.assertEqual(item["blocked_code"], "")
         self.assertEqual(item["blocked_reason"], "")
         self.assertTrue(item["can_migrate"])
+
+    def test_rollback_keeps_green_rows_selectable_without_confirmation(self):
+        item = make_item(
+            safety="green",
+            migrated_job_id=JOB_ID,
+            can_migrate=False,
+            blocked_code="ALREADY_MIGRATED",
+            blocked_reason="已迁移到目标盘，不能重复迁移",
+            requires_confirm=False,
+        )
+        set_snapshot(self.service, [item])
+
+        self.service._apply_rollback_to_snapshot(
+            JOB_ID, item["tool_id"], item["source_path"]
+        )
+
+        self.assertEqual(item["safety"], "green")
+        self.assertFalse(item["requires_confirm"])
+        self.assertTrue(item["can_migrate"])
+
+    def test_rollback_keeps_yellow_rows_reachable_behind_confirmation(self):
+        item = make_item(
+            safety="yellow",
+            migrated_job_id=JOB_ID,
+            can_migrate=False,
+            requires_confirm=True,
+            blocked_code="ALREADY_MIGRATED",
+            blocked_reason="已迁移到目标盘，不能重复迁移",
+        )
+        set_snapshot(self.service, [item])
+
+        self.service._apply_rollback_to_snapshot(
+            JOB_ID, item["tool_id"], item["source_path"]
+        )
+
+        self.assertEqual(item["safety"], "yellow")
         self.assertTrue(item["requires_confirm"])
+        self.assertTrue(item["can_migrate"])
+
+    def test_rollback_never_unlocks_a_red_path(self):
+        item = make_item(
+            safety="red",
+            migrated_job_id=JOB_ID,
+            can_migrate=False,
+            blocked_code="ALREADY_MIGRATED",
+            blocked_reason="已迁移到目标盘，不能重复迁移",
+        )
+        set_snapshot(self.service, [item])
+
+        self.service._apply_rollback_to_snapshot(
+            JOB_ID, item["tool_id"], item["source_path"]
+        )
+
+        self.assertEqual(item["safety"], "red")
+        self.assertFalse(item["can_migrate"])
 
 
 if __name__ == "__main__":
