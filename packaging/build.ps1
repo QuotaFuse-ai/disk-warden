@@ -41,6 +41,10 @@ if ($LASTEXITCODE -ne 0) { throw "PyInstaller build failed" }
 $exe = Join-Path $appDir "DiskWarden.exe"
 if (-not (Test-Path $exe)) { throw "Expected executable not found: $exe" }
 
+# PyInstaller 6 collects datas into _internal/, but .NET resolves DiskWarden.exe.config
+# next to the executable only.
+Copy-Item (Join-Path $PSScriptRoot "DiskWarden.exe.config") (Join-Path $appDir "DiskWarden.exe.config") -Force
+
 Compress-Archive -Path $appDir -DestinationPath $zipPath -CompressionLevel Optimal
 $hash = (Get-FileHash -Algorithm SHA256 $zipPath).Hash
 $sizeMb = [math]::Round((Get-Item $zipPath).Length / 1MB, 1)
