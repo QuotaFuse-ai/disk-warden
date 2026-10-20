@@ -21,6 +21,11 @@ ERROR_CODES = {
     "CONFIRM_REQUIRED": False,
     "DUPLICATE_TARGET": False,
     "AI_CONSENT_REQUIRED": False,
+    "AUTH_NOT_CONFIGURED": False,
+    "AUTH_CANCELLED": False,
+    "AUTH_TIMEOUT": True,
+    "AUTH_FAILED": True,
+    "AUTH_REQUIRED": False,
     "INTERNAL": False,
 }
 
