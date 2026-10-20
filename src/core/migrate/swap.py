@@ -10,15 +10,76 @@ acting, so a retry after a crash never renames twice.
 Python 3.8 compatible (decision 0005).
 """
 
+import errno
 import os
+import time
 
-from ...platform import LinkError
+from ...platform import LinkError, find_dir_holders
 from . import marker, paths
 from .cleanup import UnsafeCleanupError, remove_owned_tree, remove_tree
+
+# Windows refuses to rename a directory while a file below it is open without
+# FILE_SHARE_DELETE.  Search indexers and antivirus scanners take such handles
+# in short bursts, so a transient refusal is retried before giving up.
+# Directories whose files stay open cannot be renamed at all; those are named
+# in the error instead of silently failing the migration.
+RENAME_RETRY_DELAYS = (0.2, 0.5, 1.0, 1.5)
+ACCESS_DENIED_WINERROR = 5
 
 
 class SwapError(RuntimeError):
     """Raised when a swap step cannot run safely; nothing was deleted."""
+
+
+def _access_denied(exc):
+    # type: (BaseException) -> bool
+    if getattr(exc, "winerror", None) == ACCESS_DENIED_WINERROR:
+        return True
+    return getattr(exc, "errno", None) in (errno.EACCES, errno.EPERM)
+
+
+def _holder_hint(source_path, holder_provider):
+    # type: (str, object) -> str
+    """Name the processes keeping files under ``source_path`` open."""
+    try:
+        holders = list(holder_provider(source_path) or [])
+    except Exception:
+        return ""
+    labels = []  # type: list
+    for process in holders:
+        name = str(getattr(process, "name", "") or "").strip() or "unknown"
+        pid = getattr(process, "pid", None)
+        labels.append("%s (PID %s)" % (name, pid) if pid else name)
+    if labels:
+        return "; files are still open in %s" % ", ".join(labels)
+    return (
+        "; no open file handle was identified - a process may be using the"
+        " directory as its working directory, or an indexer/antivirus scanner"
+        " may still be reading it"
+    )
+
+
+def _rename_for_swap(ops, source_path, tombstone_path, holder_provider, sleep,
+                     retry_delays):
+    # type: (object, str, str, object, object, tuple) -> None
+    """Rename, retrying transient access denials; raise SwapError on failure."""
+    for delay in retry_delays:
+        try:
+            ops.rename(source_path, tombstone_path)
+            return
+        except (LinkError, OSError) as exc:
+            if not _access_denied(exc):
+                raise SwapError("cannot rename source to tombstone: %s" % exc)
+            sleep(delay)
+    try:
+        ops.rename(source_path, tombstone_path)
+    except (LinkError, OSError) as exc:
+        if not _access_denied(exc):
+            raise SwapError("cannot rename source to tombstone: %s" % exc)
+        raise SwapError(
+            "cannot rename source to tombstone: %s%s"
+            % (exc, _holder_hint(source_path, holder_provider))
+        )
 
 
 def discard_staging(staging_path, job_id):
@@ -103,13 +164,17 @@ def ensure_target_ready(ops, staging_path, final_path, job_id):
     return True, cleanup_errors
 
 
-def ensure_source_renamed(ops, source_path, tombstone_path, job_id):
-    # type: (object, str, str, str) -> bool
+def ensure_source_renamed(ops, source_path, tombstone_path, job_id,
+                          holder_provider=None, sleep=None,
+                          retry_delays=RENAME_RETRY_DELAYS):
+    # type: (object, str, str, str, object, object, tuple) -> bool
     """S6: atomically rename the source to its tombstone.
 
     Returns True when the rename happened in this call and False when a
     previous run already renamed it.  Raises ``SwapError`` when both paths
-    exist (ambiguous) or when either is not a plain directory.
+    exist (ambiguous) or when either is not a plain directory.  A refusal to
+    rename (another process holds a file open) is retried on a short bounded
+    schedule; if it persists, the holding processes are named in the error.
     """
     source_path = os.path.abspath(source_path)
     tombstone_path = os.path.abspath(tombstone_path)
@@ -133,10 +198,14 @@ def ensure_source_renamed(ops, source_path, tombstone_path, job_id):
             )
         if not ops.same_volume(source_path, tombstone_path):
             raise SwapError("source and tombstone are on different volumes")
-        try:
-            ops.rename(source_path, tombstone_path)
-        except (LinkError, OSError) as exc:
-            raise SwapError("cannot rename source to tombstone: %s" % exc)
+        _rename_for_swap(
+            ops,
+            source_path,
+            tombstone_path,
+            find_dir_holders if holder_provider is None else holder_provider,
+            time.sleep if sleep is None else sleep,
+            tuple(retry_delays) if retry_delays is not None else (),
+        )
         return True
 
     if tombstone_exists:
