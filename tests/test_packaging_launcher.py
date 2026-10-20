@@ -81,6 +81,10 @@ class CheckRuntimeLayoutTest(unittest.TestCase):
         self.assertTrue(result)
         message.assert_not_called()
 
+    @unittest.skipUnless(
+        sys.platform.startswith("win"),
+        "the python3XX.dll layout next to the executable is Windows-only",
+    )
     def test_leftover_python38_dll_blocks_start_with_clear_message(self):
         result, message = self._frozen(["python312.dll", "python38.dll"])
         self.assertFalse(result)
