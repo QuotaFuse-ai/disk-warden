@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Disk Warden">
+  <title>Disk Warden</title>
+  <defs>
+    <linearGradient id="dw-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3FBF44"/>
+      <stop offset="1" stop-color="#257A2C"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(512 512) scale(1000) translate(-0.5 -0.55)">
+    <path d="M0.15 0.055 L0.85 0.055 C0.925 0.055 0.945 0.075 0.945 0.15 L0.945 0.55 C0.945 0.80 0.74 0.98 0.50 1.045 C0.26 0.98 0.055 0.80 0.055 0.55 L0.055 0.15 C0.055 0.075 0.075 0.055 0.15 0.055 Z"
+          fill="url(#dw-g)"/>
+    <circle cx="0.5" cy="0.52" r="0.245" fill="none" stroke="#FFFFFF" stroke-width="0.082"
+            stroke-dasharray="1.2811 0.2583" transform="rotate(-15 0.5 0.52)"/>
+    <circle cx="0.5" cy="0.52" r="0.040" fill="#FFFFFF"/>
+  </g>
+</svg>

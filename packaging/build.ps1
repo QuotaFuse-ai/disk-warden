@@ -1,11 +1,11 @@
 # Build the unsigned Windows x64 development package (PyInstaller onedir).
 # Run from anywhere:  powershell -ExecutionPolicy Bypass -File packaging\build.ps1
 #   -Python <path to python.exe>   interpreter with packaging/requirements-build.txt
-#   -Version <artifact version>    defaults to 0.1.0-dev
+#   -Version <artifact version>    defaults to 0.9.0-beta.1
 
 param(
     [string]$Python = "python",
-    [string]$Version = "0.1.0-dev"
+    [string]$Version = "0.9.0-beta.1"
 )
 
 $ErrorActionPreference = "Stop"

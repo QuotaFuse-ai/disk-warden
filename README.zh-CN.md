@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="ui/assets/brand/logo-wordmark-dark.png">
+    <img src="ui/assets/brand/logo-wordmark-light.png" width="420" alt="Disk Warden">
+  </picture>
+</p>
+
 # Disk Warden
 
 [English](README.md) | 简体中文
@@ -22,10 +29,10 @@
 | 数据搬运、校验、建链、崩溃恢复（T09–T10） | 已完成 |
 | 回滚引擎与本地存储：journal / 历史 / 设置 / 学习规则（T11） | 已完成，已合入 `main` |
 | AI 分析接口（T22） | 已完成，默认关闭 |
-| 界面接入真实引擎（T12） | 进行中 |
+| 界面接入真实引擎（T12） | 已完成，已合入 `main` |
 | Windows / macOS 打包（T15 / T21） | 未开始 |
 
-已完成的模块由 **437 个单元测试**覆盖。
+已完成的模块由 **594 个单元测试**覆盖，CI 会在每次 push 时自动运行。
 
 ## 平台支持
 
