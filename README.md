@@ -30,10 +30,11 @@ English | [Chinese](README.zh-CN.md)
 | Rollback engine and local store: journal / history / settings / learned rules (T11) | Done, merged to `main` |
 | AI analysis interface (T22) | Done, disabled by default |
 | UI wired to the real engine, AI key setup (T12, T25) | Done, merged to `main` |
-| Windows packaging (T15) | Unsigned 0.9.0-beta.6 zip: tray, per-user autostart, rotating logs, packaged sandbox drills |
-| macOS packaging (T21) | Not started |
+| Welcome screen, GitHub sign-in and star prompt (T16) | In progress: GitHub Device Flow; skipping sign-in never limits local features |
+| Windows packaging (T15) | Unsigned 0.9.0-beta.7 zip: tray, per-user autostart, rotating logs, packaged sandbox drills; T26 link-verification fixes are merged and ship in beta.8 |
+| macOS adaptation and packaging (T21) | In progress: macOS implementation under `src/platform/` plus a `macos-latest` CI build of an unsigned `.app` |
 
-**704 unit tests** cover the completed modules; CI runs them on every push.
+**735 unit tests** cover the completed modules; CI runs them on every push.
 
 ## Platforms
 
