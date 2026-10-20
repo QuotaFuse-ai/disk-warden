@@ -11,7 +11,7 @@ English | [Chinese](README.zh-CN.md)
 
 **Disk Warden** is a storage manager for AI coding tools. It finds the data directories of Cursor, Trae, Claude Code and other AI IDEs on your machine, moves the reproducible bulk (caches, indexes, logs) to another drive, and keeps the original paths working — so your system drive stops filling up.
 
-Runs on **Windows and macOS**.
+**Windows** builds are available today; macOS support is in progress.
 
 ## Why not just a cleanup tool
 
