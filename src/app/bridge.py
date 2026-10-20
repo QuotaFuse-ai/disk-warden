@@ -145,6 +145,9 @@ def build_methods(service):
             _require_str(p, "job_id"),
             _optional_str(p, "action", "recover") or "recover",
         ),
+        "recovery.ignore": lambda p: service.recovery_ignore(
+            _require_str(p, "job_id"),
+        ),
         "history.list": lambda p: service.history_list(
             _optional_str(p, "filter", "all") or "all",
             p.get("limit", 500),

@@ -191,6 +191,11 @@ MIGRATION_TERMINAL = frozenset(
 )
 
 # Rollback journal states that still need convergence after a restart.
+# ``ROLLBACK_FAILED`` is deliberately absent: the rollback engine treats it as
+# a terminal outcome, so "recover" on such a record only re-reads the terminal
+# state and reports success while the banner comes back on every refresh -- an
+# entry the user could never clear.  The interrupted migration keeps its own
+# non-terminal record and stays actionable.
 ROLLBACK_UNFINISHED = frozenset(
     [
         STATE_ROLLBACK_PLANNED,
@@ -200,7 +205,18 @@ ROLLBACK_UNFINISHED = frozenset(
         STATE_ROLLBACK_VERIFIED,
         STATE_ROLLBACK_SOURCE_READY,
         STATE_ROLLBACK_CONFIG_RESTORED,
-        STATE_ROLLBACK_FAILED,
+        STATE_ROLLBACK_RECOVERY_REQUIRED,
+    ]
+)
+
+# States where no automatic convergence is left: the engine either has to make
+# a judgement call it refuses to guess at, or the leftover is informational.
+# The user may hide the banner without touching the data; the record stays on
+# disk and the item comes back if the state moves again.
+IGNORABLE_STATES = frozenset(
+    [
+        STATE_RECOVERY_REQUIRED,
+        STATE_LINKED_CLEANUP_PENDING,
         STATE_ROLLBACK_RECOVERY_REQUIRED,
     ]
 )
@@ -2101,8 +2117,26 @@ class AppService(object):
         except Exception as exc:
             LOGGER.warning("journal listing failed: %s", exc)
             return {"items": [], "count": 0, "warnings": [str(exc)]}
+        # Migration records win the dedupe below: they carry the paths and the
+        # rollback action the user needs, while a rollback record only offers
+        # "recover".  Stable sort keeps newest-first order inside each group.
+        entries = sorted(entries, key=lambda entry: 0 if entry.type == TYPE_MIGRATION else 1)
+        ignored = {}
+        try:
+            ignored = self.journals.ignored()
+        except Exception as exc:
+            LOGGER.warning("ignored journal listing failed: %s", exc)
 
+        seen = set()
         for entry in entries:
+            # One row per job: a rollback record mirrors its migration record
+            # and would otherwise double the count for the same folder.
+            if entry.job_id in seen:
+                continue
+            if ignored.get("%s:%s" % (entry.type, entry.job_id)) == entry.state:
+                # The user hid this exact state.  Any later transition makes
+                # the entry visible again, so nothing new is ever swallowed.
+                continue
             if entry.type == TYPE_MIGRATION:
                 pending = entry.state not in MIGRATION_TERMINAL
                 attention = entry.state in (
@@ -2137,6 +2171,7 @@ class AppService(object):
                 except Exception:
                     final_path = ""
 
+            seen.add(entry.job_id)
             items.append(
                 {
                     "job_id": entry.job_id,
@@ -2155,10 +2190,53 @@ class AppService(object):
                     "actions": list(actions),
                     "needs_human": entry.state
                     in (STATE_RECOVERY_REQUIRED, STATE_ROLLBACK_RECOVERY_REQUIRED),
+                    "ignorable": entry.state in IGNORABLE_STATES,
+                    "detail": self._recovery_detail(entry),
                 }
             )
         items.sort(key=lambda item: item.get("updated_at") or "", reverse=True)
         return {"items": items, "count": len(items), "warnings": []}
+
+    @staticmethod
+    def _recovery_detail(entry):
+        # type: (object) -> str
+        """Why the entry needs attention, in words the user can act on."""
+        result = entry.result if isinstance(entry.result, dict) else {}
+        for key in ("error_message", "message", "reason"):
+            value = result.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        return ""
+
+    def recovery_ignore(self, job_id):
+        # type: (object) -> dict
+        """Hide one attention item without touching its data.
+
+        The journal stays on disk and stays loadable: ignoring is a UI
+        decision, not a resolution.  If the entry later moves to another
+        state it becomes visible again, so a real new problem is never
+        swallowed by an old dismissal.
+        """
+        if not isinstance(job_id, str) or not job_id:
+            raise invalid("job_id is required")
+        entry = self.journals.load(job_id, TYPE_MIGRATION)
+        if entry is None:
+            entry = self.journals.load(job_id, TYPE_ROLLBACK)
+        if entry is None:
+            raise not_found("journal entry not found", job_id=job_id)
+        if entry.state not in IGNORABLE_STATES:
+            raise invalid(
+                "this entry still has an automatic path; recover or roll it back",
+                state=entry.state,
+            )
+        self.journals.ignore(job_id, entry.type, entry.state)
+        LOGGER.info(
+            "recovery item hidden by user: job=%s type=%s state=%s",
+            job_id,
+            entry.type,
+            entry.state,
+        )
+        return {"job_id": job_id, "type": entry.type, "state": entry.state}
 
     def recovery_run(self, job_id, action="recover"):
         # type: (object, object) -> dict

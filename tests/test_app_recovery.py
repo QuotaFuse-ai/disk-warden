@@ -24,6 +24,7 @@ from src.core.store.journal import (
     STATE_LINKED_CLEANUP_PENDING,
     STATE_RECOVERY_REQUIRED,
     STATE_ROLLBACK_COPYING,
+    STATE_ROLLBACK_FAILED,
     STATE_ROLLBACK_RECOVERY_REQUIRED,
     STATE_ROLLED_BACK,
     TYPE_MIGRATION,
@@ -260,6 +261,97 @@ class CrashWindowTest(unittest.TestCase):
             os.rmdir(path)
         except OSError:
             pass
+
+
+class BannerConvergenceTest(unittest.TestCase):
+    """The banner must be clearable (T27).
+
+    A failure the engine already considers final used to stay listed, so
+    "recover" reported success and the banner came back on every refresh.
+    Entries that genuinely need a human now carry a hide action.
+    """
+
+    def setUp(self):
+        self.service = make_service(self)
+
+    def _items(self):
+        return {item["job_id"]: item for item in self.service.recovery_list()["items"]}
+
+    def test_failed_rollback_is_not_listed(self):
+        # The rollback engine treats ROLLBACK_FAILED as final; listing it
+        # promised a progress path that did not exist.
+        add_journal(
+            self.service, ROLLBACK_ID, TYPE_ROLLBACK, STATE_ROLLBACK_FAILED
+        )
+        self.assertEqual(self.service.recovery_list()["items"], [])
+
+    def test_one_row_per_job_when_both_records_exist(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_RECOVERY_REQUIRED)
+        add_journal(
+            self.service, MIGRATION_ID, TYPE_ROLLBACK, STATE_ROLLBACK_RECOVERY_REQUIRED
+        )
+        items = self.service.recovery_list()["items"]
+        self.assertEqual([item["job_id"] for item in items], [MIGRATION_ID])
+        self.assertEqual(items[0]["type"], TYPE_MIGRATION)
+
+    def test_attention_states_are_ignorable(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_RECOVERY_REQUIRED)
+        item = self._items()[MIGRATION_ID]
+        self.assertTrue(item["ignorable"])
+
+    def test_actionable_states_are_not_ignorable(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_LINKED)
+        self.assertFalse(self._items()[MIGRATION_ID]["ignorable"])
+
+    def test_ignored_entry_disappears(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_RECOVERY_REQUIRED)
+        self.service.recovery_ignore(MIGRATION_ID)
+        self.assertEqual(self.service.recovery_list()["items"], [])
+        # The journal itself is untouched: the record is still loadable.
+        entry = self.service.journals.load(MIGRATION_ID, TYPE_MIGRATION)
+        self.assertEqual(entry.state, STATE_RECOVERY_REQUIRED)
+
+    def test_ignore_survives_a_reload(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_RECOVERY_REQUIRED)
+        self.service.recovery_ignore(MIGRATION_ID)
+        hidden = self.service.journals.ignored()
+        self.assertEqual(
+            hidden["%s:%s" % (TYPE_MIGRATION, MIGRATION_ID)],
+            STATE_RECOVERY_REQUIRED,
+        )
+
+    def test_a_new_state_becomes_visible_again(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_LINKED_CLEANUP_PENDING)
+        self.service.recovery_ignore(MIGRATION_ID)
+        self.assertEqual(self.service.recovery_list()["items"], [])
+        self.service.journals.set_result(
+            MIGRATION_ID, STATE_RECOVERY_REQUIRED, entry_type=TYPE_MIGRATION
+        )
+        self.assertIn(MIGRATION_ID, self._items())
+
+    def test_ignore_rejects_an_entry_with_an_automatic_path(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_LINKED)
+        with self.assertRaises(BridgeError) as ctx:
+            self.service.recovery_ignore(MIGRATION_ID)
+        self.assertEqual(ctx.exception.code, "INVALID_ARGUMENT")
+        self.assertIn(MIGRATION_ID, self._items())
+
+    def test_ignore_requires_a_known_job(self):
+        with self.assertRaises(BridgeError) as ctx:
+            self.service.recovery_ignore(MIGRATION_ID)
+        self.assertEqual(ctx.exception.code, "NOT_FOUND")
+
+    def test_corrupt_ignore_file_hides_nothing(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_RECOVERY_REQUIRED)
+        path = os.path.join(self.service.journals.jobs_dir, ".ignored.json")
+        with open(path, "w") as handle:
+            handle.write("{not json")
+        self.assertIn(MIGRATION_ID, self._items())
+
+    def test_amount_is_reported_once_per_job(self):
+        add_journal(self.service, MIGRATION_ID, TYPE_MIGRATION, STATE_RECOVERY_REQUIRED)
+        add_journal(self.service, ROLLBACK_ID, TYPE_ROLLBACK, STATE_ROLLBACK_COPYING)
+        self.assertEqual(self.service.recovery_list()["count"], 2)
 
 
 if __name__ == "__main__":
