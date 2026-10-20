@@ -33,7 +33,7 @@ English | [Chinese](README.zh-CN.md)
 | Windows packaging (T15) | Unsigned development build (zip) available |
 | macOS packaging (T21) | Not started |
 
-**649 unit tests** cover the completed modules; CI runs them on every push.
+**652 unit tests** cover the completed modules; CI runs them on every push.
 
 ## Platforms
 
