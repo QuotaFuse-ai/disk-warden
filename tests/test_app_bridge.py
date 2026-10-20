@@ -12,6 +12,7 @@ from src.app.errors import BridgeError
 EXPECTED_METHODS = {
     "app.hello",
     "app.ping",
+    "app.reveal",
     "settings.get",
     "settings.set",
     "ai.status",
@@ -103,6 +104,20 @@ class WhitelistTest(BridgeTestBase):
         self.assertEqual(
             response["result"], {"ok": True, "protocol": PROTOCOL_VERSION}
         )
+
+    def test_reveal_requires_a_path(self):
+        error = self.assert_error(self.call("app.reveal", {}), "INVALID_ARGUMENT")
+        self.assertIn("path", error["detail"]["reason"])
+        self.service.reveal.assert_not_called()
+
+    def test_reveal_forwards_the_path(self):
+        self.service.reveal.return_value = {"opened": True, "path": "C:\\Windows"}
+        response = self.call("app.reveal", {"path": "C:\\Windows"})
+        self.assertTrue(response["ok"])
+        self.assertEqual(
+            response["result"], {"opened": True, "path": "C:\\Windows"}
+        )
+        self.service.reveal.assert_called_once_with("C:\\Windows")
 
 
 class ParamsValidationTest(BridgeTestBase):

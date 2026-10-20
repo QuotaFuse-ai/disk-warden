@@ -698,7 +698,7 @@ I18N['zh-CN'] = {
   'ide.alreadyMigrated': '该软件的数据已位于目标盘，通过 junction 链接回原路径。',
   'ide.allGreenSelected': '全选可迁',
   'ide.cleanHint': '仅清理 Chromium / 编译缓存，不触碰会话与配置。',
-  'ide.openHint': '已在资源管理器中打开（原型模拟）',
+  'ide.openHint': '已在资源管理器中打开',
   'ide.selectIde': '请选择软件',
   'reason.chatDb': 'AI 对话与 agent 状态数据库，可再生',
   'reason.workspace': '各项目工作区索引，可再生',
@@ -1100,7 +1100,12 @@ I18N['zh-CN'] = {
   'toast.scanDone': '扫描完成',
   'toast.scanCancelled': '已取消扫描',
   'toast.copied': '已复制到剪贴板（原型模拟）',
-  'toast.opened': '已在资源管理器中打开（原型模拟）',
+  'toast.opened': '已在资源管理器中打开',
+  'toast.openFailed': '无法打开目录',
+  'error.NOT_FOUND': '目录不存在',
+  'error.PERMISSION_DENIED': '没有权限访问该目录',
+  'error.IO_ERROR': '系统未能打开资源管理器',
+  'error.INTERNAL': '主机端内部错误',
   'toast.cleaned': '缓存清理完成，释放 {size}（原型模拟）',
   'toast.ruleAdded': '规则已添加',
   'toast.saved': '设置已保存',
@@ -1345,7 +1350,7 @@ I18N['en'] = {
   'ide.alreadyMigrated': 'This app already lives on the target drive and is linked back with a junction.',
   'ide.allGreenSelected': 'Select all migratable',
   'ide.cleanHint': 'Only Chromium and compile caches are cleaned. Sessions and config stay.',
-  'ide.openHint': 'Opened in Explorer (prototype simulation)',
+  'ide.openHint': 'Opened in Explorer',
   'ide.selectIde': 'Select an app',
   'reason.chatDb': 'AI chat and agent state database, regenerable',
   'reason.workspace': 'Per-project workspace index, regenerable',
@@ -1747,7 +1752,12 @@ I18N['en'] = {
   'toast.scanDone': 'Scan complete',
   'toast.scanCancelled': 'Scan cancelled',
   'toast.copied': 'Copied to clipboard (prototype simulation)',
-  'toast.opened': 'Opened in Explorer (prototype simulation)',
+  'toast.opened': 'Opened in Explorer',
+  'toast.openFailed': 'Could not open folder',
+  'error.NOT_FOUND': 'Folder does not exist',
+  'error.PERMISSION_DENIED': 'Access to the folder was denied',
+  'error.IO_ERROR': 'Windows could not open Explorer',
+  'error.INTERNAL': 'Host internal error',
   'toast.cleaned': 'Cache cleaned, freed {size} (prototype simulation)',
   'toast.ruleAdded': 'Rule added',
   'toast.saved': 'Settings saved',
@@ -2021,6 +2031,17 @@ const DISK_CATEGORIES = [
   { id: 'temp', name: 'disk.temp', desc: 'disk.tempDesc', gb: 1.9, handling: 'clean', color: '#f7c04a' },
   { id: 'models', name: 'disk.models', desc: 'disk.modelsDesc', gb: 3.2, handling: 'env-var', color: '#3fbf44' }
 ];
+/* “查看位置”落到该分类数据所在的系统目录；%VAR% 由主机端展开。 */
+const DISK_LOCATIONS = {
+  'ai-ide': '%APPDATA%',
+  'ai-cli': '%USERPROFILE%',
+  'worktrees': '%USERPROFILE%',
+  'pkg': '%LOCALAPPDATA%',
+  'jetbrains': '%LOCALAPPDATA%',
+  'sys': '%SystemRoot%',
+  'temp': '%TEMP%',
+  'models': '%USERPROFILE%'
+};
 const DISK_SEGMENTS = [
   { key: 'disk.ide', gb: 18.6, color: '#2f8bf5' },
   { key: 'disk.dev', gb: 6.4, color: '#7c5cff' },
@@ -3215,10 +3236,10 @@ function renderIdeDetail(ide) {
     <div class="actions">
       ${migrated
         ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.openRollback('${ide.id}')">${esc(t('action.rollback'))}</button>
-           <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>`
+           <button type="button" class="btn btn-ghost btn-sm" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>`
         : `<button type="button" class="btn btn-primary btn-sm" ${g ? '' : 'disabled'} onclick="App.startPreview('${ide.id}')">${esc(t('action.migrate'))}</button>
            <button type="button" class="btn btn-ghost btn-sm" onclick="App.cleanCaches('${ide.id}')">${esc(t('action.clean'))}</button>
-           <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>
            <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>`}
       <span class="spacer"></span>
       <span class="note">${esc(migrated ? t('rollback.note', { app: ide.name }) : t('ide.cleanHint'))}</span>
@@ -3383,7 +3404,7 @@ function renderProjects() {
         </div>
         <div class="actions">
           <button type="button" class="btn btn-primary btn-sm" onclick="App.cleanProject('all')">${esc(t('action.clean'))}</button>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="App.openProjectFolder('${p.id}')">${esc(t('action.openFolder'))}</button>
           <span class="spacer"></span><span class="note">${esc(t('projects.note'))}</span>
         </div>
       </div>
@@ -3416,7 +3437,7 @@ function renderDisk() {
                 </td>
                 <td class="num">${c.gb.toFixed(1)} GB</td>
                 <td><span class="tag tag-code">${esc(t('disk.handling.' + c.handling))}</span></td>
-                <td class="right"><button type="button" class="btn btn-ghost btn-xs" onclick="App.toast(t('toast.opened'))">${esc(t('action.viewLocation'))}</button></td>
+                <td class="right"><button type="button" class="btn btn-ghost btn-xs" onclick="App.openDiskLocation('${c.id}')">${esc(t('action.viewLocation'))}</button></td>
               </tr>`).join('')}
             </tbody>
           </table>
@@ -4895,6 +4916,26 @@ const App = {
     copyText(diagnosticsText()).then(ok => {
       this.toast(t(ok ? 'feedback.copied' : 'toast.copyFailed'));
     });
+  },
+  openPath(path) {
+    if (!path) { this.toast(t('toast.openFailed')); return; }
+    rpc('app.reveal', { path: String(path) }).then(() => {
+      this.toast(t('toast.opened'));
+    }).catch(err => {
+      const detail = errText(err);
+      this.toast(t('toast.openFailed') + (detail ? ': ' + detail : ''));
+    });
+  },
+  openIdeFolder(ideId) {
+    const ide = getIde(ideId);
+    this.openPath((ide.runtime && ide.runtime.root) || '');
+  },
+  openProjectFolder(projectId) {
+    const project = PROJECTS.find(x => x.id === projectId) || PROJECTS[0];
+    this.openPath(project ? project.path : '');
+  },
+  openDiskLocation(categoryId) {
+    this.openPath(DISK_LOCATIONS[categoryId] || '');
   },
   toast(message) {
     const el = document.getElementById('toast');
