@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Disk Warden — move AI IDE data off the C: drive</title>
+  <meta name="description" content="Disk Warden finds the data folders behind Cursor, Trae, Claude Code and other AI tools, moves the reproducible parts to another drive, and keeps the original paths working. Free for personal use on Windows.">
+  <meta name="theme-color" content="#0b7a4f">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Disk Warden">
+  <meta property="og:title" content="Disk Warden — move AI IDE data off the C: drive">
+  <meta property="og:description" content="Move the reproducible bulk of AI IDE data to another drive, keep every original path working, and roll back in one click.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="zh_CN">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f8a5a'/%3E%3Cpath d='M16 7l7 3v6c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9v-6z' fill='%23fff' opacity='.92'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top">
+        <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect width="32" height="32" rx="8" fill="#0f8a5a"></rect>
+          <path d="M16 7l7 3v6c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9v-6z" fill="#ffffff" opacity=".92"></path>
+        </svg>
+        <span>Disk Warden</span>
+        <span class="brand-owner">QuotaFuse</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#problem">Why</a>
+        <a href="#how">How it works</a>
+        <a href="#safety">Safety</a>
+        <a href="#faq">FAQ</a>
+        <a href="#download">Download</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="lang" href="zh-Hans/index.html" hreflang="zh-Hans" lang="zh-Hans">中文</a>
+        <a class="header-gh" href="https://github.com/QuotaFuse-ai/disk-warden">GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- 1. Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Storage manager for AI IDEs</p>
+          <h1 id="hero-title">Free your C: drive. Keep your AI IDE working.</h1>
+          <p class="hero-lead">Disk Warden finds the data folders behind Cursor, Trae, Claude Code and other AI tools, moves the reproducible bulk to another drive, and leaves the original paths intact. Everything keeps working from the same path; credentials and settings never move.</p>
+
+          <div class="cta-row">
+            <button class="btn btn-primary" type="button" disabled aria-describedby="hero-cta-note">Coming soon for Windows</button>
+            <a class="btn btn-ghost" href="https://github.com/QuotaFuse-ai/disk-warden">View source on GitHub</a>
+          </div>
+          <p class="cta-note" id="hero-cta-note">Windows test builds exist (0.9.0-beta.7, unsigned), but there is no public installer yet — this button stays disabled on purpose.</p>
+
+          <ul class="trust">
+            <li>No account needed</li>
+            <li>No administrator rights</li>
+            <li>Works offline</li>
+          </ul>
+        </div>
+
+        <div class="diagram" aria-hidden="true">
+          <div class="path-box">
+            <span class="path-label">The app reads</span>
+            <code>C:\Users\you\AppData\Roaming\Cursor</code>
+          </div>
+          <div class="link-arrow">
+            <span class="link-line"></span>
+            <span class="link-label">junction</span>
+            <span class="link-line"></span>
+            <span class="link-head"></span>
+          </div>
+          <div class="path-box path-box--target">
+            <span class="path-label">The data lives on</span>
+            <code>D:\DiskWarden\Cursor</code>
+          </div>
+          <p class="diagram-note">The original path still exists. It just points to another drive, so the app never learns that anything moved.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Problem -->
+    <section class="section section--alt" id="problem" aria-labelledby="problem-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="problem-title">The space is not your code. It is local AI state.</h2>
+          <p>AI IDEs keep a local database, workspace indexes, logs and session history. Those files are not your source code, and most can be rebuilt — but they sit in the same folder tree as the login tokens and settings that cannot move. Cleaning by hand is how people end up logged out, or worse, with a half-deleted profile.</p>
+        </div>
+
+        <div class="stat-grid">
+          <article class="stat">
+            <p class="stat-num">200 GB+</p>
+            <p class="stat-copy">Disk use reported from a runaway debug-logging loop in Claude Code, where individual debug files passed 20 GB.</p>
+            <p class="stat-source">Source: <a href="https://github.com/anthropics/claude-code/issues/16093" rel="noopener noreferrer">GitHub issue #16093 <span aria-hidden="true">↗</span></a></p>
+          </article>
+
+          <article class="stat">
+            <p class="stat-num">44,635</p>
+            <p class="stat-copy">Files accumulated in <code>~/.claude/debug</code> in roughly four weeks, in a reproduction filed by another user.</p>
+            <p class="stat-source">Source: <a href="https://github.com/anthropics/claude-code/issues/28235" rel="noopener noreferrer">GitHub issue #28235 <span aria-hidden="true">↗</span></a></p>
+          </article>
+
+          <article class="stat">
+            <p class="stat-num">5.86 GB</p>
+            <p class="stat-copy">A single Cursor local database, reported at 5,860,462,592 bytes in the Cursor community forum — one key in it around 3.1 MB.</p>
+            <p class="stat-source">Source: <a href="https://forum.cursor.com/t/cursor-version-2-5-22-is-unusable/152665" rel="noopener noreferrer">Cursor forum thread <span aria-hidden="true">↗</span></a></p>
+          </article>
+        </div>
+
+        <p class="source-note">These are public bug reports and community threads, linked per item — not measurements we took. Your folder sizes will differ, and a single tool can hold several of these directories at once.</p>
+      </div>
+    </section>
+
+    <!-- 3. How it works -->
+    <section class="section" id="how" aria-labelledby="how-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="how-title">Move only what can be rebuilt.</h2>
+          <p>Three steps, and nothing irreversible happens before a verified copy exists.</p>
+        </div>
+
+        <div class="step-grid">
+          <article class="step">
+            <span class="step-tag">Step 01</span>
+            <h3>Identify</h3>
+            <p>Scan the known data roots of the AI IDEs and CLIs you use — Cursor, Trae, Claude Code, VS Code, Windsurf and more. Every folder is classified green (movable), yellow (unknown, ask first) or red (never touch).</p>
+          </article>
+
+          <article class="step">
+            <span class="step-tag">Step 02</span>
+            <h3>Preview</h3>
+            <p>Before anything is written, see which folders will move, how much C: will free, and how much the target drive needs. Anything you have not confirmed stays exactly where it is.</p>
+          </article>
+
+          <article class="step">
+            <span class="step-tag">Step 03</span>
+            <h3>Take over the path</h3>
+            <p>Copy, verify, then replace the original folder with a directory junction. The tool keeps reading the same path and new data lands on the target drive. No reinstall, no config edits.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Defaults -->
+    <section class="section section--alt" id="defaults" aria-labelledby="defaults-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="defaults-title">Optional accounts, quiet prompts, AI off by default.</h2>
+          <p>Three defaults that keep the app out of the way.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature">
+            <h3>Sign-in is optional</h3>
+            <p>The welcome screen and a GitHub sign-in are in development. When they arrive, skipping stays a first-class choice: scanning, migrating and rollback all run locally and never need an account.</p>
+          </article>
+
+          <article class="feature">
+            <h3>No nagging for stars</h3>
+            <p>The GitHub Star hint is a single line you can dismiss. It never blocks a task, and no feature waits on it.</p>
+          </article>
+
+          <article class="feature">
+            <h3>AI analysis off by default</h3>
+            <p>Nothing leaves the machine unless you turn AI analysis on. The API key is encrypted on this machine with Windows DPAPI — never uploaded, never written into a config file.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Safety and rollback -->
+    <section class="section" id="safety" aria-labelledby="safety-title">
+      <div class="wrap">
+        <div class="safety-panel">
+          <h2 id="safety-title">Nothing is deleted until a second copy is verified.</h2>
+          <p class="safety-lead">The four checks below run on every migration, not just the first one.</p>
+
+          <div class="safety-grid">
+            <div class="safety-item">
+              <span class="check" aria-hidden="true">✓</span>
+              <div>
+                <h3>Red items stay put</h3>
+                <p>Login Data, Local State, settings and memory files are classified red: never copied, moved or linked. What moves is cache, indexes, logs and session history.</p>
+              </div>
+            </div>
+
+            <div class="safety-item">
+              <span class="check" aria-hidden="true">✓</span>
+              <div>
+                <h3>Preview before execution</h3>
+                <p>Every move lists the folders, the space freed and the space needed. Unknown folders need a per-item confirmation before they can enter a plan.</p>
+              </div>
+            </div>
+
+            <div class="safety-item">
+              <span class="check" aria-hidden="true">✓</span>
+              <div>
+                <h3>Verify, then swap</h3>
+                <p>The copy is checked by relative-path set, file count and total bytes. If anything differs, the source stays intact and no link is created.</p>
+              </div>
+            </div>
+
+            <div class="safety-item">
+              <span class="check" aria-hidden="true">✓</span>
+              <div>
+                <h3>One-click rollback</h3>
+                <p>Move the data back to C: at any time. The copy on the target drive is cleaned only after the restored copy has verified.</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="safety-foot">If a migration is interrupted, the next start detects the unfinished task and either completes recovery or stops and asks for a decision — it does not guess. No administrator rights are requested, and scan, migration and rollback make no network requests.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. UI illustration -->
+    <section class="section section--alt" id="interface" aria-labelledby="interface-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="interface-title">What it looks like</h2>
+          <p>One screen per tool: what is movable, what is protected, and what a migration will free.</p>
+        </div>
+
+        <figure class="figure">
+          <img class="screenshot" src="assets/ide-overview-en.png" width="1440" height="900" loading="lazy" decoding="async"
+               alt="The Disk Warden IDE data screen. Five tools are listed with their sizes and Cursor is selected. The detail panel shows seven folders — four graded movable, one unknown and two protected — plus the space a migration would free on C: and the space it needs on D:.">
+          <figcaption class="figcaption">
+            <span>The shipped IDE data screen (0.9.0-beta.7, Windows 11). Folder names and sizes are sample data.</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 6. Status and download -->
+    <section class="section" id="download" aria-labelledby="download-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="download-title">Status and download</h2>
+          <p>Windows builds are in testing. macOS is in development. Nothing is published yet — the first public release will appear on GitHub Releases.</p>
+        </div>
+
+        <div class="status-grid">
+          <article class="status-card">
+            <div class="status-top">
+              <h3>Windows 10 / 11 · 64-bit</h3>
+              <span class="pill pill--beta">Test build</span>
+            </div>
+            <dl class="meta-list">
+              <dt>Current build</dt>
+              <dd><code>0.9.0-beta.7</code> · unsigned</dd>
+              <dt>Next</dt>
+              <dd><code>0.9.0-beta.8</code> — carries the junction-validation fix, coming soon</dd>
+              <dt>In this build</dt>
+              <dd>Tray icon · start with Windows for the current user · log rotation</dd>
+              <dt>Distribution</dt>
+              <dd>No public installer yet</dd>
+            </dl>
+          </article>
+
+          <article class="status-card">
+            <div class="status-top">
+              <h3>macOS 12+</h3>
+              <span class="pill">In development</span>
+            </div>
+            <dl class="meta-list">
+              <dt>Current build</dt>
+              <dd>Unsigned <code>.app</code>, built in CI</dd>
+              <dt>Approach</dt>
+              <dd>Symlinks instead of junctions</dd>
+              <dt>Timeline</dt>
+              <dd>No date announced</dd>
+              <dt>Distribution</dt>
+              <dd>Not available — there is no macOS download on this page</dd>
+            </dl>
+          </article>
+        </div>
+
+        <div class="download-card">
+          <div>
+            <h3>Disk Warden for Windows</h3>
+            <p class="download-sub">Test build 0.9.0-beta.7 · unsigned · not published</p>
+
+            <dl class="meta-list">
+              <dt>Platform</dt>
+              <dd>Windows 10 / 11 · 64-bit</dd>
+              <dt>Requirements</dt>
+              <dd>No administrator rights · No account needed</dd>
+              <dt>License</dt>
+              <dd>PolyForm Noncommercial 1.0.0</dd>
+              <dt>Installer</dt>
+              <dd><span class="todo">TODO</span> not built for public download</dd>
+              <dt>SHA-256</dt>
+              <dd><span class="todo">TODO</span> published with the first public build</dd>
+            </dl>
+          </div>
+
+          <div class="download-action">
+            <button class="btn btn-primary" type="button" disabled aria-describedby="dl-status">Coming soon</button>
+            <p class="dl-status" id="dl-status">Test builds exist, but there is no public installer yet. This button is disabled on purpose. The first public version will be published on GitHub Releases.</p>
+            <a class="text-link" href="https://github.com/QuotaFuse-ai/disk-warden">Follow releases on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. License -->
+    <section class="section section--alt" id="license" aria-labelledby="license-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="license-title">License</h2>
+          <p>Source-available under the PolyForm Noncommercial License 1.0.0. Free for individuals; commercial use needs a separate license.</p>
+        </div>
+
+        <div class="license-card">
+          <div class="license-grid">
+            <div class="license-col">
+              <h3>Free for</h3>
+              <ul>
+                <li>Personal use</li>
+                <li>Study and research</li>
+                <li>Nonprofit use</li>
+              </ul>
+            </div>
+            <div class="license-col license-col--commercial">
+              <h3>Commercial use</h3>
+              <p>Any commercial use — including internal use by a company — requires a separate commercial license. Write to <a href="mailto:44062290+QuotaFuse-ai@users.noreply.github.com">44062290+QuotaFuse-ai@users.noreply.github.com</a>.</p>
+            </div>
+          </div>
+          <p class="license-foot">
+            <a href="https://github.com/QuotaFuse-ai/disk-warden/blob/main/LICENSE">Read the full license text <span aria-hidden="true">↗</span></a>
+            <span>Source-available, not an OSI-approved open-source license.</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. FAQ -->
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="faq-title">Questions people actually ask</h2>
+        </div>
+
+        <div class="faq">
+          <details>
+            <summary>Will migration delete my chats or log me out?</summary>
+            <p>No. Chats, caches, logs and indexes are movable; login data, settings and memory are classified red and are never touched. Anything that moves is data the tool can rebuild.</p>
+          </details>
+
+          <details>
+            <summary>Does the IDE still work after migration?</summary>
+            <p>Yes. The original path becomes a directory junction that points at the new location, so the app opens exactly the path it opened before. New data is written to the target drive, and no configuration is edited.</p>
+          </details>
+
+          <details>
+            <summary>How do I roll back?</summary>
+            <p>Select the migrated tool and choose “Move back to C:”. The data is copied to the original path, verified, and only then is the copy on the target drive removed. Rollback stays available for as long as the migrated data exists.</p>
+          </details>
+
+          <details>
+            <summary>Do I have to close the IDE during migration?</summary>
+            <p>Yes. Files that are open cannot be copied reliably. If the tool is running, the migration is blocked rather than forced — Disk Warden will not kill the process for you.</p>
+          </details>
+
+          <details>
+            <summary>Which tools are supported?</summary>
+            <p>Cursor, Trae (CN and international builds), Claude Code, VS Code, Windsurf and other known AI IDEs and CLIs. Folders the rules do not recognize are shown as yellow and need your explicit confirmation before they can move.</p>
+          </details>
+
+          <details>
+            <summary>When will the macOS version be available?</summary>
+            <p>It is in development. Unsigned <code>.app</code> builds are produced in CI on GitHub's macOS runners, using symlinks instead of junctions. No release date is announced, and there is no macOS download on this page.</p>
+          </details>
+
+          <details>
+            <summary>Do I have to sign in with GitHub?</summary>
+            <p>No. The welcome screen and GitHub sign-in are still in development, and skipping will stay a first-class choice once they ship. Scanning, migrating and rollback run entirely on this machine and never need an account.</p>
+          </details>
+
+          <details>
+            <summary>Does Disk Warden upload my data?</summary>
+            <p>No — not by default. Scan, migration and rollback make no network requests. AI analysis is off until you enable it; if you do, folder metadata (paths, sizes and rule reasons) is sent to the model endpoint you configure. The API key is encrypted with Windows DPAPI, stays on this machine and is never uploaded.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. GitHub -->
+    <section class="section section--flush-top" id="github-entry" aria-labelledby="github-title">
+      <div class="wrap">
+        <div class="gh-band">
+          <div>
+            <h2 id="github-title">Source, issues and release notes</h2>
+            <p>Disk Warden is developed in the open. Reports about a folder that should — or should not — be moved are especially useful.</p>
+          </div>
+          <a class="btn btn-ghost" href="https://github.com/QuotaFuse-ai/disk-warden">github.com/QuotaFuse-ai/disk-warden <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p>© 2026 huangtao · Disk Warden is a <a href="https://www.quotafuse.com">QuotaFuse</a> project.</p>
+      <div class="footer-links">
+        <a href="https://github.com/QuotaFuse-ai/disk-warden">GitHub</a>
+        <a href="https://github.com/QuotaFuse-ai/disk-warden/blob/main/LICENSE">License</a>
+        <a href="zh-Hans/index.html" hreflang="zh-Hans" lang="zh-Hans">中文</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

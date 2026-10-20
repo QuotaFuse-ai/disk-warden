@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Disk Warden — 把 AI IDE 数据搬离 C 盘</title>
+  <meta name="description" content="Disk Warden 识别 Cursor、Trae、Claude Code 等 AI 工具的数据目录，把可再生数据迁到其他磁盘，原路径保持可用，支持一键回滚。Windows 个人使用免费。">
+  <meta name="theme-color" content="#0b7a4f">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Disk Warden">
+  <meta property="og:title" content="Disk Warden — 把 AI IDE 数据搬离 C 盘">
+  <meta property="og:description" content="把 AI IDE 的可再生数据迁到其他磁盘，原路径继续可用，随时一键回滚。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f8a5a'/%3E%3Cpath d='M16 7l7 3v6c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9v-6z' fill='%23fff' opacity='.92'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top">
+        <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect width="32" height="32" rx="8" fill="#0f8a5a"></rect>
+          <path d="M16 7l7 3v6c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9v-6z" fill="#ffffff" opacity=".92"></path>
+        </svg>
+        <span>Disk Warden</span>
+        <span class="brand-owner">QuotaFuse</span>
+      </a>
+
+      <nav class="nav-links" aria-label="页面章节">
+        <a href="#problem">为什么</a>
+        <a href="#how">工作方式</a>
+        <a href="#safety">安全</a>
+        <a href="#faq">常见问题</a>
+        <a href="#download">下载</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="lang" href="../index.html" hreflang="en" lang="en">EN</a>
+        <a class="header-gh" href="https://github.com/QuotaFuse-ai/disk-warden">GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- 1. Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>AI IDE 存储管家</p>
+          <h1 id="hero-title">清空 C 盘，不打断 AI IDE。</h1>
+          <p class="hero-lead">Disk Warden 找出 Cursor、Trae、Claude Code 等 AI 工具的数据目录，把可再生的部分迁到其他磁盘，并在原路径留下链接——工具照常读取原来的路径，凭证和配置不动。</p>
+
+          <div class="cta-row">
+            <button class="btn btn-primary" type="button" disabled aria-describedby="hero-cta-note">Windows 版即将发布</button>
+            <a class="btn btn-ghost" href="https://github.com/QuotaFuse-ai/disk-warden">在 GitHub 查看源码</a>
+          </div>
+          <p class="cta-note" id="hero-cta-note">Windows 测试版本已经可以构建（0.9.0-beta.7，未签名），但还没有公开安装包——这个按钮是刻意禁用的。</p>
+
+          <ul class="trust">
+            <li>无需账号</li>
+            <li>无需管理员权限</li>
+            <li>离线可用</li>
+          </ul>
+        </div>
+
+        <div class="diagram" aria-hidden="true">
+          <div class="path-box">
+            <span class="path-label">应用读取</span>
+            <code>C:\Users\you\AppData\Roaming\Cursor</code>
+          </div>
+          <div class="link-arrow">
+            <span class="link-line"></span>
+            <span class="link-label">junction</span>
+            <span class="link-line"></span>
+            <span class="link-head"></span>
+          </div>
+          <div class="path-box path-box--target">
+            <span class="path-label">数据实际存放于</span>
+            <code>D:\DiskWarden\Cursor</code>
+          </div>
+          <p class="diagram-note">原路径仍然存在，只是指向了另一块磁盘。应用感知不到这次变化。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Problem -->
+    <section class="section section--alt" id="problem" aria-labelledby="problem-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="problem-title">占地方的不是代码，是本地 AI 状态。</h2>
+          <p>AI IDE 会在本地保存数据库、工作区索引、日志和会话记录。这些不是你的源码，多数可以重建；但它们和登录凭证、配置处在同一棵目录树下。手动清理，正是丢登录状态的常见原因。</p>
+        </div>
+
+        <div class="stat-grid">
+          <article class="stat">
+            <p class="stat-num">200 GB+</p>
+            <p class="stat-copy">有用户报告 Claude Code 的调试日志陷入循环，单个调试文件超过 20 GB，磁盘占用达到 200 GB 以上。</p>
+            <p class="stat-source">来源：<a href="https://github.com/anthropics/claude-code/issues/16093" rel="noopener noreferrer">GitHub issue #16093 <span aria-hidden="true">↗</span></a></p>
+          </article>
+
+          <article class="stat">
+            <p class="stat-num">44,635</p>
+            <p class="stat-copy">另一位用户的复现中，约四周内 <code>~/.claude/debug</code> 累积了 44,635 个文件。</p>
+            <p class="stat-source">来源：<a href="https://github.com/anthropics/claude-code/issues/28235" rel="noopener noreferrer">GitHub issue #28235 <span aria-hidden="true">↗</span></a></p>
+          </article>
+
+          <article class="stat">
+            <p class="stat-num">5.86 GB</p>
+            <p class="stat-copy">Cursor 社区论坛报告单个本地数据库达到 5,860,462,592 字节（约 5.86 GB），其中一个键约占 3.1 MB。</p>
+            <p class="stat-source">来源：<a href="https://forum.cursor.com/t/cursor-version-2-5-22-is-unusable/152665" rel="noopener noreferrer">Cursor 论坛帖子 <span aria-hidden="true">↗</span></a></p>
+          </article>
+        </div>
+
+        <p class="source-note">以上均为公开的 bug 报告与社区帖子，逐条附了链接，不是我们的实测数据。你的目录大小会不同，一个工具也可能同时存在多个这样的目录。</p>
+      </div>
+    </section>
+
+    <!-- 3. How it works -->
+    <section class="section" id="how" aria-labelledby="how-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="how-title">只搬可以重建的数据。</h2>
+          <p>三步完成，在第二份副本校验通过之前，没有任何不可逆的操作。</p>
+        </div>
+
+        <div class="step-grid">
+          <article class="step">
+            <span class="step-tag">01</span>
+            <h3>识别</h3>
+            <p>扫描你在用的 AI IDE / CLI 的已知数据根：Cursor、Trae、Claude Code、VS Code、Windsurf 等。每个目录标成绿色（可迁）、黄色（未知，先询问）或红色（不可动）。</p>
+          </article>
+
+          <article class="step">
+            <span class="step-tag">02</span>
+            <h3>预览</h3>
+            <p>写入任何数据之前，先看清哪些目录会移动、C 盘能释放多少、目标盘需要多少。没有确认过的目录原地不动。</p>
+          </article>
+
+          <article class="step">
+            <span class="step-tag">03</span>
+            <h3>接管路径</h3>
+            <p>复制、校验，再把原目录替换为目录联接（junction）。工具读取的仍是原路径，新数据写入目标盘。不用重装，不用改配置。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 默认行为 -->
+    <section class="section section--alt" id="defaults" aria-labelledby="defaults-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="defaults-title">账号可选，提示克制，AI 默认关闭。</h2>
+          <p>三个默认行为，尽量不打扰你。</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature">
+            <h3>登录可以跳过</h3>
+            <p>欢迎页和 GitHub 登录正在开发中。上线后，跳过始终是并列的选择：扫描、迁移和回滚都在本机完成，不需要账号。</p>
+          </article>
+
+          <article class="feature">
+            <h3>不追着你要 Star</h3>
+            <p>GitHub Star 引导只是一行可以关掉的提示，不挡操作，也没有任何功能依赖它。</p>
+          </article>
+
+          <article class="feature">
+            <h3>AI 分析默认关闭</h3>
+            <p>不打开 AI 分析，就不会把任何内容发到本机之外。API Key 在本机用 Windows DPAPI 加密保存——不上传，也不写进配置文件。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Safety and rollback -->
+    <section class="section" id="safety" aria-labelledby="safety-title">
+      <div class="wrap">
+        <div class="safety-panel">
+          <h2 id="safety-title">在第二份副本校验通过之前，不删除任何东西。</h2>
+          <p class="safety-lead">下面四项检查在每次迁移时都会执行，不只是第一次。</p>
+
+          <div class="safety-grid">
+            <div class="safety-item">
+              <span class="check" aria-hidden="true">✓</span>
+              <div>
+                <h3>红色项原地不动</h3>
+                <p>登录数据、Local State、settings 和记忆文件属于红色项：不复制、不移动、不建链。会被搬走的是缓存、索引、日志和会话记录。</p>
+              </div>
+            </div>
+
+            <div class="safety-item">
+              <span class="check" aria-hidden="true">✓</span>
+              <div>
+                <h3>先预览，再执行</h3>
+                <p>每次迁移都列出目录、释放量和目标盘需求量。未知目录必须逐条确认，才能进入迁移清单。</p>
+              </div>
+            </div>
+
+            <div class="safety-item">
+              <span class="check" aria-hidden="true">✓</span>
+              <div>
+                <h3>校验通过才换位</h3>
+                <p>复制完成后按相对路径集合、文件数、总字节校验。任何一项不一致，源目录保持完整，不会创建链接。</p>
+              </div>
+            </div>
+
+            <div class="safety-item">
+              <span class="check" aria-hidden="true">✓</span>
+              <div>
+                <h3>随时一键回滚</h3>
+                <p>数据随时可以迁回 C 盘。只有迁回并校验通过后，才会清理目标盘上的副本。</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="safety-foot">迁移被中断时，下次启动会识别未完成的任务：要么完成恢复，要么停下来让你决定，不做猜测。全程不申请管理员权限，扫描、迁移和回滚都不发起网络请求。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. UI illustration -->
+    <section class="section section--alt" id="interface" aria-labelledby="interface-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="interface-title">界面长什么样</h2>
+          <p>每个工具一屏：哪些能搬、哪些受保护、这次迁移能释放多少。</p>
+        </div>
+
+        <figure class="figure">
+          <img class="screenshot" src="../assets/ide-overview-zh.png" width="1440" height="900" loading="lazy" decoding="async"
+               alt="Disk Warden 的「IDE 数据」界面。左侧列出五个工具及其占用大小，选中 Cursor；右侧详情显示七个目录——四个可迁、一个未知、两个不可动——以及本次迁移预计释放的 C 盘空间和目标盘所需空间。">
+          <figcaption class="figcaption">
+            <span>Disk Warden 0.9.0-beta.7 的「IDE 数据」界面（Windows 11）。目录名与大小为示例数据。</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 6. 状态与下载 -->
+    <section class="section" id="download" aria-labelledby="download-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="download-title">状态与下载</h2>
+          <p>Windows 版本正在测试，macOS 版本开发中。目前还没有公开发布——首个公开版本会出现在 GitHub Releases。</p>
+        </div>
+
+        <div class="status-grid">
+          <article class="status-card">
+            <div class="status-top">
+              <h3>Windows 10 / 11 · 64 位</h3>
+              <span class="pill pill--beta">测试版本</span>
+            </div>
+            <dl class="meta-list">
+              <dt>当前版本</dt>
+              <dd><code>0.9.0-beta.7</code> · 未签名</dd>
+              <dt>下一个版本</dt>
+              <dd><code>0.9.0-beta.8</code> —— 包含目录联接校验修复，即将发布</dd>
+              <dt>这个版本包含</dt>
+              <dd>托盘图标 · 随 Windows 启动（当前用户） · 日志轮转</dd>
+              <dt>分发</dt>
+              <dd>暂无公开安装包</dd>
+            </dl>
+          </article>
+
+          <article class="status-card">
+            <div class="status-top">
+              <h3>macOS 12+</h3>
+              <span class="pill">开发中</span>
+            </div>
+            <dl class="meta-list">
+              <dt>当前构建</dt>
+              <dd>CI 构建的未签名 <code>.app</code></dd>
+              <dt>实现方式</dt>
+              <dd>使用符号链接代替目录联接</dd>
+              <dt>时间表</dt>
+              <dd>尚未公布</dd>
+              <dt>分发</dt>
+              <dd>暂不可用——本页没有 macOS 下载</dd>
+            </dl>
+          </article>
+        </div>
+
+        <div class="download-card">
+          <div>
+            <h3>Disk Warden Windows 版</h3>
+            <p class="download-sub">测试版本 0.9.0-beta.7 · 未签名 · 尚未发布</p>
+
+            <dl class="meta-list">
+              <dt>平台</dt>
+              <dd>Windows 10 / 11 · 64 位</dd>
+              <dt>运行要求</dt>
+              <dd>无需管理员权限 · 无需账号</dd>
+              <dt>许可证</dt>
+              <dd>PolyForm Noncommercial 1.0.0</dd>
+              <dt>安装包</dt>
+              <dd><span class="todo">TODO</span> 尚未提供公开下载</dd>
+              <dt>SHA-256</dt>
+              <dd><span class="todo">TODO</span> 随首个公开版本一并公布</dd>
+            </dl>
+          </div>
+
+          <div class="download-action">
+            <button class="btn btn-primary" type="button" disabled aria-describedby="dl-status">即将发布</button>
+            <p class="dl-status" id="dl-status">已有测试构建，但还没有公开安装包。这个按钮是刻意禁用的。首个公开版本将发布在 GitHub Releases。</p>
+            <a class="text-link" href="https://github.com/QuotaFuse-ai/disk-warden">在 GitHub 关注发布 <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. License -->
+    <section class="section section--alt" id="license" aria-labelledby="license-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="license-title">许可证</h2>
+          <p>基于 PolyForm Noncommercial License 1.0.0 开放源码。个人免费；商业使用需单独授权。</p>
+        </div>
+
+        <div class="license-card">
+          <div class="license-grid">
+            <div class="license-col">
+              <h3>免费用于</h3>
+              <ul>
+                <li>个人使用</li>
+                <li>学习与研究</li>
+                <li>非营利使用</li>
+              </ul>
+            </div>
+            <div class="license-col license-col--commercial">
+              <h3>商业使用</h3>
+              <p>任何商业用途——包括公司内部使用——都需要单独的商业授权。请联系 <a href="mailto:44062290+QuotaFuse-ai@users.noreply.github.com">44062290+QuotaFuse-ai@users.noreply.github.com</a>。</p>
+            </div>
+          </div>
+          <p class="license-foot">
+            <a href="https://github.com/QuotaFuse-ai/disk-warden/blob/main/LICENSE">查看完整许可证文本 <span aria-hidden="true">↗</span></a>
+            <span>源码可见，但不是 OSI 认可的开源许可证。</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. FAQ -->
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="faq-title">常见问题</h2>
+        </div>
+
+        <div class="faq">
+          <details>
+            <summary>迁移会删掉我的对话记录，或者让我重新登录吗？</summary>
+            <p>不会。对话、缓存、日志和索引可以迁移；登录数据、配置和记忆属于红色项，完全不会触碰。被移走的都是工具可以重建的数据。</p>
+          </details>
+
+          <details>
+            <summary>迁移后 IDE 还能正常用吗？</summary>
+            <p>能。原路径会变成一个指向新位置的目录联接，应用打开的仍是原来的路径。新产生的数据写入目标盘，不需要改任何配置。</p>
+          </details>
+
+          <details>
+            <summary>怎么回滚？</summary>
+            <p>选中已迁移的工具，点「迁回 C 盘」。数据会复制回原路径并校验，确认无误后才清理目标盘上的副本。只要迁移数据还在，回滚就一直可用。</p>
+          </details>
+
+          <details>
+            <summary>迁移时必须关掉 IDE 吗？</summary>
+            <p>必须。被占用的文件无法可靠复制。检测到工具在运行时，迁移会被阻断而不是强制执行——Disk Warden 不会替你结束进程。</p>
+          </details>
+
+          <details>
+            <summary>支持哪些工具？</summary>
+            <p>Cursor、Trae（国内版与国际版）、Claude Code、VS Code、Windsurf，以及其他已知的 AI IDE 和 CLI。规则不认识的目录会标为黄色，必须由你逐条确认后才能移动。</p>
+          </details>
+
+          <details>
+            <summary>macOS 版什么时候有？</summary>
+            <p>正在开发中。目前在 CI（GitHub Actions 的 macOS 构建机）上产出未签名的 <code>.app</code>，用符号链接代替目录联接。没有公布时间表，本页也没有 macOS 下载。</p>
+          </details>
+
+          <details>
+            <summary>登录 GitHub 是必须的吗？</summary>
+            <p>不是。欢迎页和 GitHub 登录还在开发中，上线后「跳过」同样是并列的选择。扫描、迁移、回滚都在本机运行，不需要账号。</p>
+          </details>
+
+          <details>
+            <summary>会上传我的数据吗？</summary>
+            <p>默认不会。扫描、迁移和回滚都不发起网络请求。AI 分析默认关闭；只有你主动打开后，才会把目录信息（路径、大小、规则判断的理由）发给你配置的模型接口。API Key 用 Windows DPAPI 加密，只存在本机，不会上传。</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. GitHub -->
+    <section class="section section--flush-top" id="github-entry" aria-labelledby="github-title">
+      <div class="wrap">
+        <div class="gh-band">
+          <div>
+            <h2 id="github-title">源码、问题反馈与发布说明</h2>
+            <p>Disk Warden 在公开仓库中开发。如果你发现某个目录应该迁移、或者不该迁移，欢迎提 Issue。</p>
+          </div>
+          <a class="btn btn-ghost" href="https://github.com/QuotaFuse-ai/disk-warden">github.com/QuotaFuse-ai/disk-warden <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p>© 2026 huangtao · Disk Warden 是 <a href="https://www.quotafuse.com">QuotaFuse</a> 的项目。</p>
+      <div class="footer-links">
+        <a href="https://github.com/QuotaFuse-ai/disk-warden">GitHub</a>
+        <a href="https://github.com/QuotaFuse-ai/disk-warden/blob/main/LICENSE">许可证</a>
+        <a href="../index.html" hreflang="en" lang="en">English</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
