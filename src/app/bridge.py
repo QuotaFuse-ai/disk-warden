@@ -103,6 +103,7 @@ def build_methods(service):
             "ok": True,
             "protocol": PROTOCOL_VERSION,
         },
+        "app.reveal": lambda p: service.reveal(_require_str(p, "path")),
         "settings.get": lambda p: service.settings_get(),
         "settings.set": lambda p: service.settings_set(_settings_patch(p)),
         "ai.status": lambda p: service.ai_status(),

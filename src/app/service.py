@@ -105,7 +105,11 @@ from ..core.store.journal import (
     STATE_TARGET_READY,
     STATE_VERIFIED_LINK,
 )
-from ..platform import volume_info
+from ..platform import (
+    expand_path,
+    reveal_directory,
+    volume_info,
+)
 from . import APP_VERSION, PROTOCOL_VERSION
 from .errors import BridgeError, invalid, not_found
 from .events import EventBus
@@ -534,6 +538,26 @@ class AppService(object):
     def events_poll(self, since_seq=0):
         # type: (object) -> dict
         return self.bus.poll(since_seq)
+
+    # -- shell integration -----------------------------------------------
+
+    def reveal(self, path):
+        # type: (str) -> dict
+        """Open ``path`` in the OS file manager (UI "open folder" buttons)."""
+        try:
+            target = reveal_directory(path)
+        except FileNotFoundError:
+            raise not_found("folder does not exist", path=expand_path(path))
+        except OSError as exc:
+            code = (
+                "PERMISSION_DENIED"
+                if getattr(exc, "winerror", None) == 5
+                else "IO_ERROR"
+            )
+            raise BridgeError(
+                code, "could not open folder: %s" % exc, {"path": path}
+            )
+        return {"opened": True, "path": target}
 
     def job_status(self, job_id):
         # type: (object) -> dict

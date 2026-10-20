@@ -19,6 +19,7 @@ from .link import (
     strip_extended_prefix,
 )
 from .process import ProcessEnumerationError, ProcessInfo
+from .reveal import RevealError, expand_path, reveal_directory
 from .transfer import (
     TransferCancelled,
     TransferError,
@@ -64,12 +65,14 @@ __all__ = [
     "LinkError",
     "ProcessEnumerationError",
     "ProcessInfo",
+    "RevealError",
     "TransferCancelled",
     "TransferError",
     "TransferUnsupportedError",
     "VolumeInfo",
     "create_junction",
     "enumerate_processes",
+    "expand_path",
     "find_dir_holders",
     "is_junction",
     "is_link",
@@ -79,6 +82,7 @@ __all__ = [
     "read_junction_target",
     "remove_junction",
     "rename_dir",
+    "reveal_directory",
     "run_robocopy",
     "same_volume",
     "strip_extended_prefix",
