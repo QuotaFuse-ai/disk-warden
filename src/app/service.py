@@ -1329,6 +1329,11 @@ class AppService(object):
             )
             return self._item_result(item, job_item_id, False, STATE_FAILED, str(exc), False)
 
+        # Record the per-job backup directory, not the configurable backup
+        # root: rollback and recovery locate the manifest through this path.
+        if prepared.backup_dir:
+            self.journals.update(job_item_id, backup_dir=prepared.backup_dir)
+
         if not prepared.ok:
             self.journals.set_result(
                 job_item_id,
