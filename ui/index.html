@@ -323,8 +323,6 @@ a{color:var(--blue);text-decoration:none}
 .sw.on::after{left:18px}
 
 .actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line-soft)}
-/* 原型状态浮标固定在右下角，为末尾说明留出安全间距 */
-.main-scroll .actions{padding-right:124px}
 .actions .spacer{flex:1}
 .actions .note{font-size:var(--fs-meta);color:var(--dim)}
 
@@ -443,19 +441,6 @@ a{color:var(--blue);text-decoration:none}
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,8px);background:#333b43;border:1px solid #454e57;color:#fff;padding:8px 14px;border-radius:3px;font-size:var(--fs-body);box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;max-width:70vw;overflow-wrap:anywhere}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
-.proto-fab{position:fixed;right:14px;bottom:14px;z-index:90;background:#fff;border:1px solid #dfe6eb;color:#7d8791;font-size:var(--fs-meta);font-weight:600;padding:6px 10px;border-radius:16px;box-shadow:0 3px 10px rgba(31,45,61,.1);display:flex;align-items:center;gap:5px}
-.proto-fab:hover{color:#2f8e35;border-color:#bfe3bf}
-.proto-fab .p-dot{width:5px;height:5px;border-radius:50%;background:#f0a020}
-.proto-panel{position:fixed;right:14px;bottom:50px;z-index:91;width:300px;background:#fff;border:1px solid #dfe6eb;border-radius:5px;box-shadow:var(--shadow);padding:10px;display:none}
-.proto-panel.show{display:block}
-.proto-panel h4{font-size:var(--fs-meta);color:#4a545e;margin-bottom:2px}
-.proto-panel p{font-size:var(--fs-micro);color:var(--dim);line-height:1.45;margin-bottom:8px}
-.proto-routes{display:flex;flex-direction:column;gap:1px;max-height:50vh;overflow-y:auto}
-.proto-route{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:3px;background:none;border:none;color:#5b646d;font-size:var(--fs-meta);text-align:left}
-.proto-route:hover{background:#f2f8f1;color:#2f8e35}
-.proto-route.active{background:#eaf7e8;color:#2f8e35}
-.proto-route .pr-k{font-family:Consolas,monospace;font-size:var(--fs-micro);color:#aab3bc;margin-left:auto}
-.proto-sep{height:1px;background:var(--line-soft);margin:5px 0}
 .nav-label{font-size:var(--fs-micro);font-weight:700;color:#a0a9b2;letter-spacing:.6px;padding:4px 6px 3px}
 
 /* ---------- 规则：按软件列表（扁平行，点击开弹窗） ---------- */
@@ -546,15 +531,9 @@ a{color:var(--blue);text-decoration:none}
 </div>
 <div id="modal-root"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<button class="proto-fab" id="proto-fab" type="button"><span class="p-dot"></span><span id="proto-fab-label">原型状态</span></button>
-<div class="proto-panel" id="proto-panel" role="dialog" aria-label="Prototype state switcher">
-  <h4 id="proto-title">原型状态</h4>
-  <p id="proto-desc">仅用于评审：直接跳转到各交互状态，不影响产品逻辑。</p>
-  <div class="proto-routes" id="proto-routes"></div>
-</div>
 <script>
 /* ============================================================
-   Disk Warden — 高保真交互原型（纯静态，无构建依赖）
+   Disk Warden — 主机端界面（静态资源，无构建依赖）
    所有界面文案集中在 I18N 对象中，键名见 docs/specs/界面交互说明-v1.0.md
    ============================================================ */
 const I18N = {};
@@ -568,7 +547,7 @@ I18N['zh-CN'] = {
   'nav.rules': '规则学习',
   'nav.history': '操作历史',
   'nav.settings': '设置',
-  'nav.version': 'v0.1.0 原型',
+  'nav.version': 'v0.1.0-dev',
   'page.ide.title': 'IDE 数据',
   'page.ide.desc': '扫描本机 AI IDE / CLI 的数据目录，安全迁移可再生的缓存与会话。',
   'page.projects.title': '项目目录',
@@ -633,7 +612,6 @@ I18N['zh-CN'] = {
   'common.items': '{n} 项',
   'common.selected': '已选 {n} 项',
   'common.files': '{n} 个文件',
-  'common.simulated': '原型模拟',
   'common.required': '必填',
   'common.optional': '可选',
   'common.none': '无',
@@ -705,7 +683,7 @@ I18N['zh-CN'] = {
   'ide.noSelection': '请至少选择一个可迁目录',
   'ide.alreadyMigrated': '该软件的数据已位于目标盘，通过 junction 链接回原路径。',
   'ide.allGreenSelected': '全选可迁',
-  'ide.cleanHint': '仅清理 Chromium / 编译缓存，不触碰会话与配置。',
+  'ide.cleanHint': '缓存清理将在后续版本提供；当前版本只迁移目录。',
   'ide.selectIde': '请选择软件',
   'reason.chatDb': 'AI 对话与 agent 状态数据库，可再生',
   'reason.workspace': '各项目工作区索引，可再生',
@@ -831,7 +809,7 @@ I18N['zh-CN'] = {
   'blocked.recheck': '重新检测',
   'blocked.manual': '仍要迁移（不推荐）',
   'blocked.stillBlocked': '进程仍在运行，迁移继续被阻断。',
-  'blocked.forceWarn': '强制迁移可能导致文件损坏或软件异常，原型不提供该操作。',
+  'blocked.forceWarn': '强制迁移可能导致文件损坏或软件异常，当前版本不提供该操作。',
   'yellow.title': '确认未知目录',
   'yellow.sub': '{path}',
   'yellow.desc': '规则未覆盖该目录。请确认它的用途后再决定是否允许迁移。',
@@ -862,7 +840,7 @@ I18N['zh-CN'] = {
   'settings.title': '设置',
   'settings.sub': '目标路径与行为偏好，修改后立即生效',
   'settings.language': '界面语言',
-  'settings.languageDesc': '原型内所有文案通过 i18n 键切换',
+  'settings.languageDesc': '切换后界面文案立即生效',
   'settings.autoStart': '开机自启',
   'settings.autoStartDesc': '登录 Windows 后自动在托盘运行',
   'settings.targetRoot': '目标存储根目录',
@@ -883,39 +861,14 @@ I18N['zh-CN'] = {
   'feedback.copy': '复制诊断',
   'feedback.issue': '提 Issue',
   'feedback.copied': '诊断信息已复制',
-  'feedback.issueOpened': '已打开 Issue 页面（原型模拟）',
+  'feedback.issueUnavailable': '问题反馈入口将在后续版本开放',
   'feedback.note': '不会上传任何文件内容或凭证明文。',
-  'projects.listTitle': '项目',
-  'projects.listHint': '{n} 个最近活跃',
-  'projects.search': '搜索项目…',
-  'projects.path': '项目路径',
-  'projects.size': '占用',
-  'projects.reclaimable': '可回收',
-  'projects.reclaimableValue': '依赖 {deps} · 构建 {dist}',
-  'projects.deps': 'node_modules',
-  'projects.build': '构建产物',
-  'projects.git': '.git',
-  'projects.source': '源码',
-  'projects.ide': '关联 IDE',
-  'projects.lastActive': '最近活跃',
-  'projects.actions': '可执行操作',
-  'projects.cleanDeps': '清理依赖',
-  'projects.cleanBuild': '清理构建产物',
-  'projects.keep': '源码与 .git 永不清除',
-  'projects.sourceDesc': '用户代码与工程文件，永不清除',
-  'projects.note': '清理后需要重新 npm install / build，Disk Warden 不会自动执行。',
-  'projects.empty': '没有扫描到项目目录。',
-  'projects.select': '从左侧选择一个项目查看明细。',
-  'projects.total': '项目总占用',
-  'projects.totalSub': '源码 {src} · 可再生 {re}',
-  'projects.count': '项目数',
-  'projects.countSub': '位于 C 盘 {n} 个',
-  'projects.cleanable': '可回收空间',
-  'projects.cleanableSub': '仅依赖与构建产物',
-  'projects.danger': '受保护文件',
-  'projects.dangerSub': '源码 / .git / 配置',
-  'projects.safeTitle': '可安全清理',
-  'projects.keepTitle': '必须保留',
+  'projects.soonTitle': '项目目录清理即将推出',
+  'projects.soonDesc': '这一版只处理 IDE 数据；项目依赖与构建产物的扫描清理会在后续版本接入。',
+  'projects.soonItem1': 'node_modules / 构建产物识别',
+  'projects.soonItem2': '源码与 .git 永不清理',
+  'projects.soonItem3': '清理前逐项确认',
+  'projects.soonDisabled': '暂未开放',
   'disk.total': '总容量',
   'disk.used': '已使用',
   'disk.free': '可用空间',
@@ -936,6 +889,7 @@ I18N['zh-CN'] = {
   'disk.handling.system': '系统提供方',
   'disk.handling.clean': '直接清理',
   'disk.notIncluded': '系统文件、页面文件与受保护目录不在处理范围内；本工具不做杀毒或系统优化。',
+  'disk.noData': '暂无数据',
   'disk.refresh': '刷新占用',
   'disk.ide': 'AI IDE 与 CLI',
   'disk.ideDesc': '缓存、会话、索引与 worktree',
@@ -971,6 +925,8 @@ I18N['zh-CN'] = {
   'rules.pending': '待确认目录',
   'rules.pendingDesc': '规则未覆盖，确认后会写入本地 rules-learned.json',
   'rules.pendingEmpty': '没有待确认的目录。',
+  'rules.learnedEmpty': '还没有学习到规则。',
+  'rules.overrideFailed': '该目录缺少扫描标识，无法写入规则，请重新扫描后再试。',
   'rules.table': '规则列表',
   'rules.tableDesc': '按目录名匹配，红色优先',
   'rules.match': '匹配',
@@ -1031,8 +987,11 @@ I18N['zh-CN'] = {
   'ai.model': '模型',
   'ai.modelAuto': '跟随助手设置',
   'ai.key': '密钥',
-  'ai.keyDesc': '只写入本机配置文件，不进日志、不进反馈内容',
+  'ai.keyDesc': '只从环境变量 DEEPSEEK_API_KEY 读取，不写入本机文件，不进日志、不进反馈内容',
   'ai.test': '测试连接',
+  'ai.testUnavailable': '连接测试将在后续版本提供。',
+  'ai.keyEnvSet': '已从环境变量读取',
+  'ai.keyEnvMissing': '未检测到环境变量',
   'ai.testOk': '连接可用 · 延迟 0.8s',
   'ai.testBad': '连接失败：密钥无效',
   'ai.statusOn': '已对接',
@@ -1055,7 +1014,7 @@ I18N['zh-CN'] = {
   'ai.needModel': '请填写模型名称，或改用当前助手的模型',
   'ai.noneLeft': '没有需要识别的目录了',
   'ai.filter': 'AI 已给建议',
-  'ai.note': '原型里的识别结果是预置样例，不代表真实模型输出。',
+  'ai.note': 'AI 识别结果仅作为建议，不会自动迁移任何文件。',
   'ai.link': '去对接 AI',
   'ai.reasonCache': '目录名与结构符合已知缓存/会话目录，删了会重新生成',
   'ai.reasonSecret': '路径里有凭证或配置特征，建议不要动',
@@ -1093,8 +1052,8 @@ I18N['zh-CN'] = {
   'history.empty': '还没有操作记录。',
   'history.select': '从左侧选择一条记录。',
   'history.summary': '{freed} · {dur}',
-  'history.exported': '记录已导出（原型模拟）',
-  'history.simulated': '原型中的记录为演示数据',
+  'history.exported': '记录已导出',
+  'history.exportFailed': '导出失败',
   'history.migrateStep1': '备份配置与凭证清单',
   'history.migrateStep2': '复制文件并校验',
   'history.migrateStep3': '删除源目录',
@@ -1106,7 +1065,7 @@ I18N['zh-CN'] = {
   'history.failedStep': '校验失败，已停止并保持源目录',
   'toast.scanDone': '扫描完成',
   'toast.scanCancelled': '已取消扫描',
-  'toast.copied': '已复制到剪贴板（原型模拟）',
+  'toast.copied': '已复制到剪贴板',
   'toast.opened': '已在资源管理器中打开',
   'toast.openedPath': '已在资源管理器中打开：{path}',
   'toast.openFailedReason': '无法打开目录：{reason}',
@@ -1115,38 +1074,17 @@ I18N['zh-CN'] = {
   'error.PERMISSION_DENIED': '没有权限访问该目录',
   'error.IO_ERROR': '系统未能打开资源管理器',
   'error.INTERNAL': '主机端内部错误',
-  'toast.cleaned': '缓存清理完成，释放 {size}（原型模拟）',
+  'toast.cleaned': '缓存清理完成，释放 {size}',
   'toast.ruleAdded': '规则已添加',
   'toast.saved': '设置已保存',
   'toast.yellowConfirmed': '已确认，可在迁移预览中勾选',
-  'toast.rollbackStarted': '回滚流程已启动（原型模拟）',
-  'toast.retry': '重试中（原型模拟）',
-  'toast.exported': '已导出（原型模拟）',
+  'toast.rollbackStarted': '回滚流程已启动',
+  'toast.retry': '重试中',
+  'toast.exported': '已导出',
   'toast.needSelect': '请先选择至少一个目录',
   'toast.spaceShort': '目标盘空间不足',
   'toast.blocked': '软件正在运行，无法迁移',
-  'toast.demoHint': '原型模式：此操作不会修改任何真实文件',
-  'proto.title': '原型状态',
-  'proto.desc': '仅用于评审：直接跳转到各交互状态，不修改真实数据。',
-  'proto.section.core': 'IDE 数据',
-  'proto.section.other': '其他页面',
-  'proto.section.states': '关键状态',
-  'proto.route.ide': 'IDE 列表（默认）',
-  'proto.route.scanning': '扫描中',
-  'proto.route.empty': '空态：未检测到 IDE',
-  'proto.route.preview': '迁移预览',
-  'proto.route.progress': '迁移进度',
-  'proto.route.failed': '迁移失败',
-  'proto.route.blocked': '进程占用阻断',
-  'proto.route.rollback': '回滚确认',
-  'proto.route.yellow': '确认未知目录',
-  'proto.route.success': '迁移成功',
-  'proto.route.projects': '项目目录',
-  'proto.route.disk': 'C 盘全景',
-  'proto.route.rules': '规则学习',
-  'proto.route.history': '操作历史',
-  'proto.route.settings': '设置弹窗',
-  'proto.route.feedback': '反馈弹窗',
+  'toast.unavailable': '该功能尚未接入主机端，将在后续版本提供',
   'unit.hours': '小时',
   'unit.minutes': '分钟',
   'unit.seconds': '秒',
@@ -1221,7 +1159,7 @@ I18N['en'] = {
   'nav.rules': 'Rule learning',
   'nav.history': 'History',
   'nav.settings': 'Settings',
-  'nav.version': 'v0.1.0 prototype',
+  'nav.version': 'v0.1.0-dev',
   'page.ide.title': 'IDE data',
   'page.ide.desc': 'Scan data folders of AI IDEs and CLIs, then move regenerable caches and sessions safely.',
   'page.projects.title': 'Projects',
@@ -1286,7 +1224,6 @@ I18N['en'] = {
   'common.items': '{n} items',
   'common.selected': '{n} selected',
   'common.files': '{n} files',
-  'common.simulated': 'Simulated',
   'common.required': 'Required',
   'common.optional': 'Optional',
   'common.none': 'None',
@@ -1358,7 +1295,7 @@ I18N['en'] = {
   'ide.noSelection': 'Select at least one migratable folder',
   'ide.alreadyMigrated': 'This app already lives on the target drive and is linked back with a junction.',
   'ide.allGreenSelected': 'Select all migratable',
-  'ide.cleanHint': 'Only Chromium and compile caches are cleaned. Sessions and config stay.',
+  'ide.cleanHint': 'Cache cleanup arrives in a later version; this build only migrates folders.',
   'ide.selectIde': 'Select an app',
   'reason.chatDb': 'AI chat and agent state database, regenerable',
   'reason.workspace': 'Per-project workspace index, regenerable',
@@ -1484,7 +1421,7 @@ I18N['en'] = {
   'blocked.recheck': 'Check again',
   'blocked.manual': 'Migrate anyway (not recommended)',
   'blocked.stillBlocked': 'The process is still running. Migration stays blocked.',
-  'blocked.forceWarn': 'Force migration can corrupt files or break the app. The prototype does not offer it.',
+  'blocked.forceWarn': 'Force migration can corrupt files or break the app. It is not available in this version.',
   'yellow.title': 'Confirm unknown folder',
   'yellow.sub': '{path}',
   'yellow.desc': 'No rule covers this folder. Confirm what it holds before allowing migration.',
@@ -1515,7 +1452,7 @@ I18N['en'] = {
   'settings.title': 'Settings',
   'settings.sub': 'Target path and behavior. Changes apply immediately.',
   'settings.language': 'Language',
-  'settings.languageDesc': 'Every string in the prototype is switched via i18n keys',
+  'settings.languageDesc': 'Changes apply to the interface immediately',
   'settings.autoStart': 'Start with Windows',
   'settings.autoStartDesc': 'Run in the tray after sign-in',
   'settings.targetRoot': 'Target storage root',
@@ -1536,39 +1473,14 @@ I18N['en'] = {
   'feedback.copy': 'Copy diagnostics',
   'feedback.issue': 'Open issue',
   'feedback.copied': 'Diagnostics copied',
-  'feedback.issueOpened': 'Issue page opened (prototype simulation)',
+  'feedback.issueUnavailable': 'Issue reporting will be available in a later version',
   'feedback.note': 'No file content or credential plaintext is uploaded.',
-  'projects.listTitle': 'Projects',
-  'projects.listHint': '{n} recently active',
-  'projects.search': 'Search projects…',
-  'projects.path': 'Project path',
-  'projects.size': 'Size',
-  'projects.reclaimable': 'Reclaimable',
-  'projects.reclaimableValue': 'Deps {deps} · Build {dist}',
-  'projects.deps': 'node_modules',
-  'projects.build': 'Build output',
-  'projects.git': '.git',
-  'projects.source': 'Source',
-  'projects.ide': 'Linked IDE',
-  'projects.lastActive': 'Last active',
-  'projects.actions': 'Allowed actions',
-  'projects.cleanDeps': 'Clean dependencies',
-  'projects.cleanBuild': 'Clean build output',
-  'projects.keep': 'Source and .git are never removed',
-  'projects.sourceDesc': 'Your code and project files, never removed',
-  'projects.note': 'You need to run npm install / build again afterward. Disk Warden does not do it.',
-  'projects.empty': 'No project folder found.',
-  'projects.select': 'Select a project on the left.',
-  'projects.total': 'Project footprint',
-  'projects.totalSub': 'Source {src} · Reclaimable {re}',
-  'projects.count': 'Projects',
-  'projects.countSub': '{n} on C:',
-  'projects.cleanable': 'Reclaimable space',
-  'projects.cleanableSub': 'Dependencies and build output only',
-  'projects.danger': 'Protected files',
-  'projects.dangerSub': 'Source / .git / config',
-  'projects.safeTitle': 'Safe to clean',
-  'projects.keepTitle': 'Must keep',
+  'projects.soonTitle': 'Project cleanup is coming soon',
+  'projects.soonDesc': 'This build only handles IDE data. Scanning and cleaning project dependencies and build output arrives in a later version.',
+  'projects.soonItem1': 'Detect node_modules / build output',
+  'projects.soonItem2': 'Source and .git are never removed',
+  'projects.soonItem3': 'Confirm item by item before cleaning',
+  'projects.soonDisabled': 'Not available yet',
   'disk.total': 'Capacity',
   'disk.used': 'Used',
   'disk.free': 'Free',
@@ -1589,6 +1501,7 @@ I18N['en'] = {
   'disk.handling.system': 'OS provider',
   'disk.handling.clean': 'Clean up',
   'disk.notIncluded': 'System files, page file and protected folders are out of scope. This tool does no antivirus or system tuning.',
+  'disk.noData': 'No data yet',
   'disk.refresh': 'Refresh usage',
   'disk.ide': 'AI IDEs and CLIs',
   'disk.ideDesc': 'Caches, sessions, indexes and worktrees',
@@ -1624,6 +1537,8 @@ I18N['en'] = {
   'rules.pending': 'Folders to confirm',
   'rules.pendingDesc': 'Not covered by rules. Confirmation is written to local rules-learned.json.',
   'rules.pendingEmpty': 'Nothing to confirm.',
+  'rules.learnedEmpty': 'No learned rules yet.',
+  'rules.overrideFailed': 'This folder has no scan id, so the rule cannot be saved. Rescan and try again.',
   'rules.table': 'Rules',
   'rules.tableDesc': 'Matched by folder name, red wins',
   'rules.match': 'Match',
@@ -1684,8 +1599,11 @@ I18N['en'] = {
   'ai.model': 'Model',
   'ai.modelAuto': 'Follow agent settings',
   'ai.key': 'Key',
-  'ai.keyDesc': 'Stored in this machine only. Never in logs or feedback.',
+  'ai.keyDesc': 'Read only from the DEEPSEEK_API_KEY environment variable. Never written to disk, logs or feedback.',
   'ai.test': 'Test connection',
+  'ai.testUnavailable': 'Connection test arrives in a later version.',
+  'ai.keyEnvSet': 'Read from environment variable',
+  'ai.keyEnvMissing': 'Environment variable not set',
   'ai.testOk': 'Connection OK · 0.8s',
   'ai.testBad': 'Connection failed: invalid key',
   'ai.statusOn': 'Connected',
@@ -1708,7 +1626,7 @@ I18N['en'] = {
   'ai.needModel': 'Enter a model name, or use the agent model',
   'ai.noneLeft': 'Nothing left to identify',
   'ai.filter': 'AI suggested',
-  'ai.note': 'Results here are preset samples, not real model output.',
+  'ai.note': 'AI results are suggestions only. No file is migrated automatically.',
   'ai.link': 'Connect AI',
   'ai.reasonCache': 'Matches a known cache or session folder. It regenerates itself',
   'ai.reasonSecret': 'Path looks like credentials or settings. Leave it alone',
@@ -1746,8 +1664,8 @@ I18N['en'] = {
   'history.empty': 'No operations yet.',
   'history.select': 'Select a record on the left.',
   'history.summary': '{freed} · {dur}',
-  'history.exported': 'History exported (prototype simulation)',
-  'history.simulated': 'Records here are demo data',
+  'history.exported': 'History exported',
+  'history.exportFailed': 'Export failed',
   'history.migrateStep1': 'Back up config and credential list',
   'history.migrateStep2': 'Copy files and verify',
   'history.migrateStep3': 'Delete source folders',
@@ -1759,7 +1677,7 @@ I18N['en'] = {
   'history.failedStep': 'Verification failed. Stopped with source intact.',
   'toast.scanDone': 'Scan complete',
   'toast.scanCancelled': 'Scan cancelled',
-  'toast.copied': 'Copied to clipboard (prototype simulation)',
+  'toast.copied': 'Copied to clipboard',
   'toast.opened': 'Opened in Explorer',
   'toast.openedPath': 'Opened in Explorer: {path}',
   'toast.openFailedReason': 'Could not open folder: {reason}',
@@ -1768,38 +1686,17 @@ I18N['en'] = {
   'error.PERMISSION_DENIED': 'Access to the folder was denied',
   'error.IO_ERROR': 'The system could not open the file manager',
   'error.INTERNAL': 'Host internal error',
-  'toast.cleaned': 'Cache cleaned, freed {size} (prototype simulation)',
+  'toast.cleaned': 'Cache cleaned, freed {size}',
   'toast.ruleAdded': 'Rule added',
   'toast.saved': 'Settings saved',
   'toast.yellowConfirmed': 'Confirmed. You can select it in the preview.',
-  'toast.rollbackStarted': 'Rollback started (prototype simulation)',
-  'toast.retry': 'Retrying (prototype simulation)',
-  'toast.exported': 'Exported (prototype simulation)',
+  'toast.rollbackStarted': 'Rollback started',
+  'toast.retry': 'Retrying',
+  'toast.exported': 'Exported',
   'toast.needSelect': 'Select at least one folder first',
   'toast.spaceShort': 'Not enough space on target',
   'toast.blocked': 'The app is running, cannot migrate',
-  'toast.demoHint': 'Prototype: this action does not modify real files',
-  'proto.title': 'Prototype states',
-  'proto.desc': 'For review only. Jump between states without touching real data.',
-  'proto.section.core': 'IDE data',
-  'proto.section.other': 'Other pages',
-  'proto.section.states': 'Key states',
-  'proto.route.ide': 'IDE list (default)',
-  'proto.route.scanning': 'Scanning',
-  'proto.route.empty': 'Empty: no IDE detected',
-  'proto.route.preview': 'Migration preview',
-  'proto.route.progress': 'Migration progress',
-  'proto.route.failed': 'Migration failed',
-  'proto.route.blocked': 'Blocked by process',
-  'proto.route.rollback': 'Rollback confirmation',
-  'proto.route.yellow': 'Confirm unknown directory',
-  'proto.route.success': 'Migration success',
-  'proto.route.projects': 'Projects',
-  'proto.route.disk': 'C: overview',
-  'proto.route.rules': 'Rule learning',
-  'proto.route.history': 'History',
-  'proto.route.settings': 'Settings modal',
-  'proto.route.feedback': 'Feedback modal',
+  'toast.unavailable': 'This feature is not connected to the host yet and will arrive in a later version',
   'unit.hours': 'h',
   'unit.minutes': 'min',
   'unit.seconds': 's',
@@ -1891,155 +1788,23 @@ function sum(items, key) {
   return items.reduce((a, b) => a + (b[key] || 0), 0);
 }
 
-/* 数据形状对齐 data/ide-catalog.json（T03）：ides[].directories[] 使用
-   path / type / safety / reason / handling；原型额外附加 size_bytes，
-   真实实现由扫描引擎填充。 */
-const CATALOG = {
-  schema_version: 1,
-  source: 'ui prototype (aligned with data/ide-catalog.json)',
-  platform: 'windows',
-  updated_at: '2026-10-19',
-  ides: [
-    {
-      id: 'cursor', name: 'Cursor', kind: 'ide', platform: 'windows',
-      processes: ['Cursor.exe'],
-      directories: [
-        { path: '%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb', type: 'file', safety: 'green', reason: 'reason.chatDb', handling: 'junction' },
-        { path: '%APPDATA%\\Cursor\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%APPDATA%\\Cursor\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\Cursor\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' },
-        { path: '%APPDATA%\\Cursor\\Local State', type: 'file', safety: 'red', reason: 'reason.localState' },
-        { path: '%APPDATA%\\Cursor\\User\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
-      ]
-    },
-    {
-      id: 'trae-cn', name: 'Trae CN', kind: 'ide', platform: 'windows',
-      processes: ['Trae CN.exe', 'TRAE SOLO CN.exe'],
-      directories: [
-        { path: '%APPDATA%\\TRAE SOLO CN\\ModularData\\ai-agent\\snapshot\\', type: 'dir', safety: 'green', reason: 'reason.snapshot', handling: 'junction' },
-        { path: '%APPDATA%\\TRAE SOLO CN\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\TRAE SOLO CN\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%USERPROFILE%\\.trae-cn\\', type: 'dir', safety: 'yellow', reason: 'reason.unknown' },
-        { path: '%APPDATA%\\TRAE SOLO CN\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' },
-        { path: '%APPDATA%\\TRAE SOLO CN\\User\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
-      ]
-    },
-    {
-      id: 'trae', name: 'Trae', kind: 'ide', platform: 'windows',
-      processes: ['Trae.exe'],
-      directories: [
-        { path: '%APPDATA%\\Trae\\ModularData\\ai-agent\\snapshot\\', type: 'dir', safety: 'green', reason: 'reason.snapshot', handling: 'junction' },
-        { path: '%APPDATA%\\Trae\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\Trae\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%USERPROFILE%\\.trae\\', type: 'dir', safety: 'yellow', reason: 'reason.unknown' },
-        { path: '%APPDATA%\\Trae\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
-      ]
-    },
-    {
-      id: 'windsurf', name: 'Windsurf', kind: 'ide', platform: 'windows',
-      processes: ['Windsurf.exe'],
-      directories: [
-        { path: '%APPDATA%\\Windsurf\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%APPDATA%\\Windsurf\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codeium\\windsurf\\cascade\\', type: 'dir', safety: 'green', reason: 'reason.cascade', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codeium\\windsurf\\memories\\', type: 'dir', safety: 'red', reason: 'reason.userMemory' },
-        { path: '%APPDATA%\\Windsurf\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
-      ]
-    },
-    {
-      id: 'kiro', name: 'Kiro', kind: 'ide', platform: 'windows',
-      processes: ['Kiro.exe'],
-      directories: [
-        { path: '%APPDATA%\\Kiro\\User\\globalStorage\\', type: 'dir', safety: 'green', reason: 'reason.kiroStorage', handling: 'junction' },
-        { path: '%APPDATA%\\Kiro\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\Kiro\\logs\\', type: 'dir', safety: 'green', reason: 'reason.logs', handling: 'junction' },
-        { path: '%USERPROFILE%\\.kiro\\settings\\', type: 'dir', safety: 'red', reason: 'reason.config' }
-      ]
-    },
-    {
-      id: 'vscode', name: 'VS Code', kind: 'ide', platform: 'windows',
-      processes: ['Code.exe'],
-      directories: [
-        { path: '%APPDATA%\\Code\\User\\globalStorage\\saoudrizwan.claude-dev\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
-        { path: '%APPDATA%\\Code\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%APPDATA%\\Code\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\Code\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
-      ]
-    },
-    {
-      id: 'claude-code', name: 'Claude Code', kind: 'cli', platform: 'windows',
-      processes: ['claude.exe', 'node.exe'],
-      directories: [
-        { path: '%USERPROFILE%\\.claude\\debug\\', type: 'dir', safety: 'green', reason: 'reason.logs', handling: 'junction' },
-        { path: '%USERPROFILE%\\.claude\\projects\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
-        { path: '%USERPROFILE%\\.claude\\file-history\\', type: 'dir', safety: 'green', reason: 'reason.fileHistory', handling: 'junction' },
-        { path: '%LOCALAPPDATA%\\claude-cli-nodejs\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.mcpLogs', handling: 'junction' },
-        { path: '%USERPROFILE%\\.claude\\.credentials.json', type: 'file', safety: 'red', reason: 'reason.credentials' },
-        { path: '%USERPROFILE%\\.claude\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
-      ]
-    },
-    {
-      id: 'codex-cli', name: 'Codex CLI', kind: 'cli', platform: 'windows',
-      processes: ['codex.exe'],
-      directories: [
-        { path: '%USERPROFILE%\\.codex\\sessions\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codex\\logs_2.sqlite', type: 'file', safety: 'green', reason: 'reason.codexLogs', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codex\\worktrees\\', type: 'dir', safety: 'green', reason: 'reason.worktrees', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codex\\tmp\\', type: 'dir', safety: 'green', reason: 'reason.tmp', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codex\\auth.json', type: 'file', safety: 'red', reason: 'reason.auth' },
-        { path: '%USERPROFILE%\\.codex\\config.toml', type: 'file', safety: 'red', reason: 'reason.config' }
-      ]
-    }
-  ]
-};
+/* 扫描结果（scan.result）适配后的形状：ides[].directories[] 使用
+   path / type / safety / reason / handling，并附加 size_bytes 等字段。
+   未扫描前为空数组，界面据此显示空状态，不预置示例数据。 */
+const CATALOG = { ides: [] };
 
-/* 原型运行态：扫描结果 / 迁移状态 / 进程占用（真实实现由 T06–T08 填充） */
-const SIZE_TABLE = {
-  'cursor': [4.2, 3.1, 1.05, 0.003, 0.0002, 0.00001],
-  'trae-cn': [2.4, 1.3, 1.0, 0.4, 0.003, 0.00001],
-  'trae': [1.8, 0.9, 0.8, 0.3, 0.003],
-  'windsurf': [1.8, 0.8, 0.9, 0.005, 0.003],
-  'kiro': [16.0, 0.8, 0.4, 0.002],
-  'vscode': [1.1, 0.7, 0.4, 0.003],
-  'claude-code': [0.5, 0.06, 0.02, 0.02, 0.002, 0.001],
-  'codex-cli': [1.2, 0.8, 0.5, 0.1, 0.002, 0.001]
-};
-const RUNTIME = {
-  'cursor': { root: '%APPDATA%\\Cursor\\', location: 'C', migrated: false, running: [{ name: 'Cursor.exe', pid: 12844, lock: '%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb' }, { name: 'Cursor Helper.exe', pid: 15302, lock: '%APPDATA%\\Cursor\\Cache\\' }] },
-  'trae-cn': { root: '%APPDATA%\\TRAE SOLO CN\\', location: 'C', migrated: false, running: [] },
-  'trae': { root: '%APPDATA%\\Trae\\', location: 'C', migrated: false, running: [] },
-  'windsurf': { root: '%APPDATA%\\Windsurf\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\Windsurf', running: [] },
-  'kiro': { root: '%APPDATA%\\Kiro\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\Kiro', running: [] },
-  'vscode': { root: '%APPDATA%\\Code\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\VSCode', running: [] },
-  'claude-code': { root: '%USERPROFILE%\\.claude\\', location: 'C', migrated: false, running: [] },
-  'codex-cli': { root: '%USERPROFILE%\\.codex\\', location: 'C', migrated: false, running: [] }
-};
-
-CATALOG.ides.forEach(ide => {
-  const sizes = SIZE_TABLE[ide.id] || [];
-  ide.directories.forEach((d, i) => { d.size_bytes = Math.round((sizes[i] || 0) * GIB); });
-  ide.runtime = RUNTIME[ide.id];
-});
-
-const DRIVE = { totalGB: 120, usedGB: 117.2, freeGB: 2.8, targetFreeGB: 21.7, targetDrive: 'D:' };
-const KPI = { reclaimableGB: 31.6, freedGB: 22.9, freedOps: 3, lastScan: '2026-10-19 09:42', scanDuration: '3.4s' };
-
-const PROJECTS = [
-  { id: 'p1', name: 'disk-warden', path: 'D:\\workplace\\disk-warden', deps: 0.9, dist: 0.1, git: 0.05, source: 0.02, ide: 'Cursor', active: '2026-10-19 09:12', location: 'D' },
-  { id: 'p2', name: 'acme-web', path: 'C:\\Users\\Administrator\\dev\\acme-web', deps: 2.4, dist: 1.1, git: 0.2, source: 0.06, ide: 'Trae CN', active: '2026-10-18 22:40', location: 'C' },
-  { id: 'p3', name: 'data-pipeline', path: 'C:\\Users\\Administrator\\dev\\data-pipeline', deps: 1.8, dist: 0.4, git: 0.12, source: 0.04, ide: 'VS Code', active: '2026-10-18 16:03', location: 'C' },
-  { id: 'p4', name: 'mobile-app', path: 'D:\\projects\\mobile-app', deps: 0.7, dist: 0.2, git: 0.08, source: 0.03, ide: 'Windsurf', active: '2026-10-17 11:25', location: 'D' }
-];
+const DRIVE = { totalGB: 0, usedGB: 0, freeGB: 0, targetFreeGB: 0, targetDrive: '' };
+const KPI = { reclaimableGB: 0, freedGB: 0, freedOps: 0, lastScan: '', scanDuration: '' };
 
 const DISK_CATEGORIES = [
-  { id: 'ai-ide', name: 'disk.ide', desc: 'disk.ideDesc', gb: 12.8, handling: 'junction', color: '#2f8bf5' },
-  { id: 'ai-cli', name: 'disk.cli', desc: 'disk.cliDesc', gb: 3.1, handling: 'junction', color: '#5aa9f7' },
-  { id: 'worktrees', name: 'disk.worktrees', desc: 'disk.worktreesDesc', gb: 2.5, handling: 'junction', color: '#8f8df9' },
-  { id: 'pkg', name: 'disk.dev', desc: 'disk.devDesc', gb: 3.6, handling: 'env-var', color: '#7c5cff' },
-  { id: 'jetbrains', name: 'disk.jetbrains', desc: 'disk.jetbrainsDesc', gb: 1.8, handling: 'app-config', color: '#9b7bff' },
-  { id: 'sys', name: 'disk.sys', desc: 'disk.sysDesc', gb: 2.7, handling: 'system', color: '#f0a020' },
-  { id: 'temp', name: 'disk.temp', desc: 'disk.tempDesc', gb: 1.9, handling: 'clean', color: '#f7c04a' },
-  { id: 'models', name: 'disk.models', desc: 'disk.modelsDesc', gb: 3.2, handling: 'env-var', color: '#3fbf44' }
+  { id: 'ai-ide', name: 'disk.ide', desc: 'disk.ideDesc', gb: 0, handling: 'junction', color: '#2f8bf5' },
+  { id: 'ai-cli', name: 'disk.cli', desc: 'disk.cliDesc', gb: 0, handling: 'junction', color: '#5aa9f7' },
+  { id: 'worktrees', name: 'disk.worktrees', desc: 'disk.worktreesDesc', gb: 0, handling: 'junction', color: '#8f8df9' },
+  { id: 'pkg', name: 'disk.dev', desc: 'disk.devDesc', gb: 0, handling: 'env-var', color: '#7c5cff' },
+  { id: 'jetbrains', name: 'disk.jetbrains', desc: 'disk.jetbrainsDesc', gb: 0, handling: 'app-config', color: '#9b7bff' },
+  { id: 'sys', name: 'disk.sys', desc: 'disk.sysDesc', gb: 0, handling: 'system', color: '#f0a020' },
+  { id: 'temp', name: 'disk.temp', desc: 'disk.tempDesc', gb: 0, handling: 'clean', color: '#f7c04a' },
+  { id: 'models', name: 'disk.models', desc: 'disk.modelsDesc', gb: 0, handling: 'env-var', color: '#3fbf44' }
 ];
 /* “查看位置”落到该分类数据所在的系统目录；%VAR% 由主机端展开。 */
 const DISK_LOCATIONS = {
@@ -2053,87 +1818,33 @@ const DISK_LOCATIONS = {
   'models': '%USERPROFILE%'
 };
 const DISK_SEGMENTS = [
-  { key: 'disk.ide', gb: 18.6, color: '#2f8bf5' },
-  { key: 'disk.dev', gb: 6.4, color: '#7c5cff' },
-  { key: 'disk.sys', gb: 7.5, color: '#f0a020' },
-  { key: 'disk.models', gb: 5.2, color: '#3fbf44' },
-  { key: 'disk.other', gb: 79.5, color: '#c9d2db' },
-  { key: 'disk.free', gb: 2.8, color: '#edf1f4' }
+  { key: 'disk.ide', gb: 0, color: '#2f8bf5' },
+  { key: 'disk.dev', gb: 0, color: '#7c5cff' },
+  { key: 'disk.sys', gb: 0, color: '#f0a020' },
+  { key: 'disk.models', gb: 0, color: '#3fbf44' },
+  { key: 'disk.other', gb: 0, color: '#c9d2db' },
+  { key: 'disk.free', gb: 0, color: '#edf1f4' }
 ];
 
-const RULES = [
-  { id: 'r1', match: 'Cache', type: 'exact', safety: 'green', source: 'builtin', hits: 812, enabled: true, apps: ['*'] },
-  { id: 'r2', match: 'CachedData', type: 'exact', safety: 'green', source: 'builtin', hits: 144, enabled: true, apps: ['*'] },
-  { id: 'r3', match: 'GPUCache', type: 'exact', safety: 'green', source: 'builtin', hits: 96, enabled: true, apps: ['Cursor', 'VS Code', 'Windsurf', 'Kiro', 'Trae', 'Trae CN'] },
-  { id: 'r4', match: 'Code Cache', type: 'exact', safety: 'green', source: 'builtin', hits: 87, enabled: true, apps: ['Cursor', 'VS Code', 'Windsurf', 'Kiro', 'Trae', 'Trae CN'] },
-  { id: 'r5', match: 'logs', type: 'exact', safety: 'green', source: 'builtin', hits: 231, enabled: true, apps: ['Cursor', 'Kiro', 'Claude Code', 'Trae', 'Trae CN'] },
-  { id: 'r6', match: 'sessions', type: 'exact', safety: 'green', source: 'builtin', hits: 64, enabled: true, apps: ['Claude Code', 'Codex CLI'] },
-  { id: 'r7', match: 'workspaceStorage', type: 'exact', safety: 'green', source: 'builtin', hits: 58, enabled: true, apps: ['Cursor', 'VS Code', 'Windsurf', 'Kiro', 'Trae', 'Trae CN'] },
-  { id: 'r8', match: 'globalStorage', type: 'exact', safety: 'green', source: 'builtin', hits: 41, enabled: true, apps: ['Cursor', 'VS Code', 'Kiro', 'Trae', 'Trae CN'] },
-  { id: 'r9', match: '*.sqlite', type: 'glob', safety: 'green', source: 'builtin', hits: 37, enabled: true, apps: ['Cursor', 'VS Code', 'Claude Code', 'Codex CLI'] },
-  { id: 'r10', match: '*.log', type: 'glob', safety: 'green', source: 'builtin', hits: 122, enabled: true, apps: ['*'] },
-  { id: 'r11', match: 'node_modules', type: 'exact', safety: 'green', source: 'builtin', hits: 18, enabled: true, apps: ['*'] },
-  { id: 'r12', match: 'dist', type: 'exact', safety: 'green', source: 'builtin', hits: 12, enabled: true, apps: ['*'] },
-  { id: 'r13', match: 'Login Data', type: 'exact', safety: 'red', source: 'builtin', hits: 24, enabled: true, apps: ['Cursor', 'VS Code', 'Windsurf', 'Kiro', 'Trae', 'Trae CN'] },
-  { id: 'r14', match: 'Local State', type: 'exact', safety: 'red', source: 'builtin', hits: 19, enabled: true, apps: ['*'] },
-  { id: 'r15', match: 'settings.json', type: 'exact', safety: 'red', source: 'builtin', hits: 31, enabled: true, apps: ['Cursor', 'VS Code', 'Kiro', 'Claude Code', 'Trae', 'Trae CN'] },
-  { id: 'r16', match: '.credentials.json', type: 'exact', safety: 'red', source: 'builtin', hits: 6, enabled: true, apps: ['Claude Code'] },
-  { id: 'r17', match: 'auth.json', type: 'exact', safety: 'red', source: 'builtin', hits: 5, enabled: true, apps: ['Codex CLI'] },
-  { id: 'r18', match: 'memory', type: 'exact', safety: 'red', source: 'builtin', hits: 9, enabled: true, apps: ['Trae CN', 'Windsurf'] },
-  { id: 'r19', match: 'memories', type: 'exact', safety: 'red', source: 'builtin', hits: 7, enabled: true, apps: ['Windsurf', 'Trae'] },
-  { id: 'r20', match: 'snapshot', type: 'exact', safety: 'green', source: 'user', hits: 22, enabled: true, apps: ['Cursor', 'Windsurf'] },
-  { id: 'r21', match: 'cascade', type: 'exact', safety: 'green', source: 'user', hits: 14, enabled: true, apps: ['Windsurf'] },
-  { id: 'r22', match: '.trae-cn', type: 'exact', safety: 'red', source: 'user', hits: 3, enabled: false, apps: ['Trae CN'] }
-];
-
-const APP_MARK = {
-  'Cursor': '#37b33e', 'Trae CN': '#ef8b18', 'Trae': '#f0921c', 'Windsurf': '#2f8bf5',
-  'Kiro': '#7c5cff', 'VS Code': '#1f6fd0', 'Claude Code': '#d97757', 'Codex CLI': '#16a9a0'
-};
-const AI_SUGGEST = {
-  pd1: { safety: 'red', reason: 'reason.globalMemory', conf: 0.91 },
-  pd2: { safety: 'red', reason: 'reason.globalMemory', conf: 0.84 },
-  pd3: { safety: 'green', reason: 'reason.unknownProfile', conf: 0.62 }
-};
-
-const PENDING = [
-  { id: 'pd1', path: '%USERPROFILE%\\.trae-cn\\', size_bytes: 4e8, hint: 'reason.globalMemory', ide: 'Trae CN' },
-  { id: 'pd2', path: '%USERPROFILE%\\.trae\\', size_bytes: 3e8, hint: 'reason.globalMemory', ide: 'Trae' },
-  { id: 'pd3', path: '%USERPROFILE%\\.dsh\\profiles\\', size_bytes: 8e8, hint: 'reason.unknown', ide: 'DeepSeek Harness' }
-];
-
-const HISTORY = [
-  { id: 'h1', at: '2026-10-18 16:42', type: 'migrate', app: 'Kiro', from: '%APPDATA%\\Kiro\\', to: 'D:\\DiskWarden\\Kiro', freed: 17.2, duration: '4m 12s', result: 'success', canRollback: true, note: 'history.rollbackSpace', steps: ['migrateStep1', 'migrateStep2', 'migrateStep3', 'migrateStep4'] },
-  { id: 'h2', at: '2026-10-17 10:05', type: 'clean', app: 'Cursor', from: '%APPDATA%\\Cursor\\Cache\\', to: '—', freed: 2.1, duration: '12s', result: 'success', canRollback: false, note: 'history.cleanNoRollback', steps: ['cleanStep1'] },
-  { id: 'h3', at: '2026-10-16 21:18', type: 'migrate', app: 'VS Code', from: '%APPDATA%\\Code\\', to: 'D:\\DiskWarden\\VSCode', freed: 2.2, duration: '1m 38s', result: 'success', canRollback: true, note: 'history.canRollback', steps: ['migrateStep1', 'migrateStep2', 'migrateStep3', 'migrateStep4'] },
-  { id: 'h4', at: '2026-10-16 14:20', type: 'migrate', app: 'Trae CN', from: '%APPDATA%\\Trae CN\\', to: 'D:\\DiskWarden\\TraeCN', freed: 0, duration: '2m 05s', result: 'failed', canRollback: false, code: 'E_VERIFY_MISMATCH', note: 'failed.sourceSafe', steps: ['migrateStep1', 'migrateStep2', 'failedStep'] },
-  { id: 'h5', at: '2026-10-15 09:30', type: 'rollback', app: 'Windsurf', from: 'D:\\DiskWarden\\Windsurf', to: '%APPDATA%\\Windsurf\\', freed: 0, duration: '2m 20s', result: 'rolledback', canRollback: false, note: 'history.rollbackDone', steps: ['rollbackStep1', 'rollbackStep2', 'rollbackStep3'] }
-];
+const HISTORY = [];
 
 const state = {
   route: 'projects', tab: 'projects', sub: '',
-  selectedIde: 'cursor', selectedProject: 'p1', selectedHistory: 'h1',
+  selectedIde: '', selectedHistory: '',
   filter: 'all', search: '',
-  checked: {}, confirmed: {}, ignored: {},
-  settings: { targetRoot: 'D:\\DiskWarden\\', autoStart: false, autoMaintenance: false, uninstall: 'keep',
-    aiEnabled: true, aiProvider: 'relay', aiBaseUrl: '', aiModel: 'Qwen3.8-Flash', aiKeySet: true, aiLimit: 20 },
-  rulesView: 'app', rulesApp: '', aiFilter: false,
+  checked: {}, confirmed: {},
+  settings: { targetRoot: '', autoStart: false, autoMaintenance: false, uninstall: 'keep',
+    aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false },
   connected: false, booting: true, bootError: '', aiAsk: false,
   data: { settings: null, disk: null, snapshot: null, learned: null, scanJob: null, scanTimer: null,
     scanError: '', history: null, historyError: '', historyLoading: false,
     recovery: null, recoveryRun: null, recoveryTimer: null, flow: null, jobTimer: null },
   scanning: false, scanPct: 0,
-  demo: { pct: 45, stage: 2, freeze: true, ide: 'trae-cn', filesDone: 7421, filesTotal: 16843 },
   pendingYellow: null,
   historyFilter: 'all',
   returnHash: '',
-  protoOpen: false,
   toastTimer: null
 };
-CATALOG.ides.forEach(ide => {
-  state.checked[ide.id] = {};
-  ide.directories.forEach((d, i) => { if (d.safety === 'green') state.checked[ide.id][i] = true; });
-});
 /* ---------- 路由与通用渲染 ---------- */
 const TABS = ['projects', 'ide', 'disk', 'rules', 'history'];
 
@@ -2145,7 +1856,7 @@ function parseRoute() {
   const tab = TABS.indexOf(parts[0]) >= 0 ? parts[0] : 'projects';
   return { tab: tab, sub: parts[1] || '', modal: '' };
 }
-function getIde(id) { return CATALOG.ides.find(x => x.id === id) || CATALOG.ides[0] || { id: '', name: '', kind: 'ide', directories: [], runtime: { root: '', location: 'C', migrated: false, running: [] } }; }
+function getIde(id) { return CATALOG.ides.find(x => x.id === id) || CATALOG.ides[0] || { id: '', name: '', kind: 'ide', directories: [], runtime: { root: '', location: '', target: '', migrated: false, running: [] } }; }
 function ideSize(ide) { return sum(ide.directories, 'size_bytes'); }
 function safetyCount(ide, safety) { return ide.directories.filter(d => d.safety === safety).length; }
 function yellowKey(ideId, idx) { return ideId + '|' + idx; }
@@ -2155,7 +1866,6 @@ function isConfirmed(ideId, idx) { return !!state.confirmed[dirKey(ideId, idx)];
 function isChecked(ideId, idx, dir) {
   if (dir.safety === 'red') return false;
   if (dir.item_id && dir.can_migrate === false) return false;
-  if (dir.item_id && state.ignored[dir.item_id]) return false;
   if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return false;
   if (dir.item_id) return !!state.checked[dir.item_id];
   return !!state.checked[ideId] && !!state.checked[ideId][idx];
@@ -2178,6 +1888,7 @@ function targetPathFor(ide) {
     const m = String(it.target_path).match(/^(.*)[\\/][^\\/]+$/);
     if (m) return m[1];
   }
+  if (!state.settings.targetRoot) return '';
   return (state.settings.targetRoot.replace(/\\$/, '') + '\\' + ide.name.replace(/\s+/g, ''));
 }
 function appTitle() { return document.title; }
@@ -2240,8 +1951,6 @@ function driveOf(p) {
   return m ? m[1].toUpperCase() : '';
 }
 
-const TARGET_DEFAULT = 'D:\\DiskWarden\\';
-
 /* ---------- 真实扫描数据（scan.result）读取辅助 ---------- */
 function snapshot() { return state.data.snapshot; }
 function allTools() { const s = snapshot(); return (s && s.tools) || []; }
@@ -2284,10 +1993,6 @@ function toolRoot(tool) {
 function targetFreeBytes() {
   const d = state.data.disk && state.data.disk.target;
   return d && d.available ? (d.free || 0) : 0;
-}
-function targetDriveOf() {
-  const d = state.data.disk && state.data.disk.target;
-  return driveOf(d && d.path) || DRIVE.targetDrive || 'D:';
 }
 
 /* ---------- 扫描快照 → 已验收 CATALOG 形状（数组） ---------- */
@@ -2350,7 +2055,7 @@ function adapterIde(tool) {
       location: driveOf(root).replace(':', '') || 'C',
       migrated: isToolMigrated(tool),
       target: target,
-      running: runningProcs(tool).map(p => ({ name: p.name, pid: p.pid, lock: '' }))
+      running: runningProcs(tool).map(p => ({ name: p.name, pid: p.pid }))
     }
   };
 }
@@ -2358,7 +2063,6 @@ function adapterIde(tool) {
 function preselectGreen() {
   state.checked = {};
   state.confirmed = {};
-  state.ignored = {};
   state.pendingYellow = null;
   allItems().forEach(it => {
     if (it.safety === 'green' && it.can_migrate !== false && !it.migrated_job_id && !it.blocked_reason) {
@@ -2385,7 +2089,7 @@ function applySettings(s) {
   state.data.settings = s;
   const ai = s.ai || null;
   state.settings = {
-    targetRoot: s.target_root || TARGET_DEFAULT,
+    targetRoot: s.target_root || '',
     autoStart: !!s.launch_at_startup,
     autoMaintenance: !!s.auto_maintenance,
     uninstall: s.uninstall_policy === 'rollback' ? 'remove' : (s.uninstall_policy || 'keep'),
@@ -2396,8 +2100,7 @@ function applySettings(s) {
     aiProvider: ai && ai.enabled ? (ai.base_url ? 'custom' : 'relay') : 'none',
     aiBaseUrl: (ai && ai.base_url) || '',
     aiModel: (ai && ai.model) || '',
-    aiKeySet: !!(ai && ai.api_key_set),
-    aiLimit: 20
+    aiKeySet: !!(ai && ai.api_key_set)
   };
 }
 
@@ -3061,7 +2764,6 @@ function render() {
   const host = document.querySelector('#view .content');
   if (host && state.connected) host.insertAdjacentHTML('afterbegin', recoveryBanner());
   renderModal();
-  renderProtoPanel();
   document.documentElement.lang = LANG;
 }
 
@@ -3094,12 +2796,13 @@ const NAV_ICONS = {
 const SHIELD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 19 5.8v5.4c0 4.5-3 8.4-7 9.8-4-1.4-7-5.3-7-9.8V5.8z"/><path d="m9 11.8 2.1 2.1L15.3 9.7"/></svg>';
 
 function renderTopnav() {
+  const yellow = allItems().filter(x => x.safety === 'yellow').length;
   const items = [
-    { id: 'projects', count: PROJECTS.length,     c1: '#6ad46f', c2: '#37b33e' },
+    { id: 'projects', count: '',                  c1: '#6ad46f', c2: '#37b33e' },
     { id: 'ide',      count: CATALOG.ides.length, c1: '#67bcff', c2: '#2f8bf5' },
     { id: 'disk',     count: '',                  c1: '#ffc25e', c2: '#f0921c' },
-    { id: 'rules',    count: PENDING.length,      c1: '#b99bff', c2: '#7c5cff' },
-    { id: 'history',  count: HISTORY.length,      c1: '#5fd8cf', c2: '#16a9a0' }
+    { id: 'rules',    count: yellow,              c1: '#b99bff', c2: '#7c5cff' },
+    { id: 'history',  count: historyItems().length, c1: '#5fd8cf', c2: '#16a9a0' }
   ];
   const target = document.getElementById('topnav');
   if (!target) return;
@@ -3143,6 +2846,7 @@ function renderTopbar() {
     meta.innerHTML = `<span class="warn">${esc(t('conn.unavailable'))}</span>`;
   } else if (state.tab === 'ide') {
     if (state.sub === 'scanning' || state.scanning) meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))}</span>`;
+    else if (!KPI.lastScan) meta.innerHTML = `<span class="dim">${esc(t('meta.neverScan'))}<span class="dim"> · </span>${esc(t('meta.scope'))}</span>`;
     else meta.innerHTML = `<span class="live-dot"></span>${esc(t('meta.lastScan', { time: KPI.lastScan, dur: KPI.scanDuration }))}<span class="dim">·</span><span class="dim">${esc(t('meta.scope'))}</span>`;
   } else {
     meta.innerHTML = `<span class="dim">${esc(t('page.' + state.tab + '.desc'))}</span>`;
@@ -3256,7 +2960,7 @@ function renderIdeDetail(ide) {
         ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.openRollback('${ide.id}')">${esc(t('action.rollback'))}</button>
            <button type="button" class="btn btn-ghost btn-sm" title="${esc((ide.runtime && ide.runtime.root) || t('error.NO_PATH'))}" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>`
         : `<button type="button" class="btn btn-primary btn-sm" ${g ? '' : 'disabled'} onclick="App.startPreview('${ide.id}')">${esc(t('action.migrate'))}</button>
-           <button type="button" class="btn btn-ghost btn-sm" onclick="App.cleanCaches('${ide.id}')">${esc(t('action.clean'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" disabled title="${esc(t('toast.unavailable'))}">${esc(t('action.clean'))}</button>
            <button type="button" class="btn btn-ghost btn-sm" title="${esc((ide.runtime && ide.runtime.root) || t('error.NO_PATH'))}" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>
            <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>`}
       <span class="spacer"></span>
@@ -3343,87 +3047,20 @@ function renderEmpty() {
 }
 /* ---------- 项目目录 ---------- */
 function renderProjects() {
-  const p = PROJECTS.find(x => x.id === state.selectedProject) || PROJECTS[0];
-  const total = p.deps + p.dist + p.git + p.source;
-  return `<div class="content split-layout">
-    <section class="bar">
-      <div class="bar-top">
-        <span class="bar-title">${esc(t('projects.listTitle'))}</span>
-        <span class="bar-hint">${esc(t('projects.listHint', { n: PROJECTS.length }))}</span>
-      </div>
-      <div class="proj-bar">
-        ${PROJECTS.map(pr => `
-          <button type="button" class="proj-card ${pr.id === p.id ? 'active' : ''}" title="${esc(pr.path)}" onclick="App.selectProject('${pr.id}')">
-            <span class="pc-top">
-              <span class="ide-mark" style="width:24px;height:24px;background:${pr.location === 'C' ? 'linear-gradient(135deg,#ffb45c,#ef8b18)' : 'linear-gradient(135deg,#63b8ff,#2f8bf5)'}">${esc(pr.name.slice(0, 2).toUpperCase())}</span>
-              <span class="pc-name">${esc(pr.name)}</span>
-              <span class="badge ${pr.location === 'C' ? 'b-amber' : 'b-gray'}">${esc(pr.location)}:</span>
-            </span>
-            <span class="pc-path">${esc(pr.path)}</span>
-            <span class="pc-foot">
-              <span class="pc-size">${fmtGB(pr.deps + pr.dist + pr.git + pr.source)}</span>
-              <span class="dim" style="font-size:var(--fs-meta)">${esc(t('projects.lastActive'))} · ${esc(pr.active)}</span>
-            </span>
-          </button>`).join('')}
-      </div>
-    </section>
+  return `<div class="content narrow">
     <section class="panel">
-      <div class="detail">
-        <div class="detail-head">
-          <div class="detail-title">
-            <span class="ide-mark" style="width:32px;height:32px;background:${p.location === 'C' ? 'linear-gradient(135deg,#ffb45c,#ef8b18)' : 'linear-gradient(135deg,#63b8ff,#2f8bf5)'}">${esc(p.name.slice(0, 2).toUpperCase())}</span>
-            <div><h2>${esc(p.name)}</h2><div class="detail-path" title="${esc(p.path)}">${esc(p.path)}</div></div>
-          </div>
-          <div class="detail-badges">
-            <span class="badge b-plain">${esc(p.ide)}</span>
-            <span class="badge ${p.location === 'C' ? 'b-amber' : 'b-gray'}">${esc(t('projects.lastActive'))} · ${esc(p.active)}</span>
-          </div>
-        </div>
-        <div class="kvbar">
-          <div class="kv-item"><span class="k">${esc(t('projects.size'))}</span><span class="v">${fmtGB(total)}</span></div>
-          <div class="kv-item"><span class="k">${esc(t('projects.source'))}</span><span class="v">${fmtGB(p.source)}</span></div>
-          <div class="kv-item"><span class="k">${esc(t('projects.git'))}</span><span class="v">${fmtGB(p.git)}</span></div>
-          <div class="kv-item"><span class="k">${esc(t('projects.deps'))}</span><span class="v ok">${fmtGB(p.deps)}</span></div>
-          <div class="kv-item"><span class="k">${esc(t('projects.build'))}</span><span class="v ok">${fmtGB(p.dist)}</span></div>
-        </div>
-        <div class="section-title"><h3>${esc(t('projects.safeTitle'))}</h3><span class="sub">${esc(t('projects.cleanable'))} · ${fmtGB(p.deps + p.dist)}</span></div>
-        <div class="rows">
-          <div class="trow proj risk-green">
-            <span class="tcell lockcell"><i class="dot dot-green"></i></span>
-            <span class="tcell tpath" style="font-family:inherit">${esc(t('projects.deps'))}</span>
-            <span class="tcell tdesc" title="${esc(t('reason.nodeModules'))}">${esc(t('reason.nodeModules'))}</span>
-            <span class="tcell tsize">${fmtGB(p.deps)}</span>
-            <span class="tcell acts"><button type="button" class="btn btn-ghost btn-xs" onclick="App.cleanProject('deps')">${esc(t('projects.cleanDeps'))}</button></span>
-          </div>
-          <div class="trow proj risk-green">
-            <span class="tcell lockcell"><i class="dot dot-green"></i></span>
-            <span class="tcell tpath" style="font-family:inherit">${esc(t('projects.build'))}</span>
-            <span class="tcell tdesc" title="${esc(t('reason.dist'))}">${esc(t('reason.dist'))}</span>
-            <span class="tcell tsize">${fmtGB(p.dist)}</span>
-            <span class="tcell acts"><button type="button" class="btn btn-ghost btn-xs" onclick="App.cleanProject('dist')">${esc(t('projects.cleanBuild'))}</button></span>
-          </div>
-        </div>
-        <div class="section-title"><h3>${esc(t('projects.keepTitle'))}</h3><span class="sub">${esc(t('projects.keep'))}</span></div>
-        <div class="rows">
-          <div class="trow proj risk-red">
-            <span class="tcell lockcell"><span class="lock" title="${esc(t('projects.keep'))}">⛨</span></span>
-            <span class="tcell tpath" style="font-family:inherit">${esc(t('projects.source'))}</span>
-            <span class="tcell tdesc" title="${esc(t('projects.sourceDesc'))}">${esc(t('projects.sourceDesc'))}</span>
-            <span class="tcell tsize">${fmtGB(p.source)}</span>
-            <span class="tcell acts"></span>
-          </div>
-          <div class="trow proj risk-red">
-            <span class="tcell lockcell"><span class="lock" title="${esc(t('reason.git'))}">⛨</span></span>
-            <span class="tcell tpath" style="font-family:inherit">${esc(t('projects.git'))}</span>
-            <span class="tcell tdesc">${esc(t('reason.git'))}</span>
-            <span class="tcell tsize">${fmtGB(p.git)}</span>
-            <span class="tcell acts"></span>
-          </div>
+      <div class="empty">
+        <div class="empty-ico">⌗</div>
+        <h3>${esc(t('projects.soonTitle'))}</h3>
+        <p>${esc(t('projects.soonDesc'))}</p>
+        <div class="empty-list">
+          <span class="tag">${esc(t('projects.soonItem1'))}</span>
+          <span class="tag">${esc(t('projects.soonItem2'))}</span>
+          <span class="tag">${esc(t('projects.soonItem3'))}</span>
         </div>
         <div class="actions">
-          <button type="button" class="btn btn-primary btn-sm" onclick="App.cleanProject('all')">${esc(t('action.clean'))}</button>
-          <button type="button" class="btn btn-ghost btn-sm" title="${esc(p.path || t('error.NO_PATH'))}" onclick="App.openProjectFolder('${p.id}')">${esc(t('action.openFolder'))}</button>
-          <span class="spacer"></span><span class="note">${esc(t('projects.note'))}</span>
+          <button type="button" class="btn btn-ghost btn-sm" disabled>${esc(t('projects.soonDisabled'))}</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>
         </div>
       </div>
     </section>
@@ -3432,7 +3069,7 @@ function renderProjects() {
 
 /* ---------- C 盘全景 ---------- */
 function renderDisk() {
-  const segTotal = Math.max(1, DISK_SEGMENTS.reduce((a, s) => a + s.gb, 0));
+  const segTotal = DISK_SEGMENTS.reduce((a, s) => a + s.gb, 0);
   const ideSeg = DISK_SEGMENTS.filter(s => s.key === 'disk.ide').reduce((a, s) => a + s.gb, 0);
   return `<div class="content">
    <div class="cols cols-disk">
@@ -3453,7 +3090,7 @@ function renderDisk() {
                     <span style="font-size:var(--fs-meta);color:#9aa3ac;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t(c.desc))}</span>
                   </div>
                 </td>
-                <td class="num">${c.gb.toFixed(1)} GB</td>
+                <td class="num">${c.gb ? c.gb.toFixed(1) + ' GB' : '—'}</td>
                 <td><span class="tag tag-code">${esc(t('disk.handling.' + c.handling))}</span></td>
                 <td class="right"><button type="button" class="btn btn-ghost btn-xs" title="${esc(DISK_LOCATIONS[c.id] || t('error.NO_PATH'))}" onclick="App.openDiskLocation('${c.id}')">${esc(t('action.viewLocation'))}</button></td>
               </tr>`).join('')}
@@ -3463,14 +3100,14 @@ function renderDisk() {
       </div>
     </section>
     <section class="panel panel-scroll">
-      <div class="panel-head"><h2>C: · ${DRIVE.totalGB} GB</h2><span class="hint">${esc(t('disk.usedSub', { pct: Math.round(DRIVE.usedGB / DRIVE.totalGB * 1000) / 10 }))}</span></div>
+      <div class="panel-head"><h2>${esc(DRIVE.totalGB ? 'C: · ' + DRIVE.totalGB + ' GB' : 'C:')}</h2><span class="hint">${esc(DRIVE.totalGB ? t('disk.usedSub', { pct: Math.round(DRIVE.usedGB / DRIVE.totalGB * 1000) / 10 }) : t('disk.noData'))}</span></div>
       <div class="panel-body">
        <div class="scroll-y scroll-fit">
         <div class="diskbar">
-          ${DISK_SEGMENTS.map(s => `<span style="width:${(s.gb / segTotal * 100).toFixed(2)}%;background:${s.color}" title="${esc(t(s.key))} · ${s.gb} GB"></span>`).join('')}
+          ${segTotal ? DISK_SEGMENTS.map(s => `<span style="width:${(s.gb / segTotal * 100).toFixed(2)}%;background:${s.color}" title="${esc(t(s.key))} · ${s.gb} GB"></span>`).join('') : ''}
         </div>
         <div class="disk-legend">
-          ${DISK_SEGMENTS.map(s => `<span><i style="background:${s.color}"></i>${esc(t(s.key))} · ${s.gb.toFixed(1)} GB</span>`).join('')}
+          ${segTotal ? DISK_SEGMENTS.map(s => `<span><i style="background:${s.color}"></i>${esc(t(s.key))} · ${s.gb.toFixed(1)} GB</span>`).join('') : `<span class="dim">${esc(t('disk.noData'))}</span>`}
         </div>
         <div class="divider mt-3"></div>
         <div class="rows mt-3">
@@ -3501,155 +3138,94 @@ function renderDisk() {
 
 /* ---------- 规则学习 ---------- */
 function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && (!!state.settings.aiKeySet || state.settings.aiProvider === 'relay'); }
-function appIdOf(name) { if (name === '*') return '*'; const i = CATALOG.ides.find(x => x.name === name); return i ? i.id : ''; }
-function aiModelName() { return state.settings.aiProvider === 'relay' ? (state.settings.aiModel || t('ai.modelAuto')) : (state.settings.aiModel || t('ai.modelAuto')); }
-function rulesOfApp(app) { return RULES.filter(r => r.apps && r.apps.indexOf(app) >= 0); }
-function rulesShared() { return RULES.filter(r => r.apps && r.apps.indexOf('*') >= 0); }
-function groupById(id) {
-  if (id === '*') return { id: '*', name: t('rules.shared'), sub: t('rules.sharedSub'), rules: rulesShared() };
-  const i = CATALOG.ides.find(x => x.id === id);
-  if (!i) return null;
-  return { id: i.id, name: i.name, sub: t('ide.kind.' + i.kind), rules: RULES.filter(r => r.apps && r.apps.indexOf(i.name) >= 0 && r.apps.indexOf('*') < 0) };
+function aiModelName() { return state.settings.aiModel || t('ai.modelAuto'); }
+
+function itemReason(it) {
+  if (!it) return '';
+  const key = it.reason || it.reason_key || '';
+  if (key) {
+    const label = t(key);
+    if (label !== key) return label;
+  }
+  return it.blocked_reason || key || t('reason.unknown');
 }
-function appGroups() {
-  const groups = [{ id: '*', name: t('rules.shared'), sub: t('rules.sharedSub'), rules: rulesShared() }];
-  CATALOG.ides.forEach(i => {
-    const own = RULES.filter(r => r.apps && r.apps.indexOf(i.name) >= 0 && r.apps.indexOf('*') < 0);
-    if (own.length) groups.push({ id: i.id, name: i.name, sub: t('ide.kind.' + i.kind), rules: own });
-  });
-  return groups.filter(g => g.rules.length);
+function safetyBadge(safety) {
+  if (safety === 'green') return `<span class="badge b-green">${esc(t('common.green'))}</span>`;
+  if (safety === 'red') return `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>`;
+  return `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`;
 }
-function ruleTable(rows) {
+function pendingYellowItems() { return allItems().filter(it => it.safety === 'yellow'); }
+function learnedRules() {
+  const l = state.data.learned;
+  return (l && l.items) || [];
+}
+function learnedItem(rule) {
+  return allItems().find(it => it.item_id === rule.item_id) || null;
+}
+
+function pendingRow(it) {
+  const path = it.source_path || it.rel_path || it.item_id;
+  return `<div class="trow pend risk-yellow">
+    <span class="tcell tpath badged"><span class="badge b-amber">?</span><span class="tp" title="${esc(path)}">${esc(path)}</span></span>
+    <span class="tcell tdesc" title="${esc(it.blocked_reason || '')}">${esc(itemReason(it))}</span>
+    <span class="tcell tsize">${fmtBytes(it.bytes || 0)}</span>
+    <span class="tcell acts">
+      <button type="button" class="btn btn-ghost btn-xs" onclick="App.overrideItem('${esc(it.item_id)}','green')">${esc(t('action.markGreen'))}</button>
+      <button type="button" class="btn btn-ghost btn-xs" onclick="App.overrideItem('${esc(it.item_id)}','red')">${esc(t('action.markRed'))}</button>
+    </span>
+  </div>`;
+}
+
+function learnedTable(rows) {
   return `<div class="table-wrap">
     <table class="table">
       <thead><tr>
-        <th>${esc(t('rules.match'))}</th><th>${esc(t('rules.matchType'))}</th><th>${esc(t('rules.safety'))}</th><th>${esc(t('rules.source'))}</th><th class="num">${esc(t('rules.hits'))}</th><th>${esc(t('rules.enabled'))}</th><th></th>
+        <th>${esc(t('rules.path'))}</th><th>${esc(t('rules.appCol'))}</th><th>${esc(t('rules.safety'))}</th><th>${esc(t('common.reason'))}</th><th>${esc(t('rules.matched'))}</th>
       </tr></thead>
       <tbody>
-        ${rows.map(r => `<tr>
-          <td class="mono">${esc(r.match)}${r.reason ? `<div style="font-family:inherit;font-size:var(--fs-meta);color:#9aa3ac;margin-top:2px">${esc(r.reason)}</div>` : ''}</td>
-          <td>${esc(t('rules.type.' + r.type))}</td>
-          <td>${r.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>` : r.safety === 'red' ? `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>` : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`}</td>
-          <td><span class="tag">${esc(t('rules.source.' + r.source))}</span></td>
-          <td class="num">${r.hits}</td>
-          <td><button type="button" class="sw ${r.enabled ? 'on' : ''}" role="switch" aria-checked="${r.enabled}" aria-label="${esc(r.match)}" onclick="App.toggleRule('${r.id}')"></button></td>
-          <td class="right"><button type="button" class="btn btn-ghost btn-xs" onclick="App.deleteRule('${r.id}')">${esc(t('action.delete'))}</button></td>
-        </tr>`).join('')}
+        ${rows.map(r => {
+          const it = learnedItem(r);
+          const path = it ? (it.source_path || it.rel_path || r.item_id) : r.item_id;
+          const tool = it ? (it.tool_name || it.tool_id || '') : '';
+          return `<tr>
+            <td class="mono" style="word-break:break-all">${esc(path)}</td>
+            <td>${esc(tool || '—')}</td>
+            <td>${safetyBadge(r.safety)}</td>
+            <td>${esc(r.reason || t('rules.noReason'))}</td>
+            <td><span class="tag tag-code">${esc(r.rule_id || '—')}</span></td>
+          </tr>`;
+        }).join('')}
       </tbody>
     </table>
   </div>`;
 }
-function appGroupRow(g) {
-  const green = g.rules.filter(r => r.safety === 'green').length;
-  const red = g.rules.filter(r => r.safety === 'red').length;
-  const hits = g.rules.reduce((a, r) => a + r.hits, 0);
-  const user = g.rules.filter(r => r.source === 'user').length;
-  const builtin = g.rules.length - user;
-  const mark = g.id === '*' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5z"/><path d="M12 12v8M4 7.5 12 12l8-4.5"/></svg>'
-    : esc(g.name.slice(0, 2).toUpperCase());
-  const markBg = g.id === '*' ? '#6f4bd8' : (APP_MARK[g.name] || '#2f8bf5');
-  return `<div class="appgrp">
-    <button type="button" class="ag-head" aria-haspopup="dialog" title="${esc(t('rules.viewDetail'))}" onclick="App.openRuleModal('${esc(g.id)}')">
-      <span class="ag-mark" style="background:${markBg}">${mark}</span>
-      <span class="ag-main">
-        <span class="ag-name">${esc(g.name)}</span>
-        <span class="ag-sub">${esc(t('rules.groupCount', { n: g.rules.length }))} · ${esc(t('rules.groupBreakdown', { b: builtin, u: user }))} · ${esc(g.sub)}</span>
-      </span>
-      <span class="ag-stats">
-        <span class="ag-dot" title="${esc(t('common.green'))}"><i class="dot dot-green"></i>${green}</span>
-        <span class="ag-dot" title="${esc(t('common.red'))}"><i class="dot dot-red"></i>${red}</span>
-        <span class="ag-hits">${esc(t('rules.groupHits', { n: hits }))}</span>
-      </span>
-      <span class="ag-go">${esc(t('rules.viewDetail'))}<i class="ag-caret">›</i></span>
-    </button>
-  </div>`;
-}
-function pendingRow(pd) {
-  const sug = pd.suggest;
-  const mid = sug
-    ? `<div class="suggest">
-        <div class="sug-top"><span class="badge b-violet">✦ ${esc(t('ai.suggest'))}</span>
-          ${sug.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>` : `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>`}
-          <span class="conf">${esc(t('ai.confidence'))} ${(sug.conf * 100).toFixed(0)}%</span></div>
-        <div class="sug-reason">${esc(t(sug.reason))}</div>
-        <div class="banner-actions">
-          <button type="button" class="btn btn-soft btn-xs" onclick="App.adoptSuggest('${pd.id}')">${esc(t('ai.adopt'))}</button>
-          <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','ignore')">${esc(t('action.ignore'))}</button>
-        </div>
-      </div>`
-    : esc(t(pd.hint) + ' · ' + pd.ide);
-  const acts = sug
-    ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.aiIdentify('${pd.id}')">${esc(t('action.retry'))}</button>`
-    : `<button type="button" class="btn btn-ai btn-xs" onclick="App.aiIdentify('${pd.id}')">${esc(t('ai.identify'))}</button>
-        <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','green')">${esc(t('action.markGreen'))}</button>
-        <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','red')">${esc(t('action.markRed'))}</button>
-        <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','ignore')">${esc(t('action.ignore'))}</button>`;
-  return `<div class="trow pend ${sug ? 'has-sug risk-' + sug.safety : 'risk-yellow'}">
-    <span class="tcell tpath badged"><span class="badge ${sug ? (sug.safety === 'green' ? 'b-green' : 'b-red') : 'b-amber'}">${sug ? '✦' : '?'}</span><span class="tp" title="${esc(pd.path)}">${esc(pd.path)}</span></span>
-    <span class="tcell ${sug ? 'wrap' : 'tdesc'}" ${sug ? '' : `title="${esc(t(pd.hint))} · ${esc(pd.ide)}"`}>${mid}</span>
-    <span class="tcell tsize">${fmtBytes(pd.size_bytes)}</span>
-    <span class="tcell acts">${acts}</span>
-  </div>`;
-}
 
-function ruleForm() {
-  const apps = ['*'].concat(CATALOG.ides.map(i => i.name));
-  return `<div class="form-grid rule-form">
-    <div class="field"><label>${esc(t('rules.match'))} <span class="bad">*</span></label><input id="rule-match" placeholder="${esc(t('rules.matchPh'))}"></div>
-    <div class="field"><label>${esc(t('rules.matchType'))}</label>
-      <select id="rule-type"><option value="exact">${esc(t('rules.type.exact'))}</option><option value="glob">${esc(t('rules.type.glob'))}</option><option value="regex">${esc(t('rules.type.regex'))}</option></select>
-    </div>
-    <div class="field"><label>${esc(t('rules.safety'))}</label>
-      <select id="rule-safety"><option value="green">${esc(t('common.green'))}</option><option value="red">${esc(t('common.red'))}</option></select>
-    </div>
-    <div class="field"><label>${esc(t('rules.appCol'))}</label>
-      <select id="rule-app">${apps.map(a => `<option value="${esc(a)}">${esc(a === '*' ? t('rules.shared') : a)}</option>`).join('')}</select>
-    </div>
-    <div class="field"><label>${esc(t('common.reason'))}</label><input id="rule-reason" placeholder="${esc(t('rules.reasonPh'))}"></div>
-    <button type="button" class="btn btn-primary btn-sm" onclick="App.addRule()">${esc(t('rules.add'))}</button>
-  </div>`;
-}
 function renderRules() {
-  const pending = PENDING.filter(pd => !state.aiFilter || pd.suggest);
-  const groups = appGroups();
+  const pending = pendingYellowItems();
+  const learned = learnedRules();
+  const warnings = (state.data.learned && state.data.learned.warnings) || [];
   return `<div class="content">
    <div class="cols">
     <section class="panel panel-scroll">
-      <div class="panel-head"><h2>${esc(t('rules.pending'))}</h2><span class="hint">${esc(t('common.items', { n: PENDING.length }))}</span></div>
+      <div class="panel-head"><h2>${esc(t('rules.pending'))}</h2><span class="hint">${esc(t('common.items', { n: pending.length }))}</span></div>
       <div class="panel-body">
-        <div class="row-flex" style="justify-content:space-between">
-          <div class="note dim" style="font-size:var(--fs-meta)">${esc(t('rules.pendingDesc'))}</div>
-          <div class="banner-actions" style="margin:0">
-            <button type="button" class="btn btn-xs ${state.aiFilter ? 'btn-soft' : 'btn-ghost'}" onclick="App.toggleAiFilter()">${esc(t('ai.filter'))}</button>
-            ${PENDING.some(pd => !pd.suggest) ? `<button type="button" class="btn btn-ai btn-xs" onclick="App.aiIdentifyAll()">${esc(t('ai.identifyAll', { n: PENDING.filter(pd => !pd.suggest).length }))}</button>` : ''}
-          </div>
-        </div>
+        <div class="note dim" style="font-size:var(--fs-meta)">${esc(t('rules.pendingDesc'))}</div>
         <div class="rows scroll-y">
-          ${pending.length ? pending.map(pendingRow).join('') : `<div class="empty" style="padding:40px 10px"><p>${esc(t(state.aiFilter && PENDING.length ? 'ai.noneLeft' : 'rules.pendingEmpty'))}</p></div>`}
+          ${pending.length ? pending.map(pendingRow).join('') : `<div class="empty" style="padding:40px 10px"><p>${esc(t('rules.pendingEmpty'))}</p></div>`}
         </div>
         <div class="banner info"><span class="b-ico">i</span><div>${esc(t('rules.conflict'))}</div></div>
       </div>
     </section>
     <section class="panel panel-scroll">
-      <div class="panel-head">
-        <h2>${esc(t('rules.table'))}</h2>
-        <div class="banner-actions" style="margin:0;align-items:center">
-          <span class="hint">${esc(t('rules.groupHint'))}</span>
-          <button type="button" class="btn btn-xs ${state.rulesView === 'app' ? 'btn-soft' : 'btn-ghost'}" onclick="App.setRulesView('app')">${esc(t('rules.viewApp'))}</button>
-          <button type="button" class="btn btn-xs ${state.rulesView === 'rule' ? 'btn-soft' : 'btn-ghost'}" onclick="App.setRulesView('rule')">${esc(t('rules.viewRule'))}</button>
-        </div>
-      </div>
+      <div class="panel-head"><h2>${esc(t('rules.table'))}</h2><span class="hint">${esc(t('rules.tableDesc'))}</span></div>
       <div class="panel-body">
-        ${ruleForm()}
-        ${state.rulesView === 'app'
-          ? `<div class="scroll-y">${groups.map(appGroupRow).join('')}</div>`
-          : `<div class="scroll-y mt-2">${ruleTable(RULES)}</div>`}
+        ${warnings.length ? `<div class="banner warn"><span class="b-ico">△</span><div>${esc(warnings.join(' · '))}</div></div>` : ''}
+        ${learned.length ? learnedTable(learned) : `<div class="empty" style="padding:40px 10px"><p>${esc(t('rules.learnedEmpty'))}</p></div>`}
       </div>
     </section>
    </div>
   </div>`;
 }
-
 /* ---------- 操作历史 ---------- */
 function resultBadge(h) {
   if (h.result === 'failed') return `<span class="badge b-red">${esc(t('history.result.failed'))}</span>`;
@@ -3739,7 +3315,7 @@ function modalKind() {
   if (state.data.flow) return state.data.flow.kind;
   const info = parseRoute();
   if (info.modal) return info.modal;
-  const subs = ['migrate-preview', 'migrate-progress', 'migrate-failed', 'migrate-success', 'rollback-confirm', 'process-blocked', 'yellow-confirm'];
+  const subs = ['process-blocked', 'yellow-confirm'];
   return subs.indexOf(info.sub) >= 0 ? info.sub : '';
 }
 
@@ -3760,58 +3336,14 @@ function renderModal() {
   if (kind === 'settings') html = modalSettings();
   else if (kind === 'ai') html = modalAi();
   else if (kind === 'feedback') html = modalFeedback();
-  else if (kind === 'rules-app') html = modalRulesApp();
-  else if (kind === 'migrate-preview') html = modalPreview();
-  else if (kind === 'migrate-progress') html = modalProgress();
-  else if (kind === 'migrate-failed') html = modalFailed();
-  else if (kind === 'migrate-success') html = modalSuccess();
-  else if (kind === 'rollback-confirm') html = modalRollback();
   else if (kind === 'process-blocked') html = modalBlocked();
   else if (kind === 'yellow-confirm') html = modalYellow();
   else if (kind === 'migrate') html = modalMigrateFlow();
   else if (kind === 'rollback') html = modalRollbackFlow();
   if (!html) { root.innerHTML = ''; return; }
   root.innerHTML = `<div class="modal-mask" onclick="App.closeModal()">
-    <div class="modal ${kind === 'migrate-preview' || kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'rules-app' || kind === 'migrate' || kind === 'rollback' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
+    <div class="modal ${kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'migrate' || kind === 'rollback' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
   </div>`;
-}
-
-function modalRulesApp() {
-  const info = parseRoute();
-  const groups = appGroups();
-  const g = groupById(info.app || state.rulesApp) || groups[0] || groupById('*');
-  const close = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>`;
-  if (!g) return modalShell(t('rules.table'), '', `<div class="note dim">${esc(t('rules.groupEmpty'))}</div>`, close);
-  const green = g.rules.filter(r => r.safety === 'green').length;
-  const red = g.rules.filter(r => r.safety === 'red').length;
-  const hits = g.rules.reduce((a, r) => a + r.hits, 0);
-  const user = g.rules.filter(r => r.source === 'user').length;
-  const builtin = g.rules.length - user;
-  const known = CATALOG.ides.map(i => i.name);
-  const pend = g.id === '*' ? PENDING.filter(pd => known.indexOf(pd.ide) < 0) : PENDING.filter(pd => pd.ide === g.name);
-  const appValue = g.id === '*' ? '*' : g.name;
-  const body = `<div class="kvbar">
-      <div class="kv-item"><span class="k">${esc(t('rules.modalCount'))}</span><span class="v">${g.rules.length}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('common.green'))}</span><span class="v ok">${green}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('common.red'))}</span><span class="v ${red ? 'warn' : ''}">${red}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('rules.hits'))}</span><span class="v">${hits}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${pend.length ? 'warn' : 'ok'}">${pend.length}</span></div>
-    </div>
-    ${pend.length ? `<div class="section-title"><h3>${esc(t('rules.modalPending', { app: g.name }))}</h3><span class="sub">${esc(t('rules.modalPendingSub'))}</span></div><div class="rows">${pend.map(pendingRow).join('')}</div>` : ''}
-    <div class="section-title"><h3>${esc(t('rules.modalAdd', { app: g.name }))}</h3><span class="sub">${esc(t('rules.modalAddSub'))}</span></div>
-    <div class="form-grid rule-form mform">
-      <div class="field"><label>${esc(t('rules.match'))} <span class="bad">*</span></label><input id="rule-match-m" placeholder="${esc(t('rules.matchPh'))}"></div>
-      <div class="field"><label>${esc(t('rules.matchType'))}</label><select id="rule-type-m"><option value="exact">${esc(t('rules.type.exact'))}</option><option value="glob">${esc(t('rules.type.glob'))}</option><option value="regex">${esc(t('rules.type.regex'))}</option></select></div>
-      <div class="field"><label>${esc(t('rules.safety'))}</label><select id="rule-safety-m"><option value="green">${esc(t('common.green'))}</option><option value="red">${esc(t('common.red'))}</option></select></div>
-      <div class="field mwide"><label>${esc(t('common.reason'))}</label><input id="rule-reason-m" placeholder="${esc(t('rules.reasonPh'))}"></div>
-      <button type="button" class="btn btn-primary btn-sm" onclick="App.addRule('m','${esc(appValue)}')">${esc(t('rules.add'))}</button>
-    </div>
-    <div class="section-title"><h3>${esc(t('rules.modalRules'))}</h3><span class="sub">${esc(t('rules.groupBreakdown', { b: builtin, u: user }))}</span></div>
-    ${g.rules.length ? ruleTable(g.rules) : `<div class="note dim">${esc(t('rules.groupEmpty'))}</div>`}
-    <div class="banner info"><span class="b-ico">i</span><div>${esc(t('rules.conflict'))} · ${esc(t('rules.modalLocal'))}</div></div>`;
-  const foot = close + `<button type="button" class="btn btn-ghost btn-sm" onclick="App.showAllRules()">${esc(t('rules.viewAll'))}</button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('action.done'))}</button>`;
-  return modalShell(g.name, t('rules.modalSub', { n: g.rules.length, b: builtin, u: user, h: hits }), body, foot, true);
 }
 
 function modalSettings() {
@@ -3856,13 +3388,14 @@ function modalSettings() {
 function modalAi() {
   const s = state.settings;
   const ready = aiReady();
+  const pendingCount = pendingYellowItems().length;
   const aiConsent = state.aiAsk ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div><b>${esc(t('ai.consentTitle'))}</b><br>${esc(t('ai.consentBody'))}<div class="banner-actions"><button type="button" class="btn btn-primary btn-xs" onclick="App.confirmAiEnable()">${esc(t('ai.consentAccept'))}</button><button type="button" class="btn btn-ghost btn-xs" onclick="App.cancelAiAsk()">${esc(t('ai.consentDecline'))}</button></div></div></div>` : '';
   const body = `
     <div class="kvbar">
       <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : 'warn'}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('ai.model'))}</span><span class="v">${esc(aiModelName())}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v">${esc(s.aiKeySet ? '••••' + '4291' : t('common.none'))}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${PENDING.length ? 'warn' : 'ok'}">${PENDING.length}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : 'warn'}">${esc(s.aiKeySet ? t('ai.keyEnvSet') : t('ai.keyEnvMissing'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${pendingCount ? 'warn' : 'ok'}">${pendingCount}</span></div>
     </div>
     <div class="settings-row">
       <div><div class="k">${esc(t('ai.enable'))}</div><div class="d">${esc(t('ai.enableDesc'))}</div></div>
@@ -3879,12 +3412,9 @@ function modalAi() {
       </div>
       <div class="field"><label>${esc(t('ai.model'))}</label><input id="ai-model" value="${esc(s.aiModel)}" placeholder="${esc(t('ai.modelAuto'))}"></div>
       <div class="field full"><label>${esc(t('ai.baseUrl'))} <span class="dim">· ${esc(t('ai.baseUrlDesc'))}</span></label><input id="ai-base" value="${esc(s.aiBaseUrl)}" placeholder="https://"></div>
-      <div class="field"><label>${esc(t('ai.key'))} <span class="dim">· ${esc(t('ai.keyDesc'))}</span></label><input id="ai-key" type="password" value="${esc(s.aiKeySet ? 'stored' : '')}" placeholder="${esc(s.aiKeySet ? t('common.enabled') : t('common.none'))}"></div>
-      <div class="field"><label>${esc(t('ai.limit'))}</label><input id="ai-limit" type="number" min="1" max="200" value="${s.aiLimit}"></div>
     </div>
-    <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.scope'))}</b> · ${esc(t('ai.scopeValue'))}</div></div>
-    ${PENDING.some(p => !p.suggest) ? `<div class="banner warn"><span class="b-ico">✦</span><div>${esc(t('ai.pendingAsk', { n: PENDING.filter(p => !p.suggest).length }))}
-      <div class="banner-actions"><button type="button" class="btn btn-ai btn-xs" onclick="App.aiIdentifyAll()">${esc(t('ai.identifyAll', { n: PENDING.filter(p => !p.suggest).length }))}</button></div></div></div>` : ''}`;
+    <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.key'))}</b> · ${esc(t('ai.keyDesc'))}</div></div>
+    <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.scope'))}</b> · ${esc(t('ai.scopeValue'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.aiTest()">${esc(t('ai.test'))}</button>
     <span class="left">${esc(t('ai.note'))}</span>
     <button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.cancel'))}</button>
@@ -3899,121 +3429,9 @@ function modalFeedback() {
     </div>
     <div class="banner warn"><span class="b-ico">△</span><div>${esc(t('feedback.note'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.copyDiagnostics()">${esc(t('feedback.copy'))}</button>
-    <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('feedback.issueOpened'))">${esc(t('feedback.issue'))}</button>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('feedback.issueUnavailable'))">${esc(t('feedback.issue'))}</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>`;
   return modalShell(t('feedback.title'), t('feedback.sub'), body, foot, true);
-}
-
-function modalPreview() {
-  const ide = getIde(state.selectedIde);
-  const dirs = selectedDirs(ide);
-  const size = selectedSize(ide);
-  const red = safetyCount(ide, 'red');
-  const yellow = safetyCount(ide, 'yellow');
-  const body = `
-    <div class="sum">
-      <div class="sum-box"><div class="k">${esc(t('preview.from'))}</div><div class="v" style="font-size:var(--fs-strong)">C:</div></div>
-      <div class="sum-box"><div class="k">${esc(t('preview.to'))}</div><div class="v" style="font-size:var(--fs-strong)">${esc(DRIVE.targetDrive)}</div></div>
-      <div class="sum-box"><div class="k">${esc(t('preview.free'))}</div><div class="v ok">${fmtGB(size / GIB)}</div></div>
-    </div>
-    <div class="preview-card">
-      <div class="kv"><span class="k">${esc(t('preview.targetRoot'))}</span><span class="v">${esc(state.settings.targetRoot)}</span></div>
-      <div class="kv"><span class="k">${esc(t('preview.to'))}</span><span class="v">${esc(targetPathFor(ide))}</span></div>
-      <div class="kv"><span class="k">${esc(t('preview.targetFree'))}</span><span class="v ${spaceOk(ide) ? 'ok' : 'warn'}">${DRIVE.targetFreeGB.toFixed(1)} GB · ${esc(spaceOk(ide) ? t('preview.spaceOk') : t('preview.spaceBad'))}</span></div>
-      <div class="kv"><span class="k">${esc(t('preview.junction'))}</span></div>
-    </div>
-    <div class="section-title"><h3>${esc(t('preview.itemsTitle'))}</h3><span class="sub">${esc(t('common.selected', { n: dirs.length }))} · ${fmtGB(size / GIB)}</span></div>
-    <div class="rows">
-      ${dirs.map(d => `<div class="row risk-green">
-        <span class="row-main"><span class="row-name">${esc(d.path)}</span><span class="row-desc">${esc(t(d.reason))}</span></span>
-        <span class="row-right"><span class="row-size">${fmtBytes(d.size_bytes)}</span></span>
-      </div>`).join('') || `<div class="note dim">${esc(t('ide.noSelection'))}</div>`}
-    </div>
-    ${red ? `<div class="banner danger"><span class="b-ico">⛨</span><div><b>${esc(t('preview.willExcludeRed'))}</b> · ${esc(t('preview.willExcludeRedDesc', { n: red }))}</div></div>` : ''}
-    ${yellow ? `<div class="banner warn"><span class="b-ico">?</span><div>${esc(t('preview.yellowPending', { n: yellow }))}</div></div>` : ''}`;
-  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('preview.back'))}</button>
-    <button type="button" class="btn btn-primary btn-sm" ${dirs.length && spaceOk(ide) ? '' : 'disabled'} onclick="App.go('#ide/migrate-progress')">${esc(t('preview.start'))}</button>`;
-  return modalShell(t('preview.title'), t('preview.sub'), body, foot);
-}
-
-function modalProgress() {
-  const ide = getIde(state.selectedIde);
-  const pct = state.demo.pct;
-  const stages = ['backup', 'copy', 'verify', 'delete', 'link', 'verifyLink'];
-  const active = 2;
-  const body = `
-    <div class="preview-card">
-      <div class="preview-top"><span class="t">${esc(ide.name)}</span><span class="badge b-blue">${pct}%</span></div>
-      <div class="progress"><i style="width:${pct}%"></i></div>
-      <div class="progress-meta"><span>${esc(t('progress.files', { done: state.demo.filesDone.toLocaleString(), total: state.demo.filesTotal.toLocaleString() }))}</span><span>${esc(t('progress.percent', { pct: pct }))}</span></div>
-    </div>
-    <div class="stage-list">
-      ${stages.map((s, i) => `<div class="stage ${i < active ? 'done' : i === active ? 'active' : ''}">
-        <span class="s-ico">${i < active ? '✓' : ''}</span><span>${esc(t('progress.stage.' + s))}</span>
-        <span class="s-meta">${i < active ? esc(t('progress.done')) : i === active ? esc(t('progress.running')) : esc(t('progress.waiting'))}</span>
-      </div>`).join('')}
-    </div>
-    <div class="banner warn"><span class="b-ico">△</span><div>${esc(t('progress.keepOpen'))}</div></div>`;
-  const foot = `<span class="left">${esc(t('progress.cancelDisabled'))}</span>
-    <button type="button" class="btn btn-ghost btn-sm" disabled>${esc(t('action.cancel'))}</button>`;
-  return modalShell(t('progress.title'), ide.name + ' · ' + fmtGB(selectedSize(ide) / GIB), body, foot, true);
-}
-
-function modalFailed() {
-  const ide = getIde(state.selectedIde);
-  const body = `
-    <div class="banner danger"><span class="b-ico">✕</span><div><b>${esc(t('failed.what'))}</b><br>${esc(t('failed.verifyMsg'))}</div></div>
-    <div class="sum">
-      <div class="sum-box"><div class="k">${esc(t('failed.code'))}</div><div class="v bad" style="font-size:var(--fs-strong)">E_VERIFY_MISMATCH</div></div>
-      <div class="sum-box"><div class="k">${esc(t('history.duration'))}</div><div class="v">2m 05s</div></div>
-      <div class="sum-box"><div class="k">${esc(t('history.freed'))}</div><div class="v dim">—</div></div>
-    </div>
-    <div class="preview-card">
-      <div class="kv"><span class="k">${esc(t('preview.from'))}</span><span class="v">${esc(ide.runtime.root)}</span></div>
-      <div class="kv"><span class="k">${esc(t('failed.backup', { path: 'D:\\DiskWarden\\.backup\\TraeCN\\2026-10-16-1420' }))}</span></div>
-    </div>
-    <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('failed.sourceSafe'))}</div></div>
-    <div class="note dim">${esc(t('failed.suggestion'))}</div>`;
-  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.viewLog()">${esc(t('failed.log'))}</button>
-    <button type="button" class="btn btn-ghost btn-sm" onclick="App.rollbackFailed()">${esc(t('failed.rollback'))}</button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="App.retryMigrate()">${esc(t('failed.retry'))}</button>`;
-  return modalShell(t('failed.title'), t('failed.sub'), body, foot, true);
-}
-
-function modalSuccess() {
-  const ide = getIde(state.selectedIde);
-  const freed = selectedSize(ide) / GIB;
-  const body = `
-    <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('success.sub'))}</div></div>
-    <div class="sum">
-      <div class="sum-box"><div class="k">${esc(t('success.freed'))}</div><div class="v ok">${fmtGB(freed)}</div></div>
-      <div class="sum-box"><div class="k">${esc(t('success.verified'))}</div><div class="v ok" style="font-size:var(--fs-strong)">${esc(t('success.verifiedValue'))}</div></div>
-      <div class="sum-box"><div class="k">${esc(t('success.duration'))}</div><div class="v">3m 41s</div></div>
-    </div>
-    <div class="preview-card">
-      <div class="kv"><span class="k">${esc(t('success.junction'))}</span><span class="v">${esc(targetPathFor(ide))}</span></div>
-      <div class="kv"><span class="k">${esc(t('preview.junction'))}</span></div>
-    </div>`;
-  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.nav('history')">${esc(t('success.viewHistory'))}</button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('success.done'))}</button>`;
-  return modalShell(t('success.title'), ide.name, body, foot, true);
-}
-
-function modalRollback() {
-  const ide = getIde(state.selectedIde);
-  const size = fmtGB(ideSize(ide) / GIB);
-  const target = ide.runtime.target || targetPathFor(ide);
-  const body = `
-    <div class="banner warn"><span class="b-ico">↺</span><div>${esc(t('rollback.desc', { path: target, size: size }))}</div></div>
-    <div class="preview-card">
-      <div class="kv"><span class="k">${esc(t('rollback.source'))}</span><span class="v">${esc(target)}</span></div>
-      <div class="kv"><span class="k">${esc(t('rollback.target'))}</span><span class="v">${esc(ide.runtime.root)}</span></div>
-      <div class="kv"><span class="k">${esc(t('rollback.backup'))}</span><span class="v">D:\\DiskWarden\\.backup\\${esc(ide.name.replace(/\s+/g, ''))}\\</span></div>
-    </div>
-    <div class="note dim">${esc(t('rollback.note', { app: ide.name }))}</div>`;
-  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('rollback.cancel'))}</button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="App.confirmRollback()">${esc(t('rollback.confirm'))}</button>`;
-  return modalShell(t('rollback.title'), t('rollback.sub'), body, foot, true);
 }
 
 function modalBlocked() {
@@ -4022,8 +3440,8 @@ function modalBlocked() {
   const body = `
     <div class="banner danger"><span class="b-ico">▲</span><div>${esc(t('blocked.desc'))}</div></div>
     <div class="table-wrap"><table class="table">
-      <thead><tr><th>${esc(t('blocked.process'))}</th><th>${esc(t('blocked.pid'))}</th><th>${esc(t('blocked.path'))}</th></tr></thead>
-      <tbody>${running.map(p => `<tr><td class="mono">${esc(p.name)}</td><td class="num">${p.pid}</td><td class="mono" style="word-break:break-all">${esc(p.lock)}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>${esc(t('blocked.process'))}</th><th>${esc(t('blocked.pid'))}</th></tr></thead>
+      <tbody>${running.map(p => `<tr><td class="mono">${esc(p.name)}</td><td class="num">${p.pid}</td></tr>`).join('')}</tbody>
     </table></div>
     <div class="banner warn"><span class="b-ico">i</span><div>${esc(t('blocked.hint'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>
@@ -4032,27 +3450,11 @@ function modalBlocked() {
   return modalShell(t('blocked.title'), t('blocked.sub', { app: ide.name }), body, foot);
 }
 
-function aiSuggestFor(dir) {
-  const name = String(dir.path).replace(/[\\/]+$/, '').split(/[\\/]/).pop() || '';
-  const hit = RULES.find(r => r.enabled && (r.match.toLowerCase() === name.toLowerCase()
-    || (r.type === 'glob' && name.toLowerCase().indexOf(r.match.replace('*', '').toLowerCase()) >= 0)));
-  const safety = hit ? hit.safety : 'red';
-  return { safety: safety, reason: safety === 'green' ? 'ai.reasonCache' : 'ai.reasonSecret', conf: safety === 'green' ? 0.86 : 0.79 };
-}
-function aiSuggestCard(d) {
-  const s = aiSuggestFor(d);
-  return `<div class="preview-card">
-    <div class="preview-top"><span class="t">✦ ${esc(t('ai.suggest'))}</span><span class="conf">${esc(t('ai.confidence'))} ${Math.round(s.conf * 100)}%</span></div>
-    <div class="kv"><span class="k">${esc(t('common.safety'))}</span><span class="v ${s.safety === 'green' ? 'ok' : 'warn'}">${esc(t('common.' + s.safety))}</span></div>
-    <div class="sug-reason">${esc(t(s.reason))}</div>
-    <div class="banner-actions"><button type="button" class="btn btn-soft btn-xs" onclick="App.adoptYellow('${s.safety}')">${esc(t('ai.adopt'))}</button></div>
-  </div>`;
-}
-
 function modalYellow() {
-  const py = state.pendingYellow || { ide: 'trae-cn', idx: 3 };
+  const py = state.pendingYellow;
+  if (!py) return '';
   const ide = getIde(py.ide);
-  const d = ide.directories[py.idx] || ide.directories[0];
+  const d = ide && ide.directories ? ide.directories[py.idx] : null;
   if (!d) {
     return modalShell(t('yellow.title'), t('yellow.sub', { path: '' }),
       `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('ide.listEmpty'))}</div></div>`,
@@ -4063,11 +3465,10 @@ function modalYellow() {
     <div class="banner warn"><span class="b-ico">?</span><div>${esc(t('yellow.desc'))}<br>${esc(t('yellow.warn'))}</div></div>
     <div class="sum">
       <div class="sum-box"><div class="k">${esc(t('yellow.size'))}</div><div class="v">${fmtBytes(d.size_bytes)}</div></div>
-      <div class="sum-box"><div class="k">${esc(t('yellow.detected'))}</div><div class="v" style="font-size:var(--fs-strong)">${esc(t(d.reason))}</div></div>
+      <div class="sum-box"><div class="k">${esc(t('yellow.detected'))}</div><div class="v" style="font-size:var(--fs-strong)">${esc(itemReason(d))}</div></div>
       <div class="sum-box"><div class="k">${esc(t('common.safety'))}</div><div class="v" style="font-size:var(--fs-strong)">${esc(t('common.yellow'))}</div></div>
     </div>
     <div class="preview-card"><div class="kv"><span class="k">${esc(t('common.path'))}</span><span class="v">${esc(d.path)}</span></div></div>
-    ${aiReady() ? aiSuggestCard(d) : `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('ai.statusOff'))} · ${esc(t('ai.needKey'))} <button type="button" class="btn btn-ghost btn-xs" onclick="App.openModal('ai')">${esc(t('ai.link'))}</button></div></div>`}
     ${confirmed ? `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('common.confirmed'))}</div></div>` : ''}`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.confirmYellow('later')">${esc(t('yellow.later'))}</button>
     <button type="button" class="btn btn-ghost btn-sm" onclick="App.confirmYellow('red')">${esc(t('yellow.markRed'))}</button>
@@ -4285,51 +3686,9 @@ function modalRollbackFlow() {
   return modalShell(t('rollback.failedTitle'), toolName, body, foot, true);
 }
 
-/* ---------- 原型状态切换 ---------- */
-function renderProtoPanel() {
-  const panel = document.getElementById('proto-panel');
-  const fab = document.getElementById('proto-fab');
-  if (!panel) return;
-  panel.classList.toggle('show', !!state.protoOpen);
-  if (fab) fab.classList.toggle('active', !!state.protoOpen);
-  const current = (location.hash || '#ide').replace(/^#/, '');
-  const groups = [
-    { key: 'proto.section.core', items: [
-      { h: 'ide', k: 'proto.route.ide' },
-      { h: 'projects', k: 'proto.route.projects' },
-      { h: 'disk', k: 'proto.route.disk' },
-      { h: 'rules', k: 'proto.route.rules' },
-      { h: 'history', k: 'proto.route.history' }
-    ] },
-    { key: 'proto.section.states', items: [
-      { h: 'ide/scanning', k: 'proto.route.scanning' },
-      { h: 'ide/empty', k: 'proto.route.empty' },
-      { h: 'ide/migrate-preview', k: 'proto.route.preview' },
-      { h: 'ide/migrate-progress', k: 'proto.route.progress' },
-      { h: 'ide/migrate-failed', k: 'proto.route.failed' },
-      { h: 'ide/migrate-success', k: 'proto.route.success' },
-      { h: 'ide/process-blocked', k: 'proto.route.blocked' },
-      { h: 'ide/rollback-confirm', k: 'proto.route.rollback' },
-      { h: 'ide/yellow-confirm', k: 'proto.route.yellow' }
-    ] },
-    { key: 'proto.section.other', items: [
-      { h: 'ai', k: 'ai.title' },
-      { h: 'rules-app/cursor', k: 'rules.modalRules' },
-      { h: 'settings', k: 'proto.route.settings' },
-      { h: 'feedback', k: 'proto.route.feedback' }
-    ] }
-  ];
-  panel.innerHTML = `<h4>${esc(t('proto.title'))}</h4><p>${esc(t('proto.desc'))}</p>
-    <div class="proto-routes">
-      ${groups.map((g, gi) => `${gi ? '<div class="proto-sep"></div>' : ''}<div class="nav-label" style="padding:2px 7px 4px">${esc(t(g.key))}</div>
-        ${g.items.map(it => `<button type="button" class="proto-route ${current === it.h ? 'active' : ''}" onclick="App.go('#${it.h}')"><span>${esc(t(it.k))}</span><span class="pr-k">#${esc(it.h)}</span></button>`).join('')}`).join('')}
-    </div>`;
-  document.getElementById('proto-fab-label').textContent = t('proto.title');
-}
-/* ---------- 交互动作（原型，不改真实文件） ---------- */
+/* ---------- 交互动作 ---------- */
 const App = {
   go(hash) {
-    state.protoOpen = false;
     if (location.hash === hash) { render(); return; }
     location.hash = hash;
   },
@@ -4368,7 +3727,7 @@ const App = {
   saveSettings() {
     const root = document.getElementById('settings-root');
     const un = document.getElementById('settings-uninstall');
-    const rootVal = root ? (root.value.trim() || 'D:\\DiskWarden\\') : state.settings.targetRoot;
+    const rootVal = root ? (root.value.trim() || state.settings.targetRoot) : state.settings.targetRoot;
     const uninstall = un ? un.value : state.settings.uninstall;
     const patch = {
       launch_at_startup: !!state.settings.autoStart,
@@ -4464,23 +3823,40 @@ const App = {
     const ide = getIde(py.ide);
     const dir = ide.directories[py.idx];
     state.selectedIde = ide.id;
-    if (!dir) { this.go('#ide'); return; }
-    if (action === 'green') {
-      state.confirmed[dirKey(ide.id, py.idx)] = true;
-      if (dir.item_id) state.checked[dir.item_id] = true;
-      else {
-        state.checked[ide.id] = state.checked[ide.id] || {};
-        state.checked[ide.id][py.idx] = true;
-      }
-      this.toast(t('toast.yellowConfirmed'));
-    } else if (action === 'red') {
-      dir.safety = 'red';
-      if (dir.item_id) delete state.checked[dir.item_id];
-      else if (state.checked[ide.id]) delete state.checked[ide.id][py.idx];
-      this.toast(t('rules.markedRed'));
+    if (!dir) { state.pendingYellow = null; this.go('#ide'); return; }
+    if (action === 'later') {
+      state.pendingYellow = null;
+      this.go('#ide');
+      return;
+    }
+    if (!dir.item_id) {
+      state.pendingYellow = null;
+      this.go('#ide');
+      this.toast(t('rules.overrideFailed'));
+      return;
     }
     state.pendingYellow = null;
     this.go('#ide');
+    this.overrideItem(dir.item_id, action);
+  },
+  overrideItem(itemId, safety) {
+    if (!itemId || (safety !== 'green' && safety !== 'red')) return;
+    if (!this._overriding) this._overriding = {};
+    if (this._overriding[itemId]) return;
+    this._overriding[itemId] = true;
+    rpc('rules.override', { item_id: itemId, safety: safety }).then(() => {
+      return Promise.all([rpc('scan.result'), rpc('rules.learned.list')]);
+    }).then(res => {
+      delete this._overriding[itemId];
+      const snap = res && res[0];
+      if (snap) setSnapshot(snap);
+      if (res && res[1]) state.data.learned = res[1];
+      render();
+      this.toast(t(safety === 'green' ? 'rules.markedGreen' : 'rules.markedRed'));
+    }).catch(err => {
+      delete this._overriding[itemId];
+      this.toast(errText(err));
+    });
   },
   startPreview(ideId) {
     const ide = getIde(ideId);
@@ -4491,11 +3867,6 @@ const App = {
     if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
     this._beginMigrate(ideId);
   },
-  cleanCaches(ideId) {
-    const ide = getIde(ideId);
-    const total = sum(ide.directories.filter(d => d.safety === 'green'), 'size_bytes') / GIB;
-    this.toast(t('toast.cleaned', { size: fmtGB(total) }));
-  },
   refreshDisk() {
     rpc('disk.info').then(disk => {
       applyDisk(disk || null);
@@ -4505,18 +3876,15 @@ const App = {
   openRollback(ideId) {
     this.rollbackTool(ideId);
   },
-  confirmRollback() {
-    this.startRollback();
-  },
   startMigrate(ideId) {
     this._beginMigrate(ideId);
   },
-  _beginMigrate(ideId) {
+  _beginMigrate(ideId, skipRunningCheck) {
     const ide = getIde(ideId);
     const dirs = selectedDirs(ide);
     const items = dirs.filter(d => d.item_id);
     if (!ide || !items.length) { this.toast(t('toast.noGreen')); return; }
-    if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
+    if (!skipRunningCheck && ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
     if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
     if (!state.data.flow) state.returnHash = state.returnHash || location.hash || '#ide';
     state.data.flow = {
@@ -4733,30 +4101,11 @@ const App = {
     if (!f || f.kind !== 'migrate') { this._beginMigrate(state.selectedIde); return; }
     this._beginMigrate(f.toolId);
   },
-  rollbackFailed() {
-    this.closeFlow();
-  },
   recheckProcess() {
-    this.toast(t('blocked.stillBlocked'));
+    this._beginMigrate(state.selectedIde, true);
   },
   showForceWarn() {
     this.toast(t('blocked.forceWarn'));
-  },
-  viewLog() {
-    this.toast(t('toast.copied'));
-  },
-  selectProject(id) {
-    state.selectedProject = id;
-    render();
-  },
-  cleanProject(kind) {
-    const p = PROJECTS.find(x => x.id === state.selectedProject);
-    if (!p) return;
-    let freed = 0;
-    if (kind === 'deps' || kind === 'all') { freed += p.deps; p.deps = 0; }
-    if (kind === 'dist' || kind === 'all') { freed += p.dist; p.dist = 0; }
-    this.toast(t('toast.cleaned', { size: fmtGB(freed) }));
-    render();
   },
   selectHistory(id) {
     state.selectedHistory = id;
@@ -4775,9 +4124,20 @@ const App = {
   exportHistory() {
     const items = HISTORY.filter(h => state.historyFilter === 'all' || h.type === state.historyFilter);
     if (!items.length) { this.toast(t('history.exportEmpty')); return; }
-    copyText(JSON.stringify(items, null, 2)).then(ok => {
-      this.toast(t(ok ? 'history.exported' : 'toast.copyFailed'));
-    });
+    try {
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'disk-warden-history-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      this.toast(t('history.exported'));
+    } catch (e) {
+      this.toast(t('history.exportFailed'));
+    }
   },
   rollbackHistory(id) {
     const h = HISTORY.find(x => x.id === id);
@@ -4786,47 +4146,6 @@ const App = {
     const ide = CATALOG.ides.find(x => x.name === h.app);
     if (ide) state.selectedIde = ide.id;
     this.historyRollback(id);
-  },
-  setRulesView(v) { state.rulesView = v; render(); },
-  openRuleModal(id) {
-    state.rulesView = 'app';
-    state.rulesApp = id;
-    this.openModal('rules-app/' + (id === '*' ? 'all' : id));
-  },
-  showAllRules() { state.rulesView = 'rule'; this.closeModal(); },
-  toggleAiFilter() { state.aiFilter = !state.aiFilter; render(); },
-  aiIdentify(id) {
-    if (!aiReady()) { this.toast(t('ai.needKey')); this.openModal('ai'); return; }
-    const pd = PENDING.find(x => x.id === id);
-    if (!pd) return;
-    pd.suggest = AI_SUGGEST[id] || { safety: 'red', reason: 'ai.reasonSecret', conf: 0.7 };
-    render();
-    this.toast(t('ai.suggest'));
-  },
-  aiIdentifyAll() {
-    if (!aiReady()) { this.toast(t('ai.needKey')); this.openModal('ai'); return; }
-    const todo = PENDING.filter(pd => !pd.suggest);
-    if (!todo.length) { this.toast(t('ai.allDone')); return; }
-    todo.forEach(pd => { pd.suggest = AI_SUGGEST[pd.id] || { safety: 'red', reason: 'ai.reasonSecret', conf: 0.7 }; });
-    render();
-    this.toast(t('ai.done', { n: todo.length }));
-  },
-  adoptSuggest(id) {
-    const i = PENDING.findIndex(x => x.id === id);
-    if (i < 0) return;
-    const pd = PENDING[i];
-    if (!pd.suggest) return;
-    PENDING.splice(i, 1);
-    const name = pd.path.replace(/[\\/]+$/, '').split(/[\\/]/).pop() || pd.path;
-    RULES.unshift({ id: 'r' + Date.now(), match: name, type: 'exact', safety: pd.suggest.safety, source: 'user', hits: 0, enabled: true, reason: t(pd.suggest.reason), apps: [pd.ide] });
-    state.rulesView = 'app';
-    if (modalKind() === 'rules-app') state.rulesApp = appIdOf(pd.ide);
-    render();
-    this.toast(t('ai.adopted'));
-  },
-  adoptYellow(safety) {
-    this.confirmYellow(safety);
-    this.toast(t('ai.adopted'));
   },
   toggleAi() {
     const ai = (state.settings && state.settings.ai) || {};
@@ -4873,62 +4192,7 @@ const App = {
     }).catch(err => this.toast(errText(err)));
   },
   aiTest() {
-    this.toast(aiReady() ? t('ai.testOk') : t('ai.testBad'));
-  },
-  addRule(scope, appValue) {
-    const suf = scope ? '-' + scope : '';
-    const el = (k) => document.getElementById(k + suf);
-    const matchEl = el('rule-match');
-    const match = matchEl ? matchEl.value.trim() : '';
-    if (!match) {
-      if (matchEl) matchEl.focus();
-      this.toast(t('rules.required'));
-      return;
-    }
-    const typeEl = el('rule-type');
-    const safetyEl = el('rule-safety');
-    const reasonEl = el('rule-reason');
-    const appEl = el('rule-app');
-    RULES.unshift({
-      id: 'r' + Date.now(), match: match,
-      type: typeEl ? typeEl.value : 'exact',
-      safety: safetyEl ? safetyEl.value : 'green',
-      source: 'user', hits: 0, enabled: true,
-      reason: reasonEl && reasonEl.value.trim() ? reasonEl.value.trim() : '',
-      apps: [appEl ? appEl.value : (appValue || '*')]
-    });
-    state.rulesView = 'app';
-    state.rulesApp = appEl ? appIdOf(appEl.value) : appIdOf(appValue);
-    if (scope) { render(); this.toast(t('rules.added')); return; }
-    this.openRuleModal(state.rulesApp);
-    this.toast(t('rules.added'));
-  },
-  toggleRule(id) {
-    const r = RULES.find(x => x.id === id);
-    if (!r) return;
-    r.enabled = !r.enabled;
-    render();
-  },
-  deleteRule(id) {
-    const i = RULES.findIndex(x => x.id === id);
-    if (i < 0) return;
-    RULES.splice(i, 1);
-    render();
-    this.toast(t('rules.deleted'));
-  },
-  resolvePending(id, action) {
-    const i = PENDING.findIndex(x => x.id === id);
-    if (i < 0) return;
-    const pd = PENDING[i];
-    PENDING.splice(i, 1);
-    if (action === 'green' || action === 'red') {
-      const name = pd.path.replace(/[\\/]+$/, '').split(/[\\/]/).pop() || pd.path;
-      RULES.unshift({ id: 'r' + Date.now(), match: name, type: 'exact', safety: action, source: 'user', hits: 0, enabled: true });
-      this.toast(t(action === 'green' ? 'rules.markedGreen' : 'rules.markedRed'));
-    } else {
-      this.toast(t('rules.ignored'));
-    }
-    render();
+    this.toast(t('ai.testUnavailable'));
   },
   copyDiagnostics() {
     copyText(diagnosticsText()).then(ok => {
@@ -4946,10 +4210,6 @@ const App = {
   openIdeFolder(ideId) {
     const ide = getIde(ideId);
     this.openPath((ide.runtime && ide.runtime.root) || '');
-  },
-  openProjectFolder(projectId) {
-    const project = PROJECTS.find(x => x.id === projectId);
-    this.openPath(project ? project.path : '');
   },
   openDiskLocation(categoryId) {
     this.openPath(DISK_LOCATIONS[categoryId] || '');
@@ -4981,18 +4241,6 @@ function init() {
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     if (modalKind()) App.closeModal();
-    else if (state.protoOpen) { state.protoOpen = false; renderProtoPanel(); }
-  });
-  document.getElementById('proto-fab').addEventListener('click', e => {
-    e.stopPropagation();
-    state.protoOpen = !state.protoOpen;
-    renderProtoPanel();
-  });
-  document.addEventListener('click', e => {
-    if (!state.protoOpen) return;
-    if (e.target.closest('#proto-panel') || e.target.closest('#proto-fab')) return;
-    state.protoOpen = false;
-    renderProtoPanel();
   });
 
   render();
