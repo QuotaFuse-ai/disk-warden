@@ -29,10 +29,11 @@ Runs on **Windows and macOS**.
 | Copy, verification, link creation, crash recovery (T09–T10) | Done |
 | Rollback engine and local store: journal / history / settings / learned rules (T11) | Done, merged to `main` |
 | AI analysis interface (T22) | Done, disabled by default |
-| UI wired to the real engine (T12) | Done, merged to `main` |
-| Windows / macOS packaging (T15 / T21) | Not started |
+| UI wired to the real engine, AI key setup (T12, T25) | Done, merged to `main` |
+| Windows packaging (T15) | Unsigned development build (zip) available |
+| macOS packaging (T21) | Not started |
 
-**594 unit tests** cover the completed modules; CI runs them on every push.
+**649 unit tests** cover the completed modules; CI runs them on every push.
 
 ## Platforms
 
@@ -41,13 +42,13 @@ Runs on **Windows and macOS**.
 
 ## Stack
 
-- Python 3.8+ as the code baseline; 3.12 for official builds (decision 0005)
+- Python 3.12 as the official build toolchain (decision 0012); the test suite runs on 3.10 and 3.12 in CI
 - UI: a single self-contained HTML/JS page (`ui/index.html`) hosted by pywebview (WebView2 on Windows, WKWebView on macOS)
-- Packaging: PyInstaller onedir; macOS artifacts built in CI
+- Packaging: PyInstaller 6 onedir; macOS artifacts built in CI
 
 ## Development
 
-Requires Python 3.8 or newer.
+Requires Python 3.10 or newer.
 
 ```bash
 # Full unit test suite
@@ -61,7 +62,7 @@ python tools/migrate_drill_b.py
 # Open ui/index.html in a browser
 ```
 
-The desktop app itself (real data + native shell) becomes runnable after T12 and T15. `main.py` is a deprecated Tkinter experiment kept for reference only.
+The desktop app runs from source with `python -m src.app.main`, or from the unsigned Windows zip produced by `packaging/build.ps1`. `main.py` is the early Tkinter experiment, kept for reference only.
 
 ## Layout
 

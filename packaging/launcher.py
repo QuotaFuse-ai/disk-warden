@@ -37,6 +37,79 @@ from src.core.store.layout import DataLayout, default_data_root  # noqa: E402
 WEBVIEW_DIR = "webview"
 WEBVIEW_FAILED_MARKER = ".webview-init-failed"
 
+PYTHON_DLL_PREFIX = "python3"
+PYTHON_DLL_SUFFIX = ".dll"
+
+
+def _is_python_runtime_dll(name):
+    # type: (str) -> bool
+    """True for ``python3XX.dll``, never for the generic ``python3.dll``."""
+    low = name.lower()
+    if not (low.startswith(PYTHON_DLL_PREFIX) and low.endswith(PYTHON_DLL_SUFFIX)):
+        return False
+    return low[len(PYTHON_DLL_PREFIX):-len(PYTHON_DLL_SUFFIX)].isdigit()
+
+
+def _bundled_python_dll():
+    # type: () -> str
+    """Name of the versioned runtime DLL shipped with this frozen build."""
+    base = getattr(sys, "_MEIPASS", "") or ""
+    if not base:
+        return ""
+    try:
+        names = os.listdir(base)
+    except OSError:
+        return ""
+    for name in names:
+        if _is_python_runtime_dll(name):
+            return name
+    return ""
+
+
+def _stale_python_dlls(app_dir, expected):
+    # type: (str, str) -> list
+    """Runtime DLLs at the exe root that this build did not ship.
+
+    Extracting a PyInstaller 6 package over an older Python 3.8 onedir leaves
+    ``python38.dll`` next to the new exe; the loader then fails with
+    "Module use of python38.dll conflicts with this version of Python".
+    """
+    stale = []
+    try:
+        names = os.listdir(app_dir)
+    except OSError:
+        return stale
+    for name in names:
+        if not _is_python_runtime_dll(name):
+            continue
+        if expected and name.lower() == expected.lower():
+            continue
+        if os.path.isfile(os.path.join(app_dir, name)):
+            stale.append(name)
+    return sorted(stale)
+
+
+def _check_runtime_layout():
+    # type: () -> bool
+    """Refuse to start when older runtime files were extracted over this build."""
+    if not getattr(sys, "frozen", False):
+        return True
+    expected = _bundled_python_dll()
+    app_dir = os.path.dirname(os.path.abspath(sys.executable))
+    stale = _stale_python_dlls(app_dir, expected)
+    if not stale:
+        return True
+    _message(
+        "Disk Warden 检测到旧版本残留的运行库：\n\n%s\n\n"
+        "这通常是因为把新版压缩包直接解压覆盖到了旧版目录。新旧 Python "
+        "运行库混在一起时，程序会报 “Module use of python38.dll conflicts "
+        "with this version of Python” 之类的错误。\n\n"
+        "请把压缩包解压到一个全新的空目录（例如 C:\\DiskWarden），"
+        "不要覆盖旧版本，然后重新打开。"
+        % "\n".join(stale)
+    )
+    return False
+
 
 def _fatal_exit(code):
     # type: (int) -> None
@@ -275,6 +348,8 @@ def _run():
 
 
 if __name__ == "__main__":
+    if not _check_runtime_layout():
+        sys.exit(3)
     if not _prepare_data_root():
         sys.exit(1)
     _redirect_logs(os.environ["DISKWARDEN_DATA_ROOT"])

@@ -1,11 +1,11 @@
 # Build the unsigned Windows x64 development package (PyInstaller onedir).
 # Run from anywhere:  powershell -ExecutionPolicy Bypass -File packaging\build.ps1
 #   -Python <path to python.exe>   interpreter with packaging/requirements-build.txt
-#   -Version <artifact version>    defaults to 0.9.0-beta.1
+#   -Version <artifact version>    defaults to 0.9.0-beta.3
 
 param(
     [string]$Python = "python",
-    [string]$Version = "0.9.0-beta.1"
+    [string]$Version = "0.9.0-beta.3"
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,8 +17,8 @@ if (-not (Test-Path $Python) -and -not (Get-Command $Python -ErrorAction Silentl
 }
 
 $pyVersion = & $Python -c "import sys; print('%d.%d' % sys.version_info[:2])"
-if ($pyVersion -notin @("3.8", "3.9", "3.10", "3.11")) {
-    throw "Python 3.8-3.11 required for the pinned PyInstaller 5.x build (found $pyVersion)"
+if ($pyVersion -ne "3.12") {
+    throw "Python 3.12 required for the pinned PyInstaller 6.x build (found $pyVersion)"
 }
 Write-Host "Using Python $pyVersion ($Python)"
 
