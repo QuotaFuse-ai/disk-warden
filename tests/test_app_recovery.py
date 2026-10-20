@@ -6,10 +6,16 @@ needs the user's attention, so these tests pin the mapping from journal state
 to offered actions.
 """
 
+import os
+import shutil
+import subprocess
+import tempfile
 import unittest
+from pathlib import Path
 
 from src.app.errors import BridgeError
 from src.app.service import STATE_LABELS
+from src.core.migrate import write_owner_marker
 from src.core.store.journal import (
     STATE_ALREADY_ROLLED_BACK,
     STATE_DONE,
@@ -19,6 +25,7 @@ from src.core.store.journal import (
     STATE_RECOVERY_REQUIRED,
     STATE_ROLLBACK_COPYING,
     STATE_ROLLBACK_RECOVERY_REQUIRED,
+    STATE_ROLLED_BACK,
     TYPE_MIGRATION,
     TYPE_ROLLBACK,
 )
@@ -152,6 +159,98 @@ class RecoveryRunValidationTest(unittest.TestCase):
         self.assertEqual(ctx.exception.code, "INVALID_ARGUMENT")
         self.assertIn("migration", ctx.exception.detail["reason"])
         self.assertEqual(self.service.runner.active_jobs(), [])
+
+
+class CrashWindowTest(unittest.TestCase):
+    """The S6/S7 crash must reach a terminal state from either button.
+
+    The source was renamed to the job's tombstone, the junction was never
+    created and the tool recreated its directory.  Both "recover" and
+    "rollback" used to leave the entry pending forever, so the banner came
+    back on every refresh.
+    """
+
+    JOB_ID = "0123456789abcdef"
+    JOB8 = "01234567"
+
+    def setUp(self):
+        self.service = make_service(self)
+        temp = tempfile.TemporaryDirectory(prefix="dw-crash-window-")
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        self.source = root / "Cursor" / "Cache"
+        (self.source / "sub").mkdir(parents=True)
+        (self.source / "a.bin").write_bytes(b"a" * 100)
+        (self.source / "sub" / "b.bin").write_bytes(b"b" * 200)
+        self.final = root / "data" / "cursor" / "Cache"
+        shutil.copytree(str(self.source), str(self.final))
+        write_owner_marker(
+            str(self.final),
+            self.JOB_ID,
+            "cursor",
+            str(self.source),
+            str(self.final),
+            file_count=2,
+            total_bytes=300,
+        )
+        self.tombstone = root / "Cursor" / (".dwtombstone-" + self.JOB8)
+        shutil.copytree(str(self.source), str(self.tombstone))
+        self.service.journals.begin(
+            self.JOB_ID,
+            tool_id="cursor",
+            source=str(self.source),
+            final=str(self.final),
+            state=STATE_RECOVERY_REQUIRED,
+            intent={"bytes": 300},
+        )
+
+    def run_recovery(self, action):
+        runner_id = self.service.recovery_run(self.JOB_ID, action)["job_id"]
+        self.service.runner.wait(runner_id, 20)
+
+    def assert_settled(self):
+        entry = self.service.journals.load(self.JOB_ID, TYPE_MIGRATION)
+        self.assertEqual(entry.state, STATE_ROLLED_BACK)
+        self.assertEqual(self.service.recovery_list()["items"], [])
+        self.assertTrue(self.source.joinpath("a.bin").is_file())
+        self.assertTrue(self.source.joinpath("sub", "b.bin").is_file())
+        self.assertFalse(self.tombstone.exists())
+        self.assertFalse(self.final.exists())
+
+    def test_recover_reaches_a_terminal_state(self):
+        self.run_recovery("recover")
+        self.assert_settled()
+
+    def test_rollback_on_an_unlinked_source_uses_recovery(self):
+        self.run_recovery("rollback")
+        self.assert_settled()
+
+    def test_running_recovery_twice_is_harmless(self):
+        self.run_recovery("recover")
+        self.run_recovery("recover")
+        self.assert_settled()
+
+    def test_source_is_junction_detection(self):
+        plain = str(self.source)
+        self.assertFalse(self.service._source_is_junction(plain))
+        self.assertFalse(self.service._source_is_junction(""))
+        link = str(self.source.parent / "CacheLink")
+        created = subprocess.call(
+            ["cmd", "/c", "mklink", "/J", link, str(self.final)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        if created != 0:
+            self.skipTest("mklink /J is unavailable in this environment")
+        self.addCleanup(self._remove_link, link)
+        self.assertTrue(self.service._source_is_junction(link))
+
+    @staticmethod
+    def _remove_link(path):
+        try:
+            os.rmdir(path)
+        except OSError:
+            pass
 
 
 if __name__ == "__main__":

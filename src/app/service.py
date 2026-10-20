@@ -116,6 +116,7 @@ from ..core.store.journal import (
 )
 from ..platform import (
     expand_path,
+    is_junction,
     open_url,
     reveal_directory,
     volume_info,
@@ -2108,6 +2109,16 @@ class AppService(object):
         )
         return {"job_id": runner_job, "state": "queued", "target_job_id": job_id, "action": action}
 
+    @staticmethod
+    def _source_is_junction(source_path):
+        # type: (str) -> bool
+        try:
+            return bool(source_path) and bool(is_junction(source_path))
+        except Exception:
+            # An unreadable path is not evidence of a link; recovery is the
+            # safe route because it never deletes unproven data.
+            return False
+
     def _make_recovery_worker(self, entry_type, action, job_id):
         # type: (str, str, str) -> object
         def worker(job, token, emit):
@@ -2129,8 +2140,17 @@ class AppService(object):
         if entry is None:
             raise not_found("migration record disappeared", job_id=target_job_id)
 
+        if action == "rollback" and not self._source_is_junction(entry.source):
+            # Nothing is linked yet, so there is no junction for the rollback
+            # engine to undo and it would stop at "source is already a real
+            # directory".  Recovery is the rollback in this state: it restores
+            # the source and removes only this job's own copy.
+            return self._recover_worker(
+                job, token, emit, entry_type, "recover", target_job_id
+            )
+
         if action == "rollback":
-            return self._rollback_worker(
+            summary = self._rollback_worker(
                 job,
                 token,
                 emit,
@@ -2152,6 +2172,9 @@ class AppService(object):
                     "config_choice": "keep",
                 },
             )
+            if summary.get("ok"):
+                self._close_migration_after_rollback(entry, summary)
+            return summary
 
         def progress(payload):
             data = dict(payload or {})
@@ -2179,6 +2202,10 @@ class AppService(object):
 
         if completion.state == STATE_ROLLED_BACK:
             self._reconcile_rollback_history(entry, completion)
+            if not os.path.lexists(final_path):
+                self._apply_rollback_to_snapshot(
+                    entry.job_id, entry.tool_id, entry.source
+                )
         elif completion.ok:
             self._reconcile_success_history(entry, completion)
 
@@ -2207,6 +2234,52 @@ class AppService(object):
             },
         )
         return summary
+
+    def _close_migration_after_rollback(self, entry, summary):
+        # type: (object, dict) -> None
+        # The rollback engine keeps its own journal and never writes the
+        # migration record, so a successful rollback would otherwise leave the
+        # interrupted migration pending: the banner reappears on every refresh
+        # and the same entry can never be cleared.  Closing it here is what
+        # makes "rollback" a real end state for the user.
+        final_path = (
+            entry.final
+            or summary.get("final_path", "")
+            or ""
+        )
+        if not self.history.was_rolled_back(entry.job_id):
+            try:
+                self.history.record_rollback(
+                    tool=entry.tool_id,
+                    item=os.path.basename(entry.source.rstrip("\\/")) or entry.source,
+                    source=entry.source,
+                    target=final_path,
+                    size=_as_int(entry.intent.get("bytes"), 0),
+                    job_id=entry.job_id,
+                    stage=STATE_ROLLED_BACK,
+                    reason="recovered",
+                )
+            except Exception as exc:
+                LOGGER.warning("rollback history failed: %s", exc)
+        try:
+            self.journals.mark_recovered(
+                entry.job_id,
+                STATE_ROLLED_BACK,
+                {
+                    "state": STATE_ROLLED_BACK,
+                    "error_code": "",
+                    "error_message": "",
+                    "message": "rolled back from the recovery list",
+                    "rolled_back": True,
+                    "rollback_state": summary.get("state", ""),
+                },
+            )
+        except Exception as exc:
+            LOGGER.warning("could not close migration journal: %s", exc)
+        if final_path and not os.path.lexists(final_path):
+            self._apply_rollback_to_snapshot(
+                entry.job_id, entry.tool_id, entry.source
+            )
 
     def _recover_rollback_entry(self, job_id, token, emit):
         # type: (str, object, object) -> dict
