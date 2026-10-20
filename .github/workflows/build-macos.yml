@@ -19,6 +19,7 @@ on:
     branches: [main]
     paths:
       - "src/**"
+      - "tests/**"
       - "packaging/**"
       - "ui/**"
       - "data/**"
@@ -27,6 +28,7 @@ on:
     branches: [main]
     paths:
       - "src/**"
+      - "tests/**"
       - "packaging/**"
       - "ui/**"
       - "data/**"
