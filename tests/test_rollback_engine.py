@@ -210,6 +210,47 @@ class RollbackEngineTests(unittest.TestCase):
         )
         self.assertEqual(entry.state, STATE_ROLLED_BACK)
 
+    def test_config_is_restored_when_the_journal_records_the_backup_root(self):
+        """T12-F: an older journal stored the backup root, not the job dir."""
+        self._make_migrated()
+        payload = self._make_config_backup()
+        backup_root = self.backup_dir.parent
+        JournalStore(str(self.jobs_dir)).update(
+            JOB_ID, backup_dir=str(backup_root)
+        )
+
+        result = self._run(self._request(backup_dir=str(backup_root)))
+
+        self.assertTrue(result.ok)
+        self.assertEqual(result.state, STATE_ROLLED_BACK)
+        self.assertEqual(result.config.status, "restored")
+        self.assertTrue(result.config.ok)
+        self.assertEqual(
+            result.config.manifest_path,
+            str(self.backup_dir / "manifest.json"),
+        )
+        self.assertEqual(
+            result.config.checksums["settings.json"],
+            hashlib.sha256(payload).hexdigest(),
+        )
+        self.assertEqual(
+            (self.source_parent / "settings.json").read_bytes(), payload
+        )
+
+    def test_config_is_skipped_when_the_migration_changed_no_config(self):
+        self._make_migrated()
+        JournalStore(str(self.jobs_dir)).update(JOB_ID, backup_dir="")
+
+        result = self._run(self._request(backup_dir=""))
+
+        self.assertTrue(result.ok)
+        self.assertEqual(result.state, STATE_ROLLED_BACK)
+        self.assertTrue(result.data_rolled_back)
+        self.assertEqual(result.config.status, "skipped")
+        self.assertTrue(result.config.ok)
+        self.assertEqual(result.config_status, "skipped")
+        self.assertFalse(result.warnings)
+
     def test_precheck_reports_rollback_mode_for_a_matching_junction(self):
         self._make_migrated()
 

@@ -74,12 +74,9 @@ CONFIG_KEEP = "keep"
 CONFIG_RESTORE = "restore"
 CONFIG_CHOICES = (CONFIG_KEEP, CONFIG_RESTORE)
 
-CONFIG_STATUS_NOT_REQUIRED = "not_required"
+CONFIG_STATUS_SKIPPED = "skipped"
 CONFIG_STATUS_RESTORED = "restored"
-CONFIG_STATUS_KEPT = "kept"
-CONFIG_STATUS_UNAVAILABLE = "unavailable"
-CONFIG_STATUS_PARTIAL = "partial"
-CONFIG_STATUS_FAILED = "failed"
+CONFIG_STATUS_ERROR = "error"
 
 CONFIG_ACTION_IDENTICAL = "identical"
 CONFIG_ACTION_RESTORED_MISSING = "restored_missing"
@@ -193,21 +190,29 @@ class RollbackPrecheck:
 
 @dataclass
 class ConfigRestoreOutcome:
-    """AC-ROL-06 scenarios A/B/C/D as observed per config file."""
+    """AC-ROL-06 scenarios A/B/C/D as observed per config file.
 
-    status: str = CONFIG_STATUS_NOT_REQUIRED
+    ``status`` is one of three values: ``skipped`` (nothing had to be written
+    back), ``restored`` (at least one file was written and every entry was
+    accounted for) or ``error`` (the manifest or a file could not be trusted).
+    """
+
+    status: str = CONFIG_STATUS_SKIPPED
     complete: bool = True
     restored: List[str] = field(default_factory=list)
     kept: List[str] = field(default_factory=list)
     unavailable: List[str] = field(default_factory=list)
     failed: List[str] = field(default_factory=list)
+    checksums: Dict[str, str] = field(default_factory=dict)
     details: List[Dict[str, object]] = field(default_factory=list)
     reason: str = ""
+    backup_dir: str = ""
+    manifest_path: str = ""
 
     @property
     def ok(self):
         # type: () -> bool
-        return self.complete and not self.failed
+        return self.status in (CONFIG_STATUS_SKIPPED, CONFIG_STATUS_RESTORED)
 
     def to_dict(self):
         # type: () -> Dict[str, object]
@@ -219,8 +224,11 @@ class ConfigRestoreOutcome:
             "kept": list(self.kept),
             "unavailable": list(self.unavailable),
             "failed": list(self.failed),
+            "checksums": dict(self.checksums),
             "details": [dict(item) for item in self.details],
             "reason": self.reason,
+            "backup_dir": self.backup_dir,
+            "manifest_path": self.manifest_path,
         }
 
 
@@ -267,6 +275,16 @@ class RollbackResult:
         # type: () -> bool
         return self.state in (STATE_ROLLED_BACK, STATE_ALREADY_ROLLED_BACK)
 
+    @property
+    def data_rolled_back(self):
+        # type: () -> bool
+        return self.ok
+
+    @property
+    def config_status(self):
+        # type: () -> Optional[str]
+        return self.config.status if self.config is not None else None
+
     def to_dict(self):
         # type: () -> Dict[str, object]
         copy_result = self.copy
@@ -278,6 +296,8 @@ class RollbackResult:
             "final_path": self.final_path,
             "state": self.state,
             "ok": self.ok,
+            "data_rolled_back": self.data_rolled_back,
+            "config_status": self.config_status,
             "restore_dir": self.restore_dir,
             "backup_dir": self.backup_dir,
             "error_code": self.error_code,
@@ -319,12 +339,9 @@ __all__ = [
     "CONFIG_CHOICES",
     "CONFIG_KEEP",
     "CONFIG_RESTORE",
-    "CONFIG_STATUS_FAILED",
-    "CONFIG_STATUS_KEPT",
-    "CONFIG_STATUS_NOT_REQUIRED",
-    "CONFIG_STATUS_PARTIAL",
+    "CONFIG_STATUS_ERROR",
     "CONFIG_STATUS_RESTORED",
-    "CONFIG_STATUS_UNAVAILABLE",
+    "CONFIG_STATUS_SKIPPED",
     "ConfigRestoreOutcome",
     "ERROR_CANCELLED",
     "ERROR_CONFIG",

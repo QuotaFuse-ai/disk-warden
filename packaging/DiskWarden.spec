@@ -21,6 +21,7 @@ a = Analysis(
     binaries=[],
     datas=[
         (os.path.join(ROOT, "ui", "index.html"), "ui"),
+        (os.path.join(ROOT, "ui", "assets"), "ui/assets"),
         (os.path.join(ROOT, "data", "ide-catalog.json"), "data"),
         (os.path.join(ROOT, "data", "rules.json"), "data"),
         (os.path.join(ROOT, "packaging", "DiskWarden.exe.config"), "."),
@@ -61,6 +62,7 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     version=os.path.join(ROOT, "packaging", "version_info.txt"),
+    icon=os.path.join(ROOT, "packaging", "DiskWarden.ico"),
 )
 
 coll = COLLECT(

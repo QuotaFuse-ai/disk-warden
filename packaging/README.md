@@ -11,9 +11,9 @@ PyInstaller onedir 目录，压缩为 `DiskWarden-<version>-win-x64.zip`，解�
   Mark-of-the-Web，.NET Framework 默认拒绝 `Assembly.LoadFrom` 加载
   `pythonnet/runtime/Python.Runtime.dll`，表现为
   `Failed to resolve Python.Runtime.Loader.Initialize`；该配置允许 load-from-remote
-- `ui/index.html` 与 `data/ide-catalog.json`、`data/rules.json` 被打进应用根目录，
-  冻结后仍沿用 `src/app` 里的 `REPO_ROOT` 查找逻辑
-- 版本资源：`packaging/version_info.txt`（默认 `0.1.0-dev`）
+- `ui/index.html`、`ui/assets/`（品牌图标）与 `data/ide-catalog.json`、`data/rules.json`
+  被打进应用根目录，冻结后仍沿用 `src/app` 里的 `REPO_ROOT` 查找逻辑
+- 版本资源：`packaging/version_info.txt`（当前 `0.9.0-beta.1`），exe 图标：`packaging/DiskWarden.ico`
 - 本版不做安装器、不做代码签名，也不包含自动更新（见决策 0008 / T15）
 
 ## 构建环境
@@ -34,8 +34,8 @@ powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -Python .\.venv-bui
 
 ```powershell
 python -m PyInstaller --noconfirm --clean --distpath dist --workpath build packaging\DiskWarden.spec
-Compress-Archive -Path dist\DiskWarden -DestinationPath dist\DiskWarden-0.1.0-dev-win-x64.zip
-Get-FileHash -Algorithm SHA256 dist\DiskWarden-0.1.0-dev-win-x64.zip
+Compress-Archive -Path dist\DiskWarden -DestinationPath dist\DiskWarden-0.9.0-beta.1-win-x64.zip
+Get-FileHash -Algorithm SHA256 dist\DiskWarden-0.9.0-beta.1-win-x64.zip
 ```
 
 ## 验证清单
@@ -66,5 +66,5 @@ Get-FileHash -Algorithm SHA256 dist\DiskWarden-0.1.0-dev-win-x64.zip
 - 迁移/回滚验证只能使用临时目录，不要对真实用户数据做演练。
 - 升级 PyInstaller 或 pythonnet 后要重新验证 `webview.platforms.edgechromium` 的
   DLL 收集（`webview/lib/` 由 hooks-contrib 处理）。
-- 应用内 `APP_VERSION` 仍由 `src/app/__init__.py` 提供（当前 `0.2.0`）；`0.1.0-dev`
-  是本次点检产物的构建版本号，写在 exe 版本资源与 zip 文件名上。
+- 应用内 `APP_VERSION` 由 `src/app/__init__.py` 提供（当前 `0.9.0-beta.1`），
+  同时写在 exe 版本资源与 zip 文件名上；`build.ps1 -Version` 默认值与此保持一致。
