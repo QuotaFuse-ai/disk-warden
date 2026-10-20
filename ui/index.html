@@ -88,6 +88,8 @@ a{color:var(--blue);text-decoration:none}
 .system-chip:hover{background:rgba(255,255,255,.27)}
 .system-chip.icon{width:30px;padding:0;border-radius:50%}
 .system-chip.icon svg{width:17px;height:17px}
+.system-chip .ai-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);flex-shrink:0}
+.system-chip .ai-dot.on{background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.35)}
 .system-ver{font-size:var(--fs-meta);color:rgba(255,255,255,.75);margin-left:2px;white-space:nowrap}
 
 /* ---------- 主区 ---------- */
@@ -100,7 +102,8 @@ a{color:var(--blue);text-decoration:none}
 .scan-meta{font-size:var(--fs-meta);color:var(--dim);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .scan-meta .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 .top-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
-.main-scroll{flex:1;min-height:0;overflow-y:auto;padding:12px 16px 22px;background:var(--bg)}
+.main-scroll{flex:1;min-height:0;overflow:hidden;padding:12px 16px 16px;background:var(--bg);display:flex;flex-direction:column}
+#view{flex:1;min-height:0;display:flex;flex-direction:column}
 
 /* ---------- 按钮 ---------- */
 .btn{
@@ -126,10 +129,11 @@ a{color:var(--blue);text-decoration:none}
 .v-red{color:var(--red)} .v-blue{color:var(--blue)} .v-green{color:#2f8e35} .v-amber{color:var(--amber)} .v-violet{color:var(--violet)}
 
 /* ---------- 内容与分栏 ---------- */
-.content{display:flex;flex-direction:column;gap:12px;min-width:0}
-.split-layout{display:grid;grid-template-columns:272px minmax(0,1fr);align-items:start;gap:12px;min-width:0}
-.split-layout > .bar{min-width:0;padding:9px}
-.split-layout > .panel{min-width:0}
+.content{display:flex;flex-direction:column;gap:12px;min-width:0;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:2px}
+.content > .panel{flex-shrink:0}
+.split-layout{display:grid;grid-template-columns:272px minmax(0,1fr);align-items:stretch;gap:12px;min-width:0;flex:1;min-height:0;overflow:hidden}
+.split-layout > .bar{min-width:0;padding:9px;min-height:0;overflow:hidden}
+.split-layout > .panel{min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 .narrow{max-width:860px;width:100%;margin:0 auto}
 
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:5px;min-width:0}
@@ -138,6 +142,25 @@ a{color:var(--blue);text-decoration:none}
 .panel-head h2::before{content:"";width:3px;height:15px;border-radius:1px;background:var(--green);flex-shrink:0}
 .panel-head .hint{font-size:var(--fs-meta);color:var(--dim)}
 .panel-body{padding:12px 14px}
+/* 面板内滚动：标题栏与表单固定，列表自身滚动（规则页） */
+.panel-scroll{display:flex;flex-direction:column;min-height:0;flex:1}
+.content > .panel.panel-scroll{flex-shrink:1}
+.panel-scroll > .panel-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.panel-scroll > .panel-body > *{flex-shrink:0}
+.panel-scroll .scroll-y{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:3px}
+.panel-scroll .scroll-y > .table thead th{position:sticky;top:0;z-index:1;box-shadow:inset 0 -1px 0 var(--line)}
+.content > .cols{display:grid;gap:12px;flex:1;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch;grid-template-columns:minmax(0,1fr) minmax(0,1.22fr)}
+.content > .cols.cols-disk{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.content > .cols > .panel{min-height:0;max-height:100%}
+.panel-scroll .scroll-y.scroll-fit{flex:0 1 auto}
+.cols .trow.pend,.modal .trow.pend{grid-template-columns:minmax(0,1fr) auto;row-gap:3px;align-items:center;white-space:normal;padding:9px 12px}
+.cols .trow.pend .tcell.tpath,.modal .trow.pend .tcell.tpath{grid-column:1;grid-row:1}
+.cols .trow.pend .tcell.tsize,.modal .trow.pend .tcell.tsize{grid-column:2;grid-row:1;justify-self:end}
+.cols .trow.pend .tcell.tdesc,.modal .trow.pend .tcell.tdesc,.cols .trow.pend .tcell.wrap,.modal .trow.pend .tcell.wrap{grid-column:1/-1;grid-row:2}
+.cols .trow.pend .tcell.acts,.modal .trow.pend .tcell.acts{grid-column:1/-1;grid-row:3;justify-content:flex-end}
+.rule-form{grid-template-columns:1.2fr .8fr .8fr 1.3fr 1.1fr auto;align-items:end}
+.cols .rule-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);row-gap:8px;align-items:end}
+.cols .rule-form > button{justify-self:end;white-space:nowrap}
 .toolbar{display:flex;gap:6px;align-items:center;margin-bottom:9px;flex-wrap:wrap}
 .search{flex:1;min-width:100px;background:#fff;border:1px solid #d7dee4;border-radius:3px;padding:7px 9px;font-size:var(--fs-body);color:var(--text);transition:border-color .12s}
 .search::placeholder{color:#aab3bc}
@@ -159,10 +182,11 @@ a{color:var(--blue);text-decoration:none}
 .split-layout .bar-top .chip-row{grid-column:1/-1}
 .split-layout .bar-top .legend{grid-column:1/-1;margin-left:0;flex-direction:column;align-items:flex-start;gap:2px;font-size:var(--fs-meta);line-height:1.5}
 
-/* 竖向 Tab 列表 */
-.split-layout .ide-bar,
+/* 竖向 Tab 列表：列表栏头固定，列表区自身滚动 */
+.split-layout .bar-top{flex:0 0 auto}
+.split-layout .ide-bar{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:2px;padding:1px 3px 2px 0}
 .split-layout .proj-bar,
-.split-layout .hist-bar{display:flex;flex-direction:column;gap:1px;overflow:visible;padding-bottom:0}
+.split-layout .hist-bar{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:1px 3px 2px 0}
 .split-layout .ide-item,
 .split-layout .proj-card,
 .split-layout .hist-card{
@@ -207,7 +231,9 @@ a{color:var(--blue);text-decoration:none}
 .b-plain{background:#fff;color:var(--muted);border:1px solid #e1e6ea;font-weight:600}
 
 .detail{display:flex;flex-direction:column;gap:14px;padding:16px 18px 18px}
-.split-layout .detail{padding:14px 16px 16px}
+.split-layout .detail{padding:14px 16px 16px;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+.split-layout .detail > *{flex-shrink:0}
+.split-layout .detail > .actions{position:sticky;bottom:0;z-index:2;background:var(--panel);margin:auto -16px -16px;padding:12px 16px 14px;box-shadow:0 -8px 14px -12px rgba(31,45,61,.22)}
 .detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .detail-title{display:flex;align-items:center;gap:9px;min-width:0}
 .detail-title > div{min-width:0}
@@ -271,23 +297,32 @@ a{color:var(--blue);text-decoration:none}
 .tcell.tdesc{font-size:var(--fs-meta);color:var(--dim)}
 .tcell.tsize{font-size:var(--fs-body);font-family:Consolas,monospace;color:#4a545e;text-align:right;font-variant-numeric:tabular-nums}
 .tcell.acts{display:flex;align-items:center;justify-content:flex-end;gap:5px;overflow:visible}
+.trow.pend.has-sug{align-items:start;padding:10px 12px;white-space:normal}
+.trow.pend.has-sug .tcell.wrap{white-space:normal;overflow:visible}
+.trow.pend.has-sug .tcell.tpath{padding-top:2px}
 
 .kvbar{display:flex;align-items:stretch;background:#f7faf7;border:1px solid #e2eee0;border-radius:4px;overflow:hidden}
 .kvbar .kv-item{display:flex;flex-direction:column;justify-content:center;gap:3px;padding:10px 12px;min-width:0;flex:1}
 .kvbar .kv-item.wide{flex:2.2}
 .kvbar .kv-item + .kv-item{border-left:1px solid #e7f0e6}
-.kvbar .k{font-size:var(--fs-meta);color:var(--muted);white-space:nowrap}
+.kvbar .k{font-size:var(--fs-meta);color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .kvbar .v{font-size:var(--fs-body);font-family:Consolas,monospace;color:#2f3439;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kvbar .v.ok{color:#2f8e35}
 .kvbar .v.warn{color:var(--amber)}
+
+/* 错误明细 / 失败项：逐条独占一行，路径在上、原因在下（长路径不截断、不与原因叠字） */
+.err-list{display:flex;flex-direction:column;gap:5px;min-width:0}
+.err-item{display:flex;flex-direction:column;gap:2px;min-width:0;padding:8px 11px;border-radius:3px;background:#fdf7f7;border:1px solid #f2c9c6}
+.err-item .e-path{font-size:var(--fs-meta);font-family:Consolas,monospace;color:#33383d;line-height:1.5;overflow-wrap:anywhere}
+.err-item .e-msg{font-size:var(--fs-meta);color:#c92f36;line-height:1.5;overflow-wrap:anywhere}
+.err-item.plain{background:var(--panel-2);border-color:#eef1f4}
+.err-item.plain .e-msg{color:#5b646d}
 .sw{width:34px;height:19px;border-radius:10px;background:#cbd3db;position:relative;border:none;flex-shrink:0;transition:background .12s}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.16);transition:left .14s}
 .sw.on{background:var(--green)}
 .sw.on::after{left:18px}
 
 .actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line-soft)}
-/* 原型状态浮标固定在右下角，为末尾说明留出安全间距 */
-.main-scroll .actions{padding-right:124px}
 .actions .spacer{flex:1}
 .actions .note{font-size:var(--fs-meta);color:var(--dim)}
 
@@ -385,6 +420,7 @@ a{color:var(--blue);text-decoration:none}
 .modal-x{background:none;border:none;color:#a2abb4;font-size:var(--fs-page);line-height:1;padding:4px 6px;border-radius:3px}
 .modal-x:hover{color:#2f3439;background:#eef2f5}
 .modal-body{padding:14px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.modal-body > *{flex-shrink:0}
 .modal-foot{padding:10px 18px;border-top:1px solid var(--line-soft);display:flex;gap:7px;justify-content:flex-end;align-items:center;flex-wrap:wrap;background:#fbfcfd}
 .modal-foot .left{margin-right:auto;font-size:var(--fs-meta);color:var(--dim)}
 
@@ -402,23 +438,38 @@ a{color:var(--blue);text-decoration:none}
 .settings-row select:focus,.settings-row input[type=text]:focus{outline:none;border-color:#7fd383}
 .settings-row input[type=text]{width:280px;font-family:Consolas,monospace}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,8px);background:#333b43;border:1px solid #454e57;color:#fff;padding:8px 14px;border-radius:3px;font-size:var(--fs-body);box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;max-width:70vw}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,8px);background:#333b43;border:1px solid #454e57;color:#fff;padding:8px 14px;border-radius:3px;font-size:var(--fs-body);box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;max-width:70vw;overflow-wrap:anywhere}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
-.proto-fab{position:fixed;right:14px;bottom:14px;z-index:90;background:#fff;border:1px solid #dfe6eb;color:#7d8791;font-size:var(--fs-meta);font-weight:600;padding:6px 10px;border-radius:16px;box-shadow:0 3px 10px rgba(31,45,61,.1);display:flex;align-items:center;gap:5px}
-.proto-fab:hover{color:#2f8e35;border-color:#bfe3bf}
-.proto-fab .p-dot{width:5px;height:5px;border-radius:50%;background:#f0a020}
-.proto-panel{position:fixed;right:14px;bottom:50px;z-index:91;width:300px;background:#fff;border:1px solid #dfe6eb;border-radius:5px;box-shadow:var(--shadow);padding:10px;display:none}
-.proto-panel.show{display:block}
-.proto-panel h4{font-size:var(--fs-meta);color:#4a545e;margin-bottom:2px}
-.proto-panel p{font-size:var(--fs-micro);color:var(--dim);line-height:1.45;margin-bottom:8px}
-.proto-routes{display:flex;flex-direction:column;gap:1px;max-height:50vh;overflow-y:auto}
-.proto-route{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:3px;background:none;border:none;color:#5b646d;font-size:var(--fs-meta);text-align:left}
-.proto-route:hover{background:#f2f8f1;color:#2f8e35}
-.proto-route.active{background:#eaf7e8;color:#2f8e35}
-.proto-route .pr-k{font-family:Consolas,monospace;font-size:var(--fs-micro);color:#aab3bc;margin-left:auto}
-.proto-sep{height:1px;background:var(--line-soft);margin:5px 0}
 .nav-label{font-size:var(--fs-micro);font-weight:700;color:#a0a9b2;letter-spacing:.6px;padding:4px 6px 3px}
+
+/* ---------- 规则：按软件列表（扁平行，点击开弹窗） ---------- */
+.appgrp{background:transparent;border-bottom:1px solid var(--line-soft)}
+.appgrp:last-child{border-bottom:none}
+.ag-head{display:flex;align-items:center;gap:10px;width:100%;padding:10px 8px;background:transparent;border:none;text-align:left;border-radius:4px;transition:background .12s}
+.ag-head:hover{background:#f4f8f6}
+.ag-mark{width:26px;height:26px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:var(--fs-micro);font-weight:700;letter-spacing:.3px;opacity:.9}
+.ag-main{flex:1;min-width:0}
+.ag-name{display:block;font-size:var(--fs-strong);font-weight:600;color:#33383d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-sub{display:block;font-size:var(--fs-meta);color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-stats{display:flex;align-items:center;gap:9px;flex-shrink:0;font-size:var(--fs-meta);color:var(--muted)}
+.ag-dot{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.ag-hits{font-family:Consolas,monospace;font-variant-numeric:tabular-nums;color:#4a545e;white-space:nowrap}
+.ag-go{font-size:var(--fs-meta);color:#2f8e35;flex-shrink:0;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.ag-caret{font-style:normal;display:inline-block;font-weight:700;transition:transform .12s}
+.ag-head:hover .ag-caret{transform:translateX(2px)}
+.rule-form.mform{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);row-gap:8px;align-items:end}
+.mform > .mwide{grid-column:span 2}
+.mform > button{justify-self:end;white-space:nowrap}
+
+/* ---------- AI 识别 ---------- */
+.btn-ai{background:#f5f1ff;color:#6f4bd8;border-color:#ddd0fb}
+.btn-ai:hover{background:#eae3ff;border-color:#c8b6fb;color:#5b35c8}
+.ai-key{display:inline-flex;align-items:center;gap:5px;font-family:Consolas,monospace;font-size:var(--fs-micro);color:#6f4bd8;background:#f6f2ff;border:1px solid #e2d8fb;border-radius:10px;padding:2px 8px;white-space:nowrap}
+.suggest{display:flex;flex-direction:column;gap:4px}
+.sug-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sug-reason{font-size:var(--fs-body);color:#4a545e}
+.conf{font-family:Consolas,monospace;font-weight:700;color:#6f4bd8}
 
 .muted{color:var(--muted)} .dim{color:var(--dim)} .ok{color:#2f8e35} .warn{color:var(--amber)} .bad{color:var(--red)}
 .mono{font-family:Consolas,"SFMono-Regular",monospace;font-variant-numeric:tabular-nums}
@@ -451,6 +502,12 @@ a{color:var(--blue);text-decoration:none}
   .kvbar .kv-item{padding:9px 10px}
   .kvbar .v{font-size:var(--fs-strong)}
 }
+@media (max-width:1239px){
+  .content > .cols{display:flex;flex-direction:column;flex:none;min-height:0}
+  .content > .cols > .panel.panel-scroll{flex:none}
+  .content > .cols > .panel.panel-scroll > .panel-body{overflow:visible;flex:none}
+  .content > .cols .scroll-y{overflow:visible;flex:none}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 }
@@ -474,15 +531,9 @@ a{color:var(--blue);text-decoration:none}
 </div>
 <div id="modal-root"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<button class="proto-fab" id="proto-fab" type="button"><span class="p-dot"></span><span id="proto-fab-label">原型状态</span></button>
-<div class="proto-panel" id="proto-panel" role="dialog" aria-label="Prototype state switcher">
-  <h4 id="proto-title">原型状态</h4>
-  <p id="proto-desc">仅用于评审：直接跳转到各交互状态，不影响产品逻辑。</p>
-  <div class="proto-routes" id="proto-routes"></div>
-</div>
 <script>
 /* ============================================================
-   Disk Warden — 高保真交互原型（纯静态，无构建依赖）
+   Disk Warden — 主机端界面（静态资源，无构建依赖）
    所有界面文案集中在 I18N 对象中，键名见 docs/specs/界面交互说明-v1.0.md
    ============================================================ */
 const I18N = {};
@@ -496,7 +547,7 @@ I18N['zh-CN'] = {
   'nav.rules': '规则学习',
   'nav.history': '操作历史',
   'nav.settings': '设置',
-  'nav.version': 'v0.1.0 原型',
+  'nav.version': 'v0.1.0-dev',
   'page.ide.title': 'IDE 数据',
   'page.ide.desc': '扫描本机 AI IDE / CLI 的数据目录，安全迁移可再生的缓存与会话。',
   'page.projects.title': '项目目录',
@@ -535,6 +586,7 @@ I18N['zh-CN'] = {
   'action.ignore': '忽略',
   'action.markGreen': '标为可迁',
   'action.markRed': '标为不可动',
+  'action.unmark': '撤销标记',
   'action.confirmYellow': '确认此目录',
   'action.scanAgain': '重新扫描',
   'action.cancelScan': '取消扫描',
@@ -561,7 +613,6 @@ I18N['zh-CN'] = {
   'common.items': '{n} 项',
   'common.selected': '已选 {n} 项',
   'common.files': '{n} 个文件',
-  'common.simulated': '原型模拟',
   'common.required': '必填',
   'common.optional': '可选',
   'common.none': '无',
@@ -633,8 +684,7 @@ I18N['zh-CN'] = {
   'ide.noSelection': '请至少选择一个可迁目录',
   'ide.alreadyMigrated': '该软件的数据已位于目标盘，通过 junction 链接回原路径。',
   'ide.allGreenSelected': '全选可迁',
-  'ide.cleanHint': '仅清理 Chromium / 编译缓存，不触碰会话与配置。',
-  'ide.openHint': '已在资源管理器中打开（原型模拟）',
+  'ide.cleanHint': '缓存清理将在后续版本提供；当前版本只迁移目录。',
   'ide.selectIde': '请选择软件',
   'reason.chatDb': 'AI 对话与 agent 状态数据库，可再生',
   'reason.workspace': '各项目工作区索引，可再生',
@@ -674,6 +724,7 @@ I18N['zh-CN'] = {
   'reason.index': '向量索引，可再生',
   'reason.kiroStorage': '索引缓存，可再生',
   'reason.unknown': '规则未覆盖，需人工确认用途',
+  'reason.unknownProfile': '疑似工具的用户配置目录，动之前建议备份',
   'reason.nodeModules': '依赖目录，可通过包管理器重新安装',
   'reason.dist': '构建产物，可重新构建',
   'reason.git': '版本历史，必须保留',
@@ -759,7 +810,7 @@ I18N['zh-CN'] = {
   'blocked.recheck': '重新检测',
   'blocked.manual': '仍要迁移（不推荐）',
   'blocked.stillBlocked': '进程仍在运行，迁移继续被阻断。',
-  'blocked.forceWarn': '强制迁移可能导致文件损坏或软件异常，原型不提供该操作。',
+  'blocked.forceWarn': '强制迁移可能导致文件损坏或软件异常，当前版本不提供该操作。',
   'yellow.title': '确认未知目录',
   'yellow.sub': '{path}',
   'yellow.desc': '规则未覆盖该目录。请确认它的用途后再决定是否允许迁移。',
@@ -790,7 +841,7 @@ I18N['zh-CN'] = {
   'settings.title': '设置',
   'settings.sub': '目标路径与行为偏好，修改后立即生效',
   'settings.language': '界面语言',
-  'settings.languageDesc': '原型内所有文案通过 i18n 键切换',
+  'settings.languageDesc': '切换后界面文案立即生效',
   'settings.autoStart': '开机自启',
   'settings.autoStartDesc': '登录 Windows 后自动在托盘运行',
   'settings.targetRoot': '目标存储根目录',
@@ -811,39 +862,16 @@ I18N['zh-CN'] = {
   'feedback.copy': '复制诊断',
   'feedback.issue': '提 Issue',
   'feedback.copied': '诊断信息已复制',
-  'feedback.issueOpened': '已打开 Issue 页面（原型模拟）',
+  'feedback.issueOpened': '已在浏览器中打开 Issue 页面',
+  'feedback.openFailed': '无法打开浏览器：{reason}',
+  'feedback.browserFailed': '系统无法启动默认浏览器',
   'feedback.note': '不会上传任何文件内容或凭证明文。',
-  'projects.listTitle': '项目',
-  'projects.listHint': '{n} 个最近活跃',
-  'projects.search': '搜索项目…',
-  'projects.path': '项目路径',
-  'projects.size': '占用',
-  'projects.reclaimable': '可回收',
-  'projects.reclaimableValue': '依赖 {deps} · 构建 {dist}',
-  'projects.deps': 'node_modules',
-  'projects.build': '构建产物',
-  'projects.git': '.git',
-  'projects.source': '源码',
-  'projects.ide': '关联 IDE',
-  'projects.lastActive': '最近活跃',
-  'projects.actions': '可执行操作',
-  'projects.cleanDeps': '清理依赖',
-  'projects.cleanBuild': '清理构建产物',
-  'projects.keep': '源码与 .git 永不清除',
-  'projects.sourceDesc': '用户代码与工程文件，永不清除',
-  'projects.note': '清理后需要重新 npm install / build，Disk Warden 不会自动执行。',
-  'projects.empty': '没有扫描到项目目录。',
-  'projects.select': '从左侧选择一个项目查看明细。',
-  'projects.total': '项目总占用',
-  'projects.totalSub': '源码 {src} · 可再生 {re}',
-  'projects.count': '项目数',
-  'projects.countSub': '位于 C 盘 {n} 个',
-  'projects.cleanable': '可回收空间',
-  'projects.cleanableSub': '仅依赖与构建产物',
-  'projects.danger': '受保护文件',
-  'projects.dangerSub': '源码 / .git / 配置',
-  'projects.safeTitle': '可安全清理',
-  'projects.keepTitle': '必须保留',
+  'projects.soonTitle': '项目目录清理即将推出',
+  'projects.soonDesc': '这一版只处理 IDE 数据；项目依赖与构建产物的扫描清理会在后续版本接入。',
+  'projects.soonItem1': 'node_modules / 构建产物识别',
+  'projects.soonItem2': '源码与 .git 永不清理',
+  'projects.soonItem3': '清理前逐项确认',
+  'projects.soonDisabled': '暂未开放',
   'disk.total': '总容量',
   'disk.used': '已使用',
   'disk.free': '可用空间',
@@ -864,6 +892,7 @@ I18N['zh-CN'] = {
   'disk.handling.system': '系统提供方',
   'disk.handling.clean': '直接清理',
   'disk.notIncluded': '系统文件、页面文件与受保护目录不在处理范围内；本工具不做杀毒或系统优化。',
+  'disk.noData': '暂无数据',
   'disk.refresh': '刷新占用',
   'disk.ide': 'AI IDE 与 CLI',
   'disk.ideDesc': '缓存、会话、索引与 worktree',
@@ -899,6 +928,8 @@ I18N['zh-CN'] = {
   'rules.pending': '待确认目录',
   'rules.pendingDesc': '规则未覆盖，确认后会写入本地 rules-learned.json',
   'rules.pendingEmpty': '没有待确认的目录。',
+  'rules.learnedEmpty': '还没有学习到规则。',
+  'rules.overrideFailed': '该目录缺少扫描标识，无法写入规则，请重新扫描后再试。',
   'rules.table': '规则列表',
   'rules.tableDesc': '按目录名匹配，红色优先',
   'rules.match': '匹配',
@@ -923,11 +954,82 @@ I18N['zh-CN'] = {
   'rules.toggled': '规则状态已更新',
   'rules.deleted': '规则已删除',
   'rules.conflict': '当多条规则命中同一路径时，红色永远优先。',
+  'rules.viewApp': '按软件',
+  'rules.viewRule': '按规则',
+  'rules.groupHint': '点一个软件，弹窗里直接看和改它的规则',
+  'rules.groupEmpty': '这个软件还没有自己的规则',
+  'rules.modalSub': '{n} 条规则 · 内置 {b} · 你确认的 {u} · 命中 {h} 次',
+  'rules.modalAdd': '为「{app}」新增规则',
+  'rules.modalCount': '规则条数',
+  'rules.modalAddSub': '添加后立即对该软件生效，只写入本机 rules-learned.json',
+  'rules.modalRules': '规则明细',
+  'rules.modalPending': '{app} 的待确认目录',
+  'rules.modalPendingSub': '在这里确认，等同于在左侧列表里确认',
+  'rules.modalLocal': '弹窗里的开关与删除立即生效，不会改动磁盘上的目录',
+  'rules.groupCount': '{n} 条规则',
+  'rules.groupBreakdown': '内置 {b} · 你确认的 {u}',
+  'rules.groupHits': '命中 {n} 次',
+  'rules.groupProtected': '{n} 条保护',
+  'rules.viewDetail': '查看规则',
+  'rules.appAll': '所有软件',
+  'rules.viewAll': '按规则平铺查看全部',
+  'rules.appCol': '适用软件',
+  'rules.shared': '所有软件通用',
+  'rules.sharedSub': '不区分软件的公共规则',
+  'ai.nav': 'AI 识别',
+  'ai.title': 'AI 辅助识别',
+  'ai.sub': '不认识的目录交给 AI 判断，结果只是建议，你采纳后才写入规则。',
+  'ai.enable': '启用 AI 辅助识别',
+  'ai.enableDesc': '关闭后，未知目录只能手动确认。',
+  'ai.provider': '接入方式',
+  'ai.provider.relay': '用当前 Multica 助手的模型',
+  'ai.provider.custom': '自定义 OpenAI 兼容接口',
+  'ai.provider.none': '不对接（只用本地规则）',
+  'ai.baseUrl': '接口地址',
+  'ai.baseUrlDesc': '例：https://api.example.com/v1',
+  'ai.model': '模型',
+  'ai.modelAuto': '跟随助手设置',
+  'ai.key': '密钥',
+  'ai.keyDesc': '只从环境变量 DEEPSEEK_API_KEY 读取，不写入本机文件，不进日志、不进反馈内容',
+  'ai.test': '测试连接',
+  'ai.testUnavailable': '连接测试将在后续版本提供。',
+  'ai.keyEnvSet': '已从环境变量读取',
+  'ai.keyEnvMissing': '未检测到环境变量',
+  'ai.testOk': '连接可用 · 延迟 0.8s',
+  'ai.testBad': '连接失败：密钥无效',
+  'ai.statusOn': '已对接',
+  'ai.statusOff': '未对接',
+  'ai.scope': 'AI 能看到什么',
+  'ai.scopeValue': '只有目录路径与文件名；不读文件内容，不上传任何文件',
+  'ai.limit': '每次扫描最多调用',
+  'ai.limitValue': '{n} 个目录',
+  'ai.identify': 'AI 识别',
+  'ai.identifyAll': 'AI 识别剩余 {n} 项',
+  'ai.pendingAsk': '{n} 个待确认目录还没有判定，可以让 AI 先给建议。',
+  'ai.identifying': 'AI 正在判断…',
+  'ai.suggest': 'AI 建议',
+  'ai.confidence': '置信度',
+  'ai.adopt': '采纳建议',
+  'ai.adopted': '已采纳，写入规则表',
+  'ai.done': '本轮识别完成：{n} 项已给出建议',
+  'ai.allDone': '待确认目录都已识别',
+  'ai.needKey': '先接好 AI 模型，再接着识别',
+  'ai.needModel': '请填写模型名称，或改用当前助手的模型',
+  'ai.noneLeft': '没有需要识别的目录了',
+  'ai.filter': 'AI 已给建议',
+  'ai.note': 'AI 识别结果仅作为建议，不会自动迁移任何文件。',
+  'ai.link': '去对接 AI',
+  'ai.reasonCache': '目录名与结构符合已知缓存/会话目录，删了会重新生成',
+  'ai.reasonSecret': '路径里有凭证或配置特征，建议不要动',
   'rules.size': '大小',
   'rules.path': '路径',
+  'rules.action': '操作',
   'rules.matched': '命中规则',
   'rules.markedGreen': '已标为可迁',
   'rules.markedRed': '已标为不可动',
+  'rules.unmarked': '已恢复自动判定',
+  'rules.unmarkFailed': '撤销失败：{reason}',
+  'rules.unmarkGone': '该标记已不存在，请刷新后重试',
   'rules.ignored': '已忽略该目录',
   'rules.noReason': '用户自定义',
   'history.listTitle': '记录',
@@ -957,8 +1059,8 @@ I18N['zh-CN'] = {
   'history.empty': '还没有操作记录。',
   'history.select': '从左侧选择一条记录。',
   'history.summary': '{freed} · {dur}',
-  'history.exported': '记录已导出（原型模拟）',
-  'history.simulated': '原型中的记录为演示数据',
+  'history.exported': '记录已导出',
+  'history.exportFailed': '导出失败',
   'history.migrateStep1': '备份配置与凭证清单',
   'history.migrateStep2': '复制文件并校验',
   'history.migrateStep3': '删除源目录',
@@ -970,43 +1072,90 @@ I18N['zh-CN'] = {
   'history.failedStep': '校验失败，已停止并保持源目录',
   'toast.scanDone': '扫描完成',
   'toast.scanCancelled': '已取消扫描',
-  'toast.copied': '已复制到剪贴板（原型模拟）',
-  'toast.opened': '已在资源管理器中打开（原型模拟）',
-  'toast.cleaned': '缓存清理完成，释放 {size}（原型模拟）',
+  'toast.copied': '已复制到剪贴板',
+  'toast.opened': '已在资源管理器中打开',
+  'toast.openedPath': '已在资源管理器中打开：{path}',
+  'toast.openFailedReason': '无法打开目录：{reason}',
+  'error.NO_PATH': '路径未知',
+  'error.FORBIDDEN': '该操作不在允许范围内',
+  'error.NOT_FOUND': '目录不存在',
+  'error.PERMISSION_DENIED': '没有权限访问该目录',
+  'error.IO_ERROR': '系统未能打开资源管理器',
+  'error.INTERNAL': '主机端内部错误',
+  'toast.cleaned': '缓存清理完成，释放 {size}',
   'toast.ruleAdded': '规则已添加',
   'toast.saved': '设置已保存',
   'toast.yellowConfirmed': '已确认，可在迁移预览中勾选',
-  'toast.rollbackStarted': '回滚流程已启动（原型模拟）',
-  'toast.retry': '重试中（原型模拟）',
-  'toast.exported': '已导出（原型模拟）',
+  'toast.rollbackStarted': '回滚流程已启动',
+  'toast.retry': '重试中',
+  'toast.exported': '已导出',
   'toast.needSelect': '请先选择至少一个目录',
   'toast.spaceShort': '目标盘空间不足',
   'toast.blocked': '软件正在运行，无法迁移',
-  'toast.demoHint': '原型模式：此操作不会修改任何真实文件',
-  'proto.title': '原型状态',
-  'proto.desc': '仅用于评审：直接跳转到各交互状态，不修改真实数据。',
-  'proto.section.core': 'IDE 数据',
-  'proto.section.other': '其他页面',
-  'proto.section.states': '关键状态',
-  'proto.route.ide': 'IDE 列表（默认）',
-  'proto.route.scanning': '扫描中',
-  'proto.route.empty': '空态：未检测到 IDE',
-  'proto.route.preview': '迁移预览',
-  'proto.route.progress': '迁移进度',
-  'proto.route.failed': '迁移失败',
-  'proto.route.blocked': '进程占用阻断',
-  'proto.route.rollback': '回滚确认',
-  'proto.route.yellow': '确认未知目录',
-  'proto.route.success': '迁移成功',
-  'proto.route.projects': '项目目录',
-  'proto.route.disk': 'C 盘全景',
-  'proto.route.rules': '规则学习',
-  'proto.route.history': '操作历史',
-  'proto.route.settings': '设置弹窗',
-  'proto.route.feedback': '反馈弹窗',
+  'toast.unavailable': '该功能尚未接入主机端，将在后续版本提供',
   'unit.hours': '小时',
   'unit.minutes': '分钟',
-  'unit.seconds': '秒'
+  'unit.seconds': '秒',
+  'ai.consentTitle': '启用 AI 分析？',
+  'ai.consentBody': '启用后，目录名称、体积与分级结果等目录信息会发送给第三方 AI 服务用于分析。API Key 只从环境变量读取，不会写入本地。',
+  'ai.consentAccept': '同意并启用',
+  'ai.consentDecline': '暂不启用',
+  'ai.consentDone': 'AI 分析已启用',
+  'blocked.planTitle': '迁移计划被阻断',
+  'blocked.planDesc': '以下目录无法迁移，请先处理后再试。',
+  'blocked.accessErrors': '{n} 个文件无法读取',
+  'blocked.reparse': '该路径是重解析点（junction / symlink）',
+  'blocked.space': '目标盘空间不足：需要 {need}，可用 {free}',
+  'blocked.ntfs': '目标盘文件系统为 {fs}，需要 NTFS',
+  'blocked.close': '关闭',
+  'conn.connecting': '正在连接本地服务…',
+  'conn.hostTitle': '本地服务不可用',
+  'conn.hostBody': '无法与本地桥接服务通信，请确认应用已正常启动。',
+  'conn.unavailable': '本地服务不可用',
+  'conn.retry': '重新连接',
+  'failed.items': '失败项',
+  'history.job': '任务',
+  'history.exportEmpty': '当前筛选下没有可导出的记录',
+  'progress.stage.prepare': '准备迁移计划',
+  'progress.stage.swap': '切换目录',
+  'progress.stage.link_verify': '读回链接目标并验证',
+  'progress.stage.cleanup': '清理临时文件',
+  'progress.stage.precheck': '回滚前检查',
+  'progress.stage.restore': '迁回原目录',
+  'progress.stage.config': '恢复配置备份',
+  'progress.stage.record': '写入回滚记录',
+  'progress.stage.recover': '恢复中断的迁移',
+  'recovery.title': '发现未完成的迁移',
+  'recovery.count': '共 {n} 项',
+  'recovery.desc': '这些任务在上次运行中中断，需要恢复或回滚后才能继续迁移。',
+  'recovery.needsHuman': '需要人工处理',
+  'recovery.recover': '恢复',
+  'recovery.rollback': '回滚',
+  'recovery.running': '正在处理…',
+  'recovery.done': '恢复完成',
+  'recovery.successHint': '中断的任务已恢复，可以重新扫描确认状态。',
+  'recovery.failed': '恢复失败',
+  'recovery.failedHint': '请检查日志后重试，或联系技术支持。',
+  'rollback.progressTitle': '正在回滚',
+  'rollback.progressKeepOpen': '回滚期间请不要退出 Disk Warden。',
+  'rollback.successTitle': '回滚完成',
+  'rollback.successSub': '数据已迁回 C 盘，junction 与配置已恢复。',
+  'rollback.failedTitle': '回滚失败',
+  'rollback.blockedTitle': '暂时无法回滚',
+  'rollback.residualTitle': '需要确认清理残留',
+  'rollback.residualBody': '源目录中仍有部分文件，继续回滚将删除这些残留。',
+  'rollback.residualConfirm': '确认删除残留并继续',
+  'rollback.stage.precheck': '检查回滚条件',
+  'rollback.stage.link_remove': '移除 junction',
+  'rollback.stage.copy': '复制数据回原目录',
+  'rollback.stage.verify': '校验文件数量与总字节',
+  'rollback.stage.restore': '替换回原目录',
+  'rollback.stage.config': '恢复配置备份',
+  'rollback.stage.cleanup': '清理迁移目录',
+  'rollback.stage.record': '写入回滚记录',
+  'rollback.stage.done': '完成',
+  'success.rollbackable': '可在历史记录中随时回滚',
+  'toast.noGreen': '没有可迁移的目录'
 };
 I18N['en'] = {
   'app.tagline': 'Disk manager for AI IDEs',
@@ -1018,7 +1167,7 @@ I18N['en'] = {
   'nav.rules': 'Rule learning',
   'nav.history': 'History',
   'nav.settings': 'Settings',
-  'nav.version': 'v0.1.0 prototype',
+  'nav.version': 'v0.1.0-dev',
   'page.ide.title': 'IDE data',
   'page.ide.desc': 'Scan data folders of AI IDEs and CLIs, then move regenerable caches and sessions safely.',
   'page.projects.title': 'Projects',
@@ -1057,6 +1206,7 @@ I18N['en'] = {
   'action.ignore': 'Ignore',
   'action.markGreen': 'Mark migratable',
   'action.markRed': 'Mark protected',
+  'action.unmark': 'Undo mark',
   'action.confirmYellow': 'Confirm folder',
   'action.scanAgain': 'Rescan',
   'action.cancelScan': 'Cancel scan',
@@ -1083,7 +1233,6 @@ I18N['en'] = {
   'common.items': '{n} items',
   'common.selected': '{n} selected',
   'common.files': '{n} files',
-  'common.simulated': 'Simulated',
   'common.required': 'Required',
   'common.optional': 'Optional',
   'common.none': 'None',
@@ -1155,8 +1304,7 @@ I18N['en'] = {
   'ide.noSelection': 'Select at least one migratable folder',
   'ide.alreadyMigrated': 'This app already lives on the target drive and is linked back with a junction.',
   'ide.allGreenSelected': 'Select all migratable',
-  'ide.cleanHint': 'Only Chromium and compile caches are cleaned. Sessions and config stay.',
-  'ide.openHint': 'Opened in Explorer (prototype simulation)',
+  'ide.cleanHint': 'Cache cleanup arrives in a later version; this build only migrates folders.',
   'ide.selectIde': 'Select an app',
   'reason.chatDb': 'AI chat and agent state database, regenerable',
   'reason.workspace': 'Per-project workspace index, regenerable',
@@ -1196,6 +1344,7 @@ I18N['en'] = {
   'reason.index': 'Vector index, regenerable',
   'reason.kiroStorage': 'Index cache, regenerable',
   'reason.unknown': 'Not covered by rules. Needs a human decision',
+  'reason.unknownProfile': 'Looks like user settings for a tool. Back up first',
   'reason.nodeModules': 'Dependency folder, reinstallable via package manager',
   'reason.dist': 'Build output, rebuildable',
   'reason.git': 'Version history, must be kept',
@@ -1281,7 +1430,7 @@ I18N['en'] = {
   'blocked.recheck': 'Check again',
   'blocked.manual': 'Migrate anyway (not recommended)',
   'blocked.stillBlocked': 'The process is still running. Migration stays blocked.',
-  'blocked.forceWarn': 'Force migration can corrupt files or break the app. The prototype does not offer it.',
+  'blocked.forceWarn': 'Force migration can corrupt files or break the app. It is not available in this version.',
   'yellow.title': 'Confirm unknown folder',
   'yellow.sub': '{path}',
   'yellow.desc': 'No rule covers this folder. Confirm what it holds before allowing migration.',
@@ -1312,7 +1461,7 @@ I18N['en'] = {
   'settings.title': 'Settings',
   'settings.sub': 'Target path and behavior. Changes apply immediately.',
   'settings.language': 'Language',
-  'settings.languageDesc': 'Every string in the prototype is switched via i18n keys',
+  'settings.languageDesc': 'Changes apply to the interface immediately',
   'settings.autoStart': 'Start with Windows',
   'settings.autoStartDesc': 'Run in the tray after sign-in',
   'settings.targetRoot': 'Target storage root',
@@ -1333,39 +1482,16 @@ I18N['en'] = {
   'feedback.copy': 'Copy diagnostics',
   'feedback.issue': 'Open issue',
   'feedback.copied': 'Diagnostics copied',
-  'feedback.issueOpened': 'Issue page opened (prototype simulation)',
+  'feedback.issueOpened': 'The issue page is open in your browser',
+  'feedback.openFailed': 'Could not open the browser: {reason}',
+  'feedback.browserFailed': 'The system could not start the default browser',
   'feedback.note': 'No file content or credential plaintext is uploaded.',
-  'projects.listTitle': 'Projects',
-  'projects.listHint': '{n} recently active',
-  'projects.search': 'Search projects…',
-  'projects.path': 'Project path',
-  'projects.size': 'Size',
-  'projects.reclaimable': 'Reclaimable',
-  'projects.reclaimableValue': 'Deps {deps} · Build {dist}',
-  'projects.deps': 'node_modules',
-  'projects.build': 'Build output',
-  'projects.git': '.git',
-  'projects.source': 'Source',
-  'projects.ide': 'Linked IDE',
-  'projects.lastActive': 'Last active',
-  'projects.actions': 'Allowed actions',
-  'projects.cleanDeps': 'Clean dependencies',
-  'projects.cleanBuild': 'Clean build output',
-  'projects.keep': 'Source and .git are never removed',
-  'projects.sourceDesc': 'Your code and project files, never removed',
-  'projects.note': 'You need to run npm install / build again afterward. Disk Warden does not do it.',
-  'projects.empty': 'No project folder found.',
-  'projects.select': 'Select a project on the left.',
-  'projects.total': 'Project footprint',
-  'projects.totalSub': 'Source {src} · Reclaimable {re}',
-  'projects.count': 'Projects',
-  'projects.countSub': '{n} on C:',
-  'projects.cleanable': 'Reclaimable space',
-  'projects.cleanableSub': 'Dependencies and build output only',
-  'projects.danger': 'Protected files',
-  'projects.dangerSub': 'Source / .git / config',
-  'projects.safeTitle': 'Safe to clean',
-  'projects.keepTitle': 'Must keep',
+  'projects.soonTitle': 'Project cleanup is coming soon',
+  'projects.soonDesc': 'This build only handles IDE data. Scanning and cleaning project dependencies and build output arrives in a later version.',
+  'projects.soonItem1': 'Detect node_modules / build output',
+  'projects.soonItem2': 'Source and .git are never removed',
+  'projects.soonItem3': 'Confirm item by item before cleaning',
+  'projects.soonDisabled': 'Not available yet',
   'disk.total': 'Capacity',
   'disk.used': 'Used',
   'disk.free': 'Free',
@@ -1386,6 +1512,7 @@ I18N['en'] = {
   'disk.handling.system': 'OS provider',
   'disk.handling.clean': 'Clean up',
   'disk.notIncluded': 'System files, page file and protected folders are out of scope. This tool does no antivirus or system tuning.',
+  'disk.noData': 'No data yet',
   'disk.refresh': 'Refresh usage',
   'disk.ide': 'AI IDEs and CLIs',
   'disk.ideDesc': 'Caches, sessions, indexes and worktrees',
@@ -1421,6 +1548,8 @@ I18N['en'] = {
   'rules.pending': 'Folders to confirm',
   'rules.pendingDesc': 'Not covered by rules. Confirmation is written to local rules-learned.json.',
   'rules.pendingEmpty': 'Nothing to confirm.',
+  'rules.learnedEmpty': 'No learned rules yet.',
+  'rules.overrideFailed': 'This folder has no scan id, so the rule cannot be saved. Rescan and try again.',
   'rules.table': 'Rules',
   'rules.tableDesc': 'Matched by folder name, red wins',
   'rules.match': 'Match',
@@ -1445,11 +1574,82 @@ I18N['en'] = {
   'rules.toggled': 'Rule state updated',
   'rules.deleted': 'Rule deleted',
   'rules.conflict': 'When several rules hit the same path, red always wins.',
+  'rules.viewApp': 'By app',
+  'rules.viewRule': 'By rule',
+  'rules.groupHint': 'Pick an app to view and edit its rules in a dialog',
+  'rules.groupEmpty': 'This app has no rules of its own',
+  'rules.modalSub': '{n} rules · {b} built-in · {u} you confirmed · {h} hits',
+  'rules.modalAdd': 'Add a rule for {app}',
+  'rules.modalCount': 'Rules',
+  'rules.modalAddSub': 'Takes effect for this app right away; written only to the local rules-learned.json',
+  'rules.modalRules': 'Rule details',
+  'rules.modalPending': 'Pending folders for {app}',
+  'rules.modalPendingSub': 'Confirming here is the same as confirming in the list on the left',
+  'rules.modalLocal': 'Switches and deletes here apply at once and never touch folders on disk',
+  'rules.groupCount': '{n} rules',
+  'rules.groupBreakdown': '{b} built-in · {u} you confirmed',
+  'rules.groupHits': '{n} hits',
+  'rules.groupProtected': '{n} protected',
+  'rules.viewDetail': 'View rules',
+  'rules.appAll': 'All apps',
+  'rules.viewAll': 'Show all rules flat',
+  'rules.appCol': 'Applies to',
+  'rules.shared': 'Shared across all apps',
+  'rules.sharedSub': 'Rules that are not app specific',
+  'ai.nav': 'AI identify',
+  'ai.title': 'AI-assisted identification',
+  'ai.sub': 'Unknown folders go to AI first. Its verdict is a suggestion until you adopt it.',
+  'ai.enable': 'Use AI assistance',
+  'ai.enableDesc': 'Off means unknown folders need your manual call.',
+  'ai.provider': 'Connection',
+  'ai.provider.relay': 'Use this Multica agent model',
+  'ai.provider.custom': 'Custom OpenAI-compatible endpoint',
+  'ai.provider.none': 'No connection (local rules only)',
+  'ai.baseUrl': 'Endpoint',
+  'ai.baseUrlDesc': 'e.g. https://api.example.com/v1',
+  'ai.model': 'Model',
+  'ai.modelAuto': 'Follow agent settings',
+  'ai.key': 'Key',
+  'ai.keyDesc': 'Read only from the DEEPSEEK_API_KEY environment variable. Never written to disk, logs or feedback.',
+  'ai.test': 'Test connection',
+  'ai.testUnavailable': 'Connection test arrives in a later version.',
+  'ai.keyEnvSet': 'Read from environment variable',
+  'ai.keyEnvMissing': 'Environment variable not set',
+  'ai.testOk': 'Connection OK · 0.8s',
+  'ai.testBad': 'Connection failed: invalid key',
+  'ai.statusOn': 'Connected',
+  'ai.statusOff': 'Not connected',
+  'ai.scope': 'What AI can see',
+  'ai.scopeValue': 'Folder paths and file names only. File contents are never read or uploaded.',
+  'ai.limit': 'Call limit per scan',
+  'ai.limitValue': '{n} folders',
+  'ai.identify': 'AI identify',
+  'ai.identifyAll': 'Identify remaining {n}',
+  'ai.pendingAsk': '{n} pending folders have no verdict yet — let AI suggest one first.',
+  'ai.identifying': 'AI is checking…',
+  'ai.suggest': 'AI suggests',
+  'ai.confidence': 'confidence',
+  'ai.adopt': 'Adopt',
+  'ai.adopted': 'Adopted and added to rules',
+  'ai.done': 'Done: suggestions ready for {n} folders',
+  'ai.allDone': 'Every pending folder has a suggestion',
+  'ai.needKey': 'Connect a model first',
+  'ai.needModel': 'Enter a model name, or use the agent model',
+  'ai.noneLeft': 'Nothing left to identify',
+  'ai.filter': 'AI suggested',
+  'ai.note': 'AI results are suggestions only. No file is migrated automatically.',
+  'ai.link': 'Connect AI',
+  'ai.reasonCache': 'Matches a known cache or session folder. It regenerates itself',
+  'ai.reasonSecret': 'Path looks like credentials or settings. Leave it alone',
   'rules.size': 'Size',
   'rules.path': 'Path',
+  'rules.action': 'Action',
   'rules.matched': 'Matched rule',
   'rules.markedGreen': 'Marked migratable',
   'rules.markedRed': 'Marked protected',
+  'rules.unmarked': 'Automatic verdict restored',
+  'rules.unmarkFailed': 'Could not undo the mark: {reason}',
+  'rules.unmarkGone': 'This mark no longer exists. Refresh and try again.',
   'rules.ignored': 'Folder ignored',
   'rules.noReason': 'User defined',
   'history.listTitle': 'Records',
@@ -1479,8 +1679,8 @@ I18N['en'] = {
   'history.empty': 'No operations yet.',
   'history.select': 'Select a record on the left.',
   'history.summary': '{freed} · {dur}',
-  'history.exported': 'History exported (prototype simulation)',
-  'history.simulated': 'Records here are demo data',
+  'history.exported': 'History exported',
+  'history.exportFailed': 'Export failed',
   'history.migrateStep1': 'Back up config and credential list',
   'history.migrateStep2': 'Copy files and verify',
   'history.migrateStep3': 'Delete source folders',
@@ -1492,43 +1692,90 @@ I18N['en'] = {
   'history.failedStep': 'Verification failed. Stopped with source intact.',
   'toast.scanDone': 'Scan complete',
   'toast.scanCancelled': 'Scan cancelled',
-  'toast.copied': 'Copied to clipboard (prototype simulation)',
-  'toast.opened': 'Opened in Explorer (prototype simulation)',
-  'toast.cleaned': 'Cache cleaned, freed {size} (prototype simulation)',
+  'toast.copied': 'Copied to clipboard',
+  'toast.opened': 'Opened in Explorer',
+  'toast.openedPath': 'Opened in Explorer: {path}',
+  'toast.openFailedReason': 'Could not open folder: {reason}',
+  'error.NO_PATH': 'Path unknown',
+  'error.FORBIDDEN': 'This action is not allowed',
+  'error.NOT_FOUND': 'Folder does not exist',
+  'error.PERMISSION_DENIED': 'Access to the folder was denied',
+  'error.IO_ERROR': 'The system could not open the file manager',
+  'error.INTERNAL': 'Host internal error',
+  'toast.cleaned': 'Cache cleaned, freed {size}',
   'toast.ruleAdded': 'Rule added',
   'toast.saved': 'Settings saved',
   'toast.yellowConfirmed': 'Confirmed. You can select it in the preview.',
-  'toast.rollbackStarted': 'Rollback started (prototype simulation)',
-  'toast.retry': 'Retrying (prototype simulation)',
-  'toast.exported': 'Exported (prototype simulation)',
+  'toast.rollbackStarted': 'Rollback started',
+  'toast.retry': 'Retrying',
+  'toast.exported': 'Exported',
   'toast.needSelect': 'Select at least one folder first',
   'toast.spaceShort': 'Not enough space on target',
   'toast.blocked': 'The app is running, cannot migrate',
-  'toast.demoHint': 'Prototype: this action does not modify real files',
-  'proto.title': 'Prototype states',
-  'proto.desc': 'For review only. Jump between states without touching real data.',
-  'proto.section.core': 'IDE data',
-  'proto.section.other': 'Other pages',
-  'proto.section.states': 'Key states',
-  'proto.route.ide': 'IDE list (default)',
-  'proto.route.scanning': 'Scanning',
-  'proto.route.empty': 'Empty: no IDE detected',
-  'proto.route.preview': 'Migration preview',
-  'proto.route.progress': 'Migration progress',
-  'proto.route.failed': 'Migration failed',
-  'proto.route.blocked': 'Blocked by process',
-  'proto.route.rollback': 'Rollback confirmation',
-  'proto.route.yellow': 'Confirm unknown directory',
-  'proto.route.success': 'Migration success',
-  'proto.route.projects': 'Projects',
-  'proto.route.disk': 'C: overview',
-  'proto.route.rules': 'Rule learning',
-  'proto.route.history': 'History',
-  'proto.route.settings': 'Settings modal',
-  'proto.route.feedback': 'Feedback modal',
+  'toast.unavailable': 'This feature is not connected to the host yet and will arrive in a later version',
   'unit.hours': 'h',
   'unit.minutes': 'min',
-  'unit.seconds': 's'
+  'unit.seconds': 's',
+  'ai.consentTitle': 'Enable AI analysis?',
+  'ai.consentBody': 'When enabled, folder names, sizes and risk results are sent to a third-party AI service for analysis. The API key is read from an environment variable and never stored locally.',
+  'ai.consentAccept': 'Agree and enable',
+  'ai.consentDecline': 'Not now',
+  'ai.consentDone': 'AI analysis enabled',
+  'blocked.planTitle': 'Migration plan blocked',
+  'blocked.planDesc': 'These folders cannot be migrated yet. Resolve the issues below and retry.',
+  'blocked.accessErrors': '{n} files could not be read',
+  'blocked.reparse': 'This path is a reparse point (junction / symlink)',
+  'blocked.space': 'Not enough space on the target drive: need {need}, available {free}',
+  'blocked.ntfs': 'Target drive is {fs}; NTFS is required',
+  'blocked.close': 'Close',
+  'conn.connecting': 'Connecting to the local service…',
+  'conn.hostTitle': 'Local service unavailable',
+  'conn.hostBody': 'Cannot reach the local bridge service. Make sure the app started correctly.',
+  'conn.unavailable': 'Local service unavailable',
+  'conn.retry': 'Reconnect',
+  'failed.items': 'Failed items',
+  'history.job': 'Job',
+  'history.exportEmpty': 'No records to export under the current filter',
+  'progress.stage.prepare': 'Prepare migration plan',
+  'progress.stage.swap': 'Swap folders',
+  'progress.stage.link_verify': 'Read back link target and verify',
+  'progress.stage.cleanup': 'Clean up temporary files',
+  'progress.stage.precheck': 'Pre-rollback checks',
+  'progress.stage.restore': 'Restore original folder',
+  'progress.stage.config': 'Restore config backup',
+  'progress.stage.record': 'Write rollback record',
+  'progress.stage.recover': 'Recover interrupted migration',
+  'recovery.title': 'Unfinished migration detected',
+  'recovery.count': '{n} item(s)',
+  'recovery.desc': 'These jobs were interrupted in a previous run. Recover or roll them back before migrating again.',
+  'recovery.needsHuman': 'Needs manual attention',
+  'recovery.recover': 'Recover',
+  'recovery.rollback': 'Roll back',
+  'recovery.running': 'Working…',
+  'recovery.done': 'Recovery complete',
+  'recovery.successHint': 'The interrupted job is recovered. Rescan to confirm the state.',
+  'recovery.failed': 'Recovery failed',
+  'recovery.failedHint': 'Check the logs and retry, or contact support.',
+  'rollback.progressTitle': 'Rolling back',
+  'rollback.progressKeepOpen': 'Keep Disk Warden open while rollback runs.',
+  'rollback.successTitle': 'Rollback complete',
+  'rollback.successSub': 'Data is back on C:, and the junction and config are restored.',
+  'rollback.failedTitle': 'Rollback failed',
+  'rollback.blockedTitle': 'Cannot roll back yet',
+  'rollback.residualTitle': 'Confirm residual cleanup',
+  'rollback.residualBody': 'Some files remain in the source folder. Continuing will delete these leftovers.',
+  'rollback.residualConfirm': 'Delete leftovers and continue',
+  'rollback.stage.precheck': 'Check rollback preconditions',
+  'rollback.stage.link_remove': 'Remove junction',
+  'rollback.stage.copy': 'Copy data back',
+  'rollback.stage.verify': 'Verify file count and bytes',
+  'rollback.stage.restore': 'Replace original folder',
+  'rollback.stage.config': 'Restore config backup',
+  'rollback.stage.cleanup': 'Clean up migration folder',
+  'rollback.stage.record': 'Write rollback record',
+  'rollback.stage.done': 'Done',
+  'success.rollbackable': 'You can roll back from History at any time',
+  'toast.noGreen': 'No migratable folders selected'
 };
 let LANG = 'zh-CN';
 function t(key, vars) {
@@ -1557,273 +1804,972 @@ function sum(items, key) {
   return items.reduce((a, b) => a + (b[key] || 0), 0);
 }
 
-/* 数据形状对齐 data/ide-catalog.json（T03）：ides[].directories[] 使用
-   path / type / safety / reason / handling；原型额外附加 size_bytes，
-   真实实现由扫描引擎填充。 */
-const CATALOG = {
-  schema_version: 1,
-  source: 'ui prototype (aligned with data/ide-catalog.json)',
-  platform: 'windows',
-  updated_at: '2026-10-19',
-  ides: [
-    {
-      id: 'cursor', name: 'Cursor', kind: 'ide', platform: 'windows',
-      processes: ['Cursor.exe'],
-      directories: [
-        { path: '%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb', type: 'file', safety: 'green', reason: 'reason.chatDb', handling: 'junction' },
-        { path: '%APPDATA%\\Cursor\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%APPDATA%\\Cursor\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\Cursor\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' },
-        { path: '%APPDATA%\\Cursor\\Local State', type: 'file', safety: 'red', reason: 'reason.localState' },
-        { path: '%APPDATA%\\Cursor\\User\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
-      ]
-    },
-    {
-      id: 'trae-cn', name: 'Trae CN', kind: 'ide', platform: 'windows',
-      processes: ['Trae CN.exe', 'TRAE SOLO CN.exe'],
-      directories: [
-        { path: '%APPDATA%\\TRAE SOLO CN\\ModularData\\ai-agent\\snapshot\\', type: 'dir', safety: 'green', reason: 'reason.snapshot', handling: 'junction' },
-        { path: '%APPDATA%\\TRAE SOLO CN\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\TRAE SOLO CN\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%USERPROFILE%\\.trae-cn\\', type: 'dir', safety: 'yellow', reason: 'reason.unknown' },
-        { path: '%APPDATA%\\TRAE SOLO CN\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' },
-        { path: '%APPDATA%\\TRAE SOLO CN\\User\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
-      ]
-    },
-    {
-      id: 'trae', name: 'Trae', kind: 'ide', platform: 'windows',
-      processes: ['Trae.exe'],
-      directories: [
-        { path: '%APPDATA%\\Trae\\ModularData\\ai-agent\\snapshot\\', type: 'dir', safety: 'green', reason: 'reason.snapshot', handling: 'junction' },
-        { path: '%APPDATA%\\Trae\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\Trae\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%USERPROFILE%\\.trae\\', type: 'dir', safety: 'yellow', reason: 'reason.unknown' },
-        { path: '%APPDATA%\\Trae\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
-      ]
-    },
-    {
-      id: 'windsurf', name: 'Windsurf', kind: 'ide', platform: 'windows',
-      processes: ['Windsurf.exe'],
-      directories: [
-        { path: '%APPDATA%\\Windsurf\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%APPDATA%\\Windsurf\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codeium\\windsurf\\cascade\\', type: 'dir', safety: 'green', reason: 'reason.cascade', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codeium\\windsurf\\memories\\', type: 'dir', safety: 'red', reason: 'reason.userMemory' },
-        { path: '%APPDATA%\\Windsurf\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
-      ]
-    },
-    {
-      id: 'kiro', name: 'Kiro', kind: 'ide', platform: 'windows',
-      processes: ['Kiro.exe'],
-      directories: [
-        { path: '%APPDATA%\\Kiro\\User\\globalStorage\\', type: 'dir', safety: 'green', reason: 'reason.kiroStorage', handling: 'junction' },
-        { path: '%APPDATA%\\Kiro\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\Kiro\\logs\\', type: 'dir', safety: 'green', reason: 'reason.logs', handling: 'junction' },
-        { path: '%USERPROFILE%\\.kiro\\settings\\', type: 'dir', safety: 'red', reason: 'reason.config' }
-      ]
-    },
-    {
-      id: 'vscode', name: 'VS Code', kind: 'ide', platform: 'windows',
-      processes: ['Code.exe'],
-      directories: [
-        { path: '%APPDATA%\\Code\\User\\globalStorage\\saoudrizwan.claude-dev\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
-        { path: '%APPDATA%\\Code\\User\\workspaceStorage\\', type: 'dir', safety: 'green', reason: 'reason.workspace', handling: 'junction' },
-        { path: '%APPDATA%\\Code\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.chromeCache', handling: 'junction' },
-        { path: '%APPDATA%\\Code\\Login Data', type: 'file', safety: 'red', reason: 'reason.login' }
-      ]
-    },
-    {
-      id: 'claude-code', name: 'Claude Code', kind: 'cli', platform: 'windows',
-      processes: ['claude.exe', 'node.exe'],
-      directories: [
-        { path: '%USERPROFILE%\\.claude\\debug\\', type: 'dir', safety: 'green', reason: 'reason.logs', handling: 'junction' },
-        { path: '%USERPROFILE%\\.claude\\projects\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
-        { path: '%USERPROFILE%\\.claude\\file-history\\', type: 'dir', safety: 'green', reason: 'reason.fileHistory', handling: 'junction' },
-        { path: '%LOCALAPPDATA%\\claude-cli-nodejs\\Cache\\', type: 'dir', safety: 'green', reason: 'reason.mcpLogs', handling: 'junction' },
-        { path: '%USERPROFILE%\\.claude\\.credentials.json', type: 'file', safety: 'red', reason: 'reason.credentials' },
-        { path: '%USERPROFILE%\\.claude\\settings.json', type: 'file', safety: 'red', reason: 'reason.settings' }
-      ]
-    },
-    {
-      id: 'codex-cli', name: 'Codex CLI', kind: 'cli', platform: 'windows',
-      processes: ['codex.exe'],
-      directories: [
-        { path: '%USERPROFILE%\\.codex\\sessions\\', type: 'dir', safety: 'green', reason: 'reason.session', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codex\\logs_2.sqlite', type: 'file', safety: 'green', reason: 'reason.codexLogs', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codex\\worktrees\\', type: 'dir', safety: 'green', reason: 'reason.worktrees', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codex\\tmp\\', type: 'dir', safety: 'green', reason: 'reason.tmp', handling: 'junction' },
-        { path: '%USERPROFILE%\\.codex\\auth.json', type: 'file', safety: 'red', reason: 'reason.auth' },
-        { path: '%USERPROFILE%\\.codex\\config.toml', type: 'file', safety: 'red', reason: 'reason.config' }
-      ]
-    }
-  ]
-};
+/* 扫描结果（scan.result）适配后的形状：ides[].directories[] 使用
+   path / type / safety / reason / handling，并附加 size_bytes 等字段。
+   未扫描前为空数组，界面据此显示空状态，不预置示例数据。 */
+const CATALOG = { ides: [] };
 
-/* 原型运行态：扫描结果 / 迁移状态 / 进程占用（真实实现由 T06–T08 填充） */
-const SIZE_TABLE = {
-  'cursor': [4.2, 3.1, 1.05, 0.003, 0.0002, 0.00001],
-  'trae-cn': [2.4, 1.3, 1.0, 0.4, 0.003, 0.00001],
-  'trae': [1.8, 0.9, 0.8, 0.3, 0.003],
-  'windsurf': [1.8, 0.8, 0.9, 0.005, 0.003],
-  'kiro': [16.0, 0.8, 0.4, 0.002],
-  'vscode': [1.1, 0.7, 0.4, 0.003],
-  'claude-code': [0.5, 0.06, 0.02, 0.02, 0.002, 0.001],
-  'codex-cli': [1.2, 0.8, 0.5, 0.1, 0.002, 0.001]
-};
-const RUNTIME = {
-  'cursor': { root: '%APPDATA%\\Cursor\\', location: 'C', migrated: false, running: [{ name: 'Cursor.exe', pid: 12844, lock: '%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb' }, { name: 'Cursor Helper.exe', pid: 15302, lock: '%APPDATA%\\Cursor\\Cache\\' }] },
-  'trae-cn': { root: '%APPDATA%\\TRAE SOLO CN\\', location: 'C', migrated: false, running: [] },
-  'trae': { root: '%APPDATA%\\Trae\\', location: 'C', migrated: false, running: [] },
-  'windsurf': { root: '%APPDATA%\\Windsurf\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\Windsurf', running: [] },
-  'kiro': { root: '%APPDATA%\\Kiro\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\Kiro', running: [] },
-  'vscode': { root: '%APPDATA%\\Code\\', location: 'D', migrated: true, target: 'D:\\DiskWarden\\VSCode', running: [] },
-  'claude-code': { root: '%USERPROFILE%\\.claude\\', location: 'C', migrated: false, running: [] },
-  'codex-cli': { root: '%USERPROFILE%\\.codex\\', location: 'C', migrated: false, running: [] }
-};
-
-CATALOG.ides.forEach(ide => {
-  const sizes = SIZE_TABLE[ide.id] || [];
-  ide.directories.forEach((d, i) => { d.size_bytes = Math.round((sizes[i] || 0) * GIB); });
-  ide.runtime = RUNTIME[ide.id];
-});
-
-const DRIVE = { totalGB: 120, usedGB: 117.2, freeGB: 2.8, targetFreeGB: 21.7, targetDrive: 'D:' };
-const KPI = { reclaimableGB: 31.6, freedGB: 22.9, freedOps: 3, lastScan: '2026-10-19 09:42', scanDuration: '3.4s' };
-
-const PROJECTS = [
-  { id: 'p1', name: 'disk-warden', path: 'D:\\workplace\\disk-warden', deps: 0.9, dist: 0.1, git: 0.05, source: 0.02, ide: 'Cursor', active: '2026-10-19 09:12', location: 'D' },
-  { id: 'p2', name: 'acme-web', path: 'C:\\Users\\Administrator\\dev\\acme-web', deps: 2.4, dist: 1.1, git: 0.2, source: 0.06, ide: 'Trae CN', active: '2026-10-18 22:40', location: 'C' },
-  { id: 'p3', name: 'data-pipeline', path: 'C:\\Users\\Administrator\\dev\\data-pipeline', deps: 1.8, dist: 0.4, git: 0.12, source: 0.04, ide: 'VS Code', active: '2026-10-18 16:03', location: 'C' },
-  { id: 'p4', name: 'mobile-app', path: 'D:\\projects\\mobile-app', deps: 0.7, dist: 0.2, git: 0.08, source: 0.03, ide: 'Windsurf', active: '2026-10-17 11:25', location: 'D' }
-];
+const DRIVE = { totalGB: 0, usedGB: 0, freeGB: 0, targetFreeGB: 0, targetDrive: '' };
+const KPI = { reclaimableGB: 0, freedGB: 0, freedOps: 0, lastScan: '', scanDuration: '' };
 
 const DISK_CATEGORIES = [
-  { id: 'ai-ide', name: 'disk.ide', desc: 'disk.ideDesc', gb: 12.8, handling: 'junction', color: '#2f8bf5' },
-  { id: 'ai-cli', name: 'disk.cli', desc: 'disk.cliDesc', gb: 3.1, handling: 'junction', color: '#5aa9f7' },
-  { id: 'worktrees', name: 'disk.worktrees', desc: 'disk.worktreesDesc', gb: 2.5, handling: 'junction', color: '#8f8df9' },
-  { id: 'pkg', name: 'disk.dev', desc: 'disk.devDesc', gb: 3.6, handling: 'env-var', color: '#7c5cff' },
-  { id: 'jetbrains', name: 'disk.jetbrains', desc: 'disk.jetbrainsDesc', gb: 1.8, handling: 'app-config', color: '#9b7bff' },
-  { id: 'sys', name: 'disk.sys', desc: 'disk.sysDesc', gb: 2.7, handling: 'system', color: '#f0a020' },
-  { id: 'temp', name: 'disk.temp', desc: 'disk.tempDesc', gb: 1.9, handling: 'clean', color: '#f7c04a' },
-  { id: 'models', name: 'disk.models', desc: 'disk.modelsDesc', gb: 3.2, handling: 'env-var', color: '#3fbf44' }
+  { id: 'ai-ide', name: 'disk.ide', desc: 'disk.ideDesc', gb: 0, handling: 'junction', color: '#2f8bf5' },
+  { id: 'ai-cli', name: 'disk.cli', desc: 'disk.cliDesc', gb: 0, handling: 'junction', color: '#5aa9f7' },
+  { id: 'worktrees', name: 'disk.worktrees', desc: 'disk.worktreesDesc', gb: 0, handling: 'junction', color: '#8f8df9' },
+  { id: 'pkg', name: 'disk.dev', desc: 'disk.devDesc', gb: 0, handling: 'env-var', color: '#7c5cff' },
+  { id: 'jetbrains', name: 'disk.jetbrains', desc: 'disk.jetbrainsDesc', gb: 0, handling: 'app-config', color: '#9b7bff' },
+  { id: 'sys', name: 'disk.sys', desc: 'disk.sysDesc', gb: 0, handling: 'system', color: '#f0a020' },
+  { id: 'temp', name: 'disk.temp', desc: 'disk.tempDesc', gb: 0, handling: 'clean', color: '#f7c04a' },
+  { id: 'models', name: 'disk.models', desc: 'disk.modelsDesc', gb: 0, handling: 'env-var', color: '#3fbf44' }
 ];
+/* “查看位置”落到该分类数据所在的系统目录；%VAR% 由主机端展开。 */
+const DISK_LOCATIONS = {
+  'ai-ide': '%APPDATA%',
+  'ai-cli': '%USERPROFILE%',
+  'worktrees': '%USERPROFILE%',
+  'pkg': '%LOCALAPPDATA%',
+  'jetbrains': '%LOCALAPPDATA%',
+  'sys': '%SystemRoot%',
+  'temp': '%TEMP%',
+  'models': '%USERPROFILE%'
+};
 const DISK_SEGMENTS = [
-  { key: 'disk.ide', gb: 18.6, color: '#2f8bf5' },
-  { key: 'disk.dev', gb: 6.4, color: '#7c5cff' },
-  { key: 'disk.sys', gb: 7.5, color: '#f0a020' },
-  { key: 'disk.models', gb: 5.2, color: '#3fbf44' },
-  { key: 'disk.other', gb: 79.5, color: '#c9d2db' },
-  { key: 'disk.free', gb: 2.8, color: '#edf1f4' }
+  { key: 'disk.ide', gb: 0, color: '#2f8bf5' },
+  { key: 'disk.dev', gb: 0, color: '#7c5cff' },
+  { key: 'disk.sys', gb: 0, color: '#f0a020' },
+  { key: 'disk.models', gb: 0, color: '#3fbf44' },
+  { key: 'disk.other', gb: 0, color: '#c9d2db' },
+  { key: 'disk.free', gb: 0, color: '#edf1f4' }
 ];
 
-const RULES = [
-  { id: 'r1', match: 'Cache', type: 'exact', safety: 'green', source: 'builtin', hits: 812, enabled: true },
-  { id: 'r2', match: 'CachedData', type: 'exact', safety: 'green', source: 'builtin', hits: 144, enabled: true },
-  { id: 'r3', match: 'GPUCache', type: 'exact', safety: 'green', source: 'builtin', hits: 96, enabled: true },
-  { id: 'r4', match: 'Code Cache', type: 'exact', safety: 'green', source: 'builtin', hits: 87, enabled: true },
-  { id: 'r5', match: 'logs', type: 'exact', safety: 'green', source: 'builtin', hits: 231, enabled: true },
-  { id: 'r6', match: 'sessions', type: 'exact', safety: 'green', source: 'builtin', hits: 64, enabled: true },
-  { id: 'r7', match: 'workspaceStorage', type: 'exact', safety: 'green', source: 'builtin', hits: 58, enabled: true },
-  { id: 'r8', match: 'globalStorage', type: 'exact', safety: 'green', source: 'builtin', hits: 41, enabled: true },
-  { id: 'r9', match: '*.sqlite', type: 'glob', safety: 'green', source: 'builtin', hits: 37, enabled: true },
-  { id: 'r10', match: '*.log', type: 'glob', safety: 'green', source: 'builtin', hits: 122, enabled: true },
-  { id: 'r11', match: 'node_modules', type: 'exact', safety: 'green', source: 'builtin', hits: 18, enabled: true },
-  { id: 'r12', match: 'dist', type: 'exact', safety: 'green', source: 'builtin', hits: 12, enabled: true },
-  { id: 'r13', match: 'Login Data', type: 'exact', safety: 'red', source: 'builtin', hits: 24, enabled: true },
-  { id: 'r14', match: 'Local State', type: 'exact', safety: 'red', source: 'builtin', hits: 19, enabled: true },
-  { id: 'r15', match: 'settings.json', type: 'exact', safety: 'red', source: 'builtin', hits: 31, enabled: true },
-  { id: 'r16', match: '.credentials.json', type: 'exact', safety: 'red', source: 'builtin', hits: 6, enabled: true },
-  { id: 'r17', match: 'auth.json', type: 'exact', safety: 'red', source: 'builtin', hits: 5, enabled: true },
-  { id: 'r18', match: 'memory', type: 'exact', safety: 'red', source: 'builtin', hits: 9, enabled: true },
-  { id: 'r19', match: 'memories', type: 'exact', safety: 'red', source: 'builtin', hits: 7, enabled: true },
-  { id: 'r20', match: 'snapshot', type: 'exact', safety: 'green', source: 'user', hits: 22, enabled: true },
-  { id: 'r21', match: 'cascade', type: 'exact', safety: 'green', source: 'user', hits: 14, enabled: true },
-  { id: 'r22', match: '.trae-cn', type: 'exact', safety: 'red', source: 'user', hits: 3, enabled: false }
-];
-
-const PENDING = [
-  { id: 'pd1', path: '%USERPROFILE%\\.trae-cn\\', size_bytes: 4e8, hint: 'reason.globalMemory', ide: 'Trae CN' },
-  { id: 'pd2', path: '%USERPROFILE%\\.trae\\', size_bytes: 3e8, hint: 'reason.globalMemory', ide: 'Trae' },
-  { id: 'pd3', path: '%USERPROFILE%\\.dsh\\profiles\\', size_bytes: 8e8, hint: 'reason.unknown', ide: 'DeepSeek Harness' }
-];
-
-const HISTORY = [
-  { id: 'h1', at: '2026-10-18 16:42', type: 'migrate', app: 'Kiro', from: '%APPDATA%\\Kiro\\', to: 'D:\\DiskWarden\\Kiro', freed: 17.2, duration: '4m 12s', result: 'success', canRollback: true, note: 'history.rollbackSpace', steps: ['migrateStep1', 'migrateStep2', 'migrateStep3', 'migrateStep4'] },
-  { id: 'h2', at: '2026-10-17 10:05', type: 'clean', app: 'Cursor', from: '%APPDATA%\\Cursor\\Cache\\', to: '—', freed: 2.1, duration: '12s', result: 'success', canRollback: false, note: 'history.cleanNoRollback', steps: ['cleanStep1'] },
-  { id: 'h3', at: '2026-10-16 21:18', type: 'migrate', app: 'VS Code', from: '%APPDATA%\\Code\\', to: 'D:\\DiskWarden\\VSCode', freed: 2.2, duration: '1m 38s', result: 'success', canRollback: true, note: 'history.canRollback', steps: ['migrateStep1', 'migrateStep2', 'migrateStep3', 'migrateStep4'] },
-  { id: 'h4', at: '2026-10-16 14:20', type: 'migrate', app: 'Trae CN', from: '%APPDATA%\\Trae CN\\', to: 'D:\\DiskWarden\\TraeCN', freed: 0, duration: '2m 05s', result: 'failed', canRollback: false, code: 'E_VERIFY_MISMATCH', note: 'failed.sourceSafe', steps: ['migrateStep1', 'migrateStep2', 'failedStep'] },
-  { id: 'h5', at: '2026-10-15 09:30', type: 'rollback', app: 'Windsurf', from: 'D:\\DiskWarden\\Windsurf', to: '%APPDATA%\\Windsurf\\', freed: 0, duration: '2m 20s', result: 'rolledback', canRollback: false, note: 'history.rollbackDone', steps: ['rollbackStep1', 'rollbackStep2', 'rollbackStep3'] }
-];
+const HISTORY = [];
+const ISSUE_URL = 'https://github.com/QuotaFuse-ai/disk-warden/issues/new';
 
 const state = {
   route: 'projects', tab: 'projects', sub: '',
-  selectedIde: 'cursor', selectedProject: 'p1', selectedHistory: 'h1',
+  selectedIde: '', selectedHistory: '',
   filter: 'all', search: '',
   checked: {}, confirmed: {},
-  settings: { targetRoot: 'D:\\DiskWarden\\', autoStart: false, autoMaintenance: false, uninstall: 'keep' },
-  demo: { pct: 45, stage: 2, freeze: true, ide: 'trae-cn', filesDone: 7421, filesTotal: 16843 },
-  scanning: false, scanPct: 62,
-  pendingYellow: { ide: 'trae-cn', idx: 3 },
+  settings: { targetRoot: '', autoStart: false, autoMaintenance: false, uninstall: 'keep',
+    aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false },
+  connected: false, booting: true, bootError: '', aiAsk: false,
+  data: { settings: null, disk: null, snapshot: null, learned: null, scanJob: null, scanTimer: null,
+    scanError: '', history: null, historyError: '', historyLoading: false,
+    recovery: null, recoveryRun: null, recoveryTimer: null, flow: null, jobTimer: null },
+  scanning: false, scanPct: 0,
+  pendingYellow: null,
   historyFilter: 'all',
   returnHash: '',
-  protoOpen: false,
   toastTimer: null
 };
-CATALOG.ides.forEach(ide => {
-  state.checked[ide.id] = {};
-  ide.directories.forEach((d, i) => { if (d.safety === 'green') state.checked[ide.id][i] = true; });
-});
 /* ---------- 路由与通用渲染 ---------- */
 const TABS = ['projects', 'ide', 'disk', 'rules', 'history'];
 
 function parseRoute() {
   const raw = (location.hash || '').replace(/^#/, '');
-  if (raw === 'settings' || raw === 'feedback') return { tab: state.tab || 'projects', sub: '', modal: raw };
+  if (raw === 'settings' || raw === 'feedback' || raw === 'ai') return { tab: state.tab || 'projects', sub: '', modal: raw };
   const parts = raw.split('/');
+  if (parts[0] === 'rules-app') return { tab: 'rules', sub: '', modal: 'rules-app', app: parts[1] === 'all' ? '*' : (parts[1] || '') };
   const tab = TABS.indexOf(parts[0]) >= 0 ? parts[0] : 'projects';
   return { tab: tab, sub: parts[1] || '', modal: '' };
 }
-function getIde(id) { return CATALOG.ides.find(x => x.id === id) || CATALOG.ides[0]; }
+function getIde(id) { return CATALOG.ides.find(x => x.id === id) || CATALOG.ides[0] || { id: '', name: '', kind: 'ide', directories: [], runtime: { root: '', location: '', target: '', migrated: false, running: [] } }; }
 function ideSize(ide) { return sum(ide.directories, 'size_bytes'); }
 function safetyCount(ide, safety) { return ide.directories.filter(d => d.safety === safety).length; }
 function yellowKey(ideId, idx) { return ideId + '|' + idx; }
-function isConfirmed(ideId, idx) { return !!state.confirmed[yellowKey(ideId, idx)]; }
+function dirAt(ideId, idx) { const ide = getIde(ideId); return ide && ide.directories ? ide.directories[idx] : null; }
+function dirKey(ideId, idx) { const d = dirAt(ideId, idx); return d && d.item_id ? 'item:' + d.item_id : yellowKey(ideId, idx); }
+function isConfirmed(ideId, idx) { return !!state.confirmed[dirKey(ideId, idx)]; }
 function isChecked(ideId, idx, dir) {
   if (dir.safety === 'red') return false;
+  if (dir.item_id && dir.can_migrate === false) return false;
   if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return false;
+  if (dir.item_id) return !!state.checked[dir.item_id];
   return !!state.checked[ideId] && !!state.checked[ideId][idx];
 }
 function selectedDirs(ide) {
   return ide.directories.filter((d, i) => isChecked(ide.id, i, d));
 }
 function selectedSize(ide) { return sum(selectedDirs(ide), 'size_bytes'); }
-function targetAvailableGB() { return state.settings.targetRoot ? DRIVE.targetFreeGB : 0; }
+function targetAvailableGB() {
+  const free = state.data.disk && state.data.disk.target && state.data.disk.target.available
+    ? state.data.disk.target.free : null;
+  return free != null ? free / GIB : (state.settings.targetRoot ? DRIVE.targetFreeGB : 0);
+}
 function needBytes(ide) { return Math.ceil(selectedSize(ide) * 1.05 + 64 * 1024 * 1024); }
 function needsGB(ide) { return needBytes(ide) / GIB; }
 function spaceOk(ide) { return needsGB(ide) <= targetAvailableGB(); }
-function targetPathFor(ide) { return (state.settings.targetRoot.replace(/\\$/, '') + '\\' + ide.name.replace(/\s+/g, '')); }
+function targetPathFor(ide) {
+  const it = selectedDirs(ide)[0] || ide.directories[0];
+  if (it && it.target_path) {
+    const m = String(it.target_path).match(/^(.*)[\\/][^\\/]+$/);
+    if (m) return m[1];
+  }
+  if (!state.settings.targetRoot) return '';
+  return (state.settings.targetRoot.replace(/\\$/, '') + '\\' + ide.name.replace(/\s+/g, ''));
+}
 function appTitle() { return document.title; }
+
+
+/* ---------- RPC 传输层 ----------
+   请求：{v:1,id,method,params}；成功：{ok:true,result}；失败：{ok:false,error}。
+   bridge.rpc 接收并返回 JSON 字符串，这里统一解析并按 error 结构抛出。 */
+class RpcError extends Error {
+  constructor(err) {
+    const e = err || {};
+    super(e.message_key || e.code || 'error.INTERNAL');
+    this.code = e.code || 'INTERNAL';
+    this.message_key = e.message_key || ('error.' + this.code);
+    this.detail = e.detail || {};
+    this.retryable = !!e.retryable;
+  }
+}
+
+let rpcSeq = 0;
+function rpc(method, params) {
+  const api = window.pywebview && window.pywebview.api;
+  if (!api || typeof api.rpc !== 'function') {
+    return Promise.reject(new RpcError({ code: 'INTERNAL', detail: { reason: 'host unavailable' } }));
+  }
+  const req = { v: 1, id: 'ui-' + (++rpcSeq), method: method, params: params || {} };
+  return api.rpc(JSON.stringify(req)).then(raw => {
+    let res;
+    try { res = typeof raw === 'string' ? JSON.parse(raw) : raw; }
+    catch (e) { throw new RpcError({ code: 'INTERNAL', detail: { reason: 'invalid response' } }); }
+    if (!res || res.ok !== true) throw new RpcError(res && res.error);
+    return res.result;
+  });
+}
+
+function errText(err) {
+  if (!err) return '';
+  const key = err.message_key || ('error.' + (err.code || 'INTERNAL'));
+  const label = t(key);
+  /* 主机端可能返回界面没有收录的错误码，兜底成通用文案，不把 key 漏给用户 */
+  return label === key ? t('error.INTERNAL') : label;
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    return String(iso).replace('T', ' ').replace(/\.\d+/, '').replace(/Z$/, '');
+  }
+  const p = n => (n < 10 ? '0' : '') + n;
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function normPath(p) {
+  return String(p == null ? '' : p).replace(/\//g, '\\').replace(/\\+$/, '').toLowerCase();
+}
+
+function driveOf(p) {
+  const m = String(p || '').match(/^([A-Za-z]:)/);
+  return m ? m[1].toUpperCase() : '';
+}
+
+/* ---------- 真实扫描数据（scan.result）读取辅助 ---------- */
+function snapshot() { return state.data.snapshot; }
+function allTools() { const s = snapshot(); return (s && s.tools) || []; }
+function allItems() { const s = snapshot(); return (s && s.items) || []; }
+function toolList() { return allTools().filter(x => x.counts && x.counts.present > 0); }
+function toolById(id) { return allTools().find(x => x.id === id) || null; }
+function itemsFor(tool) { return allItems().filter(x => x.tool_id === tool.id); }
+function runningProcs(tool) { const rt = tool && tool.runtime; return (rt && rt.processes) || []; }
+function migratedItems(tool) { return itemsFor(tool).filter(x => !!x.migrated_job_id); }
+function isToolMigrated(tool) { return migratedItems(tool).length > 0; }
+function migratedTarget(tool) {
+  const it = migratedItems(tool)[0];
+  return it ? (it.target_path || '') : '';
+}
+function itemCounts(tool) {
+  const items = itemsFor(tool);
+  return {
+    green: items.filter(x => x.safety === 'green').length,
+    red: items.filter(x => x.safety === 'red').length,
+    yellow: items.filter(x => x.safety === 'yellow').length
+  };
+}
+function toolRoot(tool) {
+  const items = itemsFor(tool);
+  if (!items.length) {
+    const dirs = ((tool && tool.directories) || []).filter(d => d.resolved && d.resolved.length);
+    return dirs.length ? String(dirs[0].resolved[0]).replace(/[\\/][^\\/]*$/, '') : '';
+  }
+  let parts = String(items[0].source_path).replace(/\//g, '\\').split('\\');
+  parts.pop();
+  items.slice(1).forEach(it => {
+    const seg = String(it.source_path).replace(/\//g, '\\').split('\\');
+    const max = Math.min(parts.length, seg.length);
+    let i = 0;
+    while (i < max && parts[i].toLowerCase() === seg[i].toLowerCase()) i++;
+    parts = parts.slice(0, i);
+  });
+  return parts.join('\\');
+}
+function targetFreeBytes() {
+  const d = state.data.disk && state.data.disk.target;
+  return d && d.available ? (d.free || 0) : 0;
+}
+
+/* ---------- 扫描快照 → 已验收 CATALOG 形状（数组） ---------- */
+function adapterDir(item) {
+  return {
+    path: item.source_path || '',
+    target_path: item.target_path || '',
+    type: item.kind || 'dir',
+    safety: item.safety || 'yellow',
+    reason: item.reason || item.blocked_reason || item.reason_key || '',
+    handling: item.rule_id || item.blocked_code || '',
+    size_bytes: item.bytes || 0,
+    item_id: item.item_id,
+    can_migrate: item.can_migrate !== false && !item.migrated_job_id,
+    requires_confirm: !!item.requires_confirm,
+    blocked_code: item.blocked_code || '',
+    blocked_reason: item.blocked_reason || '',
+    migrated: !!item.migrated_job_id,
+    migrated_job_id: item.migrated_job_id || '',
+    source: item.source || '',
+    rule_id: item.rule_id || '',
+    file_count: item.file_count || 0,
+    access_errors: item.access_errors || 0,
+    is_reparse: !!item.is_reparse,
+    target_exists: !!item.target_exists
+  };
+}
+
+function synthDirectories(tool) {
+  const out = [];
+  ((tool && tool.directories) || []).forEach(d => {
+    const paths = (d.resolved && d.resolved.length) ? d.resolved : [];
+    paths.forEach(p => {
+      out.push({
+        path: String(p), target_path: '', type: d.type || 'dir',
+        safety: d.safety || 'yellow', reason: d.reason || d.reason_key || '',
+        handling: d.handling || d.status_label || '', size_bytes: 0,
+        item_id: '', can_migrate: d.safety !== 'red', requires_confirm: d.safety === 'yellow',
+        blocked_code: '', blocked_reason: '', migrated: false, source: '', rule_id: '',
+        file_count: 0, access_errors: 0, is_reparse: false, target_exists: false
+      });
+    });
+  });
+  return out;
+}
+
+function adapterIde(tool) {
+  const items = itemsFor(tool);
+  const root = toolRoot(tool);
+  const target = String(migratedTarget(tool) || '').replace(/[\\/][^\\/]*$/, '');
+  return {
+    id: tool.id,
+    name: tool.name,
+    kind: tool.kind || 'ide',
+    platform: 'windows',
+    processes: ((tool.runtime && tool.runtime.catalog_names) || []),
+    directories: items.length ? items.map(adapterDir) : synthDirectories(tool),
+    runtime: {
+      root: root,
+      location: driveOf(root).replace(':', '') || 'C',
+      migrated: isToolMigrated(tool),
+      target: target,
+      running: runningProcs(tool).map(p => ({ name: p.name, pid: p.pid }))
+    }
+  };
+}
+
+function preselectGreen() {
+  state.checked = {};
+  state.confirmed = {};
+  state.pendingYellow = null;
+  allItems().forEach(it => {
+    if (it.safety === 'green' && it.can_migrate !== false && !it.migrated_job_id && !it.blocked_reason) {
+      state.checked[it.item_id] = true;
+    }
+  });
+}
+
+function setSnapshot(snap) {
+  state.data.snapshot = snap || null;
+  const ides = toolList().map(adapterIde);
+  CATALOG.ides.length = 0;
+  Array.prototype.push.apply(CATALOG.ides, ides);
+  if (!CATALOG.ides.some(x => x.id === state.selectedIde)) {
+    state.selectedIde = CATALOG.ides.length ? CATALOG.ides[0].id : '';
+  }
+  preselectGreen();
+  syncKpi();
+  syncDiskView();
+}
+
+function applySettings(s) {
+  if (!s) return;
+  state.data.settings = s;
+  const ai = s.ai || null;
+  state.settings = {
+    targetRoot: s.target_root || '',
+    autoStart: !!s.launch_at_startup,
+    autoMaintenance: !!s.auto_maintenance,
+    uninstall: s.uninstall_policy === 'rollback' ? 'remove' : (s.uninstall_policy || 'keep'),
+    dataRoot: s.data_root || '',
+    appVersion: s.app_version || '',
+    ai: ai,
+    aiEnabled: !!(ai && ai.enabled),
+    aiProvider: ai && ai.enabled ? (ai.base_url ? 'custom' : 'relay') : 'none',
+    aiBaseUrl: (ai && ai.base_url) || '',
+    aiModel: (ai && ai.model) || '',
+    aiKeySet: !!(ai && ai.api_key_set)
+  };
+}
+
+function applyDisk(d) {
+  if (!d) return;
+  state.data.disk = d;
+  const src = d.source || {};
+  const tgt = d.target || {};
+  DRIVE.totalGB = src.available ? (src.total || 0) / GIB : 0;
+  DRIVE.usedGB = src.available ? (src.used || 0) / GIB : 0;
+  DRIVE.freeGB = src.available ? (src.free || 0) / GIB : 0;
+  DRIVE.targetFreeGB = tgt.available ? (tgt.free || 0) / GIB : 0;
+  DRIVE.targetDrive = driveOf(tgt.path) || DRIVE.targetDrive;
+  syncDiskView();
+}
+
+function setSeg(key, gb) {
+  const s = DISK_SEGMENTS.find(x => x.key === key);
+  if (s) s.gb = Math.max(0, gb || 0);
+}
+
+function syncDiskView() {
+  const tools = {};
+  allTools().forEach(t => { tools[t.id] = t; });
+  const bucket = { 'ai-ide': 0, 'ai-cli': 0, 'pkg': 0, 'jetbrains': 0, 'models': 0 };
+  allItems().forEach(it => {
+    const tool = tools[it.tool_id];
+    const kind = (tool && tool.kind) || 'ide';
+    const rel = String(it.rel_path || '').toLowerCase();
+    let cat = kind === 'ide' ? 'ai-ide' : 'ai-cli';
+    if (/(^|[\\/])(npm|npm-cache|pnpm|yarn|pip|cargo|m2|gradle)([\\/]|$)/.test(rel)) cat = 'pkg';
+    else if (/jetbrains|\.idea/.test(rel)) cat = 'jetbrains';
+    else if (/ollama|huggingface/.test(rel)) cat = 'models';
+    bucket[cat] += it.bytes || 0;
+  });
+  DISK_CATEGORIES.forEach(c => { c.gb = (bucket[c.id] || 0) / GIB; });
+  const ideGB = (bucket['ai-ide'] + bucket['ai-cli']) / GIB;
+  const devGB = (bucket.pkg + bucket.jetbrains) / GIB;
+  const modelsGB = bucket.models / GIB;
+  setSeg('disk.ide', ideGB);
+  setSeg('disk.dev', devGB);
+  setSeg('disk.sys', 0);
+  setSeg('disk.models', modelsGB);
+  setSeg('disk.other', Math.max(0, DRIVE.usedGB - ideGB - devGB - modelsGB));
+  setSeg('disk.free', DRIVE.freeGB);
+}
+
+function syncKpi() {
+  const snap = snapshot();
+  const st = (snap && snap.stats) || {};
+  KPI.reclaimableGB = (st.migratable_bytes || 0) / GIB;
+  KPI.lastScan = snap && snap.scanned_at ? fmtDate(snap.scanned_at) : '';
+  const migrates = historyItems().filter(x => x.type === 'migrate' && x.result === 'success');
+  KPI.freedGB = migrates.reduce((a, x) => a + (x.freed || 0), 0) / GIB;
+  KPI.freedOps = migrates.length;
+}
+
+/* ---------- 启动握手 ---------- */
+function hostReady() {
+  const has = () => !!(window.pywebview && window.pywebview.api && typeof window.pywebview.api.rpc === 'function');
+  if (has()) return Promise.resolve(true);
+  return new Promise(resolve => {
+    let settled = false;
+    let tries = 0;
+    const finish = ok => {
+      if (settled) return;
+      settled = true;
+      clearInterval(timer);
+      window.removeEventListener('pywebviewready', onReady);
+      resolve(ok);
+    };
+    const onReady = () => finish(has());
+    window.addEventListener('pywebviewready', onReady);
+    const timer = setInterval(() => {
+      tries++;
+      if (has()) finish(true);
+      else if (tries >= 120) finish(false);
+    }, 100);
+  });
+}
+
+function bootstrap() {
+  state.booting = true;
+  state.bootError = '';
+  return hostReady().then(ok => {
+    if (!ok) {
+      state.booting = false;
+      state.connected = false;
+      state.bootError = t('conn.hostBody');
+      return null;
+    }
+    return rpc('app.hello').then(hello => {
+      applySettings(hello.settings);
+      applyDisk(hello.disk || null);
+      state.data.recovery = hello.recovery || null;
+      state.connected = true;
+      const scan = hello.scan || {};
+      const ready = scan.available
+        ? rpc('scan.result').then(snap => setSnapshot(snap)).catch(() => {})
+        : Promise.resolve();
+      return ready
+        .then(() => rpc('rules.learned.list')).then(l => { state.data.learned = l; }).catch(() => {})
+        .then(() => rpc('job.list', { active_only: true })).catch(() => ({ jobs: [] }))
+        .then(list => {
+          const active = (list && list.jobs && list.jobs[0]) || null;
+          if (active && active.kind === 'scan' && ['queued', 'running', 'cancelling'].indexOf(active.state) >= 0) {
+            state.data.scanJob = active;
+            state.scanning = true;
+            state.scanPct = scanPercent(active);
+            startScanPolling(active.job_id);
+          }
+        })
+        .then(() => refreshRecovery())
+        .then(() => loadHistory());
+    }).catch(err => {
+      state.connected = false;
+      state.bootError = errText(err);
+    }).then(() => { state.booting = false; });
+  }).then(() => { render(); });
+}
+
+/* ---------- 扫描任务 ---------- */
+const SCAN_STAGES = ['discover', 'measure', 'classify', 'done'];
+
+function scanStage(job) {
+  const p = (job && job.progress) || {};
+  const s = p.stage || p.step || 'discover';
+  return SCAN_STAGES.indexOf(s) >= 0 ? s : 'discover';
+}
+
+function scanPercent(job) {
+  if (!job) return 0;
+  if (job.state === 'done') return 100;
+  const p = job.progress || {};
+  const stage = p.stage || p.step || '';
+  if (stage === 'measure') {
+    const total = p.targets_total || 0, done = p.targets_done || 0;
+    if (total > 0) return Math.min(88, 10 + Math.round(done / total * 78));
+    return 15;
+  }
+  if (stage === 'classify') return 92;
+  if (stage === 'discover') return 6;
+  return job.state === 'running' ? 10 : 3;
+}
+
+function stopScanPolling() {
+  if (state.data.scanTimer) {
+    clearInterval(state.data.scanTimer);
+    state.data.scanTimer = null;
+  }
+}
+
+function startScanPolling(jobId) {
+  stopScanPolling();
+  state.data.scanTimer = setInterval(() => pollScan(jobId), 350);
+  pollScan(jobId);
+}
+
+function scanFailed(err) {
+  state.data.scanError = errText(err) || t('scan.failed');
+  state.scanning = false;
+  App.toast(t('scan.failed') + ': ' + state.data.scanError);
+  if (state.tab !== 'ide' || state.sub !== 'scanning') App.go('#ide/scanning');
+  else render();
+}
+
+function pollScan(jobId) {
+  if (!jobId) return Promise.resolve();
+  return rpc('scan.status', { job_id: jobId }).then(res => {
+    const job = res && res.job ? res.job : null;
+    if (!job) { stopScanPolling(); return; }
+    state.data.scanJob = job;
+    state.scanPct = scanPercent(job);
+    if (job.state === 'done') {
+      stopScanPolling();
+      KPI.scanDuration = fmtDuration(jobDuration(job));
+      return rpc('scan.result').then(snap => {
+        setSnapshot(snap);
+        state.scanning = false;
+        state.data.scanJob = null;
+        state.scanPct = 100;
+        const n = (snap && snap.stats && snap.stats.tools_present) || 0;
+        App.toast(t('scan.done', { n: n }));
+        return rpc('disk.info').then(applyDisk).catch(() => {});
+      }).then(() => {
+        App.go('#ide' + (CATALOG.ides.length ? '' : '/empty'));
+      }).catch(scanFailed);
+    }
+    if (job.state === 'cancelled') {
+      stopScanPolling();
+      state.scanning = false;
+      state.data.scanJob = null;
+      App.toast(t('scan.cancelled'));
+      App.go('#ide' + (snapshot() ? '' : '/empty'));
+      return;
+    }
+    if (job.state === 'failed') {
+      stopScanPolling();
+      freshRenderIfScanning();
+      scanFailed(job.error);
+      return;
+    }
+    freshRenderIfScanning();
+  }).catch(err => {
+    stopScanPolling();
+    scanFailed(err);
+  });
+}
+
+function freshRenderIfScanning() {
+  if (state.tab === 'ide' && state.sub === 'scanning') render();
+}
+
+/* ---------- 操作历史（src/core/store/history） ---------- */
+function historyItems() {
+  const h = state.data.history;
+  return (h && h.items) || [];
+}
+function historyStats() {
+  const h = state.data.history;
+  return (h && h.stats) || {};
+}
+function fmtDuration(sec) {
+  if (sec === null || sec === undefined || isNaN(sec)) return '—';
+  const s = Math.max(0, Math.round(Number(sec)));
+  const m = Math.floor(s / 60);
+  return m ? m + 'm ' + (s % 60) + 's' : s + 's';
+}
+function jobDuration(job) {
+  if (!job || !job.started_at) return null;
+  const end = job.finished_at || job.updated_at;
+  const a = Date.parse(job.started_at), b = Date.parse(end);
+  if (isNaN(a) || isNaN(b)) return null;
+  return Math.max(0, Math.round((b - a) / 1000));
+}
+
+function applyHistory(res) {
+  const items = (res && res.items) || [];
+  HISTORY.length = 0;
+  items.forEach(h => {
+    const type = h.type === 'rollback' ? 'rollback' : (h.type === 'clean' ? 'clean' : 'migrate');
+    const failed = h.result === 'failed';
+    const steps = type === 'rollback'
+      ? ['rollbackStep1', 'rollbackStep2', failed ? 'failedStep' : 'rollbackStep3']
+      : type === 'clean'
+        ? ['cleanStep1']
+        : ['migrateStep1', 'migrateStep2', 'migrateStep3', failed ? 'failedStep' : 'migrateStep4'];
+    let note;
+    if (failed) note = 'failed.sourceSafe';
+    else if (type === 'rollback') note = 'history.rollbackDone';
+    else if (h.can_rollback) note = 'history.canRollback';
+    else note = 'history.noRollback';
+    HISTORY.push({
+      id: h.id,
+      at: fmtDate(h.at),
+      type: type,
+      app: h.app || h.tool_id || '',
+      from: h.from || '',
+      to: h.to || '',
+      freed: (h.freed || 0) / GIB,
+      duration: fmtDuration(h.duration_seconds),
+      result: h.result === 'rolledback' ? 'rolledback' : (failed ? 'failed' : 'success'),
+      canRollback: !!h.can_rollback,
+      code: h.code || '',
+      note: note,
+      steps: steps,
+      job_id: h.job_id || '',
+      tool_id: h.tool_id || ''
+    });
+  });
+  if (!HISTORY.some(x => x.id === state.selectedHistory)) {
+    state.selectedHistory = HISTORY.length ? HISTORY[0].id : '';
+  }
+  syncKpi();
+}
+
+function loadHistory() {
+  if (state.data.historyLoading) return Promise.resolve();
+  state.data.historyLoading = true;
+  return rpc('history.list', { filter: 'all', limit: 500 }).then(res => {
+    state.data.history = res || { items: [], count: 0, stats: {} };
+    state.data.historyError = '';
+    applyHistory(state.data.history);
+  }).catch(err => {
+    state.data.historyError = errText(err);
+    applyHistory({ items: [] });
+  }).then(res => {
+    state.data.historyLoading = false;
+    return res;
+  });
+}
+
+/* ---------- 迁移 / 回滚任务流 ---------- */
+const MIGRATE_STAGES = ['prepare', 'backup', 'copy', 'verify', 'swap', 'link', 'link_verify', 'cleanup', 'done'];
+const ROLLBACK_STAGES = ['precheck', 'link_remove', 'copy', 'verify', 'restore', 'config', 'cleanup', 'record', 'done'];
+
+function flowOpen(kind) { return !!(state.data.flow && state.data.flow.kind === kind); }
+function flowBusy() {
+  const f = state.data.flow;
+  return !!(f && (f.phase === 'loading' || f.phase === 'starting' || f.phase === 'progress'));
+}
+function stopFlowPolling() {
+  if (state.data.jobTimer) {
+    clearInterval(state.data.jobTimer);
+    state.data.jobTimer = null;
+  }
+}
+function closeFlow() {
+  stopFlowPolling();
+  state.data.flow = null;
+}
+function refreshAfterJob() {
+  return Promise.all([
+    rpc('scan.result').then(snap => setSnapshot(snap)).catch(() => {}),
+    rpc('disk.info').then(applyDisk).catch(() => {}),
+    loadHistory()
+  ]);
+}
+
+/* ---------- 启动恢复（journal 状态由 src/app 判定，UI 只负责展示与发起） ---------- */
+function recoveryItems() {
+  const r = state.data.recovery;
+  return (r && r.items) || [];
+}
+function refreshRecovery() {
+  return rpc('recovery.list').then(r => {
+    state.data.recovery = r || { items: [], count: 0, warnings: [] };
+    return state.data.recovery;
+  }).catch(() => state.data.recovery);
+}
+function stopRecoveryPolling() {
+  if (state.data.recoveryTimer) {
+    clearInterval(state.data.recoveryTimer);
+    state.data.recoveryTimer = null;
+  }
+}
+function recoveryPct(job) {
+  if (!job) return 4;
+  if (job.state === 'done') return 100;
+  const p = job.progress || {};
+  if (p.done) return 100;
+  const stages = ['precheck', 'copy', 'verify', 'swap', 'link', 'link_verify', 'restore', 'config', 'cleanup', 'record', 'recover'];
+  const idx = stages.indexOf(p.stage || '');
+  if (idx < 0) return 35;
+  return Math.max(5, Math.min(96, Math.round((idx + 1) / (stages.length + 1) * 100)));
+}
+function recoveryStageText(job) {
+  const p = (job && job.progress) || {};
+  const stage = p.stage || p.step;
+  if (!stage || stage === 'done') return t('recovery.running');
+  const key = 'progress.stage.' + stage;
+  const label = t(key);
+  return label === key ? String(stage) : label;
+}
+function startRecoveryPolling(runnerJobId) {
+  stopRecoveryPolling();
+  state.data.recoveryTimer = setInterval(() => pollRecovery(runnerJobId), 400);
+  pollRecovery(runnerJobId);
+}
+function pollRecovery(runnerJobId) {
+  return rpc('job.status', { job_id: runnerJobId }).then(res => {
+    const run = state.data.recoveryRun;
+    if (!run || run.runnerJobId !== runnerJobId) return;
+    const job = res && res.job;
+    if (!job) { render(); return; }
+    run.job = job;
+    if (job.state === 'done') {
+      stopRecoveryPolling();
+      run.summary = job.summary || {};
+      run.phase = run.summary.ok === false ? 'failed' : 'success';
+      if (run.phase === 'failed') {
+        run.error = {
+          code: run.summary.error_code || 'RECOVERY_REQUIRED',
+          detail: { message: run.summary.error_message || '' }
+        };
+      }
+      refreshAfterJob().then(() => refreshRecovery()).then(() => render());
+      return;
+    }
+    if (job.state === 'failed' || job.state === 'cancelled') {
+      stopRecoveryPolling();
+      run.phase = 'failed';
+      run.error = job.error || { code: 'INTERNAL', detail: {} };
+      refreshAfterJob().then(() => refreshRecovery()).then(() => render());
+      return;
+    }
+    render();
+  }).catch(err => {
+    stopRecoveryPolling();
+    const run = state.data.recoveryRun;
+    if (run && run.runnerJobId === runnerJobId) {
+      run.phase = 'failed';
+      run.error = err;
+      render();
+    }
+  });
+}
+function recoveryBanner() {
+  const items = recoveryItems();
+  const run = state.data.recoveryRun;
+  if (!items.length && !run) return '';
+  let html = '';
+  if (items.length) {
+    const busy = !!(run && (run.phase === 'starting' || run.phase === 'progress'));
+    const rows = items.map(it => {
+      const actions = (it.actions && it.actions.length ? it.actions : ['recover']);
+      const buttons = actions.map(a => `<button type="button" class="btn btn-xs ${a === 'rollback' ? 'btn-ghost' : 'btn-soft'}" ${busy ? 'disabled' : ''} onclick="App.recoveryStart('${esc(it.job_id)}','${esc(a)}')">${esc(t(a === 'rollback' ? 'recovery.rollback' : 'recovery.recover'))}</button>`).join('');
+      const human = it.needs_human ? ` · <b>${esc(t('recovery.needsHuman'))}</b>` : '';
+      return `<div class="kv-item wide">
+        <span class="k">${esc(it.tool_name || it.tool_id || '')} · ${esc(it.label || it.state_label || it.state || '')}${human}${it.type === 'rollback' ? ' · ' + esc(t('history.type.rollback')) : ''}</span>
+        <span class="v" style="font-weight:500;white-space:normal;font-size:var(--fs-meta)">${esc(it.source_path || '')}</span>
+        <span class="dim" style="font-size:var(--fs-meta)">${esc(fmtBytes(it.bytes || 0))} · ${esc(fmtDate(it.updated_at))}</span>
+        <div class="banner-actions">${buttons}</div>
+      </div>`;
+    }).join('');
+    html += `<div class="banner danger" style="margin-bottom:10px;align-items:flex-start">
+      <span class="b-ico">⛨</span>
+      <div style="flex:1;min-width:0">
+        <b>${esc(t('recovery.title'))}</b> · ${esc(t('recovery.count', { n: items.length }))}
+        <div style="margin-top:2px">${esc(t('recovery.desc'))}</div>
+        <div class="kvbar mt-3" style="flex-direction:column;background:#fff8f7;border-color:#f2c9c6">${rows}</div>
+      </div>
+    </div>`;
+  }
+  if (run) {
+    const phase = run.phase;
+    if (phase === 'starting' || phase === 'progress') {
+      const pct = recoveryPct(run.job);
+      html += `<div class="banner info" style="margin-bottom:10px;align-items:flex-start">
+        <span class="b-ico">i</span>
+        <div style="flex:1;min-width:0">
+          <b>${esc(t('recovery.running'))}</b>
+          <div class="progress mt-3"><i style="width:${pct}%"></i></div>
+          <div class="progress-meta"><span>${esc(t('progress.percent', { pct: pct }))}</span><span>${esc(recoveryStageText(run.job))}</span></div>
+        </div>
+      </div>`;
+    } else if (phase === 'success') {
+      const s = run.summary || {};
+      html += `<div class="banner ok" style="margin-bottom:10px;align-items:flex-start">
+        <span class="b-ico">✓</span>
+        <div style="flex:1;min-width:0">
+          <b>${esc(t('recovery.done'))}</b><br>${esc(t('recovery.successHint'))}
+          <div class="mono" style="font-size:var(--fs-meta);margin-top:2px">${esc(s.source_path || run.sourcePath || '')}</div>
+          <div class="banner-actions"><button type="button" class="btn btn-ghost btn-xs" onclick="App.dismissRecovery()">${esc(t('action.close'))}</button></div>
+        </div>
+      </div>`;
+    } else {
+      const err = run.error || {};
+      const msg = (err.detail && err.detail.message) || (run.summary && run.summary.error_message) || '';
+      html += `<div class="banner danger" style="margin-bottom:10px;align-items:flex-start">
+        <span class="b-ico">✕</span>
+        <div style="flex:1;min-width:0">
+          <b>${esc(t('recovery.failed'))}</b>${err.code ? ` · <span class="mono">${esc(err.code)}</span>` : ''}<br>${esc(msg || t('recovery.failedHint'))}
+          <div class="banner-actions">
+            <button type="button" class="btn btn-ghost btn-xs" onclick="App.retryRecovery()">${esc(run.action === 'rollback' ? t('recovery.rollback') : t('recovery.recover'))}</button>
+            <button type="button" class="btn btn-ghost btn-xs" onclick="App.dismissRecovery()">${esc(t('action.close'))}</button>
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+  return html;
+}
+
+/* ---------- 迁移 / 回滚轮询 ---------- */
+function startFlowPolling(kind, jobId) {
+  stopFlowPolling();
+  state.data.jobTimer = setInterval(() => pollFlow(kind, jobId), 350);
+  pollFlow(kind, jobId);
+}
+function pollFlow(kind, jobId) {
+  return rpc('job.status', { job_id: jobId }).then(res => {
+    const job = res && res.job;
+    const flow = state.data.flow;
+    if (!flow || flow.kind !== kind || (flow.runnerJobId || flow.jobId) !== jobId) return;
+    if (!job) { render(); return; }
+    flow.job = job;
+    if (job.state === 'done') {
+      stopFlowPolling();
+      flow.summary = job.summary || {};
+      const ok = kind === 'rollback'
+        ? flow.summary.ok !== false
+        : !flow.summary.failed && !flow.summary.cancelled;
+      flow.phase = ok ? 'success' : 'failed';
+      if (!ok) {
+        flow.errorScope = 'job';
+        if (kind === 'rollback') {
+          flow.error = {
+            code: flow.summary.error_code || 'ROLLBACK_FAILED',
+            detail: { message: flow.summary.error_message || '' }
+          };
+        } else {
+          const first = (flow.summary.items || []).find(x => !x.ok) || {};
+          flow.error = {
+            code: first.state || 'MIGRATION_FAILED',
+            detail: { message: first.error_message || '' }
+          };
+        }
+      }
+      refreshAfterJob().then(() => render());
+      return;
+    }
+    if (job.state === 'failed' || job.state === 'cancelled') {
+      stopFlowPolling();
+      flow.phase = 'failed';
+      flow.errorScope = 'job';
+      flow.error = job.error || { code: 'INTERNAL', detail: {} };
+      refreshAfterJob().then(() => render());
+      return;
+    }
+    render();
+  }).catch(err => {
+    stopFlowPolling();
+    const flow = state.data.flow;
+    if (flow && flow.kind === kind && (flow.runnerJobId || flow.jobId) === jobId) {
+      flow.phase = 'failed';
+      flow.error = err;
+      render();
+    }
+  });
+}
+function migratePct(flow) {
+  const job = flow.job || {};
+  const p = job.progress || {};
+  if (job.state === 'done' || p.done) return 100;
+  const total = Math.max(1, p.items_total || ((flow.plan && flow.plan.items && flow.plan.items.length) || 1));
+  const done = Math.max(p.items_done || 0, p.index || 0);
+  const idx = Math.max(0, MIGRATE_STAGES.indexOf(p.stage || 'prepare'));
+  const span = MIGRATE_STAGES.length - 1;
+  const partial = Math.min(1, (idx + (p.status === 'done' ? 1 : 0.4)) / span);
+  return Math.min(99, Math.max(2, Math.round((done + partial) / total * 100)));
+}
+function rollbackPct(flow) {
+  const job = flow.job || {};
+  const p = job.progress || {};
+  if (job.state === 'done' || p.stage === 'done') return 100;
+  const idx = Math.max(0, ROLLBACK_STAGES.indexOf(p.stage || 'precheck'));
+  return Math.min(99, Math.max(3, Math.round(idx / (ROLLBACK_STAGES.length - 1) * 100)));
+}
+function stageRows(stages, current, doneFlag, prefix) {
+  const active = Math.max(0, stages.indexOf(current || stages[0]));
+  return stages.map((s, i) => {
+    const done = doneFlag || i < active;
+    const act = !done && i === active;
+    return `<div class="stage ${done ? 'done' : act ? 'active' : ''}">
+      <span class="s-ico">${done ? '✓' : ''}</span><span>${esc(t(prefix + s))}</span>
+      <span class="s-meta">${done ? esc(t('progress.done')) : act ? esc(t('progress.running')) : esc(t('progress.waiting'))}</span>
+    </div>`;
+  }).join('');
+}
+function errDetailList(lines, cls) {
+  if (!lines.length) return '';
+  return `<div class="err-list${cls ? ' ' + cls : ''}">${lines.map(line => `<div class="err-item plain"><span class="e-msg">${esc(line)}</span></div>`).join('')}</div>`;
+}
+
+function errorDetailLines(err) {
+  if (!err) return [];
+  const d = err.detail || {};
+  const code = err.code || '';
+  const lines = [];
+  if (code === 'BLOCKED_PROCESS') {
+    (d.items || []).forEach(it => {
+      const proc = it.process || {};
+      const names = (proc.processes || []).map(p => (p.name || '') + ' · PID ' + (p.pid || '')).join(' | ');
+      lines.push([it.tool_name || it.tool_id || '', it.source_path || '', names].filter(Boolean).join(' · '));
+    });
+  } else if (code === 'BLOCKED_RED_PATH') {
+    (d.items || []).forEach(it => lines.push([it.tool_id || '', it.source_path || '', it.reason || ''].filter(Boolean).join(' · ')));
+  } else if (code === 'PERMISSION_DENIED') {
+    (d.items || []).forEach(it => {
+      const errs = it.access_errors;
+      const count = Array.isArray(errs) ? errs.length : (typeof errs === 'number' ? errs : 0);
+      lines.push([
+        it.source_path || '',
+        count ? t('blocked.accessErrors', { n: count }) : '',
+        it.is_reparse ? t('blocked.reparse') : ''
+      ].filter(Boolean).join(' · '));
+    });
+  } else if (code === 'INSUFFICIENT_SPACE') {
+    lines.push(t('blocked.space', { free: fmtBytes(d.free_bytes || 0), need: fmtBytes(d.required_bytes || 0) }));
+  } else if (code === 'DUPLICATE_TARGET') {
+    (d.duplicates || []).forEach(x => lines.push((x.target_path || '') + ' × ' + ((x.items || []).length)));
+    (d.existing || []).forEach(x => lines.push([x.source_path, x.target_path].filter(Boolean).join(' → ')));
+  } else if (code === 'TARGET_NOT_NTFS') {
+    lines.push(t('blocked.ntfs', { fs: d.fs || '?' }));
+  } else if (d.message) {
+    lines.push(String(d.message));
+  } else if (d.reason) {
+    lines.push(String(d.reason));
+  }
+  return lines.filter(Boolean);
+}
+
+/* ---------- 展示辅助 ---------- */
+function reasonText(dir) {
+  if (!dir) return '';
+  const key = dir.reason || '';
+  if (key) {
+    const label = t(key);
+    if (label !== key) return label;
+  }
+  return dir.blocked_reason || key || t('reason.unknown');
+}
+
+function diagnosticsText() {
+  const s = state.data.settings || {};
+  const st = (snapshot() && snapshot().stats) || {};
+  return [
+    'Disk Warden v' + (s.app_version || '0.1.0'),
+    'Protocol: ' + (s.protocol_version || '-'),
+    'OS: ' + (navigator.userAgent || 'unknown'),
+    'Locale: ' + LANG,
+    'Last scan: ' + (KPI.lastScan || t('meta.neverScan')) + ' (' + (KPI.scanDuration || '—') + ')',
+    'IDEs: ' + (st.tools_present || 0) + ' · dirs: ' + (st.items || 0),
+    'Target root: ' + state.settings.targetRoot,
+    'Data root: ' + (s.data_root || '-')
+  ].join('\n');
+}
+
+function copyText(text) {
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).then(() => true).catch(fallback);
+  }
+  return Promise.resolve(fallback());
+}
 
 function render() {
   const info = parseRoute();
   state.tab = info.tab; state.sub = info.sub; state.modal = info.modal || '';
   if (!modalKind()) state.returnHash = '';
-  if (state.sub) {
-    if (state.sub === 'process-blocked') {
-      const cur = getIde(state.selectedIde);
-      if (!cur.runtime.running.length) state.selectedIde = 'cursor';
-    } else if (state.sub === 'rollback-confirm') {
-      const cur = getIde(state.selectedIde);
-      if (!cur.runtime.migrated) { state.selectedIde = 'vscode'; state.selectedHistory = 'h3'; }
-    } else if (state.sub.indexOf('migrate-') === 0) {
-      const cur = getIde(state.selectedIde);
-      if (cur.runtime.migrated || cur.runtime.running.length) state.selectedIde = 'trae-cn';
-    }
+  if (state.connected && state.tab === 'history' && state.data.history === null && !state.data.historyLoading) {
+    loadHistory().then(() => { if (state.tab === 'history') render(); });
   }
   renderTopnav();
   renderTopbar();
   let html = '';
-  if (state.tab === 'ide') {
+  if (state.booting) html = renderConnecting();
+  else if (!state.connected) html = renderHostDown();
+  else if (state.tab === 'ide') {
     if (state.sub === 'scanning') html = renderScanning();
     else if (state.sub === 'empty') html = renderEmpty();
     else html = renderIde();
@@ -1832,9 +2778,27 @@ function render() {
   else if (state.tab === 'rules') html = renderRules();
   else if (state.tab === 'history') html = renderHistory();
   document.getElementById('view').innerHTML = html;
+  const host = document.querySelector('#view .content');
+  if (host && state.connected) host.insertAdjacentHTML('afterbegin', recoveryBanner());
   renderModal();
-  renderProtoPanel();
   document.documentElement.lang = LANG;
+}
+
+function renderConnecting() {
+  return `<div class="content"><div class="empty">
+    <div class="empty-ico">◌</div>
+    <div class="empty-title">${esc(t('conn.connecting'))}</div>
+    <div class="empty-sub">${esc(t('conn.hostBody'))}</div>
+  </div></div>`;
+}
+
+function renderHostDown() {
+  return `<div class="content"><div class="empty">
+    <div class="empty-ico">⚠</div>
+    <div class="empty-title">${esc(t('conn.hostTitle'))}</div>
+    <div class="empty-sub">${esc(state.bootError || t('conn.hostBody'))}</div>
+    <div style="margin-top:14px"><button type="button" class="btn btn-primary btn-sm" onclick="App.reconnect()">${esc(t('conn.retry'))}</button></div>
+  </div></div>`;
 }
 
 const NAV_ICONS = {
@@ -1849,12 +2813,13 @@ const NAV_ICONS = {
 const SHIELD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 19 5.8v5.4c0 4.5-3 8.4-7 9.8-4-1.4-7-5.3-7-9.8V5.8z"/><path d="m9 11.8 2.1 2.1L15.3 9.7"/></svg>';
 
 function renderTopnav() {
+  const yellow = allItems().filter(x => x.safety === 'yellow').length;
   const items = [
-    { id: 'projects', count: PROJECTS.length,     c1: '#6ad46f', c2: '#37b33e' },
+    { id: 'projects', count: '',                  c1: '#6ad46f', c2: '#37b33e' },
     { id: 'ide',      count: CATALOG.ides.length, c1: '#67bcff', c2: '#2f8bf5' },
     { id: 'disk',     count: '',                  c1: '#ffc25e', c2: '#f0921c' },
-    { id: 'rules',    count: PENDING.length,      c1: '#b99bff', c2: '#7c5cff' },
-    { id: 'history',  count: HISTORY.length,      c1: '#5fd8cf', c2: '#16a9a0' }
+    { id: 'rules',    count: yellow,              c1: '#b99bff', c2: '#7c5cff' },
+    { id: 'history',  count: historyItems().length, c1: '#5fd8cf', c2: '#16a9a0' }
   ];
   const target = document.getElementById('topnav');
   if (!target) return;
@@ -1874,6 +2839,7 @@ function renderTopnav() {
         </button>`).join('')}
     </nav>
     <div class="system">
+      <button type="button" class="system-chip ${aiReady() ? 'ai-on' : ''}" title="${esc(t('ai.title'))}" onclick="App.openModal('ai')">✦ ${esc(t('ai.nav'))}<span class="ai-dot ${aiReady() ? 'on' : ''}"></span></button>
       <button type="button" class="system-chip" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>
       <button type="button" class="system-chip icon" title="${esc(t('nav.settings'))}" aria-label="${esc(t('nav.settings'))}" onclick="App.openModal('settings')">${NAV_ICONS.settings}</button>
       <button type="button" class="system-chip" onclick="App.toggleLang()">${LANG === 'zh-CN' ? 'EN' : '中文'}</button>
@@ -1882,7 +2848,8 @@ function renderTopnav() {
 }
 
 function topActions() {
-  return `<button type="button" class="btn btn-primary btn-sm" onclick="App.rescan()">${esc(t('action.rescan'))}</button>`;
+  const bus = state.scanning || !state.connected;
+  return `<button type="button" class="btn btn-primary btn-sm" ${bus ? 'disabled' : ''} onclick="App.rescan()">${esc(t('action.rescan'))}</button>`;
 }
 
 function renderTopbar() {
@@ -1890,8 +2857,13 @@ function renderTopbar() {
   document.getElementById('page-title').textContent = title;
   document.title = 'Disk Warden — ' + title;
   const meta = document.getElementById('scan-meta');
-  if (state.tab === 'ide') {
-    if (state.sub === 'scanning') meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))}</span>`;
+  if (state.booting) {
+    meta.innerHTML = `<span class="warn">${esc(t('conn.connecting'))}</span>`;
+  } else if (!state.connected) {
+    meta.innerHTML = `<span class="warn">${esc(t('conn.unavailable'))}</span>`;
+  } else if (state.tab === 'ide') {
+    if (state.sub === 'scanning' || state.scanning) meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))}</span>`;
+    else if (!KPI.lastScan) meta.innerHTML = `<span class="dim">${esc(t('meta.neverScan'))}<span class="dim"> · </span>${esc(t('meta.scope'))}</span>`;
     else meta.innerHTML = `<span class="live-dot"></span>${esc(t('meta.lastScan', { time: KPI.lastScan, dur: KPI.scanDuration }))}<span class="dim">·</span><span class="dim">${esc(t('meta.scope'))}</span>`;
   } else {
     meta.innerHTML = `<span class="dim">${esc(t('page.' + state.tab + '.desc'))}</span>`;
@@ -2003,10 +2975,10 @@ function renderIdeDetail(ide) {
     <div class="actions">
       ${migrated
         ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.openRollback('${ide.id}')">${esc(t('action.rollback'))}</button>
-           <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>`
+           <button type="button" class="btn btn-ghost btn-sm" title="${esc((ide.runtime && ide.runtime.root) || t('error.NO_PATH'))}" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>`
         : `<button type="button" class="btn btn-primary btn-sm" ${g ? '' : 'disabled'} onclick="App.startPreview('${ide.id}')">${esc(t('action.migrate'))}</button>
-           <button type="button" class="btn btn-ghost btn-sm" onclick="App.cleanCaches('${ide.id}')">${esc(t('action.clean'))}</button>
-           <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" disabled title="${esc(t('toast.unavailable'))}">${esc(t('action.clean'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" title="${esc((ide.runtime && ide.runtime.root) || t('error.NO_PATH'))}" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>
            <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>`}
       <span class="spacer"></span>
       <span class="note">${esc(migrated ? t('rollback.note', { app: ide.name }) : t('ide.cleanHint'))}</span>
@@ -2023,7 +2995,7 @@ function itemRow(ide, d, i) {
     ? `<span class="tcell lockcell"><span class="lock" title="${esc(t('ide.redLocked'))}" aria-label="${esc(t('ide.redLocked'))}">⛨</span></span>`
     : `<span class="tcell lockcell"><input class="row-check" type="checkbox" ${checked ? 'checked' : ''} ${d.safety === 'yellow' && !isConfirmed(ide.id, i) ? 'disabled' : ''} onclick="App.toggleCheck('${ide.id}',${i})" aria-label="${esc(d.path)}"></span>`;
   const confirmed = d.safety === 'yellow' && isConfirmed(ide.id, i);
-  const reason = t(d.reason) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
+  const reason = reasonText(d) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
   const act = d.safety === 'yellow' && !confirmed
     ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.openYellow('${ide.id}',${i})">${esc(t('action.confirmYellow'))}</button>`
     : confirmed ? `<span class="badge b-gray">${esc(t('common.confirmed'))}</span>`
@@ -2037,10 +3009,18 @@ function itemRow(ide, d, i) {
   </div>`;
 }
 
+function scanDisplayStage(stage) {
+  if (stage === 'discover') return 'enumerate';
+  if (stage === 'measure') return 'size';
+  return stage;
+}
+
 function renderScanning() {
-  const pct = state.scanning ? state.scanPct : 62;
+  const job = state.data.scanJob;
+  const bridgeStage = scanStage(job);
+  const pct = state.scanning ? (state.scanPct || 0) : (job && job.state === 'done' ? 100 : (job && job.progress && job.progress.done ? 100 : 0));
   const stages = ['enumerate', 'match', 'size', 'process', 'classify', 'done'];
-  const active = pct < 18 ? 0 : pct < 38 ? 1 : pct < 68 ? 2 : pct < 84 ? 3 : pct < 96 ? 4 : 5;
+  const active = Math.max(0, stages.indexOf(scanDisplayStage(bridgeStage)));
   return `<div class="content narrow">
     <section class="panel scanning">
       <h3>${esc(t('scan.title'))}</h3>
@@ -2057,7 +3037,6 @@ function renderScanning() {
       <div class="skeleton"><div class="sk-row"></div><div class="sk-row" style="width:82%"></div><div class="sk-row" style="width:64%"></div></div>
       <div class="actions" style="border:none;padding-top:16px">
         <button type="button" class="btn btn-ghost btn-sm" onclick="App.cancelScan()">${esc(t('action.cancelScan'))}</button>
-        <span class="note">${esc(t('common.simulated'))}</span>
       </div>
     </section>
   </div>`;
@@ -2085,87 +3064,20 @@ function renderEmpty() {
 }
 /* ---------- 项目目录 ---------- */
 function renderProjects() {
-  const p = PROJECTS.find(x => x.id === state.selectedProject) || PROJECTS[0];
-  const total = p.deps + p.dist + p.git + p.source;
-  return `<div class="content split-layout">
-    <section class="bar">
-      <div class="bar-top">
-        <span class="bar-title">${esc(t('projects.listTitle'))}</span>
-        <span class="bar-hint">${esc(t('projects.listHint', { n: PROJECTS.length }))}</span>
-      </div>
-      <div class="proj-bar">
-        ${PROJECTS.map(pr => `
-          <button type="button" class="proj-card ${pr.id === p.id ? 'active' : ''}" title="${esc(pr.path)}" onclick="App.selectProject('${pr.id}')">
-            <span class="pc-top">
-              <span class="ide-mark" style="width:24px;height:24px;background:${pr.location === 'C' ? 'linear-gradient(135deg,#ffb45c,#ef8b18)' : 'linear-gradient(135deg,#63b8ff,#2f8bf5)'}">${esc(pr.name.slice(0, 2).toUpperCase())}</span>
-              <span class="pc-name">${esc(pr.name)}</span>
-              <span class="badge ${pr.location === 'C' ? 'b-amber' : 'b-gray'}">${esc(pr.location)}:</span>
-            </span>
-            <span class="pc-path">${esc(pr.path)}</span>
-            <span class="pc-foot">
-              <span class="pc-size">${fmtGB(pr.deps + pr.dist + pr.git + pr.source)}</span>
-              <span class="dim" style="font-size:var(--fs-meta)">${esc(t('projects.lastActive'))} · ${esc(pr.active)}</span>
-            </span>
-          </button>`).join('')}
-      </div>
-    </section>
+  return `<div class="content narrow">
     <section class="panel">
-      <div class="detail">
-        <div class="detail-head">
-          <div class="detail-title">
-            <span class="ide-mark" style="width:32px;height:32px;background:${p.location === 'C' ? 'linear-gradient(135deg,#ffb45c,#ef8b18)' : 'linear-gradient(135deg,#63b8ff,#2f8bf5)'}">${esc(p.name.slice(0, 2).toUpperCase())}</span>
-            <div><h2>${esc(p.name)}</h2><div class="detail-path" title="${esc(p.path)}">${esc(p.path)}</div></div>
-          </div>
-          <div class="detail-badges">
-            <span class="badge b-plain">${esc(p.ide)}</span>
-            <span class="badge ${p.location === 'C' ? 'b-amber' : 'b-gray'}">${esc(t('projects.lastActive'))} · ${esc(p.active)}</span>
-          </div>
-        </div>
-        <div class="kvbar">
-          <div class="kv-item"><span class="k">${esc(t('projects.size'))}</span><span class="v">${fmtGB(total)}</span></div>
-          <div class="kv-item"><span class="k">${esc(t('projects.source'))}</span><span class="v">${fmtGB(p.source)}</span></div>
-          <div class="kv-item"><span class="k">${esc(t('projects.git'))}</span><span class="v">${fmtGB(p.git)}</span></div>
-          <div class="kv-item"><span class="k">${esc(t('projects.deps'))}</span><span class="v ok">${fmtGB(p.deps)}</span></div>
-          <div class="kv-item"><span class="k">${esc(t('projects.build'))}</span><span class="v ok">${fmtGB(p.dist)}</span></div>
-        </div>
-        <div class="section-title"><h3>${esc(t('projects.safeTitle'))}</h3><span class="sub">${esc(t('projects.cleanable'))} · ${fmtGB(p.deps + p.dist)}</span></div>
-        <div class="rows">
-          <div class="trow proj risk-green">
-            <span class="tcell lockcell"><i class="dot dot-green"></i></span>
-            <span class="tcell tpath" style="font-family:inherit">${esc(t('projects.deps'))}</span>
-            <span class="tcell tdesc" title="${esc(t('reason.nodeModules'))}">${esc(t('reason.nodeModules'))}</span>
-            <span class="tcell tsize">${fmtGB(p.deps)}</span>
-            <span class="tcell acts"><button type="button" class="btn btn-ghost btn-xs" onclick="App.cleanProject('deps')">${esc(t('projects.cleanDeps'))}</button></span>
-          </div>
-          <div class="trow proj risk-green">
-            <span class="tcell lockcell"><i class="dot dot-green"></i></span>
-            <span class="tcell tpath" style="font-family:inherit">${esc(t('projects.build'))}</span>
-            <span class="tcell tdesc" title="${esc(t('reason.dist'))}">${esc(t('reason.dist'))}</span>
-            <span class="tcell tsize">${fmtGB(p.dist)}</span>
-            <span class="tcell acts"><button type="button" class="btn btn-ghost btn-xs" onclick="App.cleanProject('dist')">${esc(t('projects.cleanBuild'))}</button></span>
-          </div>
-        </div>
-        <div class="section-title"><h3>${esc(t('projects.keepTitle'))}</h3><span class="sub">${esc(t('projects.keep'))}</span></div>
-        <div class="rows">
-          <div class="trow proj risk-red">
-            <span class="tcell lockcell"><span class="lock" title="${esc(t('projects.keep'))}">⛨</span></span>
-            <span class="tcell tpath" style="font-family:inherit">${esc(t('projects.source'))}</span>
-            <span class="tcell tdesc" title="${esc(t('projects.sourceDesc'))}">${esc(t('projects.sourceDesc'))}</span>
-            <span class="tcell tsize">${fmtGB(p.source)}</span>
-            <span class="tcell acts"></span>
-          </div>
-          <div class="trow proj risk-red">
-            <span class="tcell lockcell"><span class="lock" title="${esc(t('reason.git'))}">⛨</span></span>
-            <span class="tcell tpath" style="font-family:inherit">${esc(t('projects.git'))}</span>
-            <span class="tcell tdesc">${esc(t('reason.git'))}</span>
-            <span class="tcell tsize">${fmtGB(p.git)}</span>
-            <span class="tcell acts"></span>
-          </div>
+      <div class="empty">
+        <div class="empty-ico">⌗</div>
+        <h3>${esc(t('projects.soonTitle'))}</h3>
+        <p>${esc(t('projects.soonDesc'))}</p>
+        <div class="empty-list">
+          <span class="tag">${esc(t('projects.soonItem1'))}</span>
+          <span class="tag">${esc(t('projects.soonItem2'))}</span>
+          <span class="tag">${esc(t('projects.soonItem3'))}</span>
         </div>
         <div class="actions">
-          <button type="button" class="btn btn-primary btn-sm" onclick="App.cleanProject('all')">${esc(t('action.clean'))}</button>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('toast.opened'))">${esc(t('action.openFolder'))}</button>
-          <span class="spacer"></span><span class="note">${esc(t('projects.note'))}</span>
+          <button type="button" class="btn btn-ghost btn-sm" disabled>${esc(t('projects.soonDisabled'))}</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>
         </div>
       </div>
     </section>
@@ -2175,11 +3087,13 @@ function renderProjects() {
 /* ---------- C 盘全景 ---------- */
 function renderDisk() {
   const segTotal = DISK_SEGMENTS.reduce((a, s) => a + s.gb, 0);
+  const ideSeg = DISK_SEGMENTS.filter(s => s.key === 'disk.ide').reduce((a, s) => a + s.gb, 0);
   return `<div class="content">
-    <section class="panel">
+   <div class="cols cols-disk">
+    <section class="panel panel-scroll">
       <div class="panel-head"><h2>${esc(t('disk.breakdown'))}</h2><span class="hint">${esc(t('disk.breakdownHint'))}</span></div>
       <div class="panel-body">
-        <div class="table-wrap">
+        <div class="table-wrap scroll-y">
           <table class="table">
             <thead><tr>
               <th>${esc(t('disk.category'))}</th><th class="right">${esc(t('disk.size'))}</th><th>${esc(t('disk.handling'))}</th><th></th>
@@ -2193,30 +3107,31 @@ function renderDisk() {
                     <span style="font-size:var(--fs-meta);color:#9aa3ac;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t(c.desc))}</span>
                   </div>
                 </td>
-                <td class="num">${c.gb.toFixed(1)} GB</td>
+                <td class="num">${c.gb ? c.gb.toFixed(1) + ' GB' : '—'}</td>
                 <td><span class="tag tag-code">${esc(t('disk.handling.' + c.handling))}</span></td>
-                <td class="right"><button type="button" class="btn btn-ghost btn-xs" onclick="App.toast(t('toast.opened'))">${esc(t('action.viewLocation'))}</button></td>
+                <td class="right"><button type="button" class="btn btn-ghost btn-xs" title="${esc(DISK_LOCATIONS[c.id] || t('error.NO_PATH'))}" onclick="App.openDiskLocation('${c.id}')">${esc(t('action.viewLocation'))}</button></td>
               </tr>`).join('')}
             </tbody>
           </table>
         </div>
       </div>
     </section>
-    <section class="panel">
-      <div class="panel-head"><h2>C: · ${DRIVE.totalGB} GB</h2><span class="hint">${esc(t('disk.usedSub', { pct: Math.round(DRIVE.usedGB / DRIVE.totalGB * 1000) / 10 }))}</span></div>
+    <section class="panel panel-scroll">
+      <div class="panel-head"><h2>${esc(DRIVE.totalGB ? 'C: · ' + DRIVE.totalGB + ' GB' : 'C:')}</h2><span class="hint">${esc(DRIVE.totalGB ? t('disk.usedSub', { pct: Math.round(DRIVE.usedGB / DRIVE.totalGB * 1000) / 10 }) : t('disk.noData'))}</span></div>
       <div class="panel-body">
+       <div class="scroll-y scroll-fit">
         <div class="diskbar">
-          ${DISK_SEGMENTS.map(s => `<span style="width:${(s.gb / segTotal * 100).toFixed(2)}%;background:${s.color}" title="${esc(t(s.key))} · ${s.gb} GB"></span>`).join('')}
+          ${segTotal ? DISK_SEGMENTS.map(s => `<span style="width:${(s.gb / segTotal * 100).toFixed(2)}%;background:${s.color}" title="${esc(t(s.key))} · ${s.gb} GB"></span>`).join('') : ''}
         </div>
         <div class="disk-legend">
-          ${DISK_SEGMENTS.map(s => `<span><i style="background:${s.color}"></i>${esc(t(s.key))} · ${s.gb.toFixed(1)} GB</span>`).join('')}
+          ${segTotal ? DISK_SEGMENTS.map(s => `<span><i style="background:${s.color}"></i>${esc(t(s.key))} · ${s.gb.toFixed(1)} GB</span>`).join('') : `<span class="dim">${esc(t('disk.noData'))}</span>`}
         </div>
         <div class="divider mt-3"></div>
         <div class="rows mt-3">
           <div class="trow cap risk-green">
             <span class="tcell tpath" style="font-family:inherit">${esc(t('disk.ide'))}</span>
             <span class="tcell tdesc" title="${esc(t('disk.junctionNote'))}">${esc(t('disk.junctionNote'))}</span>
-            <span class="tcell tsize">${fmtGB(12.8)}</span>
+            <span class="tcell tsize">${fmtGB(ideSeg)}</span>
             <span class="tcell acts"><span class="tag tag-code">junction</span></span>
           </div>
           <div class="trow cap risk-yellow">
@@ -2226,75 +3141,112 @@ function renderDisk() {
             <span class="tcell acts"><span class="badge b-amber">${esc(t('common.protected'))}</span></span>
           </div>
         </div>
-        <div class="actions" style="margin-top:12px">
-          <button type="button" class="btn btn-primary btn-sm" onclick="App.toast(t('toast.scanDone'))">${esc(t('disk.refresh'))}</button>
+       </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-sm" onclick="App.refreshDisk()">${esc(t('disk.refresh'))}</button>
           <button type="button" class="btn btn-ghost btn-sm" onclick="App.nav('ide')">${esc(t('nav.ide'))}</button>
           <span class="spacer"></span><span class="note">${esc(t('disk.notIncluded'))}</span>
         </div>
       </div>
     </section>
+   </div>
   </div>`;
 }
 
 /* ---------- 规则学习 ---------- */
-function renderRules() {
-  return `<div class="content">
-    <section class="panel">
-      <div class="panel-head"><h2>${esc(t('rules.pending'))}</h2><span class="hint">${esc(t('common.items', { n: PENDING.length }))}</span></div>
-      <div class="panel-body">
-        <div class="note dim" style="font-size:var(--fs-meta);margin-bottom:9px">${esc(t('rules.pendingDesc'))}</div>
-        <div class="rows">
-          ${PENDING.length ? PENDING.map(pd => `<div class="trow pend risk-yellow">
-            <span class="tcell tpath badged"><span class="badge b-amber">?</span><span class="tp" title="${esc(pd.path)}">${esc(pd.path)}</span></span>
-            <span class="tcell tdesc" title="${esc(t(pd.hint))} · ${esc(pd.ide)}">${esc(t(pd.hint))} · ${esc(pd.ide)}</span>
-            <span class="tcell tsize">${fmtBytes(pd.size_bytes)}</span>
-            <span class="tcell acts">
-              <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','green')">${esc(t('action.markGreen'))}</button>
-              <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','red')">${esc(t('action.markRed'))}</button>
-              <button type="button" class="btn btn-ghost btn-xs" onclick="App.resolvePending('${pd.id}','ignore')">${esc(t('action.ignore'))}</button>
-            </span>
-          </div>`).join('') : `<div class="empty" style="padding:40px 10px"><p>${esc(t('rules.pendingEmpty'))}</p></div>`}
-        </div>
-        <div class="banner info mt-3"><span class="b-ico">i</span><div>${esc(t('rules.conflict'))}</div></div>
-      </div>
-    </section>
-    <section class="panel">
-      <div class="panel-head"><h2>${esc(t('rules.table'))}</h2><span class="hint">${esc(t('rules.tableDesc'))}</span></div>
-      <div class="panel-body">
-        <div class="form-grid" style="grid-template-columns:1.2fr .8fr .8fr 1.4fr auto;align-items:end">
-          <div class="field"><label>${esc(t('rules.match'))} <span class="bad">*</span></label><input id="rule-match" placeholder="${esc(t('rules.matchPh'))}"></div>
-          <div class="field"><label>${esc(t('rules.matchType'))}</label>
-            <select id="rule-type"><option value="exact">${esc(t('rules.type.exact'))}</option><option value="glob">${esc(t('rules.type.glob'))}</option><option value="regex">${esc(t('rules.type.regex'))}</option></select>
-          </div>
-          <div class="field"><label>${esc(t('rules.safety'))}</label>
-            <select id="rule-safety"><option value="green">${esc(t('common.green'))}</option><option value="red">${esc(t('common.red'))}</option></select>
-          </div>
-          <div class="field"><label>${esc(t('common.reason'))}</label><input id="rule-reason" placeholder="${esc(t('rules.reasonPh'))}"></div>
-          <button type="button" class="btn btn-primary btn-sm" onclick="App.addRule()">${esc(t('rules.add'))}</button>
-        </div>
-        <div class="table-wrap mt-3">
-          <table class="table">
-            <thead><tr>
-              <th>${esc(t('rules.match'))}</th><th>${esc(t('rules.matchType'))}</th><th>${esc(t('rules.safety'))}</th><th>${esc(t('rules.source'))}</th><th class="num">${esc(t('rules.hits'))}</th><th>${esc(t('rules.enabled'))}</th><th></th>
-            </tr></thead>
-            <tbody>
-              ${RULES.map(r => `<tr>
-                <td class="mono">${esc(r.match)}${r.reason ? `<div style="font-family:inherit;font-size:var(--fs-meta);color:#9aa3ac;margin-top:2px">${esc(r.reason)}</div>` : ''}</td>
-                <td>${esc(t('rules.type.' + r.type))}</td>
-                <td>${r.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>` : r.safety === 'red' ? `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>` : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`}</td>
-                <td><span class="tag">${esc(t('rules.source.' + r.source))}</span></td>
-                <td class="num">${r.hits}</td>
-                <td><button type="button" class="sw ${r.enabled ? 'on' : ''}" role="switch" aria-checked="${r.enabled}" aria-label="${esc(r.match)}" onclick="App.toggleRule('${r.id}')"></button></td>
-                <td class="right"><button type="button" class="btn btn-ghost btn-xs" onclick="App.deleteRule('${r.id}')">${esc(t('action.delete'))}</button></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && (!!state.settings.aiKeySet || state.settings.aiProvider === 'relay'); }
+function aiModelName() { return state.settings.aiModel || t('ai.modelAuto'); }
+
+function itemReason(it) {
+  if (!it) return '';
+  const key = it.reason || it.reason_key || '';
+  if (key) {
+    const label = t(key);
+    if (label !== key) return label;
+  }
+  return it.blocked_reason || key || t('reason.unknown');
+}
+function safetyBadge(safety) {
+  if (safety === 'green') return `<span class="badge b-green">${esc(t('common.green'))}</span>`;
+  if (safety === 'red') return `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>`;
+  return `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`;
+}
+function pendingYellowItems() { return allItems().filter(it => it.safety === 'yellow'); }
+function learnedRules() {
+  const l = state.data.learned;
+  return (l && l.items) || [];
+}
+function learnedItem(rule) {
+  return allItems().find(it => it.item_id === rule.item_id) || null;
+}
+
+function pendingRow(it) {
+  const path = it.source_path || it.rel_path || it.item_id;
+  return `<div class="trow pend risk-yellow">
+    <span class="tcell tpath badged"><span class="badge b-amber">?</span><span class="tp" title="${esc(path)}">${esc(path)}</span></span>
+    <span class="tcell tdesc" title="${esc(it.blocked_reason || '')}">${esc(itemReason(it))}</span>
+    <span class="tcell tsize">${fmtBytes(it.bytes || 0)}</span>
+    <span class="tcell acts">
+      <button type="button" class="btn btn-ghost btn-xs" onclick="App.overrideItem('${esc(it.item_id)}','green')">${esc(t('action.markGreen'))}</button>
+      <button type="button" class="btn btn-ghost btn-xs" onclick="App.overrideItem('${esc(it.item_id)}','red')">${esc(t('action.markRed'))}</button>
+    </span>
   </div>`;
 }
 
+function learnedTable(rows) {
+  return `<div class="table-wrap">
+    <table class="table">
+      <thead><tr>
+        <th>${esc(t('rules.path'))}</th><th>${esc(t('rules.appCol'))}</th><th>${esc(t('rules.safety'))}</th><th>${esc(t('common.reason'))}</th><th>${esc(t('rules.matched'))}</th><th>${esc(t('rules.action'))}</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(r => {
+          const it = learnedItem(r);
+          const path = it ? (it.source_path || it.rel_path || r.item_id) : r.item_id;
+          const tool = it ? (it.tool_name || it.tool_id || '') : '';
+          const undo = r.rule_id === 'manual'
+            ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.clearOverride('${esc(r.item_id)}')">${esc(t('action.unmark'))}</button>`
+            : '—';
+          return `<tr>
+            <td class="mono" style="word-break:break-all">${esc(path)}</td>
+            <td>${esc(tool || '—')}</td>
+            <td>${safetyBadge(r.safety)}</td>
+            <td>${esc(r.reason || t('rules.noReason'))}</td>
+            <td><span class="tag tag-code">${esc(r.rule_id || '—')}</span></td>
+            <td class="acts">${undo}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderRules() {
+  const pending = pendingYellowItems();
+  const learned = learnedRules();
+  const warnings = (state.data.learned && state.data.learned.warnings) || [];
+  return `<div class="content">
+   <div class="cols">
+    <section class="panel panel-scroll">
+      <div class="panel-head"><h2>${esc(t('rules.pending'))}</h2><span class="hint">${esc(t('common.items', { n: pending.length }))}</span></div>
+      <div class="panel-body">
+        <div class="note dim" style="font-size:var(--fs-meta)">${esc(t('rules.pendingDesc'))}</div>
+        <div class="rows scroll-y">
+          ${pending.length ? pending.map(pendingRow).join('') : `<div class="empty" style="padding:40px 10px"><p>${esc(t('rules.pendingEmpty'))}</p></div>`}
+        </div>
+        <div class="banner info"><span class="b-ico">i</span><div>${esc(t('rules.conflict'))}</div></div>
+      </div>
+    </section>
+    <section class="panel panel-scroll">
+      <div class="panel-head"><h2>${esc(t('rules.table'))}</h2><span class="hint">${esc(t('rules.tableDesc'))}</span></div>
+      <div class="panel-body">
+        ${warnings.length ? `<div class="banner warn"><span class="b-ico">△</span><div>${esc(warnings.join(' · '))}</div></div>` : ''}
+        ${learned.length ? learnedTable(learned) : `<div class="empty" style="padding:40px 10px"><p>${esc(t('rules.learnedEmpty'))}</p></div>`}
+      </div>
+    </section>
+   </div>
+  </div>`;
+}
 /* ---------- 操作历史 ---------- */
 function resultBadge(h) {
   if (h.result === 'failed') return `<span class="badge b-red">${esc(t('history.result.failed'))}</span>`;
@@ -2306,20 +3258,9 @@ function typeBadge(h) {
 }
 function renderHistory() {
   const items = HISTORY.filter(h => state.historyFilter === 'all' || h.type === state.historyFilter);
-  const h = HISTORY.find(x => x.id === state.selectedHistory) || HISTORY[0];
-  return `<div class="content split-layout">
-    <section class="bar">
-      <div class="bar-top">
-        <span class="bar-title">${esc(t('history.listTitle'))}</span>
-        <span class="bar-hint">${esc(t('history.listHint', { n: items.length }))}</span>
-        <div class="chip-row">
-          ${['all', 'migrate', 'clean', 'rollback'].map(f => `<button type="button" class="btn btn-xs ${state.historyFilter === f ? 'btn-soft' : 'btn-ghost'}" onclick="App.setHistoryFilter('${f}')">${esc(t('history.filter.' + f))}</button>`).join('')}
-        </div>
-        <span class="bar-hint">${esc(t('history.simulated'))}</span>
-      </div>
-      <div class="hist-bar">
-        ${items.length ? items.map(it => `
-          <button type="button" class="hist-card ${it.id === h.id ? 'active' : ''}" title="${esc(it.app)} · ${esc(it.at)}" onclick="App.selectHistory('${it.id}')">
+  const h = items.find(x => x.id === state.selectedHistory) || items[0] || null;
+  const cards = items.length ? items.map(it => `
+          <button type="button" class="hist-card ${h && it.id === h.id ? 'active' : ''}" title="${esc(it.app)} · ${esc(it.at)}" onclick="App.selectHistory('${esc(it.id)}')">
             <span class="hc-top">
               <span class="hc-name">${esc(it.app)}</span>
               ${typeBadge(it)}
@@ -2329,10 +3270,10 @@ function renderHistory() {
               ${resultBadge(it)}
               <span class="hc-size">${it.freed ? fmtGB(it.freed) : '—'}</span>
             </span>
-          </button>`).join('') : `<div class="note dim" style="padding:10px 2px">${esc(t('history.empty'))}</div>`}
-      </div>
-    </section>
-    <section class="panel">
+          </button>`).join('') : `<div class="note dim" style="padding:10px 2px">${esc(t('history.empty'))}</div>`;
+  let detail;
+  if (h) {
+    detail = `<section class="panel">
       <div class="detail">
         <div class="detail-head">
           <div class="detail-title">
@@ -2352,6 +3293,7 @@ function renderHistory() {
           <div class="kv-item wide"><span class="k">${esc(t('preview.from'))}</span><span class="v" title="${esc(h.from)}">${esc(h.from)}</span></div>
           <div class="kv-item wide"><span class="k">${esc(t('preview.to'))}</span><span class="v" title="${esc(h.to)}">${esc(h.to)}</span></div>
           ${h.code ? `<div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v" style="color:#d9363e">${esc(h.code)}</span></div>` : ''}
+          ${h.job_id ? `<div class="kv-item wide"><span class="k">${esc(t('history.job'))}</span><span class="v mono">${esc(h.job_id)}</span></div>` : ''}
         </div>
         <div class="banner ${h.result === 'failed' ? 'danger' : h.result === 'rolledback' ? 'info' : 'ok'}"><span class="b-ico">${h.result === 'failed' ? '✕' : h.result === 'rolledback' ? '↺' : '✓'}</span><div>${esc(t(h.note))}</div></div>
         <div class="section-title"><h3>${esc(t('history.steps'))}</h3><span class="sub">${esc(t('history.detail'))}</span></div>
@@ -2364,24 +3306,44 @@ function renderHistory() {
         <div class="actions">
           ${h.canRollback ? `<button type="button" class="btn btn-danger btn-sm" onclick="App.rollbackHistory('${h.id}')">${esc(t('history.rollbackBtn'))}</button>` : `<button type="button" class="btn btn-ghost btn-sm" disabled>${esc(t('history.noRollback'))}</button>`}
           <button type="button" class="btn btn-ghost btn-sm" onclick="App.exportHistory()">${esc(t('action.export'))}</button>
-          <span class="spacer"></span><span class="note">${esc(h.canRollback ? t('history.canRollback') : t('history.simulated'))}</span>
+          <span class="spacer"></span><span class="note">${esc(h.canRollback ? t('history.canRollback') : t('history.noRollback'))}</span>
         </div>
       </div>
+    </section>`;
+  } else {
+    detail = `<section class="panel"><div class="panel-body"><div class="note dim">${esc(t('history.select'))}</div></div></section>`;
+  }
+  const errorBanner = state.data.historyError
+    ? `<div class="banner danger mt-3"><span class="b-ico">✕</span><div>${esc(state.data.historyError)}</div></div>`
+    : '';
+  return `<div class="content split-layout">
+    <section class="bar">
+      <div class="bar-top">
+        <span class="bar-title">${esc(t('history.listTitle'))}</span>
+        <span class="bar-hint">${esc(t('history.listHint', { n: items.length }))}</span>
+        <div class="chip-row">
+          ${['all', 'migrate', 'clean', 'rollback'].map(f => `<button type="button" class="btn btn-xs ${state.historyFilter === f ? 'btn-soft' : 'btn-ghost'}" onclick="App.setHistoryFilter('${f}')">${esc(t('history.filter.' + f))}</button>`).join('')}
+        </div>
+      </div>
+      <div class="hist-bar">${cards}</div>
+      ${errorBanner}
     </section>
+    ${detail}
   </div>`;
 }
 /* ---------- 弹窗 ---------- */
 function modalKind() {
+  if (state.data.flow) return state.data.flow.kind;
   const info = parseRoute();
   if (info.modal) return info.modal;
-  const subs = ['migrate-preview', 'migrate-progress', 'migrate-failed', 'migrate-success', 'rollback-confirm', 'process-blocked', 'yellow-confirm'];
+  const subs = ['process-blocked', 'yellow-confirm'];
   return subs.indexOf(info.sub) >= 0 ? info.sub : '';
 }
 
-function modalShell(title, sub, body, foot, wide) {
+function modalShell(title, sub, body, foot, wide, closeable) {
   return `<div class="modal-head">
       <div><h3>${esc(title)}</h3>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>
-      <button type="button" class="modal-x" onclick="App.closeModal()" aria-label="${esc(t('action.close'))}">✕</button>
+      ${closeable === false ? '' : `<button type="button" class="modal-x" onclick="App.closeModal()" aria-label="${esc(t('action.close'))}">✕</button>`}
     </div>
     <div class="modal-body">${body}</div>
     <div class="modal-foot">${foot}</div>`;
@@ -2393,17 +3355,15 @@ function renderModal() {
   if (!kind) { root.innerHTML = ''; return; }
   let html = '';
   if (kind === 'settings') html = modalSettings();
+  else if (kind === 'ai') html = modalAi();
   else if (kind === 'feedback') html = modalFeedback();
-  else if (kind === 'migrate-preview') html = modalPreview();
-  else if (kind === 'migrate-progress') html = modalProgress();
-  else if (kind === 'migrate-failed') html = modalFailed();
-  else if (kind === 'migrate-success') html = modalSuccess();
-  else if (kind === 'rollback-confirm') html = modalRollback();
   else if (kind === 'process-blocked') html = modalBlocked();
   else if (kind === 'yellow-confirm') html = modalYellow();
+  else if (kind === 'migrate') html = modalMigrateFlow();
+  else if (kind === 'rollback') html = modalRollbackFlow();
   if (!html) { root.innerHTML = ''; return; }
   root.innerHTML = `<div class="modal-mask" onclick="App.closeModal()">
-    <div class="modal ${kind === 'migrate-preview' || kind === 'process-blocked' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
+    <div class="modal ${kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'migrate' || kind === 'rollback' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
   </div>`;
 }
 
@@ -2432,141 +3392,67 @@ function modalSettings() {
         <option value="remove" ${state.settings.uninstall === 'remove' ? 'selected' : ''}>${esc(t('settings.uninstall.remove'))}</option>
       </select></div>
     </div>
+    <div class="settings-row">
+      <div><div class="k">✦ ${esc(t('ai.enable'))}</div><div class="d">${esc(t('ai.sub'))}</div></div>
+      <div class="ctrl row-flex">
+        <span class="badge ${aiReady() ? 'b-green' : 'b-gray'}">${esc(aiReady() ? t('ai.statusOn') : t('ai.statusOff'))}</span>
+        <span class="ai-key">${esc(aiModelName())}</span>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('ai')">${esc(t('ai.link'))}</button>
+      </div>
+    </div>
     <div class="banner info"><span class="b-ico">i</span><div><b>${esc(t('settings.spaceCheck'))}</b> · ${esc(t('settings.spaceCheckValue'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.cancel'))}</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="App.saveSettings()">${esc(t('action.save'))}</button>`;
   return modalShell(t('settings.title'), t('settings.sub'), body, foot);
 }
 
+function modalAi() {
+  const s = state.settings;
+  const ready = aiReady();
+  const pendingCount = pendingYellowItems().length;
+  const aiConsent = state.aiAsk ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div><b>${esc(t('ai.consentTitle'))}</b><br>${esc(t('ai.consentBody'))}<div class="banner-actions"><button type="button" class="btn btn-primary btn-xs" onclick="App.confirmAiEnable()">${esc(t('ai.consentAccept'))}</button><button type="button" class="btn btn-ghost btn-xs" onclick="App.cancelAiAsk()">${esc(t('ai.consentDecline'))}</button></div></div></div>` : '';
+  const body = `
+    <div class="kvbar">
+      <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : 'warn'}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ai.model'))}</span><span class="v">${esc(aiModelName())}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : 'warn'}">${esc(s.aiKeySet ? t('ai.keyEnvSet') : t('ai.keyEnvMissing'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${pendingCount ? 'warn' : 'ok'}">${pendingCount}</span></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('ai.enable'))}</div><div class="d">${esc(t('ai.enableDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="sw ${s.aiEnabled ? 'on' : ''}" role="switch" aria-checked="${s.aiEnabled}" onclick="App.toggleAi()"></button></div>
+    </div>
+    ${aiConsent}
+    <div class="form-grid">
+      <div class="field"><label>${esc(t('ai.provider'))}</label>
+        <select id="ai-provider">
+          <option value="relay" ${s.aiProvider === 'relay' ? 'selected' : ''}>${esc(t('ai.provider.relay'))}</option>
+          <option value="custom" ${s.aiProvider === 'custom' ? 'selected' : ''}>${esc(t('ai.provider.custom'))}</option>
+          <option value="none" ${s.aiProvider === 'none' ? 'selected' : ''}>${esc(t('ai.provider.none'))}</option>
+        </select>
+      </div>
+      <div class="field"><label>${esc(t('ai.model'))}</label><input id="ai-model" value="${esc(s.aiModel)}" placeholder="${esc(t('ai.modelAuto'))}"></div>
+      <div class="field full"><label>${esc(t('ai.baseUrl'))} <span class="dim">· ${esc(t('ai.baseUrlDesc'))}</span></label><input id="ai-base" value="${esc(s.aiBaseUrl)}" placeholder="https://"></div>
+    </div>
+    <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.key'))}</b> · ${esc(t('ai.keyDesc'))}</div></div>
+    <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.scope'))}</b> · ${esc(t('ai.scopeValue'))}</div></div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.aiTest()">${esc(t('ai.test'))}</button>
+    <span class="left">${esc(t('ai.note'))}</span>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.cancel'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.saveAi()">${esc(t('action.save'))}</button>`;
+  return modalShell(t('ai.title'), t('ai.sub'), body, foot);
+}
+
 function modalFeedback() {
-  const diag = [
-    'Disk Warden v0.1.0 (prototype)',
-    'OS: Windows 10 22H2 x64',
-    'Locale: ' + LANG,
-    'Last scan: ' + KPI.lastScan + ' (' + KPI.scanDuration + ')',
-    'IDEs: ' + CATALOG.ides.length + ' · dirs: ' + CATALOG.ides.reduce((a, i) => a + i.directories.length, 0),
-    'Target root: ' + state.settings.targetRoot
-  ].join('\n');
+  const diag = diagnosticsText();
   const body = `<div class="field full"><label>${esc(t('feedback.diagnostics'))}</label>
       <div class="mono" style="background:#f7f9fb;border:1px solid #e4eaef;border-radius:5px;padding:10px;font-size:var(--fs-meta);white-space:pre-wrap;color:#5b646d">${esc(diag)}</div>
     </div>
     <div class="banner warn"><span class="b-ico">△</span><div>${esc(t('feedback.note'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.copyDiagnostics()">${esc(t('feedback.copy'))}</button>
-    <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('feedback.issueOpened'))">${esc(t('feedback.issue'))}</button>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.openIssue()">${esc(t('feedback.issue'))}</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>`;
   return modalShell(t('feedback.title'), t('feedback.sub'), body, foot, true);
-}
-
-function modalPreview() {
-  const ide = getIde(state.selectedIde);
-  const dirs = selectedDirs(ide);
-  const size = selectedSize(ide);
-  const red = safetyCount(ide, 'red');
-  const yellow = safetyCount(ide, 'yellow');
-  const body = `
-    <div class="sum">
-      <div class="sum-box"><div class="k">${esc(t('preview.from'))}</div><div class="v" style="font-size:var(--fs-strong)">C:</div></div>
-      <div class="sum-box"><div class="k">${esc(t('preview.to'))}</div><div class="v" style="font-size:var(--fs-strong)">${esc(DRIVE.targetDrive)}</div></div>
-      <div class="sum-box"><div class="k">${esc(t('preview.free'))}</div><div class="v ok">${fmtGB(size / GIB)}</div></div>
-    </div>
-    <div class="preview-card">
-      <div class="kv"><span class="k">${esc(t('preview.targetRoot'))}</span><span class="v">${esc(state.settings.targetRoot)}</span></div>
-      <div class="kv"><span class="k">${esc(t('preview.to'))}</span><span class="v">${esc(targetPathFor(ide))}</span></div>
-      <div class="kv"><span class="k">${esc(t('preview.targetFree'))}</span><span class="v ${spaceOk(ide) ? 'ok' : 'warn'}">${DRIVE.targetFreeGB.toFixed(1)} GB · ${esc(spaceOk(ide) ? t('preview.spaceOk') : t('preview.spaceBad'))}</span></div>
-      <div class="kv"><span class="k">${esc(t('preview.junction'))}</span></div>
-    </div>
-    <div class="section-title"><h3>${esc(t('preview.itemsTitle'))}</h3><span class="sub">${esc(t('common.selected', { n: dirs.length }))} · ${fmtGB(size / GIB)}</span></div>
-    <div class="rows">
-      ${dirs.map(d => `<div class="row risk-green">
-        <span class="row-main"><span class="row-name">${esc(d.path)}</span><span class="row-desc">${esc(t(d.reason))}</span></span>
-        <span class="row-right"><span class="row-size">${fmtBytes(d.size_bytes)}</span></span>
-      </div>`).join('') || `<div class="note dim">${esc(t('ide.noSelection'))}</div>`}
-    </div>
-    ${red ? `<div class="banner danger"><span class="b-ico">⛨</span><div><b>${esc(t('preview.willExcludeRed'))}</b> · ${esc(t('preview.willExcludeRedDesc', { n: red }))}</div></div>` : ''}
-    ${yellow ? `<div class="banner warn"><span class="b-ico">?</span><div>${esc(t('preview.yellowPending', { n: yellow }))}</div></div>` : ''}`;
-  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('preview.back'))}</button>
-    <button type="button" class="btn btn-primary btn-sm" ${dirs.length && spaceOk(ide) ? '' : 'disabled'} onclick="App.go('#ide/migrate-progress')">${esc(t('preview.start'))}</button>`;
-  return modalShell(t('preview.title'), t('preview.sub'), body, foot);
-}
-
-function modalProgress() {
-  const ide = getIde(state.selectedIde);
-  const pct = state.demo.pct;
-  const stages = ['backup', 'copy', 'verify', 'delete', 'link', 'verifyLink'];
-  const active = 2;
-  const body = `
-    <div class="preview-card">
-      <div class="preview-top"><span class="t">${esc(ide.name)}</span><span class="badge b-blue">${pct}%</span></div>
-      <div class="progress"><i style="width:${pct}%"></i></div>
-      <div class="progress-meta"><span>${esc(t('progress.files', { done: state.demo.filesDone.toLocaleString(), total: state.demo.filesTotal.toLocaleString() }))}</span><span>${esc(t('progress.percent', { pct: pct }))}</span></div>
-    </div>
-    <div class="stage-list">
-      ${stages.map((s, i) => `<div class="stage ${i < active ? 'done' : i === active ? 'active' : ''}">
-        <span class="s-ico">${i < active ? '✓' : ''}</span><span>${esc(t('progress.stage.' + s))}</span>
-        <span class="s-meta">${i < active ? esc(t('progress.done')) : i === active ? esc(t('progress.running')) : esc(t('progress.waiting'))}</span>
-      </div>`).join('')}
-    </div>
-    <div class="banner warn"><span class="b-ico">△</span><div>${esc(t('progress.keepOpen'))}</div></div>`;
-  const foot = `<span class="left">${esc(t('progress.cancelDisabled'))}</span>
-    <button type="button" class="btn btn-ghost btn-sm" disabled>${esc(t('action.cancel'))}</button>`;
-  return modalShell(t('progress.title'), ide.name + ' · ' + fmtGB(selectedSize(ide) / GIB), body, foot, true);
-}
-
-function modalFailed() {
-  const ide = getIde(state.selectedIde);
-  const body = `
-    <div class="banner danger"><span class="b-ico">✕</span><div><b>${esc(t('failed.what'))}</b><br>${esc(t('failed.verifyMsg'))}</div></div>
-    <div class="sum">
-      <div class="sum-box"><div class="k">${esc(t('failed.code'))}</div><div class="v bad" style="font-size:var(--fs-strong)">E_VERIFY_MISMATCH</div></div>
-      <div class="sum-box"><div class="k">${esc(t('history.duration'))}</div><div class="v">2m 05s</div></div>
-      <div class="sum-box"><div class="k">${esc(t('history.freed'))}</div><div class="v dim">—</div></div>
-    </div>
-    <div class="preview-card">
-      <div class="kv"><span class="k">${esc(t('preview.from'))}</span><span class="v">${esc(ide.runtime.root)}</span></div>
-      <div class="kv"><span class="k">${esc(t('failed.backup', { path: 'D:\\DiskWarden\\.backup\\TraeCN\\2026-10-16-1420' }))}</span></div>
-    </div>
-    <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('failed.sourceSafe'))}</div></div>
-    <div class="note dim">${esc(t('failed.suggestion'))}</div>`;
-  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.viewLog()">${esc(t('failed.log'))}</button>
-    <button type="button" class="btn btn-ghost btn-sm" onclick="App.rollbackFailed()">${esc(t('failed.rollback'))}</button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="App.retryMigrate()">${esc(t('failed.retry'))}</button>`;
-  return modalShell(t('failed.title'), t('failed.sub'), body, foot, true);
-}
-
-function modalSuccess() {
-  const ide = getIde(state.selectedIde);
-  const freed = selectedSize(ide) / GIB;
-  const body = `
-    <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('success.sub'))}</div></div>
-    <div class="sum">
-      <div class="sum-box"><div class="k">${esc(t('success.freed'))}</div><div class="v ok">${fmtGB(freed)}</div></div>
-      <div class="sum-box"><div class="k">${esc(t('success.verified'))}</div><div class="v ok" style="font-size:var(--fs-strong)">${esc(t('success.verifiedValue'))}</div></div>
-      <div class="sum-box"><div class="k">${esc(t('success.duration'))}</div><div class="v">3m 41s</div></div>
-    </div>
-    <div class="preview-card">
-      <div class="kv"><span class="k">${esc(t('success.junction'))}</span><span class="v">${esc(targetPathFor(ide))}</span></div>
-      <div class="kv"><span class="k">${esc(t('preview.junction'))}</span></div>
-    </div>`;
-  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.nav('history')">${esc(t('success.viewHistory'))}</button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('success.done'))}</button>`;
-  return modalShell(t('success.title'), ide.name, body, foot, true);
-}
-
-function modalRollback() {
-  const ide = getIde(state.selectedIde);
-  const size = fmtGB(ideSize(ide) / GIB);
-  const target = ide.runtime.target || targetPathFor(ide);
-  const body = `
-    <div class="banner warn"><span class="b-ico">↺</span><div>${esc(t('rollback.desc', { path: target, size: size }))}</div></div>
-    <div class="preview-card">
-      <div class="kv"><span class="k">${esc(t('rollback.source'))}</span><span class="v">${esc(target)}</span></div>
-      <div class="kv"><span class="k">${esc(t('rollback.target'))}</span><span class="v">${esc(ide.runtime.root)}</span></div>
-      <div class="kv"><span class="k">${esc(t('rollback.backup'))}</span><span class="v">D:\\DiskWarden\\.backup\\${esc(ide.name.replace(/\s+/g, ''))}\\</span></div>
-    </div>
-    <div class="note dim">${esc(t('rollback.note', { app: ide.name }))}</div>`;
-  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('rollback.cancel'))}</button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="App.confirmRollback()">${esc(t('rollback.confirm'))}</button>`;
-  return modalShell(t('rollback.title'), t('rollback.sub'), body, foot, true);
 }
 
 function modalBlocked() {
@@ -2575,8 +3461,8 @@ function modalBlocked() {
   const body = `
     <div class="banner danger"><span class="b-ico">▲</span><div>${esc(t('blocked.desc'))}</div></div>
     <div class="table-wrap"><table class="table">
-      <thead><tr><th>${esc(t('blocked.process'))}</th><th>${esc(t('blocked.pid'))}</th><th>${esc(t('blocked.path'))}</th></tr></thead>
-      <tbody>${running.map(p => `<tr><td class="mono">${esc(p.name)}</td><td class="num">${p.pid}</td><td class="mono" style="word-break:break-all">${esc(p.lock)}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>${esc(t('blocked.process'))}</th><th>${esc(t('blocked.pid'))}</th></tr></thead>
+      <tbody>${running.map(p => `<tr><td class="mono">${esc(p.name)}</td><td class="num">${p.pid}</td></tr>`).join('')}</tbody>
     </table></div>
     <div class="banner warn"><span class="b-ico">i</span><div>${esc(t('blocked.hint'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>
@@ -2586,15 +3472,21 @@ function modalBlocked() {
 }
 
 function modalYellow() {
-  const py = state.pendingYellow || { ide: 'trae-cn', idx: 3 };
+  const py = state.pendingYellow;
+  if (!py) return '';
   const ide = getIde(py.ide);
-  const d = ide.directories[py.idx] || ide.directories[0];
+  const d = ide && ide.directories ? ide.directories[py.idx] : null;
+  if (!d) {
+    return modalShell(t('yellow.title'), t('yellow.sub', { path: '' }),
+      `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('ide.listEmpty'))}</div></div>`,
+      `<button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>`, true);
+  }
   const confirmed = isConfirmed(ide.id, py.idx);
   const body = `
     <div class="banner warn"><span class="b-ico">?</span><div>${esc(t('yellow.desc'))}<br>${esc(t('yellow.warn'))}</div></div>
     <div class="sum">
       <div class="sum-box"><div class="k">${esc(t('yellow.size'))}</div><div class="v">${fmtBytes(d.size_bytes)}</div></div>
-      <div class="sum-box"><div class="k">${esc(t('yellow.detected'))}</div><div class="v" style="font-size:var(--fs-strong)">${esc(t(d.reason))}</div></div>
+      <div class="sum-box"><div class="k">${esc(t('yellow.detected'))}</div><div class="v" style="font-size:var(--fs-strong)">${esc(itemReason(d))}</div></div>
       <div class="sum-box"><div class="k">${esc(t('common.safety'))}</div><div class="v" style="font-size:var(--fs-strong)">${esc(t('common.yellow'))}</div></div>
     </div>
     <div class="preview-card"><div class="kv"><span class="k">${esc(t('common.path'))}</span><span class="v">${esc(d.path)}</span></div></div>
@@ -2605,49 +3497,219 @@ function modalYellow() {
   return modalShell(t('yellow.title'), t('yellow.sub', { path: d.path }), body, foot, true);
 }
 
-/* ---------- 原型状态切换 ---------- */
-function renderProtoPanel() {
-  const panel = document.getElementById('proto-panel');
-  const fab = document.getElementById('proto-fab');
-  if (!panel) return;
-  panel.classList.toggle('show', !!state.protoOpen);
-  if (fab) fab.classList.toggle('active', !!state.protoOpen);
-  const current = (location.hash || '#ide').replace(/^#/, '');
-  const groups = [
-    { key: 'proto.section.core', items: [
-      { h: 'ide', k: 'proto.route.ide' },
-      { h: 'projects', k: 'proto.route.projects' },
-      { h: 'disk', k: 'proto.route.disk' },
-      { h: 'rules', k: 'proto.route.rules' },
-      { h: 'history', k: 'proto.route.history' }
-    ] },
-    { key: 'proto.section.states', items: [
-      { h: 'ide/scanning', k: 'proto.route.scanning' },
-      { h: 'ide/empty', k: 'proto.route.empty' },
-      { h: 'ide/migrate-preview', k: 'proto.route.preview' },
-      { h: 'ide/migrate-progress', k: 'proto.route.progress' },
-      { h: 'ide/migrate-failed', k: 'proto.route.failed' },
-      { h: 'ide/migrate-success', k: 'proto.route.success' },
-      { h: 'ide/process-blocked', k: 'proto.route.blocked' },
-      { h: 'ide/rollback-confirm', k: 'proto.route.rollback' },
-      { h: 'ide/yellow-confirm', k: 'proto.route.yellow' }
-    ] },
-    { key: 'proto.section.other', items: [
-      { h: 'settings', k: 'proto.route.settings' },
-      { h: 'feedback', k: 'proto.route.feedback' }
-    ] }
-  ];
-  panel.innerHTML = `<h4>${esc(t('proto.title'))}</h4><p>${esc(t('proto.desc'))}</p>
-    <div class="proto-routes">
-      ${groups.map((g, gi) => `${gi ? '<div class="proto-sep"></div>' : ''}<div class="nav-label" style="padding:2px 7px 4px">${esc(t(g.key))}</div>
-        ${g.items.map(it => `<button type="button" class="proto-route ${current === it.h ? 'active' : ''}" onclick="App.go('#${it.h}')"><span>${esc(t(it.k))}</span><span class="pr-k">#${esc(it.h)}</span></button>`).join('')}`).join('')}
-    </div>`;
-  document.getElementById('proto-fab-label').textContent = t('proto.title');
+/* ---------- 迁移 / 回滚任务流弹窗 ---------- */
+function flowPlanErrorBody(err) {
+  const lines = errorDetailLines(err);
+  return `<div class="banner danger"><span class="b-ico">✕</span><div><b>${esc(t('blocked.planTitle'))}</b><br>${esc(t('blocked.planDesc'))}</div></div>
+    ${errDetailList(lines, 'mt-3')}`;
 }
-/* ---------- 交互动作（原型，不改真实文件） ---------- */
+
+function modalMigrateFlow() {
+  const f = state.data.flow;
+  if (!f) return '';
+  const ide = getIde(f.toolId);
+  const toolName = (f.plan && f.plan.items && f.plan.items[0] && f.plan.items[0].tool_name) || (ide && ide.name) || f.toolId || '';
+  if (f.phase === 'loading') {
+    return modalShell(t('preview.title'), t('preview.sub'),
+      `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('progress.stage.prepare'))}</div></div>`,
+      `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.cancel'))}</button>`, true);
+  }
+  if (f.phase === 'confirm' || f.phase === 'starting') return modalMigrateConfirm(f, ide, toolName);
+  if (f.phase === 'progress') return modalMigrateProgress(f, toolName);
+  if (f.phase === 'success') return modalMigrateSuccess(f, toolName);
+  return modalMigrateFailed(f, toolName);
+}
+
+function modalMigrateConfirm(f, ide, toolName) {
+  const plan = f.plan || { items: [] };
+  const items = plan.items || [];
+  const total = plan.total_bytes || 0;
+  const need = plan.need_bytes || 0;
+  const free = plan.free_bytes || 0;
+  const enough = need <= free;
+  const yellow = items.filter(it => it.requires_confirm || it.safety === 'yellow');
+  const pending = yellow.filter(it => !f.yellowConfirmed[it.item_id]);
+  const busy = f.phase === 'starting';
+  const reds = ide ? safetyCount(ide, 'red') : 0;
+  const rows = items.map(it => `<tr>
+      <td><span class="mono">${esc(it.source_path)}</span></td>
+      <td><span class="mono">${esc(it.final_path)}</span></td>
+      <td>${it.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>` : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`}</td>
+      <td>${esc(fmtBytes(it.bytes || 0))}</td>
+    </tr>`).join('');
+  const yellowBlock = yellow.length ? `<div class="banner warn mt-3"><span class="b-ico">△</span><div>
+      <div>${esc(t('preview.yellowPending', { n: pending.length }))}</div>
+      ${yellow.map(it => `<label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:var(--fs-meta)">
+        <input type="checkbox" ${f.yellowConfirmed[it.item_id] ? 'checked' : ''} onchange="App.toggleYellowConfirm('${esc(it.item_id)}')">
+        <span class="mono">${esc(it.source_path)}</span>
+      </label>`).join('')}
+    </div></div>` : '';
+  const redBlock = reds ? `<div class="banner info mt-3"><span class="b-ico">⛨</span><div>${esc(t('preview.willExcludeRedDesc', { n: reds }))}</div></div>` : '';
+  const errBlock = f.error ? `<div class="mt-3">${flowPlanErrorBody(f.error)}</div>` : '';
+  const body = `
+    <div class="kvbar">
+      <div class="kv-item"><span class="k">${esc(t('preview.summary'))}</span><span class="v">${esc(t('common.items', { n: items.length }))} · ${esc(fmtBytes(total))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ide.needSpace'))}</span><span class="v">${esc(fmtBytes(need))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('preview.targetFree'))}</span><span class="v ${enough ? 'ok' : 'warn'}">${esc(fmtBytes(free))} · ${esc(enough ? t('preview.spaceOk') : t('preview.spaceBad'))}</span></div>
+    </div>
+    <div class="table-wrap mt-3"><table class="table">
+      <thead><tr><th>${esc(t('preview.from'))}</th><th>${esc(t('preview.to'))}</th><th>${esc(t('common.safety'))}</th><th>${esc(t('common.size'))}</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    ${redBlock}${yellowBlock}
+    <div class="banner info mt-3"><span class="b-ico">i</span><div>${esc(t('preview.junction'))}</div></div>
+    ${errBlock}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" ${busy ? 'disabled' : ''} onclick="App.closeFlow()">${esc(t('preview.back'))}</button>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-primary btn-sm" ${busy || pending.length ? 'disabled' : ''} title="${esc(pending.length ? t('preview.yellowPending', { n: pending.length }) : '')}" onclick="App.confirmMigrate()">${esc(t('preview.start'))}</button>`;
+  return modalShell(t('preview.title'), toolName + ' · ' + t('preview.sub'), body, foot, true, !busy);
+}
+
+function modalMigrateProgress(f, toolName) {
+  const job = f.job || {};
+  const p = job.progress || {};
+  const pct = migratePct(f);
+  const done = !!(p.done || job.state === 'done');
+  const total = p.items_total || ((f.plan && f.plan.items && f.plan.items.length) || 0);
+  const body = `
+    <div class="progress"><i style="width:${pct}%"></i></div>
+    <div class="progress-meta"><span>${esc(t('progress.percent', { pct: pct }))}</span><span>${esc(t('common.items', { n: (p.items_done || 0) + ' / ' + total }))}</span></div>
+    <div class="stage-list mt-3">${stageRows(MIGRATE_STAGES, p.stage || 'prepare', done, 'progress.stage.')}</div>
+    <div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('progress.keepOpen'))}</div></div>`;
+  const foot = `<span class="note">${esc(t('progress.cancelDisabled'))}</span>`;
+  return modalShell(t('progress.title'), toolName, body, foot, true, false);
+}
+
+function modalMigrateSuccess(f, toolName) {
+  const summary = f.summary || {};
+  const plan = f.plan || {};
+  const bytes = summary.bytes || plan.total_bytes || 0;
+  const junction = (plan.items && plan.items[0] && plan.items[0].final_path) || '';
+  const body = `
+    <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('success.sub'))}</div></div>
+    <div class="kvbar mt-3">
+      <div class="kv-item"><span class="k">${esc(t('success.freed'))}</span><span class="v ok">${esc(fmtBytes(bytes))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('success.verified'))}</span><span class="v">${esc(t('success.verifiedValue'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('success.duration'))}</span><span class="v">${esc(fmtDuration(jobDuration(f.job)))}</span></div>
+      <div class="kv-item wide"><span class="k">${esc(t('success.junction'))}</span><span class="v mono">${esc(junction)}</span></div>
+    </div>
+    <div class="note mt-3">${esc(t('success.rollbackable'))}</div>`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.gotoHistory()">${esc(t('success.viewHistory'))}</button>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('success.done'))}</button>`;
+  return modalShell(t('success.title'), toolName, body, foot, true);
+}
+
+function modalMigrateFailed(f, toolName) {
+  const summary = f.summary || {};
+  const failed = (summary.items || []).filter(x => !x.ok);
+  const err = f.error || {};
+  const fromPlan = f.errorScope === 'plan';
+  const code = err.code || (failed[0] && failed[0].state) || '';
+  const lines = errorDetailLines(err);
+  const failedRows = failed.map(it => `<div class="err-item"><span class="e-path">${esc(it.source_path || '')}</span><span class="e-msg">${esc(it.error_message || it.state_label || it.state || '')}</span></div>`).join('');
+  const body = `
+    <div class="banner danger"><span class="b-ico">✕</span><div>${esc(fromPlan ? t('blocked.planDesc') : t('failed.sub'))}</div></div>
+    ${code || lines.length ? `<div class="mt-3">
+      ${code ? `<div class="kvbar"><div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v mono" style="color:#d9363e">${esc(code)}</span></div></div>` : ''}
+      ${errDetailList(lines, code ? 'mt-3' : '')}
+    </div>` : ''}
+    ${failed.length ? `<div class="section-title mt-3"><h3>${esc(t('failed.items'))}</h3><span class="sub">${esc(t('common.items', { n: failed.length }))}</span></div><div class="err-list">${failedRows}</div>` : ''}
+    ${fromPlan ? '' : `<div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('failed.sourceSafe'))}<br>${esc(t('failed.suggestion'))}</div></div>`}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.close'))}</button>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.retryMigrate()">${esc(t('failed.retry'))}</button>`;
+  return modalShell(t(fromPlan ? 'blocked.planTitle' : 'failed.title'), toolName, body, foot, true);
+}
+
+function modalRollbackFlow() {
+  const f = state.data.flow;
+  if (!f) return '';
+  const p = f.preview || {};
+  const ide = getIde(f.toolId);
+  const toolName = p.tool_name || (ide && ide.name) || f.toolId || '';
+  if (f.phase === 'loading') {
+    return modalShell(t('rollback.title'), toolName,
+      `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('rollback.stage.precheck'))}</div></div>`,
+      `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.cancel'))}</button>`, true);
+  }
+  if (f.phase === 'residual') {
+    const body = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('rollback.residualBody', { size: fmtBytes(p.restore_bytes || 0) }))}</div></div>
+      <div class="kvbar mt-3">
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.source'))}</span><span class="v mono">${esc(p.final_path || '')}</span></div>
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(p.source_path || '')}</span></div>
+      </div>`;
+    const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.cancel'))}</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-primary btn-sm" onclick="App.confirmResidual()">${esc(t('rollback.residualConfirm'))}</button>`;
+    return modalShell(t('rollback.residualTitle'), toolName, body, foot, true);
+  }
+  if (f.phase === 'blocked') {
+    const code = (f.error && f.error.code) || p.error_code || '';
+    const message = (f.error && f.error.detail && f.error.detail.message) || p.error_message || '';
+    const detail = f.noticeKey
+      ? `<div class="banner info"><span class="b-ico">i</span><div>${esc(t(f.noticeKey))}</div></div>`
+      : `<div class="banner danger"><span class="b-ico">✕</span><div>${esc(message || t('blocked.planDesc'))}</div></div>`;
+    const body = `${detail}
+      ${code ? `<div class="kvbar mt-3"><div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v mono" style="color:#d9363e">${esc(code)}</span></div></div>` : ''}`;
+    const foot = `<button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('blocked.close'))}</button>`;
+    return modalShell(t('rollback.blockedTitle'), toolName, body, foot, true);
+  }
+  if (f.phase === 'confirm' || f.phase === 'starting') {
+    const busy = f.phase === 'starting';
+    const body = `<div class="note">${esc(t('rollback.desc', { path: p.final_path || '', size: fmtBytes(p.restore_bytes || 0) }))}</div>
+      <div class="kvbar mt-3">
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.source'))}</span><span class="v mono">${esc(p.final_path || '')}</span></div>
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(p.source_path || '')}</span></div>
+      </div>
+      <div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('rollback.note', { app: toolName }))}</div></div>
+      ${f.error ? `<div class="mt-3">${flowPlanErrorBody(f.error)}</div>` : ''}`;
+    const foot = `<button type="button" class="btn btn-ghost btn-sm" ${busy ? 'disabled' : ''} onclick="App.closeFlow()">${esc(t('rollback.cancel'))}</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-primary btn-sm" ${busy ? 'disabled' : ''} onclick="App.startRollback()">${esc(t('rollback.confirm'))}</button>`;
+    return modalShell(t('rollback.title'), toolName, body, foot, true, !busy);
+  }
+  if (f.phase === 'progress') {
+    const job = f.job || {};
+    const pr = job.progress || {};
+    const pct = rollbackPct(f);
+    const done = job.state === 'done' || pr.stage === 'done';
+    const body = `
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="progress-meta"><span>${esc(t('progress.percent', { pct: pct }))}</span><span>${esc(t('common.progress'))}</span></div>
+      <div class="stage-list mt-3">${stageRows(ROLLBACK_STAGES, pr.stage || 'precheck', done, 'rollback.stage.')}</div>
+      <div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('rollback.progressKeepOpen'))}</div></div>`;
+    return modalShell(t('rollback.progressTitle'), toolName, body, `<span class="note">${esc(t('progress.cancelDisabled'))}</span>`, true, false);
+  }
+  if (f.phase === 'success') {
+    const s = f.summary || {};
+    const body = `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('rollback.successSub'))}</div></div>
+      <div class="kvbar mt-3">
+        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(s.source_path || p.source_path || '')}</span></div>
+        <div class="kv-item"><span class="k">${esc(t('success.duration'))}</span><span class="v">${esc(fmtDuration(jobDuration(f.job)))}</span></div>
+      </div>`;
+    const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.gotoHistory()">${esc(t('success.viewHistory'))}</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('action.done'))}</button>`;
+    return modalShell(t('rollback.successTitle'), toolName, body, foot, true);
+  }
+  const s = f.summary || {};
+  const err = f.error || {};
+  const code = err.code || s.error_code || '';
+  const message = (err.detail && err.detail.message) || s.error_message || '';
+  const lines = errorDetailLines(err);
+  const body = `<div class="banner danger"><span class="b-ico">✕</span><div>${esc(message || t('failed.sub'))}</div></div>
+    ${code || lines.length ? `<div class="mt-3">
+      ${code ? `<div class="kvbar"><div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v mono" style="color:#d9363e">${esc(code)}</span></div></div>` : ''}
+      ${errDetailList(lines, code ? 'mt-3' : '')}
+    </div>` : ''}`;
+  const foot = `<button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('action.close'))}</button>`;
+  return modalShell(t('rollback.failedTitle'), toolName, body, foot, true);
+}
+
+/* ---------- 交互动作 ---------- */
 const App = {
   go(hash) {
-    state.protoOpen = false;
     if (location.hash === hash) { render(); return; }
     location.hash = hash;
   },
@@ -2661,6 +3723,8 @@ const App = {
     this.go('#' + kind);
   },
   closeModal() {
+    if (state.data.flow) { this.closeFlow(); return; }
+    state.aiAsk = false;
     const back = state.returnHash;
     state.returnHash = '';
     this.go(back && back !== location.hash ? back : '#ide');
@@ -2673,6 +3737,7 @@ const App = {
     LANG = lang;
     try { localStorage.setItem('dw-lang', lang); } catch (e) {}
     render();
+    rpc('settings.set', { language: lang }).catch(() => {});
   },
   toggleSetting(key) {
     const root = document.getElementById('settings-root');
@@ -2682,21 +3747,60 @@ const App = {
   },
   saveSettings() {
     const root = document.getElementById('settings-root');
-    if (root) state.settings.targetRoot = root.value.trim() || 'D:\\DiskWarden\\';
     const un = document.getElementById('settings-uninstall');
-    if (un) state.settings.uninstall = un.value;
-    this.toast(t('toast.saved'));
-    this.closeModal();
+    const rootVal = root ? (root.value.trim() || state.settings.targetRoot) : state.settings.targetRoot;
+    const uninstall = un ? un.value : state.settings.uninstall;
+    const patch = {
+      launch_at_startup: !!state.settings.autoStart,
+      auto_maintenance: !!state.settings.autoMaintenance,
+      uninstall_policy: uninstall === 'remove' ? 'rollback' : uninstall
+    };
+    if (rootVal && normPath(rootVal) !== normPath(state.settings.targetRoot)) patch.target_root = rootVal;
+    rpc('settings.set', patch).then(s => {
+      applySettings(s);
+      this.toast(t('settings.saved'));
+      this.closeModal();
+    }).catch(err => this.toast(errText(err)));
+  },
+  reconnect() {
+    bootstrap();
   },
   rescan() {
-    state.scanning = true;
-    state.scanPct = 62;
-    this.go('#ide/scanning');
+    if (state.scanning) { this.go('#ide/scanning'); return; }
+    rpc('scan.start').then(res => {
+      const jobId = res && res.job_id;
+      state.scanning = true;
+      state.data.scanError = '';
+      state.scanPct = 3;
+      state.data.scanJob = jobId ? { job_id: jobId, state: (res && res.state) || 'queued' } : null;
+      this.go('#ide/scanning');
+      if (jobId) startScanPolling(jobId);
+    }).catch(err => {
+      if (err && err.code === 'BUSY') {
+        rpc('job.list', { active_only: true }).then(list => {
+          const job = list && list.jobs && list.jobs[0];
+          if (job && job.kind === 'scan') {
+            state.scanning = true;
+            state.data.scanJob = job;
+            state.scanPct = scanPercent(job);
+            this.go('#ide/scanning');
+            startScanPolling(job.job_id);
+            return;
+          }
+          this.toast(errText(err));
+        }).catch(() => this.toast(errText(err)));
+        return;
+      }
+      this.toast(errText(err));
+    });
   },
   cancelScan() {
-    state.scanning = false;
-    this.toast(t('toast.scanCancelled'));
-    this.go('#ide');
+    const job = state.data.scanJob;
+    if (!job || !job.job_id) return;
+    rpc('scan.cancel', { job_id: job.job_id }).then(j => {
+      if (j) state.data.scanJob = j;
+      render();
+    }).catch(err => this.toast(errText(err)));
   },
   search(value) {
     state.search = value;
@@ -2718,10 +3822,14 @@ const App = {
   toggleCheck(ideId, idx) {
     const ide = getIde(ideId);
     const dir = ide.directories[idx];
-    if (!dir || dir.safety === 'red') return;
+    if (!dir || dir.safety === 'red' || dir.can_migrate === false) return;
     if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return;
-    state.checked[ideId] = state.checked[ideId] || {};
-    state.checked[ideId][idx] = !state.checked[ideId][idx];
+    if (dir.item_id) {
+      state.checked[dir.item_id] = !state.checked[dir.item_id];
+    } else {
+      state.checked[ideId] = state.checked[ideId] || {};
+      state.checked[ideId][idx] = !state.checked[ideId][idx];
+    }
     render();
   },
   openYellow(ideId, idx) {
@@ -2732,21 +3840,76 @@ const App = {
   },
   confirmYellow(action) {
     const py = state.pendingYellow;
+    if (!py) { this.go('#ide'); return; }
     const ide = getIde(py.ide);
     const dir = ide.directories[py.idx];
     state.selectedIde = ide.id;
-    if (!dir) { this.go('#ide'); return; }
-    if (action === 'green') {
-      state.confirmed[yellowKey(ide.id, py.idx)] = true;
-      state.checked[ide.id] = state.checked[ide.id] || {};
-      state.checked[ide.id][py.idx] = true;
-      this.toast(t('toast.yellowConfirmed'));
-    } else if (action === 'red') {
-      dir.safety = 'red';
-      if (state.checked[ide.id]) delete state.checked[ide.id][py.idx];
-      this.toast(t('rules.markedRed'));
+    if (!dir) { state.pendingYellow = null; this.go('#ide'); return; }
+    if (action === 'later') {
+      state.pendingYellow = null;
+      this.go('#ide');
+      return;
     }
+    if (!dir.item_id) {
+      state.pendingYellow = null;
+      this.go('#ide');
+      this.toast(t('rules.overrideFailed'));
+      return;
+    }
+    state.pendingYellow = null;
     this.go('#ide');
+    this.overrideItem(dir.item_id, action);
+  },
+  overrideItem(itemId, safety) {
+    if (!itemId || (safety !== 'green' && safety !== 'red')) return;
+    if (!this._overriding) this._overriding = {};
+    if (this._overriding[itemId]) return;
+    this._overriding[itemId] = true;
+    rpc('rules.override', { item_id: itemId, safety: safety }).then(() => {
+      return Promise.all([rpc('scan.result'), rpc('rules.learned.list')]);
+    }).then(res => {
+      delete this._overriding[itemId];
+      const snap = res && res[0];
+      if (snap) setSnapshot(snap);
+      if (res && res[1]) state.data.learned = res[1];
+      render();
+      this.toast(t(safety === 'green' ? 'rules.markedGreen' : 'rules.markedRed'));
+    }).catch(err => {
+      delete this._overriding[itemId];
+      this.toast(errText(err));
+    });
+  },
+  clearOverride(itemId) {
+    if (!itemId) return;
+    if (!this._clearing) this._clearing = {};
+    if (this._clearing[itemId]) return;
+    this._clearing[itemId] = true;
+    rpc('rules.override.clear', { item_id: itemId }).then(() => {
+      return Promise.all([rpc('scan.result'), rpc('rules.learned.list')]);
+    }).then(res => {
+      delete this._clearing[itemId];
+      const snap = res && res[0];
+      if (snap) setSnapshot(snap);
+      if (res && res[1]) state.data.learned = res[1];
+      render();
+      this.toast(t('rules.unmarked'));
+    }).catch(err => {
+      delete this._clearing[itemId];
+      const reason = err && err.code === 'NOT_FOUND' ? t('rules.unmarkGone') : errText(err);
+      this.toast(t('rules.unmarkFailed', { reason: reason }));
+    });
+  },
+  openIssue() {
+    if (this._openingIssue) return;
+    this._openingIssue = true;
+    rpc('app.open_external', { url: ISSUE_URL }).then(() => {
+      delete this._openingIssue;
+      this.toast(t('feedback.issueOpened'));
+    }).catch(err => {
+      delete this._openingIssue;
+      const reason = err && err.code === 'IO_ERROR' ? t('feedback.browserFailed') : errText(err);
+      this.toast(t('feedback.openFailed', { reason: reason }));
+    });
   },
   startPreview(ideId) {
     const ide = getIde(ideId);
@@ -2755,65 +3918,247 @@ const App = {
     state.returnHash = '#ide';
     if (ide.runtime.running.length) { this.go('#ide/process-blocked'); return; }
     if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
-    this.go('#ide/migrate-preview');
+    this._beginMigrate(ideId);
   },
-  cleanCaches(ideId) {
-    const ide = getIde(ideId);
-    const total = sum(ide.directories.filter(d => d.safety === 'green'), 'size_bytes') / GIB;
-    this.toast(t('toast.cleaned', { size: fmtGB(total) }));
+  refreshDisk() {
+    rpc('disk.info').then(disk => {
+      applyDisk(disk || null);
+      render();
+    }).catch(err => this.toast(errText(err)));
   },
   openRollback(ideId) {
-    state.selectedIde = ideId;
-    state.returnHash = '#ide';
-    this.go('#ide/rollback-confirm');
+    this.rollbackTool(ideId);
   },
-  confirmRollback() {
-    const ide = getIde(state.selectedIde);
-    const target = ide.runtime.target || targetPathFor(ide);
-    ide.runtime.migrated = false;
-    ide.runtime.location = 'C';
-    delete ide.runtime.target;
-    HISTORY.unshift({
-      id: 'h' + Date.now(), at: '2026-10-19 10:05', type: 'rollback', app: ide.name,
-      from: target, to: 'C:', freed: 0, duration: '2m 20s', result: 'rolledback',
-      canRollback: false, note: 'history.rollbackDone',
-      steps: ['rollbackStep1', 'rollbackStep2', 'rollbackStep3']
+  startMigrate(ideId) {
+    this._beginMigrate(ideId);
+  },
+  _beginMigrate(ideId, skipRunningCheck) {
+    const ide = getIde(ideId);
+    const dirs = selectedDirs(ide);
+    const items = dirs.filter(d => d.item_id);
+    if (!ide || !items.length) { this.toast(t('toast.noGreen')); return; }
+    if (!skipRunningCheck && ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
+    if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
+    if (!state.data.flow) state.returnHash = state.returnHash || location.hash || '#ide';
+    state.data.flow = {
+      kind: 'migrate', phase: 'loading', toolId: ideId,
+      plan: null, yellowConfirmed: {}, error: null, errorScope: '',
+      jobId: null, runnerJobId: null, job: null, summary: null
+    };
+    if (location.hash === '#ide/migrate-preview') render(); else this.go('#ide/migrate-preview');
+    rpc('plan.preview', {
+      item_ids: items.map(d => d.item_id),
+      confirmed_item_ids: items.filter(d => !!state.confirmed['item:' + d.item_id]).map(d => d.item_id)
+    }).then(plan => {
+      const f = state.data.flow;
+      if (!f || f.kind !== 'migrate' || f.toolId !== ideId) return;
+      f.plan = plan || {};
+      f.phase = 'confirm';
+      render();
+    }).catch(err => {
+      const f = state.data.flow;
+      if (!f || f.kind !== 'migrate' || f.toolId !== ideId) return;
+      f.phase = 'failed';
+      f.errorScope = 'plan';
+      f.error = err;
+      render();
     });
-    state.selectedHistory = HISTORY[0].id;
-    state.historyFilter = 'all';
+  },
+  toggleYellowConfirm(itemId) {
+    const f = state.data.flow;
+    if (!f || f.kind !== 'migrate') return;
+    if (f.yellowConfirmed[itemId]) delete f.yellowConfirmed[itemId];
+    else f.yellowConfirmed[itemId] = true;
+    render();
+  },
+  confirmMigrate() {
+    const f = state.data.flow;
+    if (!f || f.kind !== 'migrate' || f.phase !== 'confirm' || !f.plan) return;
+    const plan = f.plan;
+    const all = plan.items || [];
+    const isYellow = it => !!(it.requires_confirm || it.safety === 'yellow');
+    const accepted = all.filter(it => !isYellow(it) || f.yellowConfirmed[it.item_id]);
+    const acceptedYellow = accepted.filter(isYellow).map(it => it.item_id);
+    if (!accepted.length) { this.toast(t('toast.noGreen')); return; }
+    f.phase = 'starting';
+    f.error = null;
+    render();
+    const preview = accepted.length === all.length
+      ? Promise.resolve(plan)
+      : rpc('plan.preview', { item_ids: accepted.map(it => it.item_id), confirmed_item_ids: acceptedYellow });
+    preview.then(fresh => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'migrate') return null;
+      cur.plan = fresh || cur.plan;
+      return rpc('migrate.start', {
+        plan_id: cur.plan.plan_id,
+        confirm_token: cur.plan.confirm_token,
+        confirmed_item_ids: acceptedYellow
+      });
+    }).then(res => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'migrate' || !res) return;
+      cur.phase = 'progress';
+      cur.jobId = res.job_id;
+      cur.runnerJobId = res.job_id;
+      cur.job = { job_id: res.job_id, state: res.state || 'queued', progress: {} };
+      render();
+      startFlowPolling('migrate', res.job_id);
+    }).catch(err => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'migrate') return;
+      cur.phase = 'failed';
+      cur.errorScope = 'plan';
+      cur.error = err;
+      render();
+    });
+  },
+  rollbackTool(ideId) {
+    const ide = getIde(ideId);
+    const it = ide.directories.filter(d => !!d.migrated_job_id)[0];
+    if (!it) { this.toast(t('history.noRollback')); return; }
+    if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
+    this._openRollback(it.migrated_job_id);
+  },
+  historyRollback(id) {
+    const h = HISTORY.find(x => x.id === id);
+    if (!h) return;
+    this._openRollback(h.job_id || h.id);
+  },
+  _openRollback(jobId) {
+    if (!jobId) { this.toast(t('history.noRollback')); return; }
+    if (!state.data.flow) state.returnHash = state.tab === 'history' ? '#history' : (location.hash || '#ide');
+    state.data.flow = {
+      kind: 'rollback', phase: 'loading', jobId: jobId, runnerJobId: null,
+      preview: null, error: null, noticeKey: '', job: null, summary: null
+    };
+    if (location.hash === '#ide/rollback-confirm') render(); else this.go('#ide/rollback-confirm');
+    this._previewRollback(false);
+  },
+  confirmResidual() {
+    this._previewRollback(true);
+  },
+  _previewRollback(confirmResidual) {
+    const f = state.data.flow;
+    if (!f || f.kind !== 'rollback') return;
+    const jobId = f.jobId;
+    f.phase = 'loading';
+    f.error = null;
+    render();
+    rpc('rollback.preview', {
+      job_id: jobId,
+      confirm_residual_delete: !!confirmResidual
+    }).then(p => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'rollback' || cur.jobId !== jobId) return;
+      cur.preview = p || {};
+      if (p && p.tool_id) cur.toolId = p.tool_id;
+      if (!p || !p.can_proceed) {
+        cur.phase = 'blocked';
+        cur.noticeKey = p && p.mode === 'already_rolled_back' ? 'rollback.alreadyDone' : '';
+        cur.error = cur.noticeKey ? null : {
+          code: (p && p.error_code) || 'PRECHECK_FAILED',
+          detail: { message: (p && p.error_message) || '' }
+        };
+        render();
+        return;
+      }
+      cur.phase = p.requires_residual_confirm ? 'residual' : 'confirm';
+      render();
+    }).catch(err => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'rollback' || cur.jobId !== jobId) return;
+      cur.phase = 'blocked';
+      cur.noticeKey = '';
+      cur.error = err;
+      render();
+    });
+  },
+  startRollback() {
+    const f = state.data.flow;
+    if (!f || f.kind !== 'rollback' || f.phase !== 'confirm') return;
+    const p = f.preview || {};
+    if (!p.plan_id || !p.confirm_token) { this.toast(t('toast.blocked')); return; }
+    f.phase = 'starting';
+    f.error = null;
+    render();
+    rpc('rollback.start', { plan_id: p.plan_id, confirm_token: p.confirm_token }).then(res => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'rollback' || !res) return;
+      cur.phase = 'progress';
+      cur.runnerJobId = res.job_id;
+      cur.job = { job_id: res.job_id, state: res.state || 'queued', progress: {} };
+      render();
+      startFlowPolling('rollback', res.job_id);
+    }).catch(err => {
+      const cur = state.data.flow;
+      if (!cur || cur.kind !== 'rollback') return;
+      cur.phase = 'failed';
+      cur.error = err;
+      render();
+    });
+  },
+  closeFlow() {
+    if (flowBusy()) return;
+    const back = state.returnHash || ('#' + (state.tab || 'ide'));
     state.returnHash = '';
-    this.toast(t('toast.rollbackStarted'));
-    this.go('#history');
+    closeFlow();
+    this.go(back);
+  },
+  gotoHistory() {
+    stopFlowPolling();
+    state.data.flow = null;
+    state.returnHash = '';
+    this.nav('history');
+  },
+  recoveryStart(jobId, action) {
+    if (!jobId) return;
+    if (action !== 'recover' && action !== 'rollback') return;
+    const run = state.data.recoveryRun;
+    if (run && (run.phase === 'starting' || run.phase === 'progress')) return;
+    if (flowBusy()) { this.toast(t('toast.blocked')); return; }
+    const item = recoveryItems().find(x => x.job_id === jobId) || {};
+    state.data.recoveryRun = {
+      targetJobId: jobId, sourcePath: item.source_path || '', action: action,
+      phase: 'starting', runnerJobId: null, job: null, summary: null, error: null
+    };
+    render();
+    rpc('recovery.run', { job_id: jobId, action: action }).then(res => {
+      const cur = state.data.recoveryRun;
+      if (!cur || cur.targetJobId !== jobId || cur.action !== action) return;
+      cur.runnerJobId = res && res.job_id;
+      cur.phase = 'progress';
+      cur.job = { job_id: cur.runnerJobId, state: (res && res.state) || 'queued', progress: {} };
+      render();
+      if (cur.runnerJobId) startRecoveryPolling(cur.runnerJobId);
+    }).catch(err => {
+      const cur = state.data.recoveryRun;
+      if (!cur || cur.targetJobId !== jobId) return;
+      cur.phase = 'failed';
+      cur.error = err;
+      render();
+    });
+  },
+  retryRecovery() {
+    const run = state.data.recoveryRun;
+    if (!run || run.phase === 'starting' || run.phase === 'progress') return;
+    this.recoveryStart(run.targetJobId, run.action);
+  },
+  dismissRecovery() {
+    stopRecoveryPolling();
+    state.data.recoveryRun = null;
+    render();
   },
   retryMigrate() {
-    this.toast(t('toast.retry'));
-    this.go('#ide/migrate-progress');
-  },
-  rollbackFailed() {
-    this.toast(t('toast.rollbackStarted'));
-    this.go('#ide');
+    const f = state.data.flow;
+    if (!f || f.kind !== 'migrate') { this._beginMigrate(state.selectedIde); return; }
+    this._beginMigrate(f.toolId);
   },
   recheckProcess() {
-    this.toast(t('blocked.stillBlocked'));
+    this._beginMigrate(state.selectedIde, true);
   },
   showForceWarn() {
     this.toast(t('blocked.forceWarn'));
-  },
-  viewLog() {
-    this.toast(t('toast.copied'));
-  },
-  selectProject(id) {
-    state.selectedProject = id;
-    render();
-  },
-  cleanProject(kind) {
-    const p = PROJECTS.find(x => x.id === state.selectedProject);
-    if (!p) return;
-    let freed = 0;
-    if (kind === 'deps' || kind === 'all') { freed += p.deps; p.deps = 0; }
-    if (kind === 'dist' || kind === 'all') { freed += p.dist; p.dist = 0; }
-    this.toast(t('toast.cleaned', { size: fmtGB(freed) }));
-    render();
   },
   selectHistory(id) {
     state.selectedHistory = id;
@@ -2830,7 +4175,22 @@ const App = {
     render();
   },
   exportHistory() {
-    this.toast(t('history.exported'));
+    const items = HISTORY.filter(h => state.historyFilter === 'all' || h.type === state.historyFilter);
+    if (!items.length) { this.toast(t('history.exportEmpty')); return; }
+    try {
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'disk-warden-history-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      this.toast(t('history.exported'));
+    } catch (e) {
+      this.toast(t('history.exportFailed'));
+    }
   },
   rollbackHistory(id) {
     const h = HISTORY.find(x => x.id === id);
@@ -2838,70 +4198,74 @@ const App = {
     state.selectedHistory = h.id;
     const ide = CATALOG.ides.find(x => x.name === h.app);
     if (ide) state.selectedIde = ide.id;
-    state.returnHash = '#history';
-    this.go('#ide/rollback-confirm');
+    this.historyRollback(id);
   },
-  addRule() {
-    const matchEl = document.getElementById('rule-match');
-    const match = matchEl ? matchEl.value.trim() : '';
-    if (!match) {
-      if (matchEl) matchEl.focus();
-      this.toast(t('rules.required'));
+  toggleAi() {
+    const ai = (state.settings && state.settings.ai) || {};
+    if (ai.enabled) {
+      rpc('settings.set', { ai: { enabled: false } }).then(s => {
+        applySettings(s);
+        state.aiAsk = false;
+        render();
+        this.toast(t('ai.statusOff'));
+      }).catch(err => this.toast(errText(err)));
       return;
     }
-    const typeEl = document.getElementById('rule-type');
-    const safetyEl = document.getElementById('rule-safety');
-    const reasonEl = document.getElementById('rule-reason');
-    RULES.unshift({
-      id: 'r' + Date.now(), match: match,
-      type: typeEl ? typeEl.value : 'exact',
-      safety: safetyEl ? safetyEl.value : 'green',
-      source: 'user', hits: 0, enabled: true,
-      reason: reasonEl && reasonEl.value.trim() ? reasonEl.value.trim() : ''
+    state.aiAsk = true;
+    render();
+  },
+  cancelAiAsk() {
+    state.aiAsk = false;
+    render();
+  },
+  confirmAiEnable() {
+    state.aiAsk = false;
+    render();
+    rpc('ai.consent').then(() => rpc('settings.set', { ai: { enabled: true } })).then(s => {
+      applySettings(s);
+      render();
+      this.toast(t('ai.consentDone'));
+    }).catch(err => {
+      render();
+      this.toast(errText(err));
     });
-    render();
-    this.toast(t('rules.added'));
   },
-  toggleRule(id) {
-    const r = RULES.find(x => x.id === id);
-    if (!r) return;
-    r.enabled = !r.enabled;
-    render();
+  saveAi() {
+    const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    const provider = val('ai-provider') || state.settings.aiProvider;
+    const patch = {
+      enabled: provider !== 'none' && !!state.settings.aiEnabled,
+      base_url: provider === 'custom' ? val('ai-base') : '',
+      model: val('ai-model') || state.settings.aiModel
+    };
+    rpc('settings.set', { ai: patch }).then(s => {
+      applySettings(s);
+      this.toast(t('toast.saved'));
+      this.closeModal();
+    }).catch(err => this.toast(errText(err)));
   },
-  deleteRule(id) {
-    const i = RULES.findIndex(x => x.id === id);
-    if (i < 0) return;
-    RULES.splice(i, 1);
-    render();
-    this.toast(t('rules.deleted'));
-  },
-  resolvePending(id, action) {
-    const i = PENDING.findIndex(x => x.id === id);
-    if (i < 0) return;
-    const pd = PENDING[i];
-    PENDING.splice(i, 1);
-    if (action === 'green' || action === 'red') {
-      const name = pd.path.replace(/[\\/]+$/, '').split(/[\\/]/).pop() || pd.path;
-      RULES.unshift({ id: 'r' + Date.now(), match: name, type: 'exact', safety: action, source: 'user', hits: 0, enabled: true });
-      this.toast(t(action === 'green' ? 'rules.markedGreen' : 'rules.markedRed'));
-    } else {
-      this.toast(t('rules.ignored'));
-    }
-    render();
+  aiTest() {
+    this.toast(t('ai.testUnavailable'));
   },
   copyDiagnostics() {
-    const diag = [
-      'Disk Warden v0.1.0 (prototype)',
-      'OS: Windows 10 22H2 x64',
-      'Locale: ' + LANG,
-      'Last scan: ' + KPI.lastScan + ' (' + KPI.scanDuration + ')',
-      'IDEs: ' + CATALOG.ides.length + ' · dirs: ' + CATALOG.ides.reduce((a, i) => a + i.directories.length, 0),
-      'Target root: ' + state.settings.targetRoot
-    ].join('\n');
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(diag).catch(() => {});
-    }
-    this.toast(t('feedback.copied'));
+    copyText(diagnosticsText()).then(ok => {
+      this.toast(t(ok ? 'feedback.copied' : 'toast.copyFailed'));
+    });
+  },
+  openPath(path) {
+    const fail = (reason) => this.toast(t('toast.openFailedReason', { reason: reason || t('error.INTERNAL') }));
+    if (!path) { fail(t('error.NO_PATH')); return; }
+    rpc('app.reveal', { path: String(path) }).then(res => {
+      /* 主机端返回展开后的真实路径：提示里报出它，用户才知道资源管理器停在了哪儿 */
+      this.toast(res && res.path ? t('toast.openedPath', { path: res.path }) : t('toast.opened'));
+    }).catch(err => fail(errText(err)));
+  },
+  openIdeFolder(ideId) {
+    const ide = getIde(ideId);
+    this.openPath((ide.runtime && ide.runtime.root) || '');
+  },
+  openDiskLocation(categoryId) {
+    this.openPath(DISK_LOCATIONS[categoryId] || '');
   },
   toast(message) {
     const el = document.getElementById('toast');
@@ -2930,21 +4294,10 @@ function init() {
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     if (modalKind()) App.closeModal();
-    else if (state.protoOpen) { state.protoOpen = false; renderProtoPanel(); }
-  });
-  document.getElementById('proto-fab').addEventListener('click', e => {
-    e.stopPropagation();
-    state.protoOpen = !state.protoOpen;
-    renderProtoPanel();
-  });
-  document.addEventListener('click', e => {
-    if (!state.protoOpen) return;
-    if (e.target.closest('#proto-panel') || e.target.closest('#proto-fab')) return;
-    state.protoOpen = false;
-    renderProtoPanel();
   });
 
   render();
+  bootstrap();
 }
 
 init();
