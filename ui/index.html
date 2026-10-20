@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Disk Warden</title>
+<link rel="icon" href="assets/brand/favicon.ico">
 <style>
 /* ============================================================
    Disk Warden — 360 安全卫士风格 / 桌面客户端布局
@@ -48,14 +49,10 @@ a{color:var(--blue);text-decoration:none}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 1px 4px rgba(26,90,34,.16);
 }
 .brand{width:190px;flex-shrink:0;display:flex;align-items:center;gap:9px;min-width:0}
-.brand-badge{
-  width:38px;height:38px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center;
-  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.38);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
-}
-.brand-badge svg{width:23px;height:23px}
+.brand-logo{width:38px;height:38px;flex-shrink:0;border-radius:10px;box-shadow:0 1px 4px rgba(20,60,24,.22)}
 .brand-text{min-width:0}
 .brand-name{font-size:var(--fs-title);font-weight:700;letter-spacing:.2px;line-height:1.2;white-space:nowrap}
+.brand-name em{font-style:normal;font-weight:600;color:#8fe096}
 .brand-sub{font-size:var(--fs-micro);color:rgba(255,255,255,.84);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nav{display:flex;align-items:center;gap:4px;height:100%;flex:1;min-width:0}
 .nav-item{
@@ -317,6 +314,12 @@ a{color:var(--blue);text-decoration:none}
 .err-item .e-msg{font-size:var(--fs-meta);color:#c92f36;line-height:1.5;overflow-wrap:anywhere}
 .err-item.plain{background:var(--panel-2);border-color:#eef1f4}
 .err-item.plain .e-msg{color:#5b646d}
+/* 需要核对/复制的长值：纵向逐条、自动换行、附复制入口 */
+.err-item .val-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.err-item .val-head .e-k{font-size:var(--fs-meta);color:var(--muted);line-height:1.4;overflow-wrap:anywhere}
+.copy-btn{flex-shrink:0;border:1px solid #d9e2ea;background:#fff;color:#4a545e;border-radius:3px;padding:1px 7px;font-size:11px;line-height:16px;cursor:pointer}
+.copy-btn:hover{border-color:#a9bacb;color:#2f3439}
+.copy-btn:active{background:#eef2f5}
 .sw{width:34px;height:19px;border-radius:10px;background:#cbd3db;position:relative;border:none;flex-shrink:0;transition:background .12s}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.16);transition:left .14s}
 .sw.on{background:var(--green)}
@@ -384,6 +387,11 @@ a{color:var(--blue);text-decoration:none}
 .table .num{text-align:right;font-variant-numeric:tabular-nums;font-family:Consolas,monospace}
 .table .right{text-align:right}
 .table-wrap{overflow-x:auto}
+.plan-table{table-layout:fixed}
+.plan-table .path-cell{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.cell-val{display:flex;align-items:flex-start;gap:6px;min-width:0}
+.cell-val .mono{flex:1;min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word;line-height:1.5}
+.yellow-path{min-width:0;overflow-wrap:anywhere;word-break:break-word}
 
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .field{display:flex;flex-direction:column;gap:4px}
@@ -547,7 +555,7 @@ I18N['zh-CN'] = {
   'nav.rules': '规则学习',
   'nav.history': '操作历史',
   'nav.settings': '设置',
-  'nav.version': 'v0.1.0-dev',
+  'nav.version': 'v0.9.0-beta.1',
   'page.ide.title': 'IDE 数据',
   'page.ide.desc': '扫描本机 AI IDE / CLI 的数据目录，安全迁移可再生的缓存与会话。',
   'page.projects.title': '项目目录',
@@ -611,6 +619,8 @@ I18N['zh-CN'] = {
   'common.needsConfirm': '需确认',
   'common.total': '合计',
   'common.items': '{n} 项',
+  'common.copy': '复制',
+  'common.copied': '已复制',
   'common.selected': '已选 {n} 项',
   'common.files': '{n} 个文件',
   'common.required': '必填',
@@ -1167,7 +1177,7 @@ I18N['en'] = {
   'nav.rules': 'Rule learning',
   'nav.history': 'History',
   'nav.settings': 'Settings',
-  'nav.version': 'v0.1.0-dev',
+  'nav.version': 'v0.9.0-beta.1',
   'page.ide.title': 'IDE data',
   'page.ide.desc': 'Scan data folders of AI IDEs and CLIs, then move regenerable caches and sessions safely.',
   'page.projects.title': 'Projects',
@@ -1231,6 +1241,8 @@ I18N['en'] = {
   'common.needsConfirm': 'Needs review',
   'common.total': 'Total',
   'common.items': '{n} items',
+  'common.copy': 'Copy',
+  'common.copied': 'Copied',
   'common.selected': '{n} selected',
   'common.files': '{n} files',
   'common.required': 'Required',
@@ -2672,6 +2684,18 @@ function errDetailList(lines, cls) {
   if (!lines.length) return '';
   return `<div class="err-list${cls ? ' ' + cls : ''}">${lines.map(line => `<div class="err-item plain"><span class="e-msg">${esc(line)}</span></div>`).join('')}</div>`;
 }
+/* 长路径/任务号：沿用失败明细的纵向条目，值完整换行并逐项提供复制 */
+function valueList(entries, cls) {
+  const rows = entries.filter(e => e && e.value !== undefined && e.value !== null && String(e.value) !== '');
+  if (!rows.length) return '';
+  return `<div class="err-list${cls ? ' ' + cls : ''}">${rows.map(e => `<div class="err-item plain val-item">
+      <div class="val-head"><span class="e-k">${esc(e.label)}</span><button type="button" class="copy-btn" onclick="App.copyValue(this)">${esc(t('common.copy'))}</button></div>
+      <span class="e-path">${esc(e.value)}</span>
+    </div>`).join('')}</div>`;
+}
+function pathCell(value) {
+  return `<td class="path-cell"><div class="cell-val"><span class="mono">${esc(value || '')}</span><button type="button" class="copy-btn" onclick="App.copyValue(this)">${esc(t('common.copy'))}</button></div></td>`;
+}
 
 function errorDetailLines(err) {
   if (!err) return [];
@@ -2810,7 +2834,6 @@ const NAV_ICONS = {
   settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06-2.4 2.4-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21h-3.4v-.1a1.7 1.7 0 0 0-1.1-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06-2.4-2.4.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3v-3.4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06 2.4-2.4.06.06A1.7 1.7 0 0 0 8.5 5.1 1.7 1.7 0 0 0 9.6 3.5V3.4h3.4v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06 2.4 2.4-.06.06A1.7 1.7 0 0 0 19.4 9c.15.6.6 1.03 1.56 1.03H21v3.4h-.1A1.7 1.7 0 0 0 19.4 15z"/></svg>',
   feedback: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.6a8.4 8.4 0 0 1-9.1 8.3 9 9 0 0 1-3.6-.9L3 20l1.1-4.5A8.4 8.4 0 1 1 21 11.6z"/><path d="M8.4 10.6h7.2M8.4 13.6h4.6"/></svg>'
 };
-const SHIELD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 19 5.8v5.4c0 4.5-3 8.4-7 9.8-4-1.4-7-5.3-7-9.8V5.8z"/><path d="m9 11.8 2.1 2.1L15.3 9.7"/></svg>';
 
 function renderTopnav() {
   const yellow = allItems().filter(x => x.safety === 'yellow').length;
@@ -2825,9 +2848,9 @@ function renderTopnav() {
   if (!target) return;
   target.innerHTML = `
     <div class="brand">
-      <div class="brand-badge">${SHIELD_ICON}</div>
+      <img class="brand-logo" src="assets/brand/app-icon-64.png" alt="Disk Warden">
       <div class="brand-text">
-        <div class="brand-name">Disk Warden</div>
+        <div class="brand-name">Disk <em>Warden</em></div>
         <div class="brand-sub">${esc(t('app.tagline'))}</div>
       </div>
     </div>
@@ -2843,7 +2866,7 @@ function renderTopnav() {
       <button type="button" class="system-chip" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>
       <button type="button" class="system-chip icon" title="${esc(t('nav.settings'))}" aria-label="${esc(t('nav.settings'))}" onclick="App.openModal('settings')">${NAV_ICONS.settings}</button>
       <button type="button" class="system-chip" onclick="App.toggleLang()">${LANG === 'zh-CN' ? 'EN' : '中文'}</button>
-      <span class="system-ver">${esc(t('nav.version'))}</span>
+      <span class="system-ver">${esc((state.settings && state.settings.appVersion) ? 'v' + state.settings.appVersion : t('nav.version'))}</span>
     </div>`;
 }
 
@@ -3289,12 +3312,12 @@ function renderHistory() {
           <div class="sum-box"><div class="k">${esc(t('history.duration'))}</div><div class="v">${esc(h.duration)}</div></div>
           <div class="sum-box"><div class="k">${esc(t('common.type'))}</div><div class="v">${esc(t('history.type.' + h.type))}</div></div>
         </div>
-        <div class="kvbar">
-          <div class="kv-item wide"><span class="k">${esc(t('preview.from'))}</span><span class="v" title="${esc(h.from)}">${esc(h.from)}</span></div>
-          <div class="kv-item wide"><span class="k">${esc(t('preview.to'))}</span><span class="v" title="${esc(h.to)}">${esc(h.to)}</span></div>
-          ${h.code ? `<div class="kv-item"><span class="k">${esc(t('failed.code'))}</span><span class="v" style="color:#d9363e">${esc(h.code)}</span></div>` : ''}
-          ${h.job_id ? `<div class="kv-item wide"><span class="k">${esc(t('history.job'))}</span><span class="v mono">${esc(h.job_id)}</span></div>` : ''}
-        </div>
+        ${valueList([
+          { label: t('preview.from'), value: h.from },
+          { label: t('preview.to'), value: h.to },
+          h.code ? { label: t('failed.code'), value: h.code } : null,
+          h.job_id ? { label: t('history.job'), value: h.job_id } : null
+        ])}
         <div class="banner ${h.result === 'failed' ? 'danger' : h.result === 'rolledback' ? 'info' : 'ok'}"><span class="b-ico">${h.result === 'failed' ? '✕' : h.result === 'rolledback' ? '↺' : '✓'}</span><div>${esc(t(h.note))}</div></div>
         <div class="section-title"><h3>${esc(t('history.steps'))}</h3><span class="sub">${esc(t('history.detail'))}</span></div>
         <div class="timeline">
@@ -3532,8 +3555,8 @@ function modalMigrateConfirm(f, ide, toolName) {
   const busy = f.phase === 'starting';
   const reds = ide ? safetyCount(ide, 'red') : 0;
   const rows = items.map(it => `<tr>
-      <td><span class="mono">${esc(it.source_path)}</span></td>
-      <td><span class="mono">${esc(it.final_path)}</span></td>
+      ${pathCell(it.source_path)}
+      ${pathCell(it.final_path)}
       <td>${it.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>` : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`}</td>
       <td>${esc(fmtBytes(it.bytes || 0))}</td>
     </tr>`).join('');
@@ -3541,7 +3564,7 @@ function modalMigrateConfirm(f, ide, toolName) {
       <div>${esc(t('preview.yellowPending', { n: pending.length }))}</div>
       ${yellow.map(it => `<label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:var(--fs-meta)">
         <input type="checkbox" ${f.yellowConfirmed[it.item_id] ? 'checked' : ''} onchange="App.toggleYellowConfirm('${esc(it.item_id)}')">
-        <span class="mono">${esc(it.source_path)}</span>
+        <span class="mono yellow-path">${esc(it.source_path)}</span>
       </label>`).join('')}
     </div></div>` : '';
   const redBlock = reds ? `<div class="banner info mt-3"><span class="b-ico">⛨</span><div>${esc(t('preview.willExcludeRedDesc', { n: reds }))}</div></div>` : '';
@@ -3552,7 +3575,8 @@ function modalMigrateConfirm(f, ide, toolName) {
       <div class="kv-item"><span class="k">${esc(t('ide.needSpace'))}</span><span class="v">${esc(fmtBytes(need))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('preview.targetFree'))}</span><span class="v ${enough ? 'ok' : 'warn'}">${esc(fmtBytes(free))} · ${esc(enough ? t('preview.spaceOk') : t('preview.spaceBad'))}</span></div>
     </div>
-    <div class="table-wrap mt-3"><table class="table">
+    <div class="table-wrap mt-3"><table class="table plan-table">
+      <colgroup><col style="width:38%"><col style="width:38%"><col style="width:12%"><col style="width:12%"></colgroup>
       <thead><tr><th>${esc(t('preview.from'))}</th><th>${esc(t('preview.to'))}</th><th>${esc(t('common.safety'))}</th><th>${esc(t('common.size'))}</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
@@ -3584,15 +3608,23 @@ function modalMigrateSuccess(f, toolName) {
   const summary = f.summary || {};
   const plan = f.plan || {};
   const bytes = summary.bytes || plan.total_bytes || 0;
-  const junction = (plan.items && plan.items[0] && plan.items[0].final_path) || '';
+  const results = (summary.items && summary.items.length) ? summary.items : (plan.items || []);
+  const values = [];
+  results.forEach((it, i) => {
+    const suffix = results.length > 1 ? ' ' + (i + 1) : '';
+    values.push({ label: t('preview.from') + suffix, value: it.source_path || '' });
+    values.push({ label: t('preview.to') + suffix, value: it.target_path || it.final_path || '' });
+    values.push({ label: t('history.job') + suffix, value: it.job_id || '' });
+  });
+  if (!results.length) values.push({ label: t('history.job'), value: f.jobId || '' });
   const body = `
     <div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('success.sub'))}</div></div>
     <div class="kvbar mt-3">
       <div class="kv-item"><span class="k">${esc(t('success.freed'))}</span><span class="v ok">${esc(fmtBytes(bytes))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('success.verified'))}</span><span class="v">${esc(t('success.verifiedValue'))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('success.duration'))}</span><span class="v">${esc(fmtDuration(jobDuration(f.job)))}</span></div>
-      <div class="kv-item wide"><span class="k">${esc(t('success.junction'))}</span><span class="v mono">${esc(junction)}</span></div>
     </div>
+    ${valueList(values, 'mt-3')}
     <div class="note mt-3">${esc(t('success.rollbackable'))}</div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.gotoHistory()">${esc(t('success.viewHistory'))}</button>
     <span class="spacer"></span>
@@ -3635,10 +3667,10 @@ function modalRollbackFlow() {
   }
   if (f.phase === 'residual') {
     const body = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('rollback.residualBody', { size: fmtBytes(p.restore_bytes || 0) }))}</div></div>
-      <div class="kvbar mt-3">
-        <div class="kv-item wide"><span class="k">${esc(t('rollback.source'))}</span><span class="v mono">${esc(p.final_path || '')}</span></div>
-        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(p.source_path || '')}</span></div>
-      </div>`;
+      ${valueList([
+        { label: t('rollback.source'), value: p.final_path || '' },
+        { label: t('rollback.target'), value: p.source_path || '' }
+      ], 'mt-3')}`;
     const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeFlow()">${esc(t('action.cancel'))}</button>
       <span class="spacer"></span>
       <button type="button" class="btn btn-primary btn-sm" onclick="App.confirmResidual()">${esc(t('rollback.residualConfirm'))}</button>`;
@@ -3658,10 +3690,10 @@ function modalRollbackFlow() {
   if (f.phase === 'confirm' || f.phase === 'starting') {
     const busy = f.phase === 'starting';
     const body = `<div class="note">${esc(t('rollback.desc', { path: p.final_path || '', size: fmtBytes(p.restore_bytes || 0) }))}</div>
-      <div class="kvbar mt-3">
-        <div class="kv-item wide"><span class="k">${esc(t('rollback.source'))}</span><span class="v mono">${esc(p.final_path || '')}</span></div>
-        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(p.source_path || '')}</span></div>
-      </div>
+      ${valueList([
+        { label: t('rollback.source'), value: p.final_path || '' },
+        { label: t('rollback.target'), value: p.source_path || '' }
+      ], 'mt-3')}
       <div class="banner warn mt-3"><span class="b-ico">△</span><div>${esc(t('rollback.note', { app: toolName }))}</div></div>
       ${f.error ? `<div class="mt-3">${flowPlanErrorBody(f.error)}</div>` : ''}`;
     const foot = `<button type="button" class="btn btn-ghost btn-sm" ${busy ? 'disabled' : ''} onclick="App.closeFlow()">${esc(t('rollback.cancel'))}</button>
@@ -3685,9 +3717,13 @@ function modalRollbackFlow() {
     const s = f.summary || {};
     const body = `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('rollback.successSub'))}</div></div>
       <div class="kvbar mt-3">
-        <div class="kv-item wide"><span class="k">${esc(t('rollback.target'))}</span><span class="v mono">${esc(s.source_path || p.source_path || '')}</span></div>
         <div class="kv-item"><span class="k">${esc(t('success.duration'))}</span><span class="v">${esc(fmtDuration(jobDuration(f.job)))}</span></div>
-      </div>`;
+      </div>
+      ${valueList([
+        { label: t('rollback.target'), value: s.source_path || p.source_path || '' },
+        { label: t('rollback.source'), value: s.final_path || p.final_path || '' },
+        { label: t('history.job'), value: s.job_id || f.jobId || '' }
+      ], 'mt-3')}`;
     const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.gotoHistory()">${esc(t('success.viewHistory'))}</button>
       <span class="spacer"></span>
       <button type="button" class="btn btn-primary btn-sm" onclick="App.closeFlow()">${esc(t('action.done'))}</button>`;
@@ -4250,6 +4286,15 @@ const App = {
   copyDiagnostics() {
     copyText(diagnosticsText()).then(ok => {
       this.toast(t(ok ? 'feedback.copied' : 'toast.copyFailed'));
+    });
+  },
+  copyValue(btn) {
+    const box = btn.closest('.val-item, .cell-val');
+    const el = box && box.querySelector('.e-path, .mono');
+    const text = el ? el.textContent : '';
+    if (!text) return;
+    copyText(text).then(ok => {
+      this.toast(t(ok ? 'common.copied' : 'toast.copyFailed'));
     });
   },
   openPath(path) {

@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="ui/assets/brand/logo-wordmark-dark.png">
+    <img src="ui/assets/brand/logo-wordmark-light.png" width="420" alt="Disk Warden">
+  </picture>
+</p>
+
 # Disk Warden
 
 English | [Chinese](README.zh-CN.md)
@@ -22,10 +29,10 @@ Runs on **Windows and macOS**.
 | Copy, verification, link creation, crash recovery (T09–T10) | Done |
 | Rollback engine and local store: journal / history / settings / learned rules (T11) | Done, merged to `main` |
 | AI analysis interface (T22) | Done, disabled by default |
-| UI wired to the real engine (T12) | In progress |
+| UI wired to the real engine (T12) | Done, merged to `main` |
 | Windows / macOS packaging (T15 / T21) | Not started |
 
-**437 unit tests** cover the completed modules.
+**594 unit tests** cover the completed modules; CI runs them on every push.
 
 ## Platforms
 

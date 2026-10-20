@@ -67,11 +67,12 @@ def main(argv=None):
     debug = os.environ.get("DISK_WARDEN_DEBUG", "") == "1"
     os.environ.setdefault("PYTHONUTF8", "1")
 
+    from . import APP_VERSION
     from .service import create_service
 
     service = create_service()
     _configure_logging(service.layout.logs_dir, debug=debug)
-    LOGGER.info("starting disk-warden %s (data root %s)", "0.2.0", service.layout.root)
+    LOGGER.info("starting disk-warden %s (data root %s)", APP_VERSION, service.layout.root)
 
     try:
         import webview
