@@ -10,6 +10,7 @@ Python 3.8 compatible (decision 0005).
 
 import sys
 
+from .external import ExternalOpenError, open_url
 from .filesystem import is_reparse_point, is_reparse_stat
 from .link import (
     LinkError,
@@ -19,6 +20,7 @@ from .link import (
     strip_extended_prefix,
 )
 from .process import ProcessEnumerationError, ProcessInfo
+from .reveal import RevealError, expand_path, reveal_directory
 from .transfer import (
     TransferCancelled,
     TransferError,
@@ -43,6 +45,8 @@ if sys.platform.startswith("win"):
         rename_dir,
         volume_info,
     )
+    from .win.handles import find_dir_holders
+    from .win.integrity import describe_denial as describe_integrity_denial
 else:
     from .posix.link import (
         create_junction,
@@ -54,24 +58,41 @@ else:
         volume_info,
     )
 
+    def find_dir_holders(path):
+        # type: (str) -> list
+        """POSIX renames do not fail because of open handles; nothing to find."""
+        return []
+
+    def describe_integrity_denial(path):
+        # type: (str) -> str
+        """POSIX has no mandatory integrity levels; nothing can be denied."""
+        return ""
+
 __all__ = [
+    "ExternalOpenError",
     "LinkError",
     "ProcessEnumerationError",
     "ProcessInfo",
+    "RevealError",
     "TransferCancelled",
     "TransferError",
     "TransferUnsupportedError",
     "VolumeInfo",
     "create_junction",
+    "describe_integrity_denial",
     "enumerate_processes",
+    "expand_path",
+    "find_dir_holders",
     "is_junction",
     "is_link",
     "is_reparse_point",
     "is_reparse_stat",
     "link_target_matches",
+    "open_url",
     "read_junction_target",
     "remove_junction",
     "rename_dir",
+    "reveal_directory",
     "run_robocopy",
     "same_volume",
     "strip_extended_prefix",
