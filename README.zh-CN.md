@@ -40,6 +40,7 @@
 
 - **Windows 10/11**：当前主开发与验证平台。核心引擎已实现：robocopy 搬运、`mklink /J` 建链、进程占用检测、卷信息与空间预检。
 - **macOS 11+（Apple Silicon）**：属于第一期产品范围（决策 0004）。所有平台相关实现都在 `src/platform/mac/`：`rsync`/`cp` 搬运、`ln -s` 建链并回读目标、卷信息与空间检查、进程检测、当前用户 LaunchAgent 自启。未签名 `.app` 由 GitHub Actions `macos-latest` 构建（决策 0007）；Intel Mac 需要单独的 x64 构建，目前尚未产出。
+  - **0.9.0-beta 的已知缺口**：自动发现（`data/ide-catalog.json` + `src/core/scan/discovery.py`）仍是 Windows 专用，在 Mac 上扫描结果为 0，列表是空的。应用、托盘、自启、日志与迁移引擎均就绪；macOS 目录清单是后续任务。
 
 ## macOS 首次启动
 

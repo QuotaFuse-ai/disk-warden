@@ -40,6 +40,7 @@ English | [Chinese](README.zh-CN.md)
 
 - **Windows 10/11** — primary development and verification platform. The core engine is implemented: robocopy transfer, `mklink /J` links, process-in-use detection, volume and free-space checks.
 - **macOS 11+ (Apple Silicon)** — in scope for the first release (decision 0004). Everything platform-specific lives in `src/platform/mac/`: `rsync`/`cp` transfer, `ln -s` symlinks with target read-back, volume and free-space checks, process detection, and a per-user LaunchAgent for autostart. The unsigned `.app` is built on GitHub Actions `macos-latest` (decision 0007); Intel Macs need a separate x64 build, which is not produced yet.
+  - **Known gap in 0.9.0-beta:** automatic discovery (`data/ide-catalog.json` + `src/core/scan/discovery.py`) is still Windows-only, so the scan finds nothing on a Mac and the list comes up empty. The app, tray, autostart, logs, and the migration engine itself are in place; a macOS catalog is a follow-up task.
 
 ## First launch on macOS
 
