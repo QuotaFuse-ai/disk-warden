@@ -17,6 +17,8 @@
   --line:#e3e7eb; --line-soft:#edf0f3;
   --text:#2f3439; --text-2:#5b646d; --muted:#7d8791; --dim:#98a2ac;
   --blue:#2f8bf5; --blue-2:#1d74dc; --red:#e5484d; --amber:#d98500;
+  /* 可访问性色板（主机端交互设计 v0.2 §4.2.1，产品已批准）：黄=待确认 + 禁用态 */
+  --amber-ink:#8a5c00; --amber-line:#f1dcaa; --amber-bar:#cc7300; --disabled-ink:#838d97;
   --violet:#7c5cff;
   --radius:5px; --radius-sm:3px;
   /* 桌面端字号阶梯：最小 11px，正文 14px（100% DPI 可读） */
@@ -39,7 +41,7 @@ a{color:var(--blue);text-decoration:none}
 ::-webkit-scrollbar-track{background:transparent}
 :focus-visible{outline:2px solid #7fd383;outline-offset:1px;border-radius:3px}
 
-.app{display:flex;flex-direction:column;height:100vh;min-width:1080px;background:var(--bg)}
+.app{display:flex;flex-direction:column;height:100vh;min-width:1024px;background:var(--bg)}
 
 /* ---------- 顶部绿色导航 ---------- */
 .topnav{
@@ -119,11 +121,11 @@ a{color:var(--blue);text-decoration:none}
 .btn-soft:hover{background:#ddf3db}
 .btn-sm{padding:6px 11px;font-size:var(--fs-body)}
 .btn-xs{padding:3px 8px;font-size:var(--fs-meta);border-radius:2px}
-.btn[disabled],.btn.disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.25)}
+.btn[disabled],.btn.disabled{opacity:.55;cursor:not-allowed}
 .btn[disabled]:hover,.btn.disabled:hover{background:inherit;color:inherit;border-color:inherit}
 .modal-foot .btn{padding:6px 16px}
 
-.v-red{color:var(--red)} .v-blue{color:var(--blue)} .v-green{color:#2f8e35} .v-amber{color:var(--amber)} .v-violet{color:var(--violet)}
+.v-red{color:var(--red)} .v-blue{color:var(--blue)} .v-green{color:#2f8e35} .v-amber{color:var(--amber-ink)} .v-violet{color:var(--violet)}
 
 /* ---------- 内容与分栏 ---------- */
 .content{display:flex;flex-direction:column;gap:12px;min-width:0;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:2px}
@@ -165,7 +167,7 @@ a{color:var(--blue);text-decoration:none}
 
 .legend{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:var(--fs-meta);color:var(--muted)}
 .legend .dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px}
-.dot-green{background:var(--green)} .dot-red{background:var(--red)} .dot-amber{background:#f0a020} .dot-blue{background:var(--blue)} .dot-gray{background:#aab3bc}
+.dot-green{background:var(--green)} .dot-red{background:var(--red)} .dot-amber{background:var(--amber-bar)} .dot-blue{background:var(--blue)} .dot-gray{background:#aab3bc}
 
 /* 列表栏 */
 .bar{background:#fff;border:1px solid var(--line);border-radius:5px;display:flex;flex-direction:column;gap:9px;min-width:0}
@@ -221,7 +223,7 @@ a{color:var(--blue);text-decoration:none}
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-micro);font-weight:600;padding:1px 6px;border-radius:2px;line-height:1.5;white-space:nowrap}
 .b-green{background:#eaf7e8;color:#2f8e35;border:1px solid #d0eccd}
 .b-red{background:#fff0ef;color:#d9363e;border:1px solid #f2c9c6}
-.b-amber{background:#fff7e6;color:#c47b00;border:1px solid #f1dcaa}
+.b-amber{background:#fff7e6;color:var(--amber-ink);border:1px solid var(--amber-line)}
 .b-blue{background:#eef5ff;color:#1f6fd0;border:1px solid #cfe2fb}
 .b-gray{background:#f2f4f6;color:#7d8791;border:1px solid #e1e6ea}
 .b-violet{background:#f3efff;color:#6f4bd8;border:1px solid #ddd0fb}
@@ -240,7 +242,7 @@ a{color:var(--blue);text-decoration:none}
 
 .banner{display:flex;gap:8px;padding:8px 10px;border-radius:3px;font-size:var(--fs-body);line-height:1.55;border:1px solid}
 .banner .b-ico{flex-shrink:0;font-size:var(--fs-sub);line-height:1.3}
-.banner.warn{background:#fff9ea;border-color:#f1dcaa;color:#a86a00}
+.banner.warn{background:#fff9ea;border-color:var(--amber-line);color:var(--amber-ink)}
 .banner.danger{background:#fff1f0;border-color:#f2c9c6;color:#c92f36}
 .banner.info{background:#eff6ff;border-color:#cfe2fb;color:#1f6fd0}
 .banner.ok{background:#f0faf0;border-color:#d0eccd;color:#2f8e35}
@@ -255,7 +257,7 @@ a{color:var(--blue);text-decoration:none}
 .kv .k{color:var(--muted)}
 .kv .v{font-family:Consolas,monospace;color:#2f3439;font-weight:600;text-align:right;word-break:break-all}
 .kv .v.ok{color:#2f8e35}
-.kv .v.warn{color:var(--amber)}
+.kv .v.warn{color:var(--amber-ink)}
 
 .section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:1px}
 .section-title h3{font-size:var(--fs-body);font-weight:700;color:#4a545e;letter-spacing:.3px;display:flex;align-items:center;gap:6px}
@@ -266,7 +268,7 @@ a{color:var(--blue);text-decoration:none}
 .row:hover{background:#f7fafc;border-color:#e0e6eb}
 .row.risk-green{box-shadow:inset 2px 0 0 var(--green)}
 .row.risk-red{box-shadow:inset 2px 0 0 var(--red);background:#fdf7f7}
-.row.risk-yellow{box-shadow:inset 2px 0 0 #f0a020}
+.row.risk-yellow{box-shadow:inset 2px 0 0 var(--amber-bar)}
 .row-check{flex-shrink:0;width:16px;height:16px;accent-color:var(--green);cursor:pointer}
 .row-main{flex:1;min-width:0}
 .row-name{font-size:var(--fs-strong);font-weight:550;color:#33383d;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -280,7 +282,7 @@ a{color:var(--blue);text-decoration:none}
 .trow:hover{background:#f7fafc;border-color:#e0e6eb}
 .trow.risk-green{box-shadow:inset 3px 0 0 var(--green)}
 .trow.risk-red{box-shadow:inset 3px 0 0 var(--red);background:#fdf7f7}
-.trow.risk-yellow{box-shadow:inset 3px 0 0 #f0a020;background:#fffbf3}
+.trow.risk-yellow{box-shadow:inset 3px 0 0 var(--amber-bar);background:#fffbf3}
 .trow.dir{grid-template-columns:18px minmax(0,1.6fr) minmax(0,1.15fr) 84px 106px}
 .trow.proj{grid-template-columns:18px minmax(0,1.6fr) minmax(0,1.2fr) 84px 106px}
 .trow.pend{grid-template-columns:minmax(0,1.6fr) minmax(0,1.1fr) 84px auto}
@@ -305,7 +307,7 @@ a{color:var(--blue);text-decoration:none}
 .kvbar .k{font-size:var(--fs-meta);color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .kvbar .v{font-size:var(--fs-body);font-family:Consolas,monospace;color:#2f3439;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kvbar .v.ok{color:#2f8e35}
-.kvbar .v.warn{color:var(--amber)}
+.kvbar .v.warn{color:var(--amber-ink)}
 
 /* 错误明细 / 失败项：逐条独占一行，路径在上、原因在下（长路径不截断、不与原因叠字） */
 .err-list{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -425,7 +427,7 @@ a{color:var(--blue);text-decoration:none}
 .modal-head h3{font-size:var(--fs-sub);font-weight:700;color:#2f3439;display:flex;align-items:center;gap:7px}
 .modal-head h3::before{content:"";width:3px;height:15px;border-radius:1px;background:var(--green);flex-shrink:0}
 .modal-head .sub{font-size:var(--fs-meta);color:var(--dim);margin-top:3px;line-height:1.45}
-.modal-x{background:none;border:none;color:#a2abb4;font-size:var(--fs-page);line-height:1;padding:4px 6px;border-radius:3px}
+.modal-x{background:none;border:none;color:var(--disabled-ink);font-size:var(--fs-page);line-height:1;padding:4px 6px;border-radius:3px}
 .modal-x:hover{color:#2f3439;background:#eef2f5}
 .modal-body{padding:14px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .modal-body > *{flex-shrink:0}
@@ -445,6 +447,19 @@ a{color:var(--blue);text-decoration:none}
 .settings-row select,.settings-row input[type=text]{background:#fff;border:1px solid #d7dee4;border-radius:3px;padding:7px 9px;font-size:var(--fs-body);color:var(--text)}
 .settings-row select:focus,.settings-row input[type=text]:focus{outline:none;border-color:#7fd383}
 .settings-row input[type=text]{width:280px;font-family:Consolas,monospace}
+
+/* ---------- 首次启动引导（macOS 未签名应用） ---------- */
+.fr-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.fr-steps li{display:flex;gap:10px;align-items:flex-start;font-size:var(--fs-body);line-height:1.65;color:var(--text)}
+.fr-n{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#eef3f7;color:var(--text-2);font-size:var(--fs-micro);font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px}
+.fr-adv{border:1px solid var(--line-soft);border-radius:5px;background:#fbfcfd;padding:9px 11px}
+.fr-adv summary{cursor:pointer;font-size:var(--fs-meta);font-weight:600;color:var(--text-2);list-style:none}
+.fr-adv summary::-webkit-details-marker{display:none}
+.fr-adv summary::before{content:"▸ ";color:var(--dim)}
+.fr-adv[open] summary::before{content:"▾ "}
+.fr-adv .cmd{display:block;margin-top:8px;padding:8px 10px;background:#f4f7f9;border:1px solid #e4eaef;border-radius:4px;font-size:var(--fs-meta);overflow-wrap:anywhere;user-select:all}
+.fr-adv p{margin:8px 0 0;font-size:var(--fs-meta);color:var(--dim);line-height:1.6}
+.fr-adv .row-flex{margin-top:8px}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,8px);background:#333b43;border:1px solid #454e57;color:#fff;padding:8px 14px;border-radius:3px;font-size:var(--fs-body);box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;max-width:70vw;overflow-wrap:anywhere}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -479,7 +494,7 @@ a{color:var(--blue);text-decoration:none}
 .sug-reason{font-size:var(--fs-body);color:#4a545e}
 .conf{font-family:Consolas,monospace;font-weight:700;color:#6f4bd8}
 
-.muted{color:var(--muted)} .dim{color:var(--dim)} .ok{color:#2f8e35} .warn{color:var(--amber)} .bad{color:var(--red)}
+.muted{color:var(--muted)} .dim{color:var(--dim)} .ok{color:#2f8e35} .warn{color:var(--amber-ink)} .bad{color:var(--red)}
 .mono{font-family:Consolas,"SFMono-Regular",monospace;font-variant-numeric:tabular-nums}
 .nowrap{white-space:nowrap} .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row-flex{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -515,6 +530,32 @@ a{color:var(--blue);text-decoration:none}
   .content > .cols > .panel.panel-scroll{flex:none}
   .content > .cols > .panel.panel-scroll > .panel-body{overflow:visible;flex:none}
   .content > .cols .scroll-y{overflow:visible;flex:none}
+}
+/* ---------- ≤1080：最小可用宽度 1024 档（设计文档 §11.4.1 / §4.4） ---------- */
+@media (max-width:1080px){
+  .topnav{height:80px}
+  .nav-item{width:76px;height:72px;gap:5px}
+  .brand{width:150px}
+  .nav-ico{width:30px;height:30px}.nav-ico svg{width:18px;height:18px}
+  .split-layout{grid-template-columns:200px minmax(0,1fr)}
+  .system-chip{padding:0 9px;font-size:var(--fs-body)}
+  .empty{padding:40px 20px}
+  .modal,.modal.wide{width:min(580px,calc(100vw - 32px))}
+  /* 表格 → 行卡：横向滚动只允许在 ≥1080 生效 */
+  .table-wrap{overflow:visible}
+  .table,.table tbody{display:block;width:100%}
+  .table thead{display:none}
+  .table tr{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;min-height:44px;padding:9px 12px;margin-bottom:6px;background:var(--panel-2);border:1px solid #eef1f4;border-radius:4px}
+  .table td{display:block;padding:0;border:none;text-align:left;white-space:normal}
+  .table td:first-child{flex:1 1 100%;min-width:0}
+  /* 待确认/失败项：不折叠成横排，保持纵向列表 */
+  .cols .trow.pend,.modal .trow.pend{grid-template-columns:minmax(0,1fr);row-gap:5px;padding:10px 12px;align-items:start}
+  .cols .trow.pend .tcell.tpath,.modal .trow.pend .tcell.tpath,
+  .cols .trow.pend .tcell.tsize,.modal .trow.pend .tcell.tsize,
+  .cols .trow.pend .tcell.tdesc,.modal .trow.pend .tcell.tdesc,
+  .cols .trow.pend .tcell.wrap,.modal .trow.pend .tcell.wrap,
+  .cols .trow.pend .tcell.acts,.modal .trow.pend .tcell.acts{grid-column:1;grid-row:auto;justify-self:start;text-align:left}
+  .cols .trow.pend .tcell.acts,.modal .trow.pend .tcell.acts{justify-content:flex-start}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
@@ -555,7 +596,7 @@ I18N['zh-CN'] = {
   'nav.rules': '规则学习',
   'nav.history': '操作历史',
   'nav.settings': '设置',
-  'nav.version': 'v0.9.0-beta.1',
+  'nav.version': 'v0.9.0-beta.6',
   'page.ide.title': 'IDE 数据',
   'page.ide.desc': '扫描本机 AI IDE / CLI 的数据目录，安全迁移可再生的缓存与会话。',
   'page.projects.title': '项目目录',
@@ -686,6 +727,8 @@ I18N['zh-CN'] = {
   'ide.migratableValue': '{n} 项 · {size}',
   'ide.redExcluded': '{n} 个受保护项已自动排除，不会迁移',
   'ide.redLocked': '受保护，无迁移入口',
+  'ide.migratedLocked': '已迁移，不能重复迁移',
+  'ide.migratedRowReason': '已迁移到目标盘，可随时回滚',
   'ide.yellowHint': '未知目录默认不参与迁移；确认后可手动勾选。',
   'ide.yellowLocked': '需先确认此目录的用途',
   'ide.processTitle': '检测到进程正在运行',
@@ -854,6 +897,10 @@ I18N['zh-CN'] = {
   'settings.languageDesc': '切换后界面文案立即生效',
   'settings.autoStart': '开机自启',
   'settings.autoStartDesc': '登录 Windows 后自动在托盘运行',
+  'settings.autoStartUnsupported': '当前运行方式不会写入开机启动项，安装版生效',
+  'settings.logs': '日志目录',
+  'settings.logsDesc': '运行日志只保存在本机，按 2 MB 轮转并保留最近 3 份',
+  'settings.logsOpen': '打开目录',
   'settings.targetRoot': '目标存储根目录',
   'settings.targetRootDesc': '迁移后的目录、备份与日志都放在这里',
   'settings.autoMaintenance': '自动维护',
@@ -991,24 +1038,54 @@ I18N['zh-CN'] = {
   'ai.sub': '不认识的目录交给 AI 判断，结果只是建议，你采纳后才写入规则。',
   'ai.enable': '启用 AI 辅助识别',
   'ai.enableDesc': '关闭后，未知目录只能手动确认。',
-  'ai.provider': '接入方式',
-  'ai.provider.relay': '用当前 Multica 助手的模型',
+  'ai.provider': '服务商',
+  'ai.providerHint': '选择常用服务商会自动填好接口地址与模型，仍可手动修改。',
+  'ai.provider.deepseek': 'DeepSeek',
+  'ai.provider.openai': 'OpenAI',
+  'ai.provider.qwen': '通义千问',
+  'ai.provider.kimi': 'Kimi（月之暗面）',
+  'ai.provider.zhipu': '智谱 GLM',
   'ai.provider.custom': '自定义 OpenAI 兼容接口',
   'ai.provider.none': '不对接（只用本地规则）',
   'ai.baseUrl': '接口地址',
   'ai.baseUrlDesc': '例：https://api.example.com/v1',
   'ai.model': '模型',
-  'ai.modelAuto': '跟随助手设置',
+  'ai.modelAuto': '服务端默认模型',
   'ai.key': '密钥',
-  'ai.keyDesc': '只从环境变量 DEEPSEEK_API_KEY 读取，不写入本机文件，不进日志、不进反馈内容',
+  'ai.keyDesc': '密钥用 Windows DPAPI 加密后只保存在本机，仅当前用户可解密；不写入日志，也不会进入反馈内容。',
+  'ai.keyHint': '密钥以密文保存，界面不会回显明文。留空表示不修改已保存的密钥。',
+  'ai.keyPlaceholder': '粘贴 API Key',
+  'ai.keyPlaceholderStored': '已保存，留空则不修改',
+  'ai.keyShow': '显示',
+  'ai.keyHide': '隐藏',
+  'ai.keyMask': '••••••••',
+  'ai.keySource.env': '来源：环境变量',
+  'ai.keySource.stored': '来源：本机加密保存',
+  'ai.keySource.none': '未保存密钥',
+  'ai.keyMissing': '未配置密钥',
+  'ai.keyStoredHint': '密钥已加密保存在本机，界面只显示掩码。',
+  'ai.keyEnvOverride': '环境变量 DISK_WARDEN_AI_API_KEY 优先于本机保存的密钥。',
+  'ai.keyUnavailable': '已保存的密钥无法解密（可能来自其他账户或电脑），请重新填写或清除。',
+  'ai.keyClear': '清除已保存的密钥',
+  'ai.keyCleared': '已清除本机保存的密钥',
+  'ai.savedWithKey': '设置已保存，密钥已加密保存在本机',
+  'ai.localOnlyTitle': '仅使用本地规则',
+  'ai.localOnly': '扫描、迁移、回滚照常可用，不受影响。',
   'ai.test': '测试连接',
-  'ai.testUnavailable': '连接测试将在后续版本提供。',
-  'ai.keyEnvSet': '已从环境变量读取',
-  'ai.keyEnvMissing': '未检测到环境变量',
-  'ai.testOk': '连接可用 · 延迟 0.8s',
-  'ai.testBad': '连接失败：密钥无效',
+  'ai.testing': '正在测试连接…',
+  'ai.testOk': '连接正常 · {model} · {ms} ms',
+  'ai.testBad': '连接失败：{reason}',
+  'ai.test.reason.missing_api_key': '还没有可用的密钥',
+  'ai.test.reason.missing_base_url': '没有填写接口地址',
+  'ai.test.reason.missing_model': '没有填写模型名称',
+  'ai.test.reason.timeout': '连接超时（8 秒）',
+  'ai.test.reason.network': '网络无法连接，请检查接口地址或代理',
+  'ai.test.reason.http': '服务端返回错误，请检查密钥与接口地址',
+  'ai.test.reason.rate_limited': '请求过于频繁，请稍后再试',
+  'ai.test.reason.invalid_response': '服务端返回内容无法解析',
+  'ai.test.reason.internal': '主机端内部错误',
   'ai.statusOn': '已对接',
-  'ai.statusOff': '未对接',
+  'ai.statusOff': '仅使用本地规则',
   'ai.scope': 'AI 能看到什么',
   'ai.scopeValue': '只有目录路径与文件名；不读文件内容，不上传任何文件',
   'ai.limit': '每次扫描最多调用',
@@ -1023,8 +1100,8 @@ I18N['zh-CN'] = {
   'ai.adopted': '已采纳，写入规则表',
   'ai.done': '本轮识别完成：{n} 项已给出建议',
   'ai.allDone': '待确认目录都已识别',
-  'ai.needKey': '先接好 AI 模型，再接着识别',
-  'ai.needModel': '请填写模型名称，或改用当前助手的模型',
+  'ai.needKey': '未配置 AI 接口或密钥，当前仅使用本地规则',
+  'ai.needModel': '请填写模型名称',
   'ai.noneLeft': '没有需要识别的目录了',
   'ai.filter': 'AI 已给建议',
   'ai.note': 'AI 识别结果仅作为建议，不会自动迁移任何文件。',
@@ -1090,8 +1167,14 @@ I18N['zh-CN'] = {
   'error.FORBIDDEN': '该操作不在允许范围内',
   'error.NOT_FOUND': '目录不存在',
   'error.PERMISSION_DENIED': '没有权限访问该目录',
+  'error.AUTOSTART_FAILED': '无法更新开机启动项，请检查当前用户权限',
   'error.IO_ERROR': '系统未能打开资源管理器',
+  'error.ALREADY_MIGRATED': '这些目录已经迁移，无需重复迁移',
   'error.INTERNAL': '主机端内部错误',
+  'error.AI_CONSENT_REQUIRED': '启用 AI 前需要先确认第三方数据说明',
+  'error.AI_KEY_UNSUPPORTED': '当前系统不支持在本机加密保存密钥，请改用环境变量 DISK_WARDEN_AI_API_KEY',
+  'error.AI_KEY_STORE_FAILED': '密钥保存失败，请重试',
+  'error.AI_KEY_DECRYPT_FAILED': '已保存的密钥无法解密，请重新填写或清除',
   'toast.cleaned': '缓存清理完成，释放 {size}',
   'toast.ruleAdded': '规则已添加',
   'toast.saved': '设置已保存',
@@ -1100,6 +1183,9 @@ I18N['zh-CN'] = {
   'toast.retry': '重试中',
   'toast.exported': '已导出',
   'toast.needSelect': '请先选择至少一个目录',
+  'toast.needSelectAllRed': '没有可迁目录：受保护项已自动排除',
+  'toast.needSelectMigrated': '没有可迁目录：都已迁移，可先回滚再迁移',
+  'toast.needSelectYellow': '没有可勾选目录：待确认项需先确认用途',
   'toast.spaceShort': '目标盘空间不足',
   'toast.blocked': '软件正在运行，无法迁移',
   'toast.unavailable': '该功能尚未接入主机端，将在后续版本提供',
@@ -1107,7 +1193,7 @@ I18N['zh-CN'] = {
   'unit.minutes': '分钟',
   'unit.seconds': '秒',
   'ai.consentTitle': '启用 AI 分析？',
-  'ai.consentBody': '启用后，目录名称、体积与分级结果等目录信息会发送给第三方 AI 服务用于分析。API Key 只从环境变量读取，不会写入本地。',
+  'ai.consentBody': '启用后，目录名称、体积与分级结果等目录信息会发送给第三方 AI 服务用于分析。API Key 经 Windows DPAPI 加密后仅保存在本机，只用于调用你填写的接口。',
   'ai.consentAccept': '同意并启用',
   'ai.consentDecline': '暂不启用',
   'ai.consentDone': 'AI 分析已启用',
@@ -1141,6 +1227,9 @@ I18N['zh-CN'] = {
   'recovery.needsHuman': '需要人工处理',
   'recovery.recover': '恢复',
   'recovery.rollback': '回滚',
+  'recovery.ignore': '忽略此项',
+  'recovery.ignoreHint': '只是不再提示，磁盘上的记录和数据都不会改动',
+  'recovery.ignored': '已忽略该项，状态再次变化时会重新提示',
   'recovery.running': '正在处理…',
   'recovery.done': '恢复完成',
   'recovery.successHint': '中断的任务已恢复，可以重新扫描确认状态。',
@@ -1165,7 +1254,30 @@ I18N['zh-CN'] = {
   'rollback.stage.record': '写入回滚记录',
   'rollback.stage.done': '完成',
   'success.rollbackable': '可在历史记录中随时回滚',
-  'toast.noGreen': '没有可迁移的目录'
+  'toast.noGreen': '没有可迁移的目录',
+  'firstRun.title': '首次启动设置',
+  'firstRun.sub': '这个版本没有 Apple 开发者签名，macOS 第一次会拦截它。按下面的步骤放行一次即可。',
+  'firstRun.version': '系统版本 macOS {version}',
+  'firstRun.versionUnknown': '没能识别系统版本。先按 macOS 15 及以上的步骤操作；如果看不到「仍要打开」，再用旧版本的方式：按住 Control 点按图标 → 打开。',
+  'firstRun.unsupported': 'Disk Warden 需要 macOS {min} 或更高版本，当前系统可能无法正常运行。',
+  'firstRun.step.move_to_applications': '把 DiskWarden.app 拖进「应用程序」文件夹。不要在下载目录或解压出来的临时目录里直接运行：系统会把程序挂到只读的随机路径上，之后的迁移会失败。',
+  'firstRun.step.try_to_open': '在「应用程序」里双击 DiskWarden.app。',
+  'firstRun.step.dismiss_block': '出现「Apple 无法验证“Disk Warden”是否包含恶意软件」时，点「完成」关掉。这是未签名应用的固定提示，不是病毒告警，也不需要关闭任何系统安全功能。',
+  'firstRun.step.open_privacy_security': '打开 系统设置 → 隐私与安全性，向下滚动到「安全性」，会有一条「已阻止使用“Disk Warden”」的提示，点「仍要打开」，然后输入登录密码或使用触控 ID。',
+  'firstRun.step.allow_anyway': '再双击一次 DiskWarden.app，在弹窗里点「打开」，主界面就出来了。之后双击即可正常启动。',
+  'firstRun.step.control_click_open': '在「应用程序」里按住 Control 键点按（或右键点按）DiskWarden.app 图标，在快捷菜单里选「打开」。',
+  'firstRun.step.confirm_open': '弹窗提示「macOS 无法验证此 App 是否包含恶意软件」时，点「打开」完成放行。',
+  'firstRun.step.double_click_later': '之后双击图标即可正常启动，不需要重复这些步骤。',
+  'firstRun.advanced': '高级选项：用终端移除隔离属性',
+  'firstRun.advancedRisk': '执行下面这条命令会一次性跳过上面的步骤，但它把整个 App 的隔离标记都去掉了，等于放弃系统对下载来源的检查。只对你亲手下载并确认过的这份文件使用；命令里的路径写错会作用到别的程序上，执行前请先核对路径。',
+  'firstRun.advancedNote': '根治办法是代码签名与公证（需要 Apple 开发者账号），本期没有做，后续再评估。',
+  'firstRun.copy': '复制命令',
+  'firstRun.later': '下次再说',
+  'firstRun.done': '我知道了',
+  'firstRun.help': '首次启动说明',
+  'firstRun.helpDesc': '重新查看未签名应用的放行步骤',
+  'firstRun.view': '查看步骤',
+  'firstRun.copied': '命令已复制'
 };
 I18N['en'] = {
   'app.tagline': 'Disk manager for AI IDEs',
@@ -1177,7 +1289,7 @@ I18N['en'] = {
   'nav.rules': 'Rule learning',
   'nav.history': 'History',
   'nav.settings': 'Settings',
-  'nav.version': 'v0.9.0-beta.1',
+  'nav.version': 'v0.9.0-beta.6',
   'page.ide.title': 'IDE data',
   'page.ide.desc': 'Scan data folders of AI IDEs and CLIs, then move regenerable caches and sessions safely.',
   'page.projects.title': 'Projects',
@@ -1308,6 +1420,8 @@ I18N['en'] = {
   'ide.migratableValue': '{n} items · {size}',
   'ide.redExcluded': '{n} protected items are excluded automatically',
   'ide.redLocked': 'Protected, no migration entry',
+  'ide.migratedLocked': 'Migrated, cannot migrate again',
+  'ide.migratedRowReason': 'Migrated to the target drive; rollback is available',
   'ide.yellowHint': 'Unknown folders are excluded until you confirm them.',
   'ide.yellowLocked': 'Confirm what this folder is first',
   'ide.processTitle': 'Running process detected',
@@ -1476,6 +1590,10 @@ I18N['en'] = {
   'settings.languageDesc': 'Changes apply to the interface immediately',
   'settings.autoStart': 'Start with Windows',
   'settings.autoStartDesc': 'Run in the tray after sign-in',
+  'settings.autoStartUnsupported': 'Not available in this run mode; enabled in the installed build',
+  'settings.logs': 'Log folder',
+  'settings.logsDesc': 'Logs stay on this computer; 2 MB rotation keeps the last 3 files',
+  'settings.logsOpen': 'Open folder',
   'settings.targetRoot': 'Target storage root',
   'settings.targetRootDesc': 'Migrated folders, backups and logs live here',
   'settings.autoMaintenance': 'Auto maintenance',
@@ -1613,24 +1731,54 @@ I18N['en'] = {
   'ai.sub': 'Unknown folders go to AI first. Its verdict is a suggestion until you adopt it.',
   'ai.enable': 'Use AI assistance',
   'ai.enableDesc': 'Off means unknown folders need your manual call.',
-  'ai.provider': 'Connection',
-  'ai.provider.relay': 'Use this Multica agent model',
+  'ai.provider': 'Provider',
+  'ai.providerHint': 'Picking a provider fills in the endpoint and model for you. Both stay editable.',
+  'ai.provider.deepseek': 'DeepSeek',
+  'ai.provider.openai': 'OpenAI',
+  'ai.provider.qwen': 'Qwen (DashScope)',
+  'ai.provider.kimi': 'Kimi (Moonshot)',
+  'ai.provider.zhipu': 'Zhipu GLM',
   'ai.provider.custom': 'Custom OpenAI-compatible endpoint',
   'ai.provider.none': 'No connection (local rules only)',
   'ai.baseUrl': 'Endpoint',
   'ai.baseUrlDesc': 'e.g. https://api.example.com/v1',
   'ai.model': 'Model',
-  'ai.modelAuto': 'Follow agent settings',
-  'ai.key': 'Key',
-  'ai.keyDesc': 'Read only from the DEEPSEEK_API_KEY environment variable. Never written to disk, logs or feedback.',
+  'ai.modelAuto': 'Server default model',
+  'ai.key': 'API key',
+  'ai.keyDesc': 'The key is encrypted with Windows DPAPI and stored on this machine only. Only your Windows account can decrypt it. It is never logged or included in feedback.',
+  'ai.keyHint': 'Stored as ciphertext; the plaintext is never shown again. Leave empty to keep the saved key.',
+  'ai.keyPlaceholder': 'Paste your API key',
+  'ai.keyPlaceholderStored': 'Saved — leave empty to keep it',
+  'ai.keyShow': 'Show',
+  'ai.keyHide': 'Hide',
+  'ai.keyMask': '••••••••',
+  'ai.keySource.env': 'Source: environment variable',
+  'ai.keySource.stored': 'Source: encrypted on this PC',
+  'ai.keySource.none': 'No key saved',
+  'ai.keyMissing': 'No key configured',
+  'ai.keyStoredHint': 'The key is encrypted on this PC; only a mask is shown.',
+  'ai.keyEnvOverride': 'The DISK_WARDEN_AI_API_KEY environment variable overrides the saved key.',
+  'ai.keyUnavailable': 'The saved key cannot be decrypted (it may come from another account or PC). Enter a new key or clear it.',
+  'ai.keyClear': 'Clear saved key',
+  'ai.keyCleared': 'Saved key cleared',
+  'ai.savedWithKey': 'Saved. The key is encrypted on this PC.',
+  'ai.localOnlyTitle': 'Local rules only',
+  'ai.localOnly': 'Scanning, migration and rollback keep working as usual.',
   'ai.test': 'Test connection',
-  'ai.testUnavailable': 'Connection test arrives in a later version.',
-  'ai.keyEnvSet': 'Read from environment variable',
-  'ai.keyEnvMissing': 'Environment variable not set',
-  'ai.testOk': 'Connection OK · 0.8s',
-  'ai.testBad': 'Connection failed: invalid key',
+  'ai.testing': 'Testing the connection…',
+  'ai.testOk': 'Connection OK · {model} · {ms} ms',
+  'ai.testBad': 'Connection failed: {reason}',
+  'ai.test.reason.missing_api_key': 'no usable key',
+  'ai.test.reason.missing_base_url': 'no endpoint entered',
+  'ai.test.reason.missing_model': 'no model entered',
+  'ai.test.reason.timeout': 'timed out after 8 seconds',
+  'ai.test.reason.network': 'cannot reach the endpoint — check the URL or proxy',
+  'ai.test.reason.http': 'the server rejected the request — check the key and endpoint',
+  'ai.test.reason.rate_limited': 'too many requests — try again shortly',
+  'ai.test.reason.invalid_response': 'the response could not be parsed',
+  'ai.test.reason.internal': 'host internal error',
   'ai.statusOn': 'Connected',
-  'ai.statusOff': 'Not connected',
+  'ai.statusOff': 'Local rules only',
   'ai.scope': 'What AI can see',
   'ai.scopeValue': 'Folder paths and file names only. File contents are never read or uploaded.',
   'ai.limit': 'Call limit per scan',
@@ -1645,8 +1793,8 @@ I18N['en'] = {
   'ai.adopted': 'Adopted and added to rules',
   'ai.done': 'Done: suggestions ready for {n} folders',
   'ai.allDone': 'Every pending folder has a suggestion',
-  'ai.needKey': 'Connect a model first',
-  'ai.needModel': 'Enter a model name, or use the agent model',
+  'ai.needKey': 'No AI endpoint or key configured — local rules only for now',
+  'ai.needModel': 'Enter a model name',
   'ai.noneLeft': 'Nothing left to identify',
   'ai.filter': 'AI suggested',
   'ai.note': 'AI results are suggestions only. No file is migrated automatically.',
@@ -1712,8 +1860,14 @@ I18N['en'] = {
   'error.FORBIDDEN': 'This action is not allowed',
   'error.NOT_FOUND': 'Folder does not exist',
   'error.PERMISSION_DENIED': 'Access to the folder was denied',
+  'error.AUTOSTART_FAILED': 'Could not update the startup item; check your user permissions',
   'error.IO_ERROR': 'The system could not open the file manager',
+  'error.ALREADY_MIGRATED': 'These folders are already migrated',
   'error.INTERNAL': 'Host internal error',
+  'error.AI_CONSENT_REQUIRED': 'Confirm the third-party data notice before enabling AI',
+  'error.AI_KEY_UNSUPPORTED': 'This system cannot store the key locally — use the DISK_WARDEN_AI_API_KEY environment variable',
+  'error.AI_KEY_STORE_FAILED': 'Could not save the key. Try again.',
+  'error.AI_KEY_DECRYPT_FAILED': 'The saved key cannot be decrypted. Enter a new one or clear it.',
   'toast.cleaned': 'Cache cleaned, freed {size}',
   'toast.ruleAdded': 'Rule added',
   'toast.saved': 'Settings saved',
@@ -1722,6 +1876,9 @@ I18N['en'] = {
   'toast.retry': 'Retrying',
   'toast.exported': 'Exported',
   'toast.needSelect': 'Select at least one folder first',
+  'toast.needSelectAllRed': 'Nothing to migrate: protected folders are excluded automatically',
+  'toast.needSelectMigrated': 'Nothing to migrate: all folders are already migrated — roll back one first',
+  'toast.needSelectYellow': 'Nothing checked yet: confirm the pending folders first',
   'toast.spaceShort': 'Not enough space on target',
   'toast.blocked': 'The app is running, cannot migrate',
   'toast.unavailable': 'This feature is not connected to the host yet and will arrive in a later version',
@@ -1729,7 +1886,7 @@ I18N['en'] = {
   'unit.minutes': 'min',
   'unit.seconds': 's',
   'ai.consentTitle': 'Enable AI analysis?',
-  'ai.consentBody': 'When enabled, folder names, sizes and risk results are sent to a third-party AI service for analysis. The API key is read from an environment variable and never stored locally.',
+  'ai.consentBody': 'When enabled, folder names, sizes and risk results are sent to a third-party AI service for analysis. The API key is encrypted with Windows DPAPI, stored only on this PC, and used solely to call the endpoint you configure.',
   'ai.consentAccept': 'Agree and enable',
   'ai.consentDecline': 'Not now',
   'ai.consentDone': 'AI analysis enabled',
@@ -1763,6 +1920,9 @@ I18N['en'] = {
   'recovery.needsHuman': 'Needs manual attention',
   'recovery.recover': 'Recover',
   'recovery.rollback': 'Roll back',
+  'recovery.ignore': 'Hide this',
+  'recovery.ignoreHint': 'Hides the notice only; the record and your data stay untouched',
+  'recovery.ignored': 'Hidden. It comes back if the state changes again',
   'recovery.running': 'Working…',
   'recovery.done': 'Recovery complete',
   'recovery.successHint': 'The interrupted job is recovered. Rescan to confirm the state.',
@@ -1787,7 +1947,30 @@ I18N['en'] = {
   'rollback.stage.record': 'Write rollback record',
   'rollback.stage.done': 'Done',
   'success.rollbackable': 'You can roll back from History at any time',
-  'toast.noGreen': 'No migratable folders selected'
+  'toast.noGreen': 'No migratable folders selected',
+  'firstRun.title': 'Set up the first launch',
+  'firstRun.sub': 'This build has no Apple developer signature, so macOS blocks it the first time. Follow these steps once to let it through.',
+  'firstRun.version': 'macOS {version}',
+  'firstRun.versionUnknown': 'The macOS version could not be read. Follow the macOS 15 and newer steps first; if there is no "Open Anyway" button, use the older way: Control-click the icon, then choose Open.',
+  'firstRun.unsupported': 'Disk Warden needs macOS {min} or newer; this system may not run it correctly.',
+  'firstRun.step.move_to_applications': 'Drag DiskWarden.app into the Applications folder. Do not run it from Downloads or from the folder a zip unzipped into: macOS would launch it from a read-only random path and later migrations would fail.',
+  'firstRun.step.try_to_open': 'Double-click DiskWarden.app in Applications.',
+  'firstRun.step.dismiss_block': 'When macOS says it cannot verify "Disk Warden", click Done. Every unsigned app shows this; it is not a virus warning and you do not need to switch off any system protection.',
+  'firstRun.step.open_privacy_security': 'Open System Settings -> Privacy & Security, scroll to Security and find the "Disk Warden was blocked" line. Click Open Anyway and authenticate with your password or Touch ID.',
+  'firstRun.step.allow_anyway': 'Double-click DiskWarden.app once more and click Open in the dialog. The main window appears; from then on a double-click is enough.',
+  'firstRun.step.control_click_open': 'In Applications, Control-click (or right-click) the DiskWarden.app icon and choose Open from the shortcut menu.',
+  'firstRun.step.confirm_open': 'In the "macOS cannot verify this app" dialog, click Open to let it through.',
+  'firstRun.step.double_click_later': 'After that a normal double-click starts the app; these steps are not repeated.',
+  'firstRun.advanced': 'Advanced: remove the quarantine flag in Terminal',
+  'firstRun.advancedRisk': 'This command skips the steps above but also removes the download-origin check for the whole app. Use it only on the file you downloaded yourself and checked; a wrong path in the command would affect another program, so verify the path first.',
+  'firstRun.advancedNote': 'The real fix is code signing and notarisation (an Apple Developer account). That is out of scope for this release.',
+  'firstRun.copy': 'Copy command',
+  'firstRun.later': 'Later',
+  'firstRun.done': 'Got it',
+  'firstRun.help': 'First-launch guide',
+  'firstRun.helpDesc': 'Show the steps for allowing an unsigned app again',
+  'firstRun.view': 'Show steps',
+  'firstRun.copied': 'Command copied'
 };
 let LANG = 'zh-CN';
 function t(key, vars) {
@@ -1863,7 +2046,8 @@ const state = {
   filter: 'all', search: '',
   checked: {}, confirmed: {},
   settings: { targetRoot: '', autoStart: false, autoMaintenance: false, uninstall: 'keep',
-    aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false },
+    aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false,
+    aiKeySource: 'none', aiKeyError: '', firstRun: null },
   connected: false, booting: true, bootError: '', aiAsk: false,
   data: { settings: null, disk: null, snapshot: null, learned: null, scanJob: null, scanTimer: null,
     scanError: '', history: null, historyError: '', historyLoading: false,
@@ -1879,7 +2063,7 @@ const TABS = ['projects', 'ide', 'disk', 'rules', 'history'];
 
 function parseRoute() {
   const raw = (location.hash || '').replace(/^#/, '');
-  if (raw === 'settings' || raw === 'feedback' || raw === 'ai') return { tab: state.tab || 'projects', sub: '', modal: raw };
+  if (raw === 'settings' || raw === 'feedback' || raw === 'ai' || raw === 'mac-first-run') return { tab: state.tab || 'projects', sub: '', modal: raw };
   const parts = raw.split('/');
   if (parts[0] === 'rules-app') return { tab: 'rules', sub: '', modal: 'rules-app', app: parts[1] === 'all' ? '*' : (parts[1] || '') };
   const tab = TABS.indexOf(parts[0]) >= 0 ? parts[0] : 'projects';
@@ -1893,6 +2077,7 @@ function dirAt(ideId, idx) { const ide = getIde(ideId); return ide && ide.direct
 function dirKey(ideId, idx) { const d = dirAt(ideId, idx); return d && d.item_id ? 'item:' + d.item_id : yellowKey(ideId, idx); }
 function isConfirmed(ideId, idx) { return !!state.confirmed[dirKey(ideId, idx)]; }
 function isChecked(ideId, idx, dir) {
+  if (dir.migrated) return false;
   if (dir.safety === 'red') return false;
   if (dir.item_id && dir.can_migrate === false) return false;
   if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return false;
@@ -1903,6 +2088,19 @@ function selectedDirs(ide) {
   return ide.directories.filter((d, i) => isChecked(ide.id, i, d));
 }
 function selectedSize(ide) { return sum(selectedDirs(ide), 'size_bytes'); }
+/* Explain an empty selection instead of a generic "select something" toast. */
+function emptySelectionKey(ide) {
+  const dirs = (ide && ide.directories) || [];
+  if (!dirs.length) return 'toast.needSelect';
+  const nonRed = dirs.filter(d => d.safety !== 'red');
+  if (!nonRed.length) return 'toast.needSelectAllRed';
+  if (nonRed.every(d => d.migrated)) return 'toast.needSelectMigrated';
+  if (
+    nonRed.some(d => !d.migrated && d.safety === 'yellow') &&
+    nonRed.every(d => d.migrated || d.safety === 'yellow')
+  ) return 'toast.needSelectYellow';
+  return 'toast.needSelect';
+}
 function targetAvailableGB() {
   const free = state.data.disk && state.data.disk.target && state.data.disk.target.available
     ? state.data.disk.target.free : null;
@@ -1989,7 +2187,12 @@ function toolById(id) { return allTools().find(x => x.id === id) || null; }
 function itemsFor(tool) { return allItems().filter(x => x.tool_id === tool.id); }
 function runningProcs(tool) { const rt = tool && tool.runtime; return (rt && rt.processes) || []; }
 function migratedItems(tool) { return itemsFor(tool).filter(x => !!x.migrated_job_id); }
-function isToolMigrated(tool) { return migratedItems(tool).length > 0; }
+/* A tool counts as migrated only when nothing is left to migrate; a partial
+   migration keeps the migrate action so the remaining folders stay reachable. */
+function isToolMigrated(tool) {
+  const actionable = itemsFor(tool).filter(x => x.safety !== 'red');
+  return actionable.length > 0 && actionable.every(x => !!x.migrated_job_id);
+}
 function migratedTarget(tool) {
   const it = migratedItems(tool)[0];
   return it ? (it.target_path || '') : '';
@@ -2120,16 +2323,22 @@ function applySettings(s) {
   state.settings = {
     targetRoot: s.target_root || '',
     autoStart: !!s.launch_at_startup,
+    autoStartSupported: s.launch_at_startup_supported !== false,
+    autoStartError: s.launch_at_startup_error || '',
     autoMaintenance: !!s.auto_maintenance,
+    logsDir: (s.paths && s.paths.logs_dir) || '',
     uninstall: s.uninstall_policy === 'rollback' ? 'remove' : (s.uninstall_policy || 'keep'),
     dataRoot: s.data_root || '',
     appVersion: s.app_version || '',
     ai: ai,
     aiEnabled: !!(ai && ai.enabled),
-    aiProvider: ai && ai.enabled ? (ai.base_url ? 'custom' : 'relay') : 'none',
+    aiProvider: aiPresetFor(ai && ai.base_url),
     aiBaseUrl: (ai && ai.base_url) || '',
     aiModel: (ai && ai.model) || '',
-    aiKeySet: !!(ai && ai.api_key_set)
+    aiKeySet: !!(ai && ai.api_key_set),
+    aiKeySource: (ai && ai.api_key_source) || 'none',
+    aiKeyError: (ai && ai.api_key_error) || '',
+    firstRun: s.first_launch || null
   };
 }
 
@@ -2226,6 +2435,9 @@ function bootstrap() {
       applyDisk(hello.disk || null);
       state.data.recovery = hello.recovery || null;
       state.connected = true;
+      /* 未签名构建的首次启动引导：由主机端决定是否需要（first_launch.show），
+         页面不判断平台。用户点「我知道了」后写入 first_run_done。 */
+      if (state.settings.firstRun && state.settings.firstRun.show && !modalKind()) location.hash = '#mac-first-run';
       const scan = hello.scan || {};
       const ready = scan.available
         ? rpc('scan.result').then(snap => setSnapshot(snap)).catch(() => {})
@@ -2538,11 +2750,14 @@ function recoveryBanner() {
       const actions = (it.actions && it.actions.length ? it.actions : ['recover']);
       const buttons = actions.map(a => `<button type="button" class="btn btn-xs ${a === 'rollback' ? 'btn-ghost' : 'btn-soft'}" ${busy ? 'disabled' : ''} onclick="App.recoveryStart('${esc(it.job_id)}','${esc(a)}')">${esc(t(a === 'rollback' ? 'recovery.rollback' : 'recovery.recover'))}</button>`).join('');
       const human = it.needs_human ? ` · <b>${esc(t('recovery.needsHuman'))}</b>` : '';
+      const ignore = it.ignorable ? `<button type="button" class="btn btn-ghost btn-xs" title="${esc(t('recovery.ignoreHint'))}" ${busy ? 'disabled' : ''} onclick="App.recoveryIgnore('${esc(it.job_id)}')">${esc(t('recovery.ignore'))}</button>` : '';
+      const detail = it.detail ? `<span class="dim" style="font-size:var(--fs-meta);white-space:normal">${esc(it.detail)}</span>` : '';
       return `<div class="kv-item wide">
         <span class="k">${esc(it.tool_name || it.tool_id || '')} · ${esc(it.label || it.state_label || it.state || '')}${human}${it.type === 'rollback' ? ' · ' + esc(t('history.type.rollback')) : ''}</span>
         <span class="v" style="font-weight:500;white-space:normal;font-size:var(--fs-meta)">${esc(it.source_path || '')}</span>
         <span class="dim" style="font-size:var(--fs-meta)">${esc(fmtBytes(it.bytes || 0))} · ${esc(fmtDate(it.updated_at))}</span>
-        <div class="banner-actions">${buttons}</div>
+        ${detail}
+        <div class="banner-actions">${buttons}${ignore}</div>
       </div>`;
     }).join('');
     html += `<div class="banner danger" style="margin-bottom:10px;align-items:flex-start">
@@ -3011,19 +3226,26 @@ function renderIdeDetail(ide) {
 
 function itemRow(ide, d, i) {
   const checked = isChecked(ide.id, i, d);
-  const badge = d.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>`
+  const badge = d.migrated ? `<span class="badge b-green">✓ ${esc(t('common.migrated'))}</span>`
+    : d.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>`
     : d.safety === 'red' ? `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>`
     : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`;
-  const left = d.safety === 'red'
+  const left = d.migrated
+    ? `<span class="tcell lockcell"><span class="lock" title="${esc(t('ide.migratedLocked'))}" aria-label="${esc(t('ide.migratedLocked'))}">✓</span></span>`
+    : d.safety === 'red'
     ? `<span class="tcell lockcell"><span class="lock" title="${esc(t('ide.redLocked'))}" aria-label="${esc(t('ide.redLocked'))}">⛨</span></span>`
     : `<span class="tcell lockcell"><input class="row-check" type="checkbox" ${checked ? 'checked' : ''} ${d.safety === 'yellow' && !isConfirmed(ide.id, i) ? 'disabled' : ''} onclick="App.toggleCheck('${ide.id}',${i})" aria-label="${esc(d.path)}"></span>`;
   const confirmed = d.safety === 'yellow' && isConfirmed(ide.id, i);
-  const reason = reasonText(d) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
-  const act = d.safety === 'yellow' && !confirmed
+  const reason = d.migrated
+    ? t('ide.migratedRowReason')
+    : reasonText(d) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
+  const act = d.migrated
+    ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.rollbackDir('${ide.id}',${i})">${esc(t('action.rollback'))}</button>`
+    : d.safety === 'yellow' && !confirmed
     ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.openYellow('${ide.id}',${i})">${esc(t('action.confirmYellow'))}</button>`
     : confirmed ? `<span class="badge b-gray">${esc(t('common.confirmed'))}</span>`
     : d.handling ? `<span class="tag tag-code">${esc(d.handling)}</span>` : '';
-  return `<div class="trow dir risk-${d.safety}" title="${esc(d.path)} · ${esc(reason)}">
+  return `<div class="trow dir risk-${d.migrated ? 'green' : d.safety}" title="${esc(d.path)} · ${esc(reason)}">
     ${left}
     <span class="tcell tpath badged">${badge}<span class="tp" title="${esc(d.path)}">${esc(d.path)}</span></span>
     <span class="tcell tdesc">${esc(reason)}</span>
@@ -3177,7 +3399,31 @@ function renderDisk() {
 }
 
 /* ---------- 规则学习 ---------- */
-function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && (!!state.settings.aiKeySet || state.settings.aiProvider === 'relay'); }
+/* 预设只负责填表单；保存时仍是普通的 base_url/model，可随意改。 */
+const AI_PRESETS = [
+  { id: 'deepseek', base: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+  { id: 'openai', base: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  { id: 'qwen', base: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus' },
+  { id: 'kimi', base: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-8k' },
+  { id: 'zhipu', base: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-flash' }
+];
+function aiPresetFor(baseUrl) {
+  const base = String(baseUrl || '').trim().replace(/\/+$/, '').toLowerCase();
+  if (!base) return 'none';
+  const hit = AI_PRESETS.find(p => p.base.toLowerCase() === base);
+  return hit ? hit.id : 'custom';
+}
+function aiSourceLabel(source) {
+  if (source === 'env') return t('ai.keySource.env');
+  if (source === 'stored') return t('ai.keySource.stored');
+  return t('ai.keySource.none');
+}
+function aiTestReason(code) {
+  const key = 'ai.test.reason.' + (code || 'internal');
+  const label = t(key);
+  return label === key ? t('ai.test.reason.internal') : label;
+}
+function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && !!state.settings.aiKeySet; }
 function aiModelName() { return state.settings.aiModel || t('ai.modelAuto'); }
 
 function itemReason(it) {
@@ -3359,7 +3605,7 @@ function modalKind() {
   if (state.data.flow) return state.data.flow.kind;
   const info = parseRoute();
   if (info.modal) return info.modal;
-  const subs = ['process-blocked', 'yellow-confirm'];
+  const subs = ['process-blocked', 'yellow-confirm', 'mac-first-run'];
   return subs.indexOf(info.sub) >= 0 ? info.sub : '';
 }
 
@@ -3382,11 +3628,12 @@ function renderModal() {
   else if (kind === 'feedback') html = modalFeedback();
   else if (kind === 'process-blocked') html = modalBlocked();
   else if (kind === 'yellow-confirm') html = modalYellow();
+  else if (kind === 'mac-first-run') html = modalFirstRun();
   else if (kind === 'migrate') html = modalMigrateFlow();
   else if (kind === 'rollback') html = modalRollbackFlow();
   if (!html) { root.innerHTML = ''; return; }
   root.innerHTML = `<div class="modal-mask" onclick="App.closeModal()">
-    <div class="modal ${kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'migrate' || kind === 'rollback' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
+    <div class="modal ${kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'migrate' || kind === 'rollback' || kind === 'mac-first-run' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
   </div>`;
 }
 
@@ -3401,8 +3648,12 @@ function modalSettings() {
       <div class="ctrl"><input type="text" id="settings-root" value="${esc(state.settings.targetRoot)}"></div>
     </div>
     <div class="settings-row">
-      <div><div class="k">${esc(t('settings.autoStart'))}</div><div class="d">${esc(t('settings.autoStartDesc'))}</div></div>
+      <div><div class="k">${esc(t('settings.autoStart'))}</div><div class="d">${esc(t('settings.autoStartDesc'))}${state.settings.autoStartSupported === false ? ' · ' + esc(t('settings.autoStartUnsupported')) : ''}${state.settings.autoStartError ? ' · ' + esc(state.settings.autoStartError) : ''}</div></div>
       <div class="ctrl"><button type="button" class="sw ${state.settings.autoStart ? 'on' : ''}" role="switch" aria-checked="${state.settings.autoStart}" onclick="App.toggleSetting('autoStart')"></button></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.logs'))}</div><div class="d">${esc(t('settings.logsDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="btn btn-ghost btn-sm" title="${esc(state.settings.logsDir)}" onclick="App.openPath(state.settings.logsDir)">${esc(t('settings.logsOpen'))}</button></div>
     </div>
     <div class="settings-row">
       <div><div class="k">${esc(t('settings.autoMaintenance'))}</div><div class="d">${esc(t('settings.autoMaintenanceDesc'))}</div></div>
@@ -3415,6 +3666,14 @@ function modalSettings() {
         <option value="remove" ${state.settings.uninstall === 'remove' ? 'selected' : ''}>${esc(t('settings.uninstall.remove'))}</option>
       </select></div>
     </div>
+    ${(() => {
+      const fr = state.settings.firstRun;
+      if (!fr || !(fr.steps || []).length) return '';
+      return `<div class="settings-row">
+      <div><div class="k">${esc(t('firstRun.help'))}</div><div class="d">${esc(t('firstRun.helpDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('mac-first-run')">${esc(t('firstRun.view'))}</button></div>
+    </div>`;
+    })()}
     <div class="settings-row">
       <div><div class="k">✦ ${esc(t('ai.enable'))}</div><div class="d">${esc(t('ai.sub'))}</div></div>
       <div class="ctrl row-flex">
@@ -3429,16 +3688,62 @@ function modalSettings() {
   return modalShell(t('settings.title'), t('settings.sub'), body, foot);
 }
 
+/* macOS 未签名应用的首次启动引导。版本差异由主机端 first_launch 数据给出
+   （tier / steps），页面只负责按 id 取文案，不做平台判断。 */
+function modalFirstRun() {
+  const g = state.settings.firstRun || {};
+  const steps = g.steps || [];
+  if (!steps.length) return '';
+  const list = steps
+    .map((id, i) => `<li><span class="fr-n">${i + 1}</span><span>${esc(t('firstRun.step.' + id))}</span></li>`)
+    .join('');
+  const unknown = g.tier === 'unknown'
+    ? `<div class="banner warn"><span class="b-ico">i</span><div>${esc(t('firstRun.versionUnknown'))}</div></div>`
+    : '';
+  const unsupported = g.supported === false
+    ? `<div class="banner danger"><span class="b-ico">▲</span><div>${esc(t('firstRun.unsupported', { min: g.min_supported || 11 }))}</div></div>`
+    : '';
+  const cmd = g.advanced_command || '';
+  const advanced = cmd ? `<details class="fr-adv">
+      <summary>${esc(t('firstRun.advanced'))}</summary>
+      <p>${esc(t('firstRun.advancedRisk'))}</p>
+      <code class="cmd mono">${esc(cmd)}</code>
+      <div class="row-flex"><button type="button" class="btn btn-ghost btn-xs" onclick="App.copyFirstRunCommand()">${esc(t('firstRun.copy'))}</button></div>
+      <p>${esc(t('firstRun.advancedNote'))}</p>
+    </details>` : '';
+  const body = `${unknown}${unsupported}
+    <div class="banner info"><span class="b-ico">i</span><div>${esc(t('firstRun.sub'))}</div></div>
+    <ol class="fr-steps">${list}</ol>
+    ${advanced}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('firstRun.later'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.ackFirstRun()">${esc(t('firstRun.done'))}</button>`;
+  return modalShell(t('firstRun.title'), g.version ? t('firstRun.version', { version: g.version }) : '', body, foot);
+}
+
 function modalAi() {
   const s = state.settings;
   const ready = aiReady();
   const pendingCount = pendingYellowItems().length;
   const aiConsent = state.aiAsk ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div><b>${esc(t('ai.consentTitle'))}</b><br>${esc(t('ai.consentBody'))}<div class="banner-actions"><button type="button" class="btn btn-primary btn-xs" onclick="App.confirmAiEnable()">${esc(t('ai.consentAccept'))}</button><button type="button" class="btn btn-ghost btn-xs" onclick="App.cancelAiAsk()">${esc(t('ai.consentDecline'))}</button></div></div></div>` : '';
+  const keyText = s.aiKeySet
+    ? `${t('ai.keyMask')} · ${aiSourceLabel(s.aiKeySource)}`
+    : (s.aiKeyError ? t('ai.keyUnavailable') : t('ai.keyMissing'));
+  const providerOptions = ['deepseek', 'openai', 'qwen', 'kimi', 'zhipu', 'custom', 'none']
+    .map(id => `<option value="${id}" ${s.aiProvider === id ? 'selected' : ''}>${esc(t('ai.provider.' + id))}</option>`)
+    .join('');
+  const clearKey = (s.aiKeySource === 'stored' || s.aiKeyError)
+    ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.clearAiKey()">${esc(t('ai.keyClear'))}</button>`
+    : '';
+  const keyNotes = `<div class="hint">${esc(t('ai.keyHint'))}</div>
+    ${s.aiKeySource === 'env' ? `<div class="hint">${esc(t('ai.keyEnvOverride'))}</div>` : ''}
+    ${s.aiKeyError ? `<div class="hint" style="color:var(--amber)">${esc(t('ai.keyUnavailable'))}</div>` : ''}`;
+  const localOnly = ready ? ''
+    : `<div class="banner info"><span class="b-ico">i</span><div><b>${esc(t('ai.localOnlyTitle'))}</b> · ${esc(t('ai.localOnly'))}</div></div>`;
   const body = `
     <div class="kvbar">
-      <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : 'warn'}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : ''}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('ai.model'))}</span><span class="v">${esc(aiModelName())}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : 'warn'}">${esc(s.aiKeySet ? t('ai.keyEnvSet') : t('ai.keyEnvMissing'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : (s.aiKeyError ? 'warn' : '')}">${esc(keyText)}</span></div>
       <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${pendingCount ? 'warn' : 'ok'}">${pendingCount}</span></div>
     </div>
     <div class="settings-row">
@@ -3448,15 +3753,22 @@ function modalAi() {
     ${aiConsent}
     <div class="form-grid">
       <div class="field"><label>${esc(t('ai.provider'))}</label>
-        <select id="ai-provider">
-          <option value="relay" ${s.aiProvider === 'relay' ? 'selected' : ''}>${esc(t('ai.provider.relay'))}</option>
-          <option value="custom" ${s.aiProvider === 'custom' ? 'selected' : ''}>${esc(t('ai.provider.custom'))}</option>
-          <option value="none" ${s.aiProvider === 'none' ? 'selected' : ''}>${esc(t('ai.provider.none'))}</option>
-        </select>
+        <select id="ai-provider" onchange="App.pickAiPreset(this.value)">${providerOptions}</select>
+        <div class="hint">${esc(t('ai.providerHint'))}</div>
       </div>
       <div class="field"><label>${esc(t('ai.model'))}</label><input id="ai-model" value="${esc(s.aiModel)}" placeholder="${esc(t('ai.modelAuto'))}"></div>
       <div class="field full"><label>${esc(t('ai.baseUrl'))} <span class="dim">· ${esc(t('ai.baseUrlDesc'))}</span></label><input id="ai-base" value="${esc(s.aiBaseUrl)}" placeholder="https://"></div>
+      <div class="field full"><label>${esc(t('ai.key'))} <span class="dim">· ${esc(aiSourceLabel(s.aiKeySource))}</span></label>
+        <div class="row-flex">
+          <input id="ai-key" type="password" autocomplete="new-password" spellcheck="false" value="" style="flex:1;width:auto;min-width:220px" placeholder="${esc(s.aiKeySet ? t('ai.keyPlaceholderStored') : t('ai.keyPlaceholder'))}">
+          <button type="button" class="btn btn-ghost btn-sm" id="ai-key-toggle" onclick="App.toggleAiKey()">${esc(t('ai.keyShow'))}</button>
+          ${clearKey}
+        </div>
+        ${keyNotes}
+      </div>
     </div>
+    <div id="ai-test-result" class="mt-2"></div>
+    ${localOnly}
     <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.key'))}</b> · ${esc(t('ai.keyDesc'))}</div></div>
     <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.scope'))}</b> · ${esc(t('ai.scopeValue'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.aiTest()">${esc(t('ai.test'))}</button>
@@ -3801,6 +4113,19 @@ const App = {
   reconnect() {
     bootstrap();
   },
+  ackFirstRun() {
+    rpc('settings.set', { first_run_done: true }).then(s => {
+      applySettings(s);
+      this.closeModal();
+    }).catch(err => this.toast(errText(err)));
+  },
+  copyFirstRunCommand() {
+    const g = state.settings.firstRun || {};
+    if (!g.advanced_command) return;
+    copyText(g.advanced_command).then(ok => {
+      this.toast(t(ok ? 'firstRun.copied' : 'toast.copyFailed'));
+    });
+  },
   rescan() {
     if (state.scanning) { this.go('#ide/scanning'); return; }
     rpc('scan.start').then(res => {
@@ -3950,7 +4275,7 @@ const App = {
   startPreview(ideId) {
     const ide = getIde(ideId);
     state.selectedIde = ide.id;
-    if (!selectedDirs(ide).length) { this.toast(t('toast.needSelect')); return; }
+    if (!selectedDirs(ide).length) { this.toast(t(emptySelectionKey(ide))); return; }
     state.returnHash = '#ide';
     if (ide.runtime.running.length) { this.go('#ide/process-blocked'); return; }
     if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
@@ -4055,6 +4380,13 @@ const App = {
     if (!it) { this.toast(t('history.noRollback')); return; }
     if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
     this._openRollback(it.migrated_job_id);
+  },
+  rollbackDir(ideId, idx) {
+    const ide = getIde(ideId);
+    const d = dirAt(ideId, idx);
+    if (!d || !d.migrated_job_id) { this.toast(t('history.noRollback')); return; }
+    if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
+    this._openRollback(d.migrated_job_id);
   },
   historyRollback(id) {
     const h = HISTORY.find(x => x.id === id);
@@ -4185,6 +4517,17 @@ const App = {
     state.data.recoveryRun = null;
     render();
   },
+  recoveryIgnore(jobId) {
+    if (!jobId) return;
+    const run = state.data.recoveryRun;
+    if (run && (run.phase === 'starting' || run.phase === 'progress')) return;
+    rpc('recovery.ignore', { job_id: jobId }).then(() => {
+      this.toast(t('recovery.ignored'));
+      return refreshRecovery();
+    }).then(() => render()).catch(err => {
+      this.toast((err && err.detail && err.detail.message) || (err && err.code) || String(err));
+    });
+  },
   retryMigrate() {
     const f = state.data.flow;
     if (!f || f.kind !== 'migrate') { this._beginMigrate(state.selectedIde); return; }
@@ -4266,22 +4609,74 @@ const App = {
       this.toast(errText(err));
     });
   },
+  pickAiPreset(value) {
+    const preset = AI_PRESETS.find(p => p.id === value);
+    if (!preset) return;
+    const base = document.getElementById('ai-base');
+    const model = document.getElementById('ai-model');
+    if (base) base.value = preset.base;
+    if (model) model.value = preset.model;
+  },
+  toggleAiKey() {
+    const input = document.getElementById('ai-key');
+    const btn = document.getElementById('ai-key-toggle');
+    if (!input) return;
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    if (btn) btn.textContent = t(show ? 'ai.keyHide' : 'ai.keyShow');
+  },
+  clearAiKey() {
+    rpc('settings.set', { ai: { api_key: '' } }).then(s => {
+      applySettings(s);
+      render();
+      this.toast(t('ai.keyCleared'));
+    }).catch(err => this.toast(errText(err)));
+  },
   saveAi() {
     const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-    const provider = val('ai-provider') || state.settings.aiProvider;
+    const provider = val('ai-provider') || 'none';
     const patch = {
-      enabled: provider !== 'none' && !!state.settings.aiEnabled,
-      base_url: provider === 'custom' ? val('ai-base') : '',
-      model: val('ai-model') || state.settings.aiModel
+      enabled: !!state.settings.aiEnabled,
+      base_url: provider === 'none' ? '' : val('ai-base'),
+      model: provider === 'none' ? '' : val('ai-model')
     };
+    const typedKey = val('ai-key');
+    /* 只有用户主动填了新密钥才发送；留空表示保留已保存的密钥 */
+    if (typedKey) patch.api_key = typedKey;
     rpc('settings.set', { ai: patch }).then(s => {
       applySettings(s);
+      if (typedKey) {
+        render();
+        this.toast(t('ai.savedWithKey'));
+        return;
+      }
       this.toast(t('toast.saved'));
       this.closeModal();
     }).catch(err => this.toast(errText(err)));
   },
   aiTest() {
-    this.toast(t('ai.testUnavailable'));
+    const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    const baseUrl = val('ai-base');
+    const model = val('ai-model');
+    const apiKey = val('ai-key');
+    const box = document.getElementById('ai-test-result');
+    if (box) box.innerHTML = `<div class="banner info"><span class="b-ico">…</span><div>${esc(t('ai.testing'))}</div></div>`;
+    const params = { base_url: baseUrl, model: model };
+    /* 表单里刚填、尚未保存的密钥只用于这一次测试，主机端不会写入磁盘 */
+    if (apiKey) params.api_key = apiKey;
+    rpc('ai.test', params).then(res => {
+      const out = document.getElementById('ai-test-result');
+      if (!out) return;
+      if (res && res.ok) {
+        out.innerHTML = `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('ai.testOk', { model: res.model || model, ms: res.latency_ms || 0 }))}</div></div>`;
+        return;
+      }
+      const reason = aiTestReason((res && res.error_code) || 'internal');
+      out.innerHTML = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('ai.testBad', { reason: reason }))}</div></div>`;
+    }).catch(err => {
+      const out = document.getElementById('ai-test-result');
+      if (out) out.innerHTML = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('ai.testBad', { reason: errText(err) }))}</div></div>`;
+    });
   },
   copyDiagnostics() {
     copyText(diagnosticsText()).then(ok => {

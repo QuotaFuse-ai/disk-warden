@@ -1,0 +1,14 @@
+# Build dependencies for the unsigned macOS .app (decision 0012 pins the
+# Windows build to Python 3.12 + PyInstaller 6.x; this file mirrors it).
+# Install with: python -m pip install -r packaging/requirements-build-macos.txt
+#
+# No pythonnet / clr_loader: those are the Windows WebView2 bridge and do not
+# build on macOS.  pywebview pulls the pyobjc frameworks (Cocoa, Quartz,
+# WebKit, security, UniformTypeIdentifiers) through its own darwin markers, so
+# they are intentionally not pinned here.
+pywebview==6.1
+psutil==7.2.2
+pystray==0.19.5
+Pillow==12.3.0
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.8

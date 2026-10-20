@@ -29,12 +29,20 @@ import math
 import os
 import shutil
 import threading
+import time
 import traceback
 from collections import OrderedDict
 from datetime import datetime, timezone
 from urllib.parse import unquote, urlsplit
 
-from ..core.ai import AIResolver, OpenAICompatibleProvider, load_config
+from ..core.ai import (
+    AIResolver,
+    ENV_API_KEY,
+    OpenAICompatibleProvider,
+    ProviderError,
+    keystore,
+    load_config,
+)
 from ..core.migrate import (
     ERROR_CANCELLED,
     STATE_DONE,
@@ -107,7 +115,12 @@ from ..core.store.journal import (
     STATE_VERIFIED_LINK,
 )
 from ..platform import (
+    Autostart,
+    AutostartError,
     expand_path,
+    first_launch_guide,
+    is_junction,
+    link_support,
     open_url,
     reveal_directory,
     volume_info,
@@ -129,6 +142,10 @@ SPACE_MARGIN_BYTES = 64 * 1024 * 1024
 SPACE_FACTOR = 1.05
 
 MAX_EXTERNAL_URL_LENGTH = 2048
+
+AI_TEST_TIMEOUT_SECONDS = 8.0
+AI_TEST_MAX_TOKENS = 1
+AI_KEY_MAX_LENGTH = keystore.MAX_SECRET_BYTES
 
 
 def _validate_external_url(url):
@@ -176,6 +193,11 @@ MIGRATION_TERMINAL = frozenset(
 )
 
 # Rollback journal states that still need convergence after a restart.
+# ``ROLLBACK_FAILED`` is deliberately absent: the rollback engine treats it as
+# a terminal outcome, so "recover" on such a record only re-reads the terminal
+# state and reports success while the banner comes back on every refresh -- an
+# entry the user could never clear.  The interrupted migration keeps its own
+# non-terminal record and stays actionable.
 ROLLBACK_UNFINISHED = frozenset(
     [
         STATE_ROLLBACK_PLANNED,
@@ -185,7 +207,18 @@ ROLLBACK_UNFINISHED = frozenset(
         STATE_ROLLBACK_VERIFIED,
         STATE_ROLLBACK_SOURCE_READY,
         STATE_ROLLBACK_CONFIG_RESTORED,
-        STATE_ROLLBACK_FAILED,
+        STATE_ROLLBACK_RECOVERY_REQUIRED,
+    ]
+)
+
+# States where no automatic convergence is left: the engine either has to make
+# a judgement call it refuses to guess at, or the leftover is informational.
+# The user may hide the banner without touching the data; the record stays on
+# disk and the item comes back if the state moves again.
+IGNORABLE_STATES = frozenset(
+    [
+        STATE_RECOVERY_REQUIRED,
+        STATE_LINKED_CLEANUP_PENDING,
         STATE_ROLLBACK_RECOVERY_REQUIRED,
     ]
 )
@@ -223,6 +256,21 @@ STATE_LABELS = {
 def _text(value):
     # type: (object) -> str
     return value.strip() if isinstance(value, str) else ""
+
+
+def _normalize_source_path(path):
+    # type: (object) -> str
+    """Key used to match recorded migrations to scanned directories.
+
+    Separator style and (on Windows) letter case must not matter, otherwise a
+    restart would not recognise a directory that is already a junction.
+    """
+    if not isinstance(path, str):
+        return ""
+    value = path.strip().replace("\\", "/")
+    if not value:
+        return ""
+    return os.path.normcase(os.path.normpath(value))
 
 
 def _as_int(value, default=0):
@@ -286,6 +334,11 @@ def _need_bytes(total_bytes):
     return int(math.ceil(max(0, total_bytes) * SPACE_FACTOR)) + SPACE_MARGIN_BYTES
 
 
+def _elapsed_ms(started):
+    # type: (float) -> int
+    return int(round((time.monotonic() - started) * 1000))
+
+
 def _fallback_root(environ):
     # type: (dict) -> str
     local = environ.get("LOCALAPPDATA") or ""
@@ -306,8 +359,10 @@ class AppService(object):
         process_provider=None,
         free_space_provider=None,
         transfer=None,
+        ai_test_opener=None,
+        autostart=None,
     ):
-        # type: (object, object, object, object, object, object, object) -> None
+        # type: (object, object, object, object, object, object, object, object, object) -> None
         self.environ = dict(environ if environ is not None else os.environ)
         self.catalog_path = os.path.abspath(
             catalog_path or DEFAULT_CATALOG_PATH
@@ -316,6 +371,11 @@ class AppService(object):
         self._process_provider = process_provider
         self._free_space_provider = free_space_provider
         self._transfer = transfer
+        self._ai_test_opener = ai_test_opener
+        self.autostart = autostart if autostart is not None else Autostart()
+
+        self._stored_ai_key = ""
+        self._ai_key_error = ""
 
         self.bus = EventBus()
         self.runner = JobRunner(self.bus)
@@ -377,10 +437,36 @@ class AppService(object):
             "enabled": bool(self._settings.get("ai_enabled", False)),
             "base_url": _text(self._settings.get("ai_base_url")),
             "model": _text(self._settings.get("ai_model")),
+            "api_key": self._stored_ai_key,
         }
+
+    def _load_stored_ai_key(self):
+        # type: () -> None
+        """Cache the decrypted key; keep a stable error code when it fails.
+
+        A key file copied from another account or machine cannot be decrypted
+        by DPAPI.  That is a recoverable state, not a crash: the layer simply
+        stays unavailable and the UI offers to clear the stored key.
+        """
+        try:
+            self._stored_ai_key = keystore.load(self.layout.ai_key_path)
+            self._ai_key_error = ""
+        except keystore.KeystoreError as exc:
+            self._stored_ai_key = ""
+            self._ai_key_error = exc.code
+            LOGGER.warning("stored AI key is unavailable (%s)", exc.code)
+
+    def _ai_key_source(self):
+        # type: () -> str
+        if _text(self.environ.get(ENV_API_KEY)):
+            return "env"
+        if keystore.stored(self.layout.ai_key_path):
+            return "stored"
+        return "none"
 
     def _refresh_ai(self):
         # type: () -> None
+        self._load_stored_ai_key()
         try:
             self._ai_config = load_config(
                 self.environ,
@@ -411,21 +497,95 @@ class AppService(object):
             LOGGER.warning("AI resolver disabled: %s", exc)
             return None
 
+    def _autostart_status(self):
+        # type: () -> dict
+        """Registry state of the current-user startup item (never raises)."""
+        try:
+            status = self.autostart.status()
+        except Exception as exc:
+            LOGGER.warning("could not read the startup item: %s", exc)
+            return {
+                "supported": False,
+                "enabled": False,
+                "command": "",
+                "registered": "",
+                "error": str(exc),
+            }
+        status = dict(status)
+        status.setdefault("supported", False)
+        status.setdefault("enabled", False)
+        status.setdefault("command", "")
+        status.setdefault("registered", "")
+        status.setdefault("error", "")
+        return status
+
+    def _apply_autostart(self, enabled):
+        # type: (bool) -> None
+        """Write or remove the ``HKCU`` startup value, without elevation.
+
+        A source checkout (and every non-Windows build) has no launch command
+        to register, so the preference is only persisted there.  In a frozen
+        build a registry failure is surfaced to the UI instead of leaving the
+        switch looking enabled while nothing starts with Windows.
+        """
+        # Ask the object, not ``status()``: a registry read failure must not be
+        # mistaken for "this build cannot start with Windows" and silently
+        # drop the user's choice.
+        try:
+            supported = bool(self.autostart.supported)
+        except Exception:
+            supported = False
+        if not supported:
+            return
+        try:
+            self.autostart.set_enabled(enabled)
+        except AutostartError as exc:
+            raise BridgeError(
+                "AUTOSTART_FAILED",
+                "could not update the startup item: %s" % exc,
+                {"code": getattr(exc, "code", "AUTOSTART_FAILED")},
+            )
+        except Exception as exc:
+            raise BridgeError(
+                "AUTOSTART_FAILED",
+                "could not update the startup item: %s" % exc,
+            )
+        after = self._autostart_status()
+        if bool(after["enabled"]) != bool(enabled):
+            raise BridgeError(
+                "AUTOSTART_FAILED",
+                "the startup item did not change; check permissions for "
+                "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                {"enabled": bool(after["enabled"])},
+            )
+
     def settings_get(self):
         # type: () -> dict
         with self._lock:
             settings = dict(self._settings)
         ai = self._ai_config
         public = ai.public_dict() if ai is not None else {}
+        autostart = self._autostart_status()
+        stored_startup = bool(settings.get("launch_at_startup", False))
         return {
             "app_version": APP_VERSION,
             "protocol_version": PROTOCOL_VERSION,
             "data_root": self.layout.root,
             "target_root": settings.get("data_root") or self.layout.root,
-            "launch_at_startup": bool(settings.get("launch_at_startup", False)),
+            "launch_at_startup": (
+                autostart["enabled"] if autostart["supported"] else stored_startup
+            ),
+            "launch_at_startup_supported": autostart["supported"],
+            "launch_at_startup_error": autostart["error"],
+            "launch_at_startup_command": autostart["command"],
             "auto_maintenance": bool(settings.get("auto_maintenance", False)),
             "uninstall_policy": settings.get("uninstall_policy", "keep"),
             "language": settings.get("language", "en"),
+            # Platform data, not a branch: the adapter decides whether an
+            # unsigned build needs first-launch steps and which ones.
+            "first_launch": first_launch_guide(
+                bool(settings.get("first_run_done", False))
+            ),
             "ai": {
                 "enabled": bool(public.get("enabled", False)),
                 "available": bool(public.get("available", False)),
@@ -434,6 +594,8 @@ class AppService(object):
                 "base_url": public.get("base_url", ""),
                 "model": public.get("model", ""),
                 "api_key_set": bool(ai is not None and ai.api_key),
+                "api_key_source": self._ai_key_source(),
+                "api_key_error": self._ai_key_error,
                 "warning_key": "ai.third_party_warning",
                 "warning": "目录信息会发送给第三方 AI 服务",
             },
@@ -477,11 +639,18 @@ class AppService(object):
         if "launch_at_startup" in patch:
             if not isinstance(patch["launch_at_startup"], bool):
                 raise invalid("launch_at_startup must be a boolean")
+            # Always reconcile the registry with the requested value: a stale
+            # entry from an older extraction folder must not survive a toggle.
+            self._apply_autostart(patch["launch_at_startup"])
             settings["launch_at_startup"] = patch["launch_at_startup"]
         if "auto_maintenance" in patch:
             if not isinstance(patch["auto_maintenance"], bool):
                 raise invalid("auto_maintenance must be a boolean")
             settings["auto_maintenance"] = patch["auto_maintenance"]
+        if "first_run_done" in patch:
+            if not isinstance(patch["first_run_done"], bool):
+                raise invalid("first_run_done must be a boolean")
+            settings["first_run_done"] = patch["first_run_done"]
         if "uninstall_policy" in patch:
             policy = patch["uninstall_policy"]
             if policy not in ("keep", "rollback"):
@@ -496,10 +665,6 @@ class AppService(object):
         if ai_patch is not None:
             if not isinstance(ai_patch, dict):
                 raise invalid("ai settings must be an object")
-            if "api_key" in ai_patch or "apiKey" in ai_patch:
-                raise invalid(
-                    "the API key is read from DISK_WARDEN_AI_API_KEY and is never stored"
-                )
             for key, setting_key in (
                 ("enabled", "ai_enabled"),
                 ("consent", "ai_consent"),
@@ -522,11 +687,57 @@ class AppService(object):
                 {"warning_key": "ai.third_party_warning"},
             )
 
+        if ai_patch is not None:
+            self._apply_ai_key(ai_patch)
+
         with self._lock:
             self._settings = settings
         self.settings_store.save(settings)
         self._refresh_ai()
         return self.settings_get()
+
+    def _apply_ai_key(self, ai_patch):
+        # type: (dict) -> bool
+        """Encrypt or clear ``ai.api_key`` and return True when it changed.
+
+        Only a DPAPI ciphertext reaches the disk.  The plaintext key is never
+        part of a returned value, exception message or log record.
+        """
+        raw = None
+        for name in ("api_key", "apiKey"):
+            if name in ai_patch:
+                if not isinstance(ai_patch[name], str):
+                    raise invalid("ai.%s must be a string" % name)
+                if raw is None:
+                    raw = ai_patch[name]
+        if raw is None:
+            return False
+
+        secret = raw.strip()
+        path = self.layout.ai_key_path
+        if not secret:
+            try:
+                keystore.clear(path)
+            except keystore.KeystoreError as exc:
+                LOGGER.warning("stored AI key could not be removed (%s)", exc.code)
+                raise BridgeError(
+                    "AI_KEY_STORE_FAILED", "the stored API key could not be removed"
+                )
+            return True
+
+        if len(secret.encode("utf-8")) > AI_KEY_MAX_LENGTH:
+            raise invalid("ai.api_key is too long")
+        try:
+            keystore.save(path, secret)
+        except keystore.KeystoreError as exc:
+            if exc.code == keystore.CODE_UNSUPPORTED:
+                raise BridgeError(
+                    "AI_KEY_UNSUPPORTED",
+                    "local key storage is not supported on this platform",
+                )
+            LOGGER.warning("AI key could not be stored (%s)", exc.code)
+            raise BridgeError("AI_KEY_STORE_FAILED", "the API key could not be stored")
+        return True
 
     def ai_status(self):
         # type: () -> dict
@@ -541,6 +752,84 @@ class AppService(object):
         self.settings_store.save(settings)
         self._refresh_ai()
         return self.settings_get()["ai"]
+
+    def ai_test(self, params=None):
+        # type: (object) -> dict
+        """Send one minimal chat request to verify the configured endpoint.
+
+        ``params`` may carry unsaved ``base_url`` / ``model`` / ``api_key``
+        values from the settings form; they are used for this one call and
+        never written anywhere.  Failures are reported inline (``ok: False``)
+        rather than raised, and the result never contains the key.
+        """
+        overrides = params if isinstance(params, dict) else {}
+        for name in ("base_url", "model", "api_key"):
+            if name in overrides and not isinstance(overrides[name], str):
+                raise invalid("ai.%s must be a string" % name)
+
+        config = self._ai_config
+        base_url = _text(overrides.get("base_url")) or (
+            config.base_url if config is not None else ""
+        )
+        model = _text(overrides.get("model")) or (
+            config.model if config is not None else ""
+        )
+        api_key = _text(overrides.get("api_key")) or (
+            config.api_key if config is not None else ""
+        )
+
+        def failure(code, message, latency_ms=0):
+            return {
+                "ok": False,
+                "latency_ms": latency_ms,
+                "model": model,
+                "error_code": code,
+                "message": message,
+            }
+
+        if not api_key:
+            return failure("missing_api_key", "no API key is configured")
+        if not base_url:
+            return failure("missing_base_url", "no endpoint is configured")
+        if not model:
+            return failure("missing_model", "no model is configured")
+
+        started = time.monotonic()
+        try:
+            provider = OpenAICompatibleProvider(
+                base_url,
+                model,
+                api_key,
+                timeout_seconds=AI_TEST_TIMEOUT_SECONDS,
+                opener=self._ai_test_opener,
+            )
+            envelope = provider.classify(
+                {
+                    "model": model,
+                    "messages": [{"role": "user", "content": "ping"}],
+                    "max_tokens": AI_TEST_MAX_TOKENS,
+                    "stream": False,
+                }
+            )
+        except ProviderError as exc:
+            LOGGER.info("AI connection test failed (%s)", exc.code)
+            return failure(exc.code, str(exc), _elapsed_ms(started))
+        except Exception as exc:
+            LOGGER.warning(
+                "AI connection test failed (%s)", type(exc).__name__
+            )
+            return failure(
+                "internal", "the connection test failed", _elapsed_ms(started)
+            )
+
+        reported = envelope.get("model")
+        return {
+            "ok": True,
+            "latency_ms": _elapsed_ms(started),
+            "model": reported if isinstance(reported, str) and reported else model,
+            "error_code": "",
+            "message": "",
+        }
 
     # -- read-only info --------------------------------------------------
 
@@ -748,10 +1037,16 @@ class AppService(object):
         engine = self._build_engine()
         tool_names = {tool.id: tool.name for tool in catalog.tools}
         self._tool_names = tool_names
+        migrated = self._migrated_index()
 
         items = []
         for measured in report.items:
-            item = self._build_item(measured, engine, processes)
+            item = self._build_item(
+                measured,
+                engine,
+                processes,
+                migrated.get(_normalize_source_path(measured.source_path)),
+            )
             items.append(item)
             emit(
                 "job.progress",
@@ -797,8 +1092,59 @@ class AppService(object):
             "warnings": len(warnings),
         }
 
-    def _build_item(self, measured, engine, processes):
-        # type: (object, object, object) -> dict
+    def _migrated_index(self):
+        # type: () -> dict
+        """Successful migrations keyed by normalised source path.
+
+        A path counts as migrated only when history says the migration
+        succeeded, no rollback record exists for the job, and the journal (if
+        still present) ended in a success state.  Older installs may have no
+        journal left, so history alone is accepted in that case.
+        """
+        try:
+            records = self.history.load()
+        except Exception as exc:
+            LOGGER.warning("migration history unavailable: %s", exc)
+            return {}
+        rolled_back = set(
+            record.job_id
+            for record in records
+            if record.type == TYPE_ROLLBACK
+            and record.result in (RESULT_ROLLED_BACK, RESULT_SUCCESS)
+            and record.job_id
+        )
+        index = {}  # type: dict
+        for record in records:
+            if record.type != TYPE_MIGRATION or record.result != RESULT_SUCCESS:
+                continue
+            if not record.job_id or not record.source:
+                continue
+            if record.job_id in rolled_back:
+                continue
+            try:
+                entry = self.journals.load(record.job_id, TYPE_MIGRATION)
+            except Exception as exc:
+                # History does not validate job-id format; a hand-edited or
+                # legacy record must not abort the whole scan.
+                LOGGER.warning("journal for %s is unusable: %s", record.job_id, exc)
+                entry = None
+            if entry is not None and entry.state not in (
+                STATE_DONE,
+                STATE_LINKED_CLEANUP_PENDING,
+            ):
+                continue
+            key = _normalize_source_path(record.source)
+            if not key:
+                continue
+            index[key] = {
+                "job_id": record.job_id,
+                "target": record.target
+                or (entry.final if entry is not None else ""),
+            }
+        return index
+
+    def _build_item(self, measured, engine, processes, migrated=None):
+        # type: (object, object, object, object) -> dict
         classification = engine.classify(measured)
         process = processes.get(measured.tool_id)
         target_path = ""
@@ -812,7 +1158,16 @@ class AppService(object):
             target_path = ""
         blocked_reason = ""
         blocked_code = ""
-        if measured.access_errors:
+        migrated_job_id = ""
+        if migrated:
+            migrated_job_id = _text(migrated.get("job_id"))
+            recorded_target = _text(migrated.get("target"))
+            if recorded_target:
+                target_path = recorded_target
+                target_exists = os.path.isdir(recorded_target)
+            blocked_code = "ALREADY_MIGRATED"
+            blocked_reason = "已迁移到目标盘，不能重复迁移"
+        elif measured.access_errors:
             blocked_code = "PERMISSION_DENIED"
             blocked_reason = "部分目录无法读取，无法安全迁移"
         elif measured.is_reparse:
@@ -852,7 +1207,7 @@ class AppService(object):
             "blocked_code": blocked_code,
             "blocked_reason": blocked_reason,
             "process": process.to_dict() if process is not None else None,
-            "migrated_job_id": "",
+            "migrated_job_id": migrated_job_id,
         }
         return payload
 
@@ -983,6 +1338,26 @@ class AppService(object):
                 },
             )
 
+        already_migrated = [
+            item for item in selected if item.get("migrated_job_id")
+        ]
+        if already_migrated:
+            raise BridgeError(
+                "ALREADY_MIGRATED",
+                "some selected directories are already migrated",
+                {
+                    "items": [
+                        {
+                            "item_id": item["item_id"],
+                            "tool_id": item["tool_id"],
+                            "source_path": item["source_path"],
+                            "job_id": item["migrated_job_id"],
+                        }
+                        for item in already_migrated
+                    ]
+                },
+            )
+
         blocked_process = []
         for item in selected:
             process = processes.get(item["tool_id"])
@@ -1073,18 +1448,23 @@ class AppService(object):
             if self._free_space_provider is not None
             else _free_bytes(self.layout.data_dir)
         )
-        if os.name == "nt":
-            info = None
-            try:
-                info = volume_info(self.layout.data_dir)
-            except Exception:
-                info = None
-            if info is not None and not getattr(info, "is_ntfs", False):
-                raise BridgeError(
-                    "TARGET_NOT_NTFS",
-                    "the target disk must be NTFS to create links",
-                    {"target_root": self.layout.root, "fs": getattr(info, "fs_name", "")},
-                )
+        # The platform package owns the filesystem requirement (NTFS on
+        # Windows, APFS/HFS+ on macOS); no ``os.name`` test belongs here.
+        support = None
+        try:
+            support = link_support(self.layout.data_dir)
+        except Exception as exc:  # volume probing is advisory only
+            LOGGER.debug("link support probe failed: %s", exc)
+        if support is not None and not support.get("supported", True):
+            raise BridgeError(
+                support.get("code") or "TARGET_FS_UNSUPPORTED",
+                support.get("message") or "the target disk cannot hold links",
+                {
+                    "target_root": self.layout.root,
+                    "fs": support.get("fs_name", ""),
+                    "mount_point": support.get("mount_point", ""),
+                },
+            )
         if free < need:
             raise BridgeError(
                 "INSUFFICIENT_SPACE",
@@ -1531,6 +1911,8 @@ class AppService(object):
                     item["target_exists"] = True
                     item["migrated_job_id"] = job_id
                     item["target_path"] = target_path
+                    item["blocked_code"] = "ALREADY_MIGRATED"
+                    item["blocked_reason"] = "已迁移到目标盘，不能重复迁移"
                     item["can_migrate"] = False
                     break
 
@@ -1715,20 +2097,25 @@ class AppService(object):
 
     def _apply_rollback_to_snapshot(self, job_id, tool_id, source_path):
         # type: (str, str, str) -> None
+        # Rollback restores the directory to its pre-migration shape, so the
+        # row must look exactly like a fresh scan: keep the classified safety
+        # (migration never changes it) and only clear the migrated/blocked
+        # flags.  Forcing SAFETY_RED here made the restored row read as
+        # protected, excluding it from selection until the next scan.
         with self._lock:
             if self._snapshot is None:
                 return
             for item in self._snapshot["items"]:
                 if item.get("migrated_job_id") == job_id or (
                     item["tool_id"] == tool_id
-                    and os.path.normcase(item["source_path"]) == os.path.normcase(source_path)
+                    and _normalize_source_path(item["source_path"])
+                    == _normalize_source_path(source_path)
                 ):
                     item["target_exists"] = False
                     item["migrated_job_id"] = ""
-                    item["can_migrate"] = not item.get("blocked_reason")
-                    item["safety"] = SAFETY_RED
-                    item["reason"] = "已回滚，需人工确认后才能再次迁移"
-                    item["requires_confirm"] = True
+                    item["blocked_code"] = ""
+                    item["blocked_reason"] = ""
+                    item["can_migrate"] = item.get("safety") != SAFETY_RED
                     break
             snapshot = self._snapshot
         try:
@@ -1746,8 +2133,26 @@ class AppService(object):
         except Exception as exc:
             LOGGER.warning("journal listing failed: %s", exc)
             return {"items": [], "count": 0, "warnings": [str(exc)]}
+        # Migration records win the dedupe below: they carry the paths and the
+        # rollback action the user needs, while a rollback record only offers
+        # "recover".  Stable sort keeps newest-first order inside each group.
+        entries = sorted(entries, key=lambda entry: 0 if entry.type == TYPE_MIGRATION else 1)
+        ignored = {}
+        try:
+            ignored = self.journals.ignored()
+        except Exception as exc:
+            LOGGER.warning("ignored journal listing failed: %s", exc)
 
+        seen = set()
         for entry in entries:
+            # One row per job: a rollback record mirrors its migration record
+            # and would otherwise double the count for the same folder.
+            if entry.job_id in seen:
+                continue
+            if ignored.get("%s:%s" % (entry.type, entry.job_id)) == entry.state:
+                # The user hid this exact state.  Any later transition makes
+                # the entry visible again, so nothing new is ever swallowed.
+                continue
             if entry.type == TYPE_MIGRATION:
                 pending = entry.state not in MIGRATION_TERMINAL
                 attention = entry.state in (
@@ -1782,6 +2187,7 @@ class AppService(object):
                 except Exception:
                     final_path = ""
 
+            seen.add(entry.job_id)
             items.append(
                 {
                     "job_id": entry.job_id,
@@ -1800,10 +2206,53 @@ class AppService(object):
                     "actions": list(actions),
                     "needs_human": entry.state
                     in (STATE_RECOVERY_REQUIRED, STATE_ROLLBACK_RECOVERY_REQUIRED),
+                    "ignorable": entry.state in IGNORABLE_STATES,
+                    "detail": self._recovery_detail(entry),
                 }
             )
         items.sort(key=lambda item: item.get("updated_at") or "", reverse=True)
         return {"items": items, "count": len(items), "warnings": []}
+
+    @staticmethod
+    def _recovery_detail(entry):
+        # type: (object) -> str
+        """Why the entry needs attention, in words the user can act on."""
+        result = entry.result if isinstance(entry.result, dict) else {}
+        for key in ("error_message", "message", "reason"):
+            value = result.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        return ""
+
+    def recovery_ignore(self, job_id):
+        # type: (object) -> dict
+        """Hide one attention item without touching its data.
+
+        The journal stays on disk and stays loadable: ignoring is a UI
+        decision, not a resolution.  If the entry later moves to another
+        state it becomes visible again, so a real new problem is never
+        swallowed by an old dismissal.
+        """
+        if not isinstance(job_id, str) or not job_id:
+            raise invalid("job_id is required")
+        entry = self.journals.load(job_id, TYPE_MIGRATION)
+        if entry is None:
+            entry = self.journals.load(job_id, TYPE_ROLLBACK)
+        if entry is None:
+            raise not_found("journal entry not found", job_id=job_id)
+        if entry.state not in IGNORABLE_STATES:
+            raise invalid(
+                "this entry still has an automatic path; recover or roll it back",
+                state=entry.state,
+            )
+        self.journals.ignore(job_id, entry.type, entry.state)
+        LOGGER.info(
+            "recovery item hidden by user: job=%s type=%s state=%s",
+            job_id,
+            entry.type,
+            entry.state,
+        )
+        return {"job_id": job_id, "type": entry.type, "state": entry.state}
 
     def recovery_run(self, job_id, action="recover"):
         # type: (object, object) -> dict
@@ -1830,6 +2279,16 @@ class AppService(object):
         )
         return {"job_id": runner_job, "state": "queued", "target_job_id": job_id, "action": action}
 
+    @staticmethod
+    def _source_is_junction(source_path):
+        # type: (str) -> bool
+        try:
+            return bool(source_path) and bool(is_junction(source_path))
+        except Exception:
+            # An unreadable path is not evidence of a link; recovery is the
+            # safe route because it never deletes unproven data.
+            return False
+
     def _make_recovery_worker(self, entry_type, action, job_id):
         # type: (str, str, str) -> object
         def worker(job, token, emit):
@@ -1851,8 +2310,17 @@ class AppService(object):
         if entry is None:
             raise not_found("migration record disappeared", job_id=target_job_id)
 
+        if action == "rollback" and not self._source_is_junction(entry.source):
+            # Nothing is linked yet, so there is no junction for the rollback
+            # engine to undo and it would stop at "source is already a real
+            # directory".  Recovery is the rollback in this state: it restores
+            # the source and removes only this job's own copy.
+            return self._recover_worker(
+                job, token, emit, entry_type, "recover", target_job_id
+            )
+
         if action == "rollback":
-            return self._rollback_worker(
+            summary = self._rollback_worker(
                 job,
                 token,
                 emit,
@@ -1874,6 +2342,9 @@ class AppService(object):
                     "config_choice": "keep",
                 },
             )
+            if summary.get("ok"):
+                self._close_migration_after_rollback(entry, summary)
+            return summary
 
         def progress(payload):
             data = dict(payload or {})
@@ -1901,9 +2372,20 @@ class AppService(object):
 
         if completion.state == STATE_ROLLED_BACK:
             self._reconcile_rollback_history(entry, completion)
+            if not os.path.lexists(final_path):
+                self._apply_rollback_to_snapshot(
+                    entry.job_id, entry.tool_id, entry.source
+                )
         elif completion.ok:
             self._reconcile_success_history(entry, completion)
 
+        # A recovery that undoes the interrupted migration has resolved it:
+        # the source is intact again and nothing is pending.  ``ok`` follows
+        # the migration completion, so a rolled-back recovery used to report
+        # failure and the UI banner said "恢复失败" after a successful undo.
+        resolved = bool(completion.ok) or bool(completion.rolled_back) or (
+            completion.state in (STATE_ROLLED_BACK, STATE_ALREADY_ROLLED_BACK)
+        )
         summary = {
             "job_id": entry.job_id,
             "runner_job_id": job.job_id,
@@ -1912,7 +2394,7 @@ class AppService(object):
             "final_path": final_path,
             "state": completion.state,
             "state_label": STATE_LABELS.get(completion.state, completion.state),
-            "ok": bool(completion.ok),
+            "ok": resolved,
             "rolled_back": bool(completion.rolled_back),
             "error_code": completion.error_code or "",
             "error_message": completion.error_message or "",
@@ -1924,11 +2406,57 @@ class AppService(object):
                 "stage": "done",
                 "step": "done",
                 "done": True,
-                "ok": bool(completion.ok),
+                "ok": resolved,
                 "state": completion.state,
             },
         )
         return summary
+
+    def _close_migration_after_rollback(self, entry, summary):
+        # type: (object, dict) -> None
+        # The rollback engine keeps its own journal and never writes the
+        # migration record, so a successful rollback would otherwise leave the
+        # interrupted migration pending: the banner reappears on every refresh
+        # and the same entry can never be cleared.  Closing it here is what
+        # makes "rollback" a real end state for the user.
+        final_path = (
+            entry.final
+            or summary.get("final_path", "")
+            or ""
+        )
+        if not self.history.was_rolled_back(entry.job_id):
+            try:
+                self.history.record_rollback(
+                    tool=entry.tool_id,
+                    item=os.path.basename(entry.source.rstrip("\\/")) or entry.source,
+                    source=entry.source,
+                    target=final_path,
+                    size=_as_int(entry.intent.get("bytes"), 0),
+                    job_id=entry.job_id,
+                    stage=STATE_ROLLED_BACK,
+                    reason="recovered",
+                )
+            except Exception as exc:
+                LOGGER.warning("rollback history failed: %s", exc)
+        try:
+            self.journals.mark_recovered(
+                entry.job_id,
+                STATE_ROLLED_BACK,
+                {
+                    "state": STATE_ROLLED_BACK,
+                    "error_code": "",
+                    "error_message": "",
+                    "message": "rolled back from the recovery list",
+                    "rolled_back": True,
+                    "rollback_state": summary.get("state", ""),
+                },
+            )
+        except Exception as exc:
+            LOGGER.warning("could not close migration journal: %s", exc)
+        if final_path and not os.path.lexists(final_path):
+            self._apply_rollback_to_snapshot(
+                entry.job_id, entry.tool_id, entry.source
+            )
 
     def _recover_rollback_entry(self, job_id, token, emit):
         # type: (str, object, object) -> dict

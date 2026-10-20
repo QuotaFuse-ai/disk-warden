@@ -150,6 +150,7 @@ class BudgetParsingTests(unittest.TestCase):
 
 
 class CachePathTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "nt", "LOCALAPPDATA is the Windows cache base")
     def test_default_cache_path_uses_local_app_data(self):
         environ = {
             "LOCALAPPDATA": r"C:\Users\alice\AppData\Local",
@@ -157,6 +158,17 @@ class CachePathTests(unittest.TestCase):
         self.assertEqual(
             default_cache_path(environ).replace("\\", "/"),
             "C:/Users/alice/AppData/Local/disk-warden/ai-cache.json",
+        )
+
+    @unittest.skipIf(os.name == "nt", "POSIX hosts use XDG_CACHE_HOME / HOME")
+    def test_default_cache_path_uses_the_posix_cache_base(self):
+        self.assertEqual(
+            default_cache_path({"XDG_CACHE_HOME": "/home/alice/.cache"}),
+            os.path.join("/home/alice/.cache", "disk-warden", "ai-cache.json"),
+        )
+        self.assertEqual(
+            default_cache_path({"HOME": "/home/alice"}),
+            os.path.join("/home/alice", ".cache", "disk-warden", "ai-cache.json"),
         )
 
     def test_cache_path_is_only_filled_when_enabled(self):
@@ -182,7 +194,12 @@ class SecretHandlingTests(unittest.TestCase):
         self.assertNotIn("api_key", public)
 
     def test_public_dict_reports_availability(self):
-        public = load_config(environ=FULL_ENV).public_dict()
+        environ = dict(FULL_ENV)
+        if os.name != "nt":
+            # The cache base is per-platform; without one the layer still
+            # works but reports caching as disabled.
+            environ["XDG_CACHE_HOME"] = "/home/alice/.cache"
+        public = load_config(environ=environ).public_dict()
         self.assertTrue(public["available"])
         self.assertEqual(public["model"], "test-model")
         self.assertTrue(public["cache_enabled"])

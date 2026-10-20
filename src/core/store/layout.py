@@ -9,6 +9,7 @@ migrated.  Layout mirrors the documented root::
       backup/
       logs/
       config/settings.json
+      config/ai-key.bin
       config/rules-learned.json
       config/history.json
       config/migration-jobs/<job_id>.json
@@ -18,6 +19,8 @@ Python 3.8 compatible (decision 0005).
 """
 
 import os
+import posixpath
+import sys
 
 from .atomic import StoreError, atomic_write_bytes
 
@@ -34,9 +37,21 @@ def default_data_root():
     # type: () -> str
     override = os.environ.get(ENV_DATA_ROOT)
     if override:
-        return os.path.abspath(os.path.expanduser(override))
-    if os.name == "nt":
+        # A macOS root is a POSIX path even when this code runs on a Windows
+        # test host, so normalize it with the separators it will be used with.
+        paths = posixpath if sys.platform == "darwin" else os.path
+        return paths.abspath(paths.expanduser(override))
+    if sys.platform.startswith("win"):
         return "D:\\DiskWarden"
+    if sys.platform == "darwin":
+        # The macOS equivalent of %LOCALAPPDATA%: per-user, backed up with the
+        # home folder, and not a visible clutter folder in the home directory.
+        return os.path.join(
+            os.path.expanduser("~"),
+            "Library",
+            "Application Support",
+            "DiskWarden",
+        )
     return os.path.join(os.path.expanduser("~"), "DiskWarden")
 
 
@@ -89,6 +104,11 @@ class DataLayout(object):
     def learned_path(self):
         # type: () -> str
         return os.path.join(self.config_dir, "rules-learned.json")
+
+    @property
+    def ai_key_path(self):
+        # type: () -> str
+        return os.path.join(self.config_dir, "ai-key.bin")
 
     @property
     def history_path(self):

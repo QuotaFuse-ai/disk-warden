@@ -111,6 +111,7 @@ def build_methods(service):
         "settings.set": lambda p: service.settings_set(_settings_patch(p)),
         "ai.status": lambda p: service.ai_status(),
         "ai.consent": lambda p: service.ai_consent(),
+        "ai.test": lambda p: service.ai_test(p),
         "disk.info": lambda p: service.disk_info(),
         "scan.start": lambda p: service.scan_start(),
         "scan.cancel": lambda p: service.scan_cancel(p.get("job_id")),
@@ -143,6 +144,9 @@ def build_methods(service):
         "recovery.run": lambda p: service.recovery_run(
             _require_str(p, "job_id"),
             _optional_str(p, "action", "recover") or "recover",
+        ),
+        "recovery.ignore": lambda p: service.recovery_ignore(
+            _require_str(p, "job_id"),
         ),
         "history.list": lambda p: service.history_list(
             _optional_str(p, "filter", "all") or "all",

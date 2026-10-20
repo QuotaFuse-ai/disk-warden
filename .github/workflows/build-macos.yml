@@ -1,0 +1,187 @@
+name: build-macos
+
+# Unsigned macOS development build (T21). Produces DiskWarden.app inside a
+# zip and runs the frozen bundle's --smoke self-check, because nobody on the
+# team has a Mac to click through. The click-through verification is still a
+# human step; see docs/tasks/T21/验证记录.md.
+#
+# macos-latest is Apple Silicon (arm64). Intel Macs need a macos-13 leg; add
+# one to the matrix only when an Intel build is actually requested, so the
+# default job stays one runner and one artifact.
+
+on:
+  # A workflow that exists only on a feature branch cannot be dispatched from
+  # the API, and macos-latest minutes are too precious to build every push.
+  # The PR event gives the branch one real build, and reviewers see the result
+  # before merge; main keeps the same build afterwards.
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "packaging/**"
+      - "ui/**"
+      - "data/**"
+      - ".github/workflows/build-macos.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "packaging/**"
+      - "ui/**"
+      - "data/**"
+      - ".github/workflows/build-macos.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: macOS .app (unsigned)
+    runs-on: macos-latest
+    env:
+      PYTHONUTF8: "1"
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: packaging/requirements-build-macos.txt
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r packaging/requirements-build-macos.txt
+          python -m pip install pytest==8.3.5
+          python -c "import PyInstaller, webview, psutil, pystray, PIL; print('deps ok')"
+
+      # Informational on this runner and gated again after the upload: the
+      # artifact must survive a red test step so it can be inspected, but a
+      # failure still fails the job.
+      - name: Unit tests on macOS
+        id: tests
+        continue-on-error: true
+        run: python -m pytest tests -q
+        timeout-minutes: 15
+
+      - name: Build the icon
+        run: |
+          python packaging/make_icns.py
+          ls -l packaging/DiskWarden.icns
+
+      - name: Build DiskWarden.app
+        run: |
+          python -m PyInstaller --noconfirm --clean \
+            --distpath dist --workpath build \
+            packaging/DiskWarden-macos.spec
+
+      - name: Check the bundle layout
+        run: |
+          set -euo pipefail
+          APP="dist/DiskWarden.app"
+          test -d "$APP" || { echo "::error::$APP was not produced"; exit 1; }
+          test -x "$APP/Contents/MacOS/DiskWarden" || {
+            echo "::error::bundle executable is missing"; exit 1; }
+          plutil -lint "$APP/Contents/Info.plist"
+          plutil -extract CFBundleIdentifier raw "$APP/Contents/Info.plist" \
+            | grep -qx "com.quotafuse.diskwarden"
+          UI="$(find "$APP" -path '*/ui/index.html' -type f | head -1)"
+          test -n "$UI" || { echo "::error::ui/index.html missing from the bundle"; exit 1; }
+          test -d "$(dirname "$UI")/assets" || {
+            echo "::error::ui/assets missing next to index.html"; exit 1; }
+          echo "UI bundled at: $UI"
+          ls "$APP/Contents/MacOS" "$APP/Contents/Frameworks" 2>/dev/null || true
+
+      - name: Package the app
+        id: package
+        run: |
+          set -euo pipefail
+          VERSION="$(python -c 'from src.app import APP_VERSION; print(APP_VERSION)')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          ZIP="dist/DiskWarden-$VERSION-macos-arm64.zip"
+          # The zip root holds the bundle plus START-HERE-macOS.txt: macOS
+          # blocks the first launch before any window exists, so the in-app
+          # dialog cannot be read until the file's steps are done.
+          STAGE="dist/stage/DiskWarden-$VERSION-macos-arm64"
+          mkdir -p "$STAGE"
+          # ditto keeps symlinks, permissions and extended attributes intact;
+          # zip(1) does not, and the bundle then fails to launch after unzip.
+          ditto "dist/DiskWarden.app" "$STAGE/DiskWarden.app"
+          cp packaging/START-HERE-macOS.txt "$STAGE/"
+          ditto -c -k --keepParent "$STAGE" "$ZIP"
+          unzip -l "$ZIP" | grep -q "START-HERE-macOS.txt" || {
+            echo "::error::START-HERE-macOS.txt is missing from the zip"; exit 1; }
+          shasum -a 256 "$ZIP" | tee "$ZIP.sha256"
+          ls -lh "$ZIP"
+
+      # The frozen launcher imports the browser backend and the platform layer
+      # and writes a JSON report; it never opens a window, which a headless
+      # runner could not show.  Steps --smoke in packaging/launcher.py.
+      #
+      # Deliberately after "Package the app": the zip is the evidence we need,
+      # so a smoke failure must be reported without withholding it.  The gate
+      # at the end of the job still turns the run red.
+      - name: Smoke-test the frozen bundle
+        id: smoke
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          ./dist/DiskWarden.app/Contents/MacOS/DiskWarden \
+            --smoke --smoke-out "$PWD/smoke.json"
+          status=$?
+          cat smoke.json 2>/dev/null || echo "::error::no smoke.json was written"
+          python - <<'PY' || status=1
+          import json
+          report = json.load(open("smoke.json"))
+          assert report["ok"], report
+          assert report["webview_backend"] == "cocoa", report
+          assert report["ui_present"], report
+          assert report["frozen"], report
+          print("smoke ok: %s" % report["data_root"])
+          PY
+          exit $status
+
+      - name: Upload the unsigned app
+        uses: actions/upload-artifact@v4
+        with:
+          name: DiskWarden-macos-arm64-unsigned
+          path: |
+            dist/*.zip
+            dist/*.sha256
+            smoke.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record the result
+        if: always()
+        run: |
+          {
+            echo "### macOS build"
+            echo ""
+            echo "- Tests: ${{ steps.tests.outcome }}"
+            echo "- Package: ${{ steps.package.outcome }}"
+            echo "- Smoke: ${{ steps.smoke.outcome }}"
+            echo "- Artifact: DiskWarden-macos-arm64-unsigned"
+            echo ""
+            echo "Unsigned build: the first launch needs Gatekeeper approval,"
+            echo "see the macOS section in the download page / START-HERE-macOS.txt."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # The artifact is already uploaded, so a failing suite or smoke check is
+      # reported after the fact instead of hiding the evidence we need.
+      - name: Fail when the macOS checks found real failures
+        if: steps.tests.outcome == 'failure' || steps.smoke.outcome == 'failure'
+        run: |
+          echo "::error::macOS checks failed (tests=${{ steps.tests.outcome }}, smoke=${{ steps.smoke.outcome }}); see the logs. The artifact above still uploaded."
+          exit 1
