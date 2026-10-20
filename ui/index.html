@@ -448,6 +448,19 @@ a{color:var(--blue);text-decoration:none}
 .settings-row select:focus,.settings-row input[type=text]:focus{outline:none;border-color:#7fd383}
 .settings-row input[type=text]{width:280px;font-family:Consolas,monospace}
 
+/* ---------- 首次启动引导（macOS 未签名应用） ---------- */
+.fr-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.fr-steps li{display:flex;gap:10px;align-items:flex-start;font-size:var(--fs-body);line-height:1.65;color:var(--text)}
+.fr-n{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#eef3f7;color:var(--text-2);font-size:var(--fs-micro);font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px}
+.fr-adv{border:1px solid var(--line-soft);border-radius:5px;background:#fbfcfd;padding:9px 11px}
+.fr-adv summary{cursor:pointer;font-size:var(--fs-meta);font-weight:600;color:var(--text-2);list-style:none}
+.fr-adv summary::-webkit-details-marker{display:none}
+.fr-adv summary::before{content:"▸ ";color:var(--dim)}
+.fr-adv[open] summary::before{content:"▾ "}
+.fr-adv .cmd{display:block;margin-top:8px;padding:8px 10px;background:#f4f7f9;border:1px solid #e4eaef;border-radius:4px;font-size:var(--fs-meta);overflow-wrap:anywhere;user-select:all}
+.fr-adv p{margin:8px 0 0;font-size:var(--fs-meta);color:var(--dim);line-height:1.6}
+.fr-adv .row-flex{margin-top:8px}
+
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,8px);background:#333b43;border:1px solid #454e57;color:#fff;padding:8px 14px;border-radius:3px;font-size:var(--fs-body);box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;max-width:70vw;overflow-wrap:anywhere}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
@@ -1241,7 +1254,30 @@ I18N['zh-CN'] = {
   'rollback.stage.record': '写入回滚记录',
   'rollback.stage.done': '完成',
   'success.rollbackable': '可在历史记录中随时回滚',
-  'toast.noGreen': '没有可迁移的目录'
+  'toast.noGreen': '没有可迁移的目录',
+  'firstRun.title': '首次启动设置',
+  'firstRun.sub': '这个版本没有 Apple 开发者签名，macOS 第一次会拦截它。按下面的步骤放行一次即可。',
+  'firstRun.version': '系统版本 macOS {version}',
+  'firstRun.versionUnknown': '没能识别系统版本。先按 macOS 15 及以上的步骤操作；如果看不到「仍要打开」，再用旧版本的方式：按住 Control 点按图标 → 打开。',
+  'firstRun.unsupported': 'Disk Warden 需要 macOS {min} 或更高版本，当前系统可能无法正常运行。',
+  'firstRun.step.move_to_applications': '把 DiskWarden.app 拖进「应用程序」文件夹。不要在下载目录或解压出来的临时目录里直接运行：系统会把程序挂到只读的随机路径上，之后的迁移会失败。',
+  'firstRun.step.try_to_open': '在「应用程序」里双击 DiskWarden.app。',
+  'firstRun.step.dismiss_block': '出现「Apple 无法验证“Disk Warden”是否包含恶意软件」时，点「完成」关掉。这是未签名应用的固定提示，不是病毒告警，也不需要关闭任何系统安全功能。',
+  'firstRun.step.open_privacy_security': '打开 系统设置 → 隐私与安全性，向下滚动到「安全性」，会有一条「已阻止使用“Disk Warden”」的提示，点「仍要打开」，然后输入登录密码或使用触控 ID。',
+  'firstRun.step.allow_anyway': '再双击一次 DiskWarden.app，在弹窗里点「打开」，主界面就出来了。之后双击即可正常启动。',
+  'firstRun.step.control_click_open': '在「应用程序」里按住 Control 键点按（或右键点按）DiskWarden.app 图标，在快捷菜单里选「打开」。',
+  'firstRun.step.confirm_open': '弹窗提示「macOS 无法验证此 App 是否包含恶意软件」时，点「打开」完成放行。',
+  'firstRun.step.double_click_later': '之后双击图标即可正常启动，不需要重复这些步骤。',
+  'firstRun.advanced': '高级选项：用终端移除隔离属性',
+  'firstRun.advancedRisk': '执行下面这条命令会一次性跳过上面的步骤，但它把整个 App 的隔离标记都去掉了，等于放弃系统对下载来源的检查。只对你亲手下载并确认过的这份文件使用；命令里的路径写错会作用到别的程序上，执行前请先核对路径。',
+  'firstRun.advancedNote': '根治办法是代码签名与公证（需要 Apple 开发者账号），本期没有做，后续再评估。',
+  'firstRun.copy': '复制命令',
+  'firstRun.later': '下次再说',
+  'firstRun.done': '我知道了',
+  'firstRun.help': '首次启动说明',
+  'firstRun.helpDesc': '重新查看未签名应用的放行步骤',
+  'firstRun.view': '查看步骤',
+  'firstRun.copied': '命令已复制'
 };
 I18N['en'] = {
   'app.tagline': 'Disk manager for AI IDEs',
@@ -1911,7 +1947,30 @@ I18N['en'] = {
   'rollback.stage.record': 'Write rollback record',
   'rollback.stage.done': 'Done',
   'success.rollbackable': 'You can roll back from History at any time',
-  'toast.noGreen': 'No migratable folders selected'
+  'toast.noGreen': 'No migratable folders selected',
+  'firstRun.title': 'Set up the first launch',
+  'firstRun.sub': 'This build has no Apple developer signature, so macOS blocks it the first time. Follow these steps once to let it through.',
+  'firstRun.version': 'macOS {version}',
+  'firstRun.versionUnknown': 'The macOS version could not be read. Follow the macOS 15 and newer steps first; if there is no "Open Anyway" button, use the older way: Control-click the icon, then choose Open.',
+  'firstRun.unsupported': 'Disk Warden needs macOS {min} or newer; this system may not run it correctly.',
+  'firstRun.step.move_to_applications': 'Drag DiskWarden.app into the Applications folder. Do not run it from Downloads or from the folder a zip unzipped into: macOS would launch it from a read-only random path and later migrations would fail.',
+  'firstRun.step.try_to_open': 'Double-click DiskWarden.app in Applications.',
+  'firstRun.step.dismiss_block': 'When macOS says it cannot verify "Disk Warden", click Done. Every unsigned app shows this; it is not a virus warning and you do not need to switch off any system protection.',
+  'firstRun.step.open_privacy_security': 'Open System Settings -> Privacy & Security, scroll to Security and find the "Disk Warden was blocked" line. Click Open Anyway and authenticate with your password or Touch ID.',
+  'firstRun.step.allow_anyway': 'Double-click DiskWarden.app once more and click Open in the dialog. The main window appears; from then on a double-click is enough.',
+  'firstRun.step.control_click_open': 'In Applications, Control-click (or right-click) the DiskWarden.app icon and choose Open from the shortcut menu.',
+  'firstRun.step.confirm_open': 'In the "macOS cannot verify this app" dialog, click Open to let it through.',
+  'firstRun.step.double_click_later': 'After that a normal double-click starts the app; these steps are not repeated.',
+  'firstRun.advanced': 'Advanced: remove the quarantine flag in Terminal',
+  'firstRun.advancedRisk': 'This command skips the steps above but also removes the download-origin check for the whole app. Use it only on the file you downloaded yourself and checked; a wrong path in the command would affect another program, so verify the path first.',
+  'firstRun.advancedNote': 'The real fix is code signing and notarisation (an Apple Developer account). That is out of scope for this release.',
+  'firstRun.copy': 'Copy command',
+  'firstRun.later': 'Later',
+  'firstRun.done': 'Got it',
+  'firstRun.help': 'First-launch guide',
+  'firstRun.helpDesc': 'Show the steps for allowing an unsigned app again',
+  'firstRun.view': 'Show steps',
+  'firstRun.copied': 'Command copied'
 };
 let LANG = 'zh-CN';
 function t(key, vars) {
@@ -1988,7 +2047,7 @@ const state = {
   checked: {}, confirmed: {},
   settings: { targetRoot: '', autoStart: false, autoMaintenance: false, uninstall: 'keep',
     aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false,
-    aiKeySource: 'none', aiKeyError: '' },
+    aiKeySource: 'none', aiKeyError: '', firstRun: null },
   connected: false, booting: true, bootError: '', aiAsk: false,
   data: { settings: null, disk: null, snapshot: null, learned: null, scanJob: null, scanTimer: null,
     scanError: '', history: null, historyError: '', historyLoading: false,
@@ -2004,7 +2063,7 @@ const TABS = ['projects', 'ide', 'disk', 'rules', 'history'];
 
 function parseRoute() {
   const raw = (location.hash || '').replace(/^#/, '');
-  if (raw === 'settings' || raw === 'feedback' || raw === 'ai') return { tab: state.tab || 'projects', sub: '', modal: raw };
+  if (raw === 'settings' || raw === 'feedback' || raw === 'ai' || raw === 'mac-first-run') return { tab: state.tab || 'projects', sub: '', modal: raw };
   const parts = raw.split('/');
   if (parts[0] === 'rules-app') return { tab: 'rules', sub: '', modal: 'rules-app', app: parts[1] === 'all' ? '*' : (parts[1] || '') };
   const tab = TABS.indexOf(parts[0]) >= 0 ? parts[0] : 'projects';
@@ -2278,7 +2337,8 @@ function applySettings(s) {
     aiModel: (ai && ai.model) || '',
     aiKeySet: !!(ai && ai.api_key_set),
     aiKeySource: (ai && ai.api_key_source) || 'none',
-    aiKeyError: (ai && ai.api_key_error) || ''
+    aiKeyError: (ai && ai.api_key_error) || '',
+    firstRun: s.first_launch || null
   };
 }
 
@@ -2375,6 +2435,9 @@ function bootstrap() {
       applyDisk(hello.disk || null);
       state.data.recovery = hello.recovery || null;
       state.connected = true;
+      /* 未签名构建的首次启动引导：由主机端决定是否需要（first_launch.show），
+         页面不判断平台。用户点「我知道了」后写入 first_run_done。 */
+      if (state.settings.firstRun && state.settings.firstRun.show && !modalKind()) location.hash = '#mac-first-run';
       const scan = hello.scan || {};
       const ready = scan.available
         ? rpc('scan.result').then(snap => setSnapshot(snap)).catch(() => {})
@@ -3542,7 +3605,7 @@ function modalKind() {
   if (state.data.flow) return state.data.flow.kind;
   const info = parseRoute();
   if (info.modal) return info.modal;
-  const subs = ['process-blocked', 'yellow-confirm'];
+  const subs = ['process-blocked', 'yellow-confirm', 'mac-first-run'];
   return subs.indexOf(info.sub) >= 0 ? info.sub : '';
 }
 
@@ -3565,11 +3628,12 @@ function renderModal() {
   else if (kind === 'feedback') html = modalFeedback();
   else if (kind === 'process-blocked') html = modalBlocked();
   else if (kind === 'yellow-confirm') html = modalYellow();
+  else if (kind === 'mac-first-run') html = modalFirstRun();
   else if (kind === 'migrate') html = modalMigrateFlow();
   else if (kind === 'rollback') html = modalRollbackFlow();
   if (!html) { root.innerHTML = ''; return; }
   root.innerHTML = `<div class="modal-mask" onclick="App.closeModal()">
-    <div class="modal ${kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'migrate' || kind === 'rollback' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
+    <div class="modal ${kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'migrate' || kind === 'rollback' || kind === 'mac-first-run' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
   </div>`;
 }
 
@@ -3602,6 +3666,14 @@ function modalSettings() {
         <option value="remove" ${state.settings.uninstall === 'remove' ? 'selected' : ''}>${esc(t('settings.uninstall.remove'))}</option>
       </select></div>
     </div>
+    ${(() => {
+      const fr = state.settings.firstRun;
+      if (!fr || !(fr.steps || []).length) return '';
+      return `<div class="settings-row">
+      <div><div class="k">${esc(t('firstRun.help'))}</div><div class="d">${esc(t('firstRun.helpDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('mac-first-run')">${esc(t('firstRun.view'))}</button></div>
+    </div>`;
+    })()}
     <div class="settings-row">
       <div><div class="k">✦ ${esc(t('ai.enable'))}</div><div class="d">${esc(t('ai.sub'))}</div></div>
       <div class="ctrl row-flex">
@@ -3614,6 +3686,38 @@ function modalSettings() {
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.cancel'))}</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="App.saveSettings()">${esc(t('action.save'))}</button>`;
   return modalShell(t('settings.title'), t('settings.sub'), body, foot);
+}
+
+/* macOS 未签名应用的首次启动引导。版本差异由主机端 first_launch 数据给出
+   （tier / steps），页面只负责按 id 取文案，不做平台判断。 */
+function modalFirstRun() {
+  const g = state.settings.firstRun || {};
+  const steps = g.steps || [];
+  if (!steps.length) return '';
+  const list = steps
+    .map((id, i) => `<li><span class="fr-n">${i + 1}</span><span>${esc(t('firstRun.step.' + id))}</span></li>`)
+    .join('');
+  const unknown = g.tier === 'unknown'
+    ? `<div class="banner warn"><span class="b-ico">i</span><div>${esc(t('firstRun.versionUnknown'))}</div></div>`
+    : '';
+  const unsupported = g.supported === false
+    ? `<div class="banner danger"><span class="b-ico">▲</span><div>${esc(t('firstRun.unsupported', { min: g.min_supported || 11 }))}</div></div>`
+    : '';
+  const cmd = g.advanced_command || '';
+  const advanced = cmd ? `<details class="fr-adv">
+      <summary>${esc(t('firstRun.advanced'))}</summary>
+      <p>${esc(t('firstRun.advancedRisk'))}</p>
+      <code class="cmd mono">${esc(cmd)}</code>
+      <div class="row-flex"><button type="button" class="btn btn-ghost btn-xs" onclick="App.copyFirstRunCommand()">${esc(t('firstRun.copy'))}</button></div>
+      <p>${esc(t('firstRun.advancedNote'))}</p>
+    </details>` : '';
+  const body = `${unknown}${unsupported}
+    <div class="banner info"><span class="b-ico">i</span><div>${esc(t('firstRun.sub'))}</div></div>
+    <ol class="fr-steps">${list}</ol>
+    ${advanced}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('firstRun.later'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.ackFirstRun()">${esc(t('firstRun.done'))}</button>`;
+  return modalShell(t('firstRun.title'), g.version ? t('firstRun.version', { version: g.version }) : '', body, foot);
 }
 
 function modalAi() {
@@ -4008,6 +4112,19 @@ const App = {
   },
   reconnect() {
     bootstrap();
+  },
+  ackFirstRun() {
+    rpc('settings.set', { first_run_done: true }).then(s => {
+      applySettings(s);
+      this.closeModal();
+    }).catch(err => this.toast(errText(err)));
+  },
+  copyFirstRunCommand() {
+    const g = state.settings.firstRun || {};
+    if (!g.advanced_command) return;
+    copyText(g.advanced_command).then(ok => {
+      this.toast(t(ok ? 'firstRun.copied' : 'toast.copyFailed'));
+    });
   },
   rescan() {
     if (state.scanning) { this.go('#ide/scanning'); return; }
