@@ -9,6 +9,7 @@ migrated.  Layout mirrors the documented root::
       backup/
       logs/
       config/settings.json
+      config/ai-key.bin
       config/rules-learned.json
       config/history.json
       config/migration-jobs/<job_id>.json
@@ -89,6 +90,11 @@ class DataLayout(object):
     def learned_path(self):
         # type: () -> str
         return os.path.join(self.config_dir, "rules-learned.json")
+
+    @property
+    def ai_key_path(self):
+        # type: () -> str
+        return os.path.join(self.config_dir, "ai-key.bin")
 
     @property
     def history_path(self):

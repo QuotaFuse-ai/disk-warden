@@ -993,7 +993,13 @@ I18N['zh-CN'] = {
   'ai.sub': '不认识的目录交给 AI 判断，结果只是建议，你采纳后才写入规则。',
   'ai.enable': '启用 AI 辅助识别',
   'ai.enableDesc': '关闭后，未知目录只能手动确认。',
-  'ai.provider': '接入方式',
+  'ai.provider': '服务商',
+  'ai.providerHint': '选择常用服务商会自动填好接口地址与模型，仍可手动修改。',
+  'ai.provider.deepseek': 'DeepSeek',
+  'ai.provider.openai': 'OpenAI',
+  'ai.provider.qwen': '通义千问',
+  'ai.provider.kimi': 'Kimi（月之暗面）',
+  'ai.provider.zhipu': '智谱 GLM',
   'ai.provider.custom': '自定义 OpenAI 兼容接口',
   'ai.provider.none': '不对接（只用本地规则）',
   'ai.baseUrl': '接口地址',
@@ -1001,13 +1007,38 @@ I18N['zh-CN'] = {
   'ai.model': '模型',
   'ai.modelAuto': '服务端默认模型',
   'ai.key': '密钥',
-  'ai.keyDesc': '可选高级配置：仅从环境变量 DISK_WARDEN_AI_API_KEY 读取，不写入本机文件，不进日志、不进反馈内容',
+  'ai.keyDesc': '密钥用 Windows DPAPI 加密后只保存在本机，仅当前用户可解密；不写入日志，也不会进入反馈内容。',
+  'ai.keyHint': '密钥以密文保存，界面不会回显明文。留空表示不修改已保存的密钥。',
+  'ai.keyPlaceholder': '粘贴 API Key',
+  'ai.keyPlaceholderStored': '已保存，留空则不修改',
+  'ai.keyShow': '显示',
+  'ai.keyHide': '隐藏',
+  'ai.keyMask': '••••••••',
+  'ai.keySource.env': '来源：环境变量',
+  'ai.keySource.stored': '来源：本机加密保存',
+  'ai.keySource.none': '未保存密钥',
+  'ai.keyMissing': '未配置密钥',
+  'ai.keyStoredHint': '密钥已加密保存在本机，界面只显示掩码。',
+  'ai.keyEnvOverride': '环境变量 DISK_WARDEN_AI_API_KEY 优先于本机保存的密钥。',
+  'ai.keyUnavailable': '已保存的密钥无法解密（可能来自其他账户或电脑），请重新填写或清除。',
+  'ai.keyClear': '清除已保存的密钥',
+  'ai.keyCleared': '已清除本机保存的密钥',
+  'ai.savedWithKey': '设置已保存，密钥已加密保存在本机',
+  'ai.localOnlyTitle': '仅使用本地规则',
+  'ai.localOnly': '扫描、迁移、回滚照常可用，不受影响。',
   'ai.test': '测试连接',
-  'ai.testUnavailable': '连接测试将在后续版本提供。',
-  'ai.keyEnvSet': '已从环境变量读取',
-  'ai.keyEnvMissing': '未设置，仅使用本地规则',
-  'ai.testOk': '连接可用 · 延迟 0.8s',
-  'ai.testBad': '连接失败：密钥无效',
+  'ai.testing': '正在测试连接…',
+  'ai.testOk': '连接正常 · {model} · {ms} ms',
+  'ai.testBad': '连接失败：{reason}',
+  'ai.test.reason.missing_api_key': '还没有可用的密钥',
+  'ai.test.reason.missing_base_url': '没有填写接口地址',
+  'ai.test.reason.missing_model': '没有填写模型名称',
+  'ai.test.reason.timeout': '连接超时（8 秒）',
+  'ai.test.reason.network': '网络无法连接，请检查接口地址或代理',
+  'ai.test.reason.http': '服务端返回错误，请检查密钥与接口地址',
+  'ai.test.reason.rate_limited': '请求过于频繁，请稍后再试',
+  'ai.test.reason.invalid_response': '服务端返回内容无法解析',
+  'ai.test.reason.internal': '主机端内部错误',
   'ai.statusOn': '已对接',
   'ai.statusOff': '仅使用本地规则',
   'ai.scope': 'AI 能看到什么',
@@ -1094,6 +1125,10 @@ I18N['zh-CN'] = {
   'error.IO_ERROR': '系统未能打开资源管理器',
   'error.ALREADY_MIGRATED': '这些目录已经迁移，无需重复迁移',
   'error.INTERNAL': '主机端内部错误',
+  'error.AI_CONSENT_REQUIRED': '启用 AI 前需要先确认第三方数据说明',
+  'error.AI_KEY_UNSUPPORTED': '当前系统不支持在本机加密保存密钥，请改用环境变量 DISK_WARDEN_AI_API_KEY',
+  'error.AI_KEY_STORE_FAILED': '密钥保存失败，请重试',
+  'error.AI_KEY_DECRYPT_FAILED': '已保存的密钥无法解密，请重新填写或清除',
   'toast.cleaned': '缓存清理完成，释放 {size}',
   'toast.ruleAdded': '规则已添加',
   'toast.saved': '设置已保存',
@@ -1112,7 +1147,7 @@ I18N['zh-CN'] = {
   'unit.minutes': '分钟',
   'unit.seconds': '秒',
   'ai.consentTitle': '启用 AI 分析？',
-  'ai.consentBody': '启用后，目录名称、体积与分级结果等目录信息会发送给第三方 AI 服务用于分析。API Key 只从环境变量读取，不会写入本地。',
+  'ai.consentBody': '启用后，目录名称、体积与分级结果等目录信息会发送给第三方 AI 服务用于分析。API Key 经 Windows DPAPI 加密后仅保存在本机，只用于调用你填写的接口。',
   'ai.consentAccept': '同意并启用',
   'ai.consentDecline': '暂不启用',
   'ai.consentDone': 'AI 分析已启用',
@@ -1620,21 +1655,52 @@ I18N['en'] = {
   'ai.sub': 'Unknown folders go to AI first. Its verdict is a suggestion until you adopt it.',
   'ai.enable': 'Use AI assistance',
   'ai.enableDesc': 'Off means unknown folders need your manual call.',
-  'ai.provider': 'Connection',
+  'ai.provider': 'Provider',
+  'ai.providerHint': 'Picking a provider fills in the endpoint and model for you. Both stay editable.',
+  'ai.provider.deepseek': 'DeepSeek',
+  'ai.provider.openai': 'OpenAI',
+  'ai.provider.qwen': 'Qwen (DashScope)',
+  'ai.provider.kimi': 'Kimi (Moonshot)',
+  'ai.provider.zhipu': 'Zhipu GLM',
   'ai.provider.custom': 'Custom OpenAI-compatible endpoint',
   'ai.provider.none': 'No connection (local rules only)',
   'ai.baseUrl': 'Endpoint',
   'ai.baseUrlDesc': 'e.g. https://api.example.com/v1',
   'ai.model': 'Model',
   'ai.modelAuto': 'Server default model',
-  'ai.key': 'Key',
-  'ai.keyDesc': 'Optional advanced setup: read only from the DISK_WARDEN_AI_API_KEY environment variable. Never written to disk, logs or feedback.',
+  'ai.key': 'API key',
+  'ai.keyDesc': 'The key is encrypted with Windows DPAPI and stored on this machine only. Only your Windows account can decrypt it. It is never logged or included in feedback.',
+  'ai.keyHint': 'Stored as ciphertext; the plaintext is never shown again. Leave empty to keep the saved key.',
+  'ai.keyPlaceholder': 'Paste your API key',
+  'ai.keyPlaceholderStored': 'Saved — leave empty to keep it',
+  'ai.keyShow': 'Show',
+  'ai.keyHide': 'Hide',
+  'ai.keyMask': '••••••••',
+  'ai.keySource.env': 'Source: environment variable',
+  'ai.keySource.stored': 'Source: encrypted on this PC',
+  'ai.keySource.none': 'No key saved',
+  'ai.keyMissing': 'No key configured',
+  'ai.keyStoredHint': 'The key is encrypted on this PC; only a mask is shown.',
+  'ai.keyEnvOverride': 'The DISK_WARDEN_AI_API_KEY environment variable overrides the saved key.',
+  'ai.keyUnavailable': 'The saved key cannot be decrypted (it may come from another account or PC). Enter a new key or clear it.',
+  'ai.keyClear': 'Clear saved key',
+  'ai.keyCleared': 'Saved key cleared',
+  'ai.savedWithKey': 'Saved. The key is encrypted on this PC.',
+  'ai.localOnlyTitle': 'Local rules only',
+  'ai.localOnly': 'Scanning, migration and rollback keep working as usual.',
   'ai.test': 'Test connection',
-  'ai.testUnavailable': 'Connection test arrives in a later version.',
-  'ai.keyEnvSet': 'Read from environment variable',
-  'ai.keyEnvMissing': 'Not set — local rules only',
-  'ai.testOk': 'Connection OK · 0.8s',
-  'ai.testBad': 'Connection failed: invalid key',
+  'ai.testing': 'Testing the connection…',
+  'ai.testOk': 'Connection OK · {model} · {ms} ms',
+  'ai.testBad': 'Connection failed: {reason}',
+  'ai.test.reason.missing_api_key': 'no usable key',
+  'ai.test.reason.missing_base_url': 'no endpoint entered',
+  'ai.test.reason.missing_model': 'no model entered',
+  'ai.test.reason.timeout': 'timed out after 8 seconds',
+  'ai.test.reason.network': 'cannot reach the endpoint — check the URL or proxy',
+  'ai.test.reason.http': 'the server rejected the request — check the key and endpoint',
+  'ai.test.reason.rate_limited': 'too many requests — try again shortly',
+  'ai.test.reason.invalid_response': 'the response could not be parsed',
+  'ai.test.reason.internal': 'host internal error',
   'ai.statusOn': 'Connected',
   'ai.statusOff': 'Local rules only',
   'ai.scope': 'What AI can see',
@@ -1721,6 +1787,10 @@ I18N['en'] = {
   'error.IO_ERROR': 'The system could not open the file manager',
   'error.ALREADY_MIGRATED': 'These folders are already migrated',
   'error.INTERNAL': 'Host internal error',
+  'error.AI_CONSENT_REQUIRED': 'Confirm the third-party data notice before enabling AI',
+  'error.AI_KEY_UNSUPPORTED': 'This system cannot store the key locally — use the DISK_WARDEN_AI_API_KEY environment variable',
+  'error.AI_KEY_STORE_FAILED': 'Could not save the key. Try again.',
+  'error.AI_KEY_DECRYPT_FAILED': 'The saved key cannot be decrypted. Enter a new one or clear it.',
   'toast.cleaned': 'Cache cleaned, freed {size}',
   'toast.ruleAdded': 'Rule added',
   'toast.saved': 'Settings saved',
@@ -1739,7 +1809,7 @@ I18N['en'] = {
   'unit.minutes': 'min',
   'unit.seconds': 's',
   'ai.consentTitle': 'Enable AI analysis?',
-  'ai.consentBody': 'When enabled, folder names, sizes and risk results are sent to a third-party AI service for analysis. The API key is read from an environment variable and never stored locally.',
+  'ai.consentBody': 'When enabled, folder names, sizes and risk results are sent to a third-party AI service for analysis. The API key is encrypted with Windows DPAPI, stored only on this PC, and used solely to call the endpoint you configure.',
   'ai.consentAccept': 'Agree and enable',
   'ai.consentDecline': 'Not now',
   'ai.consentDone': 'AI analysis enabled',
@@ -1873,7 +1943,8 @@ const state = {
   filter: 'all', search: '',
   checked: {}, confirmed: {},
   settings: { targetRoot: '', autoStart: false, autoMaintenance: false, uninstall: 'keep',
-    aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false },
+    aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false,
+    aiKeySource: 'none', aiKeyError: '' },
   connected: false, booting: true, bootError: '', aiAsk: false,
   data: { settings: null, disk: null, snapshot: null, learned: null, scanJob: null, scanTimer: null,
     scanError: '', history: null, historyError: '', historyLoading: false,
@@ -2155,10 +2226,12 @@ function applySettings(s) {
     appVersion: s.app_version || '',
     ai: ai,
     aiEnabled: !!(ai && ai.enabled),
-    aiProvider: ai && ai.enabled && ai.base_url ? 'custom' : 'none',
+    aiProvider: aiPresetFor(ai && ai.base_url),
     aiBaseUrl: (ai && ai.base_url) || '',
     aiModel: (ai && ai.model) || '',
-    aiKeySet: !!(ai && ai.api_key_set)
+    aiKeySet: !!(ai && ai.api_key_set),
+    aiKeySource: (ai && ai.api_key_source) || 'none',
+    aiKeyError: (ai && ai.api_key_error) || ''
   };
 }
 
@@ -3213,6 +3286,30 @@ function renderDisk() {
 }
 
 /* ---------- 规则学习 ---------- */
+/* 预设只负责填表单；保存时仍是普通的 base_url/model，可随意改。 */
+const AI_PRESETS = [
+  { id: 'deepseek', base: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+  { id: 'openai', base: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  { id: 'qwen', base: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus' },
+  { id: 'kimi', base: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-8k' },
+  { id: 'zhipu', base: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-flash' }
+];
+function aiPresetFor(baseUrl) {
+  const base = String(baseUrl || '').trim().replace(/\/+$/, '').toLowerCase();
+  if (!base) return 'none';
+  const hit = AI_PRESETS.find(p => p.base.toLowerCase() === base);
+  return hit ? hit.id : 'custom';
+}
+function aiSourceLabel(source) {
+  if (source === 'env') return t('ai.keySource.env');
+  if (source === 'stored') return t('ai.keySource.stored');
+  return t('ai.keySource.none');
+}
+function aiTestReason(code) {
+  const key = 'ai.test.reason.' + (code || 'internal');
+  const label = t(key);
+  return label === key ? t('ai.test.reason.internal') : label;
+}
 function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && !!state.settings.aiKeySet; }
 function aiModelName() { return state.settings.aiModel || t('ai.modelAuto'); }
 
@@ -3470,11 +3567,25 @@ function modalAi() {
   const ready = aiReady();
   const pendingCount = pendingYellowItems().length;
   const aiConsent = state.aiAsk ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div><b>${esc(t('ai.consentTitle'))}</b><br>${esc(t('ai.consentBody'))}<div class="banner-actions"><button type="button" class="btn btn-primary btn-xs" onclick="App.confirmAiEnable()">${esc(t('ai.consentAccept'))}</button><button type="button" class="btn btn-ghost btn-xs" onclick="App.cancelAiAsk()">${esc(t('ai.consentDecline'))}</button></div></div></div>` : '';
+  const keyText = s.aiKeySet
+    ? `${t('ai.keyMask')} · ${aiSourceLabel(s.aiKeySource)}`
+    : (s.aiKeyError ? t('ai.keyUnavailable') : t('ai.keyMissing'));
+  const providerOptions = ['deepseek', 'openai', 'qwen', 'kimi', 'zhipu', 'custom', 'none']
+    .map(id => `<option value="${id}" ${s.aiProvider === id ? 'selected' : ''}>${esc(t('ai.provider.' + id))}</option>`)
+    .join('');
+  const clearKey = (s.aiKeySource === 'stored' || s.aiKeyError)
+    ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.clearAiKey()">${esc(t('ai.keyClear'))}</button>`
+    : '';
+  const keyNotes = `<div class="hint">${esc(t('ai.keyHint'))}</div>
+    ${s.aiKeySource === 'env' ? `<div class="hint">${esc(t('ai.keyEnvOverride'))}</div>` : ''}
+    ${s.aiKeyError ? `<div class="hint" style="color:var(--amber)">${esc(t('ai.keyUnavailable'))}</div>` : ''}`;
+  const localOnly = ready ? ''
+    : `<div class="banner info"><span class="b-ico">i</span><div><b>${esc(t('ai.localOnlyTitle'))}</b> · ${esc(t('ai.localOnly'))}</div></div>`;
   const body = `
     <div class="kvbar">
       <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : ''}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('ai.model'))}</span><span class="v">${esc(aiModelName())}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : ''}">${esc(s.aiKeySet ? t('ai.keyEnvSet') : t('ai.keyEnvMissing'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : (s.aiKeyError ? 'warn' : '')}">${esc(keyText)}</span></div>
       <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${pendingCount ? 'warn' : 'ok'}">${pendingCount}</span></div>
     </div>
     <div class="settings-row">
@@ -3484,14 +3595,22 @@ function modalAi() {
     ${aiConsent}
     <div class="form-grid">
       <div class="field"><label>${esc(t('ai.provider'))}</label>
-        <select id="ai-provider">
-          <option value="custom" ${s.aiProvider === 'custom' ? 'selected' : ''}>${esc(t('ai.provider.custom'))}</option>
-          <option value="none" ${s.aiProvider === 'none' ? 'selected' : ''}>${esc(t('ai.provider.none'))}</option>
-        </select>
+        <select id="ai-provider" onchange="App.pickAiPreset(this.value)">${providerOptions}</select>
+        <div class="hint">${esc(t('ai.providerHint'))}</div>
       </div>
       <div class="field"><label>${esc(t('ai.model'))}</label><input id="ai-model" value="${esc(s.aiModel)}" placeholder="${esc(t('ai.modelAuto'))}"></div>
       <div class="field full"><label>${esc(t('ai.baseUrl'))} <span class="dim">· ${esc(t('ai.baseUrlDesc'))}</span></label><input id="ai-base" value="${esc(s.aiBaseUrl)}" placeholder="https://"></div>
+      <div class="field full"><label>${esc(t('ai.key'))} <span class="dim">· ${esc(aiSourceLabel(s.aiKeySource))}</span></label>
+        <div class="row-flex">
+          <input id="ai-key" type="password" autocomplete="new-password" spellcheck="false" value="" style="flex:1;width:auto;min-width:220px" placeholder="${esc(s.aiKeySet ? t('ai.keyPlaceholderStored') : t('ai.keyPlaceholder'))}">
+          <button type="button" class="btn btn-ghost btn-sm" id="ai-key-toggle" onclick="App.toggleAiKey()">${esc(t('ai.keyShow'))}</button>
+          ${clearKey}
+        </div>
+        ${keyNotes}
+      </div>
     </div>
+    <div id="ai-test-result" class="mt-2"></div>
+    ${localOnly}
     <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.key'))}</b> · ${esc(t('ai.keyDesc'))}</div></div>
     <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.scope'))}</b> · ${esc(t('ai.scopeValue'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.aiTest()">${esc(t('ai.test'))}</button>
@@ -4308,22 +4427,74 @@ const App = {
       this.toast(errText(err));
     });
   },
+  pickAiPreset(value) {
+    const preset = AI_PRESETS.find(p => p.id === value);
+    if (!preset) return;
+    const base = document.getElementById('ai-base');
+    const model = document.getElementById('ai-model');
+    if (base) base.value = preset.base;
+    if (model) model.value = preset.model;
+  },
+  toggleAiKey() {
+    const input = document.getElementById('ai-key');
+    const btn = document.getElementById('ai-key-toggle');
+    if (!input) return;
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    if (btn) btn.textContent = t(show ? 'ai.keyHide' : 'ai.keyShow');
+  },
+  clearAiKey() {
+    rpc('settings.set', { ai: { api_key: '' } }).then(s => {
+      applySettings(s);
+      render();
+      this.toast(t('ai.keyCleared'));
+    }).catch(err => this.toast(errText(err)));
+  },
   saveAi() {
     const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-    const provider = val('ai-provider') || state.settings.aiProvider;
+    const provider = val('ai-provider') || 'none';
     const patch = {
-      enabled: provider !== 'none' && !!state.settings.aiEnabled,
-      base_url: provider === 'custom' ? val('ai-base') : '',
-      model: val('ai-model') || state.settings.aiModel
+      enabled: !!state.settings.aiEnabled,
+      base_url: provider === 'none' ? '' : val('ai-base'),
+      model: provider === 'none' ? '' : val('ai-model')
     };
+    const typedKey = val('ai-key');
+    /* 只有用户主动填了新密钥才发送；留空表示保留已保存的密钥 */
+    if (typedKey) patch.api_key = typedKey;
     rpc('settings.set', { ai: patch }).then(s => {
       applySettings(s);
+      if (typedKey) {
+        render();
+        this.toast(t('ai.savedWithKey'));
+        return;
+      }
       this.toast(t('toast.saved'));
       this.closeModal();
     }).catch(err => this.toast(errText(err)));
   },
   aiTest() {
-    this.toast(t('ai.testUnavailable'));
+    const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    const baseUrl = val('ai-base');
+    const model = val('ai-model');
+    const apiKey = val('ai-key');
+    const box = document.getElementById('ai-test-result');
+    if (box) box.innerHTML = `<div class="banner info"><span class="b-ico">…</span><div>${esc(t('ai.testing'))}</div></div>`;
+    const params = { base_url: baseUrl, model: model };
+    /* 表单里刚填、尚未保存的密钥只用于这一次测试，主机端不会写入磁盘 */
+    if (apiKey) params.api_key = apiKey;
+    rpc('ai.test', params).then(res => {
+      const out = document.getElementById('ai-test-result');
+      if (!out) return;
+      if (res && res.ok) {
+        out.innerHTML = `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('ai.testOk', { model: res.model || model, ms: res.latency_ms || 0 }))}</div></div>`;
+        return;
+      }
+      const reason = aiTestReason((res && res.error_code) || 'internal');
+      out.innerHTML = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('ai.testBad', { reason: reason }))}</div></div>`;
+    }).catch(err => {
+      const out = document.getElementById('ai-test-result');
+      if (out) out.innerHTML = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('ai.testBad', { reason: errText(err) }))}</div></div>`;
+    });
   },
   copyDiagnostics() {
     copyText(diagnosticsText()).then(ok => {

@@ -22,6 +22,9 @@ ERROR_CODES = {
     "DUPLICATE_TARGET": False,
     "ALREADY_MIGRATED": False,
     "AI_CONSENT_REQUIRED": False,
+    "AI_KEY_UNSUPPORTED": False,
+    "AI_KEY_STORE_FAILED": True,
+    "AI_KEY_DECRYPT_FAILED": False,
     "INTERNAL": False,
 }
 
