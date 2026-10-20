@@ -35,6 +35,9 @@ TYPE_VALUES = (TYPE_MIGRATION, TYPE_ROLLBACK)
 JOB_ID_RE = re.compile(r"^[0-9a-f]{8,32}$")
 ROLLBACK_SUFFIX = "-rollback.json"
 JOURNAL_SUFFIX = ".json"
+# Bookkeeping for banner dismissals; the leading dot keeps it out of the way
+# and the name cannot match JOB_ID_RE, so journal scans skip it.
+IGNORED_FILENAME = ".ignored.json"
 
 STATE_PLANNED = "PLANNED"
 STATE_BACKED_UP = "BACKED_UP"
@@ -363,6 +366,60 @@ class JournalStore(object):
             entry.result = _mapping(payload)
         self.save(entry, now=now)
         return entry
+
+    def _ignored_path(self):
+        # type: () -> str
+        return os.path.join(self.jobs_dir, IGNORED_FILENAME)
+
+    def ignored(self):
+        # type: () -> Dict[str, str]
+        """Map ``"<type>:<job_id>"`` to the state the user hid.
+
+        Missing or unreadable bookkeeping degrades to "nothing hidden": a
+        corrupt helper file must never resurrect an error path.
+        """
+        path = self._ignored_path()
+        try:
+            payload = read_json_file(path)
+        except (StoreCorruptError, StoreError, OSError):
+            return {}
+        entries = payload.get("entries") if isinstance(payload, dict) else None
+        if not isinstance(entries, list):
+            return {}
+        hidden = {}  # type: Dict[str, str]
+        for item in entries:
+            if not isinstance(item, dict):
+                continue
+            job_id = _text(item.get("job_id"))
+            entry_type = _text(item.get("type")) or TYPE_MIGRATION
+            state = _text(item.get("state"))
+            if not JOB_ID_RE.match(job_id) or not state:
+                continue
+            hidden["%s:%s" % (entry_type, job_id)] = state
+        return hidden
+
+    def ignore(self, job_id, entry_type=TYPE_MIGRATION, state=""):
+        # type: (str, str, str) -> None
+        """Remember that the user hid this entry while it is in ``state``."""
+        value = validate_job_id(job_id)
+        if entry_type not in TYPE_VALUES:
+            raise StoreError("invalid journal type: %r" % (entry_type,))
+        hidden = self.ignored()
+        key = "%s:%s" % (entry_type, value)
+        hidden[key] = state or ""
+        now = utc_now()
+        entries = []
+        for name in sorted(hidden):
+            kind, job = name.split(":", 1)
+            entries.append(
+                {
+                    "job_id": job,
+                    "type": kind,
+                    "state": hidden[name],
+                    "at": now,
+                }
+            )
+        atomic_write_json(self._ignored_path(), {"entries": entries})
 
     def list_pending(self):
         # type: () -> List[JournalEntry]

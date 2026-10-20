@@ -1214,6 +1214,9 @@ I18N['zh-CN'] = {
   'recovery.needsHuman': '需要人工处理',
   'recovery.recover': '恢复',
   'recovery.rollback': '回滚',
+  'recovery.ignore': '忽略此项',
+  'recovery.ignoreHint': '只是不再提示，磁盘上的记录和数据都不会改动',
+  'recovery.ignored': '已忽略该项，状态再次变化时会重新提示',
   'recovery.running': '正在处理…',
   'recovery.done': '恢复完成',
   'recovery.successHint': '中断的任务已恢复，可以重新扫描确认状态。',
@@ -1881,6 +1884,9 @@ I18N['en'] = {
   'recovery.needsHuman': 'Needs manual attention',
   'recovery.recover': 'Recover',
   'recovery.rollback': 'Roll back',
+  'recovery.ignore': 'Hide this',
+  'recovery.ignoreHint': 'Hides the notice only; the record and your data stay untouched',
+  'recovery.ignored': 'Hidden. It comes back if the state changes again',
   'recovery.running': 'Working…',
   'recovery.done': 'Recovery complete',
   'recovery.successHint': 'The interrupted job is recovered. Rescan to confirm the state.',
@@ -2681,11 +2687,14 @@ function recoveryBanner() {
       const actions = (it.actions && it.actions.length ? it.actions : ['recover']);
       const buttons = actions.map(a => `<button type="button" class="btn btn-xs ${a === 'rollback' ? 'btn-ghost' : 'btn-soft'}" ${busy ? 'disabled' : ''} onclick="App.recoveryStart('${esc(it.job_id)}','${esc(a)}')">${esc(t(a === 'rollback' ? 'recovery.rollback' : 'recovery.recover'))}</button>`).join('');
       const human = it.needs_human ? ` · <b>${esc(t('recovery.needsHuman'))}</b>` : '';
+      const ignore = it.ignorable ? `<button type="button" class="btn btn-ghost btn-xs" title="${esc(t('recovery.ignoreHint'))}" ${busy ? 'disabled' : ''} onclick="App.recoveryIgnore('${esc(it.job_id)}')">${esc(t('recovery.ignore'))}</button>` : '';
+      const detail = it.detail ? `<span class="dim" style="font-size:var(--fs-meta);white-space:normal">${esc(it.detail)}</span>` : '';
       return `<div class="kv-item wide">
         <span class="k">${esc(it.tool_name || it.tool_id || '')} · ${esc(it.label || it.state_label || it.state || '')}${human}${it.type === 'rollback' ? ' · ' + esc(t('history.type.rollback')) : ''}</span>
         <span class="v" style="font-weight:500;white-space:normal;font-size:var(--fs-meta)">${esc(it.source_path || '')}</span>
         <span class="dim" style="font-size:var(--fs-meta)">${esc(fmtBytes(it.bytes || 0))} · ${esc(fmtDate(it.updated_at))}</span>
-        <div class="banner-actions">${buttons}</div>
+        ${detail}
+        <div class="banner-actions">${buttons}${ignore}</div>
       </div>`;
     }).join('');
     html += `<div class="banner danger" style="margin-bottom:10px;align-items:flex-start">
@@ -4390,6 +4399,17 @@ const App = {
     stopRecoveryPolling();
     state.data.recoveryRun = null;
     render();
+  },
+  recoveryIgnore(jobId) {
+    if (!jobId) return;
+    const run = state.data.recoveryRun;
+    if (run && (run.phase === 'starting' || run.phase === 'progress')) return;
+    rpc('recovery.ignore', { job_id: jobId }).then(() => {
+      this.toast(t('recovery.ignored'));
+      return refreshRecovery();
+    }).then(() => render()).catch(err => {
+      this.toast((err && err.detail && err.detail.message) || (err && err.code) || String(err));
+    });
   },
   retryMigrate() {
     const f = state.data.flow;
