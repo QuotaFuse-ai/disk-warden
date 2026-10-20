@@ -225,6 +225,21 @@ def _text(value):
     return value.strip() if isinstance(value, str) else ""
 
 
+def _normalize_source_path(path):
+    # type: (object) -> str
+    """Key used to match recorded migrations to scanned directories.
+
+    Separator style and (on Windows) letter case must not matter, otherwise a
+    restart would not recognise a directory that is already a junction.
+    """
+    if not isinstance(path, str):
+        return ""
+    value = path.strip().replace("\\", "/")
+    if not value:
+        return ""
+    return os.path.normcase(os.path.normpath(value))
+
+
 def _as_int(value, default=0):
     # type: (object, int) -> int
     if isinstance(value, bool) or not isinstance(value, (int, float)):
@@ -748,10 +763,16 @@ class AppService(object):
         engine = self._build_engine()
         tool_names = {tool.id: tool.name for tool in catalog.tools}
         self._tool_names = tool_names
+        migrated = self._migrated_index()
 
         items = []
         for measured in report.items:
-            item = self._build_item(measured, engine, processes)
+            item = self._build_item(
+                measured,
+                engine,
+                processes,
+                migrated.get(_normalize_source_path(measured.source_path)),
+            )
             items.append(item)
             emit(
                 "job.progress",
@@ -797,8 +818,59 @@ class AppService(object):
             "warnings": len(warnings),
         }
 
-    def _build_item(self, measured, engine, processes):
-        # type: (object, object, object) -> dict
+    def _migrated_index(self):
+        # type: () -> dict
+        """Successful migrations keyed by normalised source path.
+
+        A path counts as migrated only when history says the migration
+        succeeded, no rollback record exists for the job, and the journal (if
+        still present) ended in a success state.  Older installs may have no
+        journal left, so history alone is accepted in that case.
+        """
+        try:
+            records = self.history.load()
+        except Exception as exc:
+            LOGGER.warning("migration history unavailable: %s", exc)
+            return {}
+        rolled_back = set(
+            record.job_id
+            for record in records
+            if record.type == TYPE_ROLLBACK
+            and record.result in (RESULT_ROLLED_BACK, RESULT_SUCCESS)
+            and record.job_id
+        )
+        index = {}  # type: dict
+        for record in records:
+            if record.type != TYPE_MIGRATION or record.result != RESULT_SUCCESS:
+                continue
+            if not record.job_id or not record.source:
+                continue
+            if record.job_id in rolled_back:
+                continue
+            try:
+                entry = self.journals.load(record.job_id, TYPE_MIGRATION)
+            except Exception as exc:
+                # History does not validate job-id format; a hand-edited or
+                # legacy record must not abort the whole scan.
+                LOGGER.warning("journal for %s is unusable: %s", record.job_id, exc)
+                entry = None
+            if entry is not None and entry.state not in (
+                STATE_DONE,
+                STATE_LINKED_CLEANUP_PENDING,
+            ):
+                continue
+            key = _normalize_source_path(record.source)
+            if not key:
+                continue
+            index[key] = {
+                "job_id": record.job_id,
+                "target": record.target
+                or (entry.final if entry is not None else ""),
+            }
+        return index
+
+    def _build_item(self, measured, engine, processes, migrated=None):
+        # type: (object, object, object, object) -> dict
         classification = engine.classify(measured)
         process = processes.get(measured.tool_id)
         target_path = ""
@@ -812,7 +884,16 @@ class AppService(object):
             target_path = ""
         blocked_reason = ""
         blocked_code = ""
-        if measured.access_errors:
+        migrated_job_id = ""
+        if migrated:
+            migrated_job_id = _text(migrated.get("job_id"))
+            recorded_target = _text(migrated.get("target"))
+            if recorded_target:
+                target_path = recorded_target
+                target_exists = os.path.isdir(recorded_target)
+            blocked_code = "ALREADY_MIGRATED"
+            blocked_reason = "已迁移到目标盘，不能重复迁移"
+        elif measured.access_errors:
             blocked_code = "PERMISSION_DENIED"
             blocked_reason = "部分目录无法读取，无法安全迁移"
         elif measured.is_reparse:
@@ -852,7 +933,7 @@ class AppService(object):
             "blocked_code": blocked_code,
             "blocked_reason": blocked_reason,
             "process": process.to_dict() if process is not None else None,
-            "migrated_job_id": "",
+            "migrated_job_id": migrated_job_id,
         }
         return payload
 
@@ -979,6 +1060,26 @@ class AppService(object):
                             "reason": item["reason"],
                         }
                         for item in red
+                    ]
+                },
+            )
+
+        already_migrated = [
+            item for item in selected if item.get("migrated_job_id")
+        ]
+        if already_migrated:
+            raise BridgeError(
+                "ALREADY_MIGRATED",
+                "some selected directories are already migrated",
+                {
+                    "items": [
+                        {
+                            "item_id": item["item_id"],
+                            "tool_id": item["tool_id"],
+                            "source_path": item["source_path"],
+                            "job_id": item["migrated_job_id"],
+                        }
+                        for item in already_migrated
                     ]
                 },
             )
@@ -1531,6 +1632,8 @@ class AppService(object):
                     item["target_exists"] = True
                     item["migrated_job_id"] = job_id
                     item["target_path"] = target_path
+                    item["blocked_code"] = "ALREADY_MIGRATED"
+                    item["blocked_reason"] = "已迁移到目标盘，不能重复迁移"
                     item["can_migrate"] = False
                     break
 
@@ -1721,11 +1824,14 @@ class AppService(object):
             for item in self._snapshot["items"]:
                 if item.get("migrated_job_id") == job_id or (
                     item["tool_id"] == tool_id
-                    and os.path.normcase(item["source_path"]) == os.path.normcase(source_path)
+                    and _normalize_source_path(item["source_path"])
+                    == _normalize_source_path(source_path)
                 ):
                     item["target_exists"] = False
                     item["migrated_job_id"] = ""
-                    item["can_migrate"] = not item.get("blocked_reason")
+                    item["blocked_code"] = ""
+                    item["blocked_reason"] = ""
+                    item["can_migrate"] = True
                     item["safety"] = SAFETY_RED
                     item["reason"] = "已回滚，需人工确认后才能再次迁移"
                     item["requires_confirm"] = True
