@@ -1,7 +1,7 @@
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(0, 9, 0, 1),
-    prodvers=(0, 9, 0, 1),
+    filevers=(0, 9, 0, 2),
+    prodvers=(0, 9, 0, 2),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -17,12 +17,12 @@ VSVersionInfo(
           [
             StringStruct('CompanyName', 'QuotaFuse'),
             StringStruct('FileDescription', 'Disk Warden (development build)'),
-            StringStruct('FileVersion', '0.9.0.1'),
+            StringStruct('FileVersion', '0.9.0.2'),
             StringStruct('InternalName', 'DiskWarden'),
             StringStruct('LegalCopyright', 'Copyright (c) QuotaFuse'),
             StringStruct('OriginalFilename', 'DiskWarden.exe'),
             StringStruct('ProductName', 'Disk Warden'),
-            StringStruct('ProductVersion', '0.9.0-beta.1')
+            StringStruct('ProductVersion', '0.9.0-beta.2')
           ]
         )
       ]
