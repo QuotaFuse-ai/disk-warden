@@ -586,6 +586,7 @@ I18N['zh-CN'] = {
   'action.ignore': '忽略',
   'action.markGreen': '标为可迁',
   'action.markRed': '标为不可动',
+  'action.unmark': '撤销标记',
   'action.confirmYellow': '确认此目录',
   'action.scanAgain': '重新扫描',
   'action.cancelScan': '取消扫描',
@@ -861,7 +862,9 @@ I18N['zh-CN'] = {
   'feedback.copy': '复制诊断',
   'feedback.issue': '提 Issue',
   'feedback.copied': '诊断信息已复制',
-  'feedback.issueUnavailable': '问题反馈入口将在后续版本开放',
+  'feedback.issueOpened': '已在浏览器中打开 Issue 页面',
+  'feedback.openFailed': '无法打开浏览器：{reason}',
+  'feedback.browserFailed': '系统无法启动默认浏览器',
   'feedback.note': '不会上传任何文件内容或凭证明文。',
   'projects.soonTitle': '项目目录清理即将推出',
   'projects.soonDesc': '这一版只处理 IDE 数据；项目依赖与构建产物的扫描清理会在后续版本接入。',
@@ -1020,9 +1023,13 @@ I18N['zh-CN'] = {
   'ai.reasonSecret': '路径里有凭证或配置特征，建议不要动',
   'rules.size': '大小',
   'rules.path': '路径',
+  'rules.action': '操作',
   'rules.matched': '命中规则',
   'rules.markedGreen': '已标为可迁',
   'rules.markedRed': '已标为不可动',
+  'rules.unmarked': '已恢复自动判定',
+  'rules.unmarkFailed': '撤销失败：{reason}',
+  'rules.unmarkGone': '该标记已不存在，请刷新后重试',
   'rules.ignored': '已忽略该目录',
   'rules.noReason': '用户自定义',
   'history.listTitle': '记录',
@@ -1070,6 +1077,7 @@ I18N['zh-CN'] = {
   'toast.openedPath': '已在资源管理器中打开：{path}',
   'toast.openFailedReason': '无法打开目录：{reason}',
   'error.NO_PATH': '路径未知',
+  'error.FORBIDDEN': '该操作不在允许范围内',
   'error.NOT_FOUND': '目录不存在',
   'error.PERMISSION_DENIED': '没有权限访问该目录',
   'error.IO_ERROR': '系统未能打开资源管理器',
@@ -1198,6 +1206,7 @@ I18N['en'] = {
   'action.ignore': 'Ignore',
   'action.markGreen': 'Mark migratable',
   'action.markRed': 'Mark protected',
+  'action.unmark': 'Undo mark',
   'action.confirmYellow': 'Confirm folder',
   'action.scanAgain': 'Rescan',
   'action.cancelScan': 'Cancel scan',
@@ -1473,7 +1482,9 @@ I18N['en'] = {
   'feedback.copy': 'Copy diagnostics',
   'feedback.issue': 'Open issue',
   'feedback.copied': 'Diagnostics copied',
-  'feedback.issueUnavailable': 'Issue reporting will be available in a later version',
+  'feedback.issueOpened': 'The issue page is open in your browser',
+  'feedback.openFailed': 'Could not open the browser: {reason}',
+  'feedback.browserFailed': 'The system could not start the default browser',
   'feedback.note': 'No file content or credential plaintext is uploaded.',
   'projects.soonTitle': 'Project cleanup is coming soon',
   'projects.soonDesc': 'This build only handles IDE data. Scanning and cleaning project dependencies and build output arrives in a later version.',
@@ -1632,9 +1643,13 @@ I18N['en'] = {
   'ai.reasonSecret': 'Path looks like credentials or settings. Leave it alone',
   'rules.size': 'Size',
   'rules.path': 'Path',
+  'rules.action': 'Action',
   'rules.matched': 'Matched rule',
   'rules.markedGreen': 'Marked migratable',
   'rules.markedRed': 'Marked protected',
+  'rules.unmarked': 'Automatic verdict restored',
+  'rules.unmarkFailed': 'Could not undo the mark: {reason}',
+  'rules.unmarkGone': 'This mark no longer exists. Refresh and try again.',
   'rules.ignored': 'Folder ignored',
   'rules.noReason': 'User defined',
   'history.listTitle': 'Records',
@@ -1682,6 +1697,7 @@ I18N['en'] = {
   'toast.openedPath': 'Opened in Explorer: {path}',
   'toast.openFailedReason': 'Could not open folder: {reason}',
   'error.NO_PATH': 'Path unknown',
+  'error.FORBIDDEN': 'This action is not allowed',
   'error.NOT_FOUND': 'Folder does not exist',
   'error.PERMISSION_DENIED': 'Access to the folder was denied',
   'error.IO_ERROR': 'The system could not open the file manager',
@@ -1827,6 +1843,7 @@ const DISK_SEGMENTS = [
 ];
 
 const HISTORY = [];
+const ISSUE_URL = 'https://github.com/QuotaFuse-ai/disk-warden/issues/new';
 
 const state = {
   route: 'projects', tab: 'projects', sub: '',
@@ -3180,19 +3197,23 @@ function learnedTable(rows) {
   return `<div class="table-wrap">
     <table class="table">
       <thead><tr>
-        <th>${esc(t('rules.path'))}</th><th>${esc(t('rules.appCol'))}</th><th>${esc(t('rules.safety'))}</th><th>${esc(t('common.reason'))}</th><th>${esc(t('rules.matched'))}</th>
+        <th>${esc(t('rules.path'))}</th><th>${esc(t('rules.appCol'))}</th><th>${esc(t('rules.safety'))}</th><th>${esc(t('common.reason'))}</th><th>${esc(t('rules.matched'))}</th><th>${esc(t('rules.action'))}</th>
       </tr></thead>
       <tbody>
         ${rows.map(r => {
           const it = learnedItem(r);
           const path = it ? (it.source_path || it.rel_path || r.item_id) : r.item_id;
           const tool = it ? (it.tool_name || it.tool_id || '') : '';
+          const undo = r.rule_id === 'manual'
+            ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.clearOverride('${esc(r.item_id)}')">${esc(t('action.unmark'))}</button>`
+            : '—';
           return `<tr>
             <td class="mono" style="word-break:break-all">${esc(path)}</td>
             <td>${esc(tool || '—')}</td>
             <td>${safetyBadge(r.safety)}</td>
             <td>${esc(r.reason || t('rules.noReason'))}</td>
             <td><span class="tag tag-code">${esc(r.rule_id || '—')}</span></td>
+            <td class="acts">${undo}</td>
           </tr>`;
         }).join('')}
       </tbody>
@@ -3429,7 +3450,7 @@ function modalFeedback() {
     </div>
     <div class="banner warn"><span class="b-ico">△</span><div>${esc(t('feedback.note'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.copyDiagnostics()">${esc(t('feedback.copy'))}</button>
-    <button type="button" class="btn btn-ghost btn-sm" onclick="App.toast(t('feedback.issueUnavailable'))">${esc(t('feedback.issue'))}</button>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="App.openIssue()">${esc(t('feedback.issue'))}</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal()">${esc(t('action.close'))}</button>`;
   return modalShell(t('feedback.title'), t('feedback.sub'), body, foot, true);
 }
@@ -3856,6 +3877,38 @@ const App = {
     }).catch(err => {
       delete this._overriding[itemId];
       this.toast(errText(err));
+    });
+  },
+  clearOverride(itemId) {
+    if (!itemId) return;
+    if (!this._clearing) this._clearing = {};
+    if (this._clearing[itemId]) return;
+    this._clearing[itemId] = true;
+    rpc('rules.override.clear', { item_id: itemId }).then(() => {
+      return Promise.all([rpc('scan.result'), rpc('rules.learned.list')]);
+    }).then(res => {
+      delete this._clearing[itemId];
+      const snap = res && res[0];
+      if (snap) setSnapshot(snap);
+      if (res && res[1]) state.data.learned = res[1];
+      render();
+      this.toast(t('rules.unmarked'));
+    }).catch(err => {
+      delete this._clearing[itemId];
+      const reason = err && err.code === 'NOT_FOUND' ? t('rules.unmarkGone') : errText(err);
+      this.toast(t('rules.unmarkFailed', { reason: reason }));
+    });
+  },
+  openIssue() {
+    if (this._openingIssue) return;
+    this._openingIssue = true;
+    rpc('app.open_external', { url: ISSUE_URL }).then(() => {
+      delete this._openingIssue;
+      this.toast(t('feedback.issueOpened'));
+    }).catch(err => {
+      delete this._openingIssue;
+      const reason = err && err.code === 'IO_ERROR' ? t('feedback.browserFailed') : errText(err);
+      this.toast(t('feedback.openFailed', { reason: reason }));
     });
   },
   startPreview(ideId) {

@@ -13,6 +13,7 @@ EXPECTED_METHODS = {
     "app.hello",
     "app.ping",
     "app.reveal",
+    "app.open_external",
     "settings.get",
     "settings.set",
     "ai.status",
@@ -35,6 +36,7 @@ EXPECTED_METHODS = {
     "history.list",
     "rules.learned.list",
     "rules.override",
+    "rules.override.clear",
     "events.poll",
 }
 
@@ -119,6 +121,31 @@ class WhitelistTest(BridgeTestBase):
         )
         self.service.reveal.assert_called_once_with("C:\\Windows")
 
+    def test_open_external_requires_a_url(self):
+        error = self.assert_error(
+            self.call("app.open_external", {}), "INVALID_ARGUMENT"
+        )
+        self.assertIn("url", error["detail"]["reason"])
+        self.service.open_external.assert_not_called()
+
+    def test_open_external_forwards_the_url(self):
+        url = "https://github.com/QuotaFuse-ai/disk-warden/issues/new"
+        self.service.open_external.return_value = {"opened": True, "url": url}
+        response = self.call("app.open_external", {"url": url})
+        self.assertTrue(response["ok"])
+        self.service.open_external.assert_called_once_with(url)
+
+    def test_override_clear_requires_an_item_id(self):
+        error = self.assert_error(
+            self.call("rules.override.clear", {}), "INVALID_ARGUMENT"
+        )
+        self.assertIn("item_id", error["detail"]["reason"])
+        self.service.rules_override_clear.assert_not_called()
+
+    def test_override_clear_forwards_the_item_id(self):
+        self.call("rules.override.clear", {"item_id": "cursor-cache"})
+        self.service.rules_override_clear.assert_called_once_with("cursor-cache")
+
 
 class ParamsValidationTest(BridgeTestBase):
     def test_params_must_be_an_object(self):
@@ -178,6 +205,10 @@ class ParamsValidationTest(BridgeTestBase):
             ("rollback.preview", {}),
             ("rollback.start", {"plan_id": "p1"}),
             ("rules.override", {"item_id": "a"}),
+            ("rules.override.clear", {}),
+            ("rules.override.clear", {"item_id": 7}),
+            ("app.open_external", {"url": ""}),
+            ("app.open_external", {"url": 7}),
         )
         for method, params in cases:
             error = self.assert_error(
@@ -187,6 +218,8 @@ class ParamsValidationTest(BridgeTestBase):
         for name in ("job_status", "job_cancel", "rollback_preview"):
             self.assertFalse(getattr(self.service, name).called)
         self.service.rules_override.assert_not_called()
+        self.service.rules_override_clear.assert_not_called()
+        self.service.open_external.assert_not_called()
 
     def test_optional_bool_rejects_non_booleans(self):
         error = self.assert_error(

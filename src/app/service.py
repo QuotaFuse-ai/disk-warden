@@ -32,6 +32,7 @@ import threading
 import traceback
 from collections import OrderedDict
 from datetime import datetime, timezone
+from urllib.parse import unquote, urlsplit
 
 from ..core.ai import AIResolver, OpenAICompatibleProvider, load_config
 from ..core.migrate import (
@@ -107,6 +108,7 @@ from ..core.store.journal import (
 )
 from ..platform import (
     expand_path,
+    open_url,
     reveal_directory,
     volume_info,
 )
@@ -125,6 +127,43 @@ DEFAULT_RULES_PATH = os.path.join(REPO_ROOT, "data", "rules.json")
 
 SPACE_MARGIN_BYTES = 64 * 1024 * 1024
 SPACE_FACTOR = 1.05
+
+MAX_EXTERNAL_URL_LENGTH = 2048
+
+
+def _validate_external_url(url):
+    # type: (object) -> str
+    """Only GitHub URLs under the QuotaFuse-ai organisation are allowed."""
+    if not isinstance(url, str) or not url:
+        raise invalid("url is required")
+    if len(url) > MAX_EXTERNAL_URL_LENGTH:
+        raise invalid("url is too long")
+    if any(ord(char) < 0x20 or ord(char) == 0x7F for char in url):
+        raise invalid("url must not contain control characters")
+    try:
+        parsed = urlsplit(url)
+        port = parsed.port
+    except ValueError:
+        raise invalid("url is not valid")
+    path = unquote(parsed.path)
+    segments = path.split("/")
+    if (
+        parsed.scheme != "https"
+        or parsed.hostname != "github.com"
+        or port not in (None, 443)
+        or parsed.username is not None
+        or parsed.password is not None
+        or not path.startswith("/QuotaFuse-ai/")
+        or "\\" in path
+        or "." in segments
+        or ".." in segments
+    ):
+        raise BridgeError(
+            "FORBIDDEN",
+            "url is not on the allowed list",
+            {"url": url},
+        )
+    return url
 
 MIGRATION_TERMINAL = frozenset(
     [
@@ -558,6 +597,18 @@ class AppService(object):
                 code, "could not open folder: %s" % exc, {"path": path}
             )
         return {"opened": True, "path": target}
+
+    def open_external(self, url):
+        # type: (object) -> dict
+        """Open a whitelisted web page in the default browser."""
+        target = _validate_external_url(url)
+        try:
+            open_url(target)
+        except OSError as exc:
+            raise BridgeError(
+                "IO_ERROR", "could not open browser: %s" % exc, {"url": target}
+            )
+        return {"opened": True, "url": target}
 
     def job_status(self, job_id):
         # type: (object) -> dict
@@ -2080,6 +2131,18 @@ class AppService(object):
         changed = self.learned.set_rule(item_id, safety, reason, rule_id="manual")
         self._reclassify_snapshot()
         return {"item_id": item_id, "safety": safety, "changed": bool(changed)}
+
+    def rules_override_clear(self, item_id):
+        # type: (object) -> dict
+        """Drop a manual override so the item returns to automatic rules."""
+        if not isinstance(item_id, str) or not item_id:
+            raise invalid("item_id is required")
+        current = self.learned.load().get(item_id)
+        if current is None or current.get("rule_id") != "manual":
+            raise not_found("no manual override for this item", item_id=item_id)
+        self.learned.remove(item_id)
+        self._reclassify_snapshot()
+        return {"item_id": item_id, "cleared": True}
 
     def _reclassify_snapshot(self):
         # type: () -> None

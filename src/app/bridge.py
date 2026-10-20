@@ -104,6 +104,9 @@ def build_methods(service):
             "protocol": PROTOCOL_VERSION,
         },
         "app.reveal": lambda p: service.reveal(_require_str(p, "path")),
+        "app.open_external": lambda p: service.open_external(
+            _require_str(p, "url")
+        ),
         "settings.get": lambda p: service.settings_get(),
         "settings.set": lambda p: service.settings_set(_settings_patch(p)),
         "ai.status": lambda p: service.ai_status(),
@@ -150,6 +153,9 @@ def build_methods(service):
             _require_str(p, "item_id"),
             _require_str(p, "safety"),
             _optional_str(p, "reason", ""),
+        ),
+        "rules.override.clear": lambda p: service.rules_override_clear(
+            _require_str(p, "item_id")
         ),
         "events.poll": lambda p: service.events_poll(p.get("since_seq", 0)),
     }
