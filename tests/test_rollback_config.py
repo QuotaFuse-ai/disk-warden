@@ -359,7 +359,12 @@ class ConfigRestoreTests(unittest.TestCase):
     # -- unsafe manifests ------------------------------------------------
 
     def test_unsafe_relative_paths_are_rejected(self):
-        unsafe = ("../evil.txt", "/etc/passwd", "C:/evil.txt", "", ".", "a/../b")
+        unsafe = ["../evil.txt", "/etc/passwd", "", ".", "a/../b"]
+        if os.name == "nt":
+            # A drive-qualified path only means "absolute" on Windows.  On
+            # POSIX ``C:`` is an ordinary file name, so that entry is a
+            # missing backup instead of a corrupt manifest record.
+            unsafe.insert(2, "C:/evil.txt")
         entries = [self._entry(rel, b"x") for rel in unsafe]
         self._manifest(entries)
 

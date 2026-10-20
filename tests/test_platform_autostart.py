@@ -59,6 +59,7 @@ class DefaultCommandTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {ENV_COMMAND: COMMAND}):
             self.assertEqual(default_command(), COMMAND)
 
+    @unittest.skipUnless(WINDOWS, "the packaged command is a Windows .exe")
     def test_frozen_build_registers_the_packaged_exe(self):
         with mock.patch.dict(os.environ, {ENV_COMMAND: ""}):
             with mock.patch.object(sys, "frozen", True, create=True):

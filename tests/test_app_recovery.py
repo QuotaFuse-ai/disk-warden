@@ -8,7 +8,6 @@ to offered actions.
 
 import os
 import shutil
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -16,6 +15,7 @@ from pathlib import Path
 from src.app.errors import BridgeError
 from src.app.service import STATE_LABELS
 from src.core.migrate import write_owner_marker
+from src.platform import LinkError, create_junction, remove_junction
 from src.core.store.journal import (
     STATE_ALREADY_ROLLED_BACK,
     STATE_DONE,
@@ -245,22 +245,15 @@ class CrashWindowTest(unittest.TestCase):
         self.assertFalse(self.service._source_is_junction(plain))
         self.assertFalse(self.service._source_is_junction(""))
         link = str(self.source.parent / "CacheLink")
-        created = subprocess.call(
-            ["cmd", "/c", "mklink", "/J", link, str(self.final)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        if created != 0:
-            self.skipTest("mklink /J is unavailable in this environment")
-        self.addCleanup(self._remove_link, link)
-        self.assertTrue(self.service._source_is_junction(link))
-
-    @staticmethod
-    def _remove_link(path):
+        # Use the platform adapter instead of ``cmd /c mklink /J`` so the test
+        # exercises the real link type on every host (junction on Windows,
+        # symlink on macOS/POSIX).
         try:
-            os.rmdir(path)
-        except OSError:
-            pass
+            create_junction(link, str(self.final))
+        except (LinkError, OSError) as exc:
+            self.skipTest("this filesystem cannot create a directory link: %s" % exc)
+        self.addCleanup(remove_junction, link)
+        self.assertTrue(self.service._source_is_junction(link))
 
 
 class BannerConvergenceTest(unittest.TestCase):
