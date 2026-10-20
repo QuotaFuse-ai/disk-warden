@@ -4,6 +4,7 @@
 # code -> retryable
 ERROR_CODES = {
     "INVALID_ARGUMENT": False,
+    "FORBIDDEN": False,
     "NOT_FOUND": False,
     "BUSY": True,
     "JOB_CONFLICT": False,

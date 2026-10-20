@@ -10,6 +10,7 @@ Python 3.8 compatible (decision 0005).
 
 import sys
 
+from .external import ExternalOpenError, open_url
 from .filesystem import is_reparse_point, is_reparse_stat
 from .link import (
     LinkError,
@@ -68,6 +69,7 @@ else:
         return ""
 
 __all__ = [
+    "ExternalOpenError",
     "LinkError",
     "ProcessEnumerationError",
     "ProcessInfo",
@@ -86,6 +88,7 @@ __all__ = [
     "is_reparse_point",
     "is_reparse_stat",
     "link_target_matches",
+    "open_url",
     "read_junction_target",
     "remove_junction",
     "rename_dir",
