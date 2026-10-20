@@ -25,6 +25,7 @@ ERROR_CODES = {
     "AI_KEY_UNSUPPORTED": False,
     "AI_KEY_STORE_FAILED": True,
     "AI_KEY_DECRYPT_FAILED": False,
+    "AUTOSTART_FAILED": True,
     "INTERNAL": False,
 }
 

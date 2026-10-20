@@ -37,6 +37,9 @@ from src.core.store.layout import DataLayout, default_data_root  # noqa: E402
 WEBVIEW_DIR = "webview"
 WEBVIEW_FAILED_MARKER = ".webview-init-failed"
 
+LAUNCHER_LOG_MAX_BYTES = 2 * 1024 * 1024
+LAUNCHER_LOG_BACKUPS = 3
+
 PYTHON_DLL_PREFIX = "python3"
 PYTHON_DLL_SUFFIX = ".dll"
 
@@ -126,15 +129,42 @@ def _message(text):
         sys.stderr.write(text + "\n")
 
 
+def _rotate_launcher_log(path, max_bytes=LAUNCHER_LOG_MAX_BYTES, backups=LAUNCHER_LOG_BACKUPS):
+    # type: (str, int, int) -> None
+    """Shift ``launcher.log`` -> ``.1`` -> ``.2`` when it grew too large.
+
+    The launcher log is only appended to at startup, so a size check here is
+    enough; a failure (another instance still holds the file) must never stop
+    the application from starting.
+    """
+    try:
+        if os.path.getsize(path) < max_bytes:
+            return
+    except OSError:
+        return
+    for index in range(backups, 1, -1):
+        source = "%s.%d" % (path, index - 1)
+        target = "%s.%d" % (path, index)
+        try:
+            if os.path.exists(source):
+                os.replace(source, target)
+        except OSError:
+            return
+    try:
+        os.replace(path, path + ".1")
+    except OSError:
+        pass
+
+
 def _redirect_logs(root):
     # type: (str) -> None
     """A windowed build has no stderr; keep the startup diagnostics on disk."""
     try:
         log_dir = os.path.join(root, "logs")
         os.makedirs(log_dir, exist_ok=True)
-        stream = open(
-            os.path.join(log_dir, "launcher.log"), "a", encoding="utf-8", buffering=1
-        )
+        path = os.path.join(log_dir, "launcher.log")
+        _rotate_launcher_log(path)
+        stream = open(path, "a", encoding="utf-8", buffering=1)
     except OSError:
         return
     sys.stdout = stream
@@ -347,7 +377,22 @@ def _run():
     return main()
 
 
+def _run_drill(argv):
+    # type: (list) -> int
+    """QA sandbox drill, reached through the frozen executable.
+
+    The windowed build has no console, so the drill writes a JSON report
+    instead of printing.  It manages its own data root (``--sandbox``) and
+    never starts WebView2, so it runs before the data-root and profile setup.
+    """
+    from src.app.drill import run_drill
+
+    return run_drill(argv)
+
+
 if __name__ == "__main__":
+    if "--drill" in sys.argv[1:]:
+        sys.exit(_run_drill(sys.argv[1:]))
     if not _check_runtime_layout():
         sys.exit(3)
     if not _prepare_data_root():

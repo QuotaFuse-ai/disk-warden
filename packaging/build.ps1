@@ -1,11 +1,11 @@
 # Build the unsigned Windows x64 development package (PyInstaller onedir).
 # Run from anywhere:  powershell -ExecutionPolicy Bypass -File packaging\build.ps1
 #   -Python <path to python.exe>   interpreter with packaging/requirements-build.txt
-#   -Version <artifact version>    defaults to 0.9.0-beta.5
+#   -Version <artifact version>    defaults to 0.9.0-beta.6
 
 param(
     [string]$Python = "python",
-    [string]$Version = "0.9.0-beta.5"
+    [string]$Version = "0.9.0-beta.6"
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,7 +22,7 @@ if ($pyVersion -ne "3.12") {
 }
 Write-Host "Using Python $pyVersion ($Python)"
 
-& $Python -c "import PyInstaller, webview, psutil; print('deps ok')"
+& $Python -c "import PyInstaller, webview, psutil, pystray, PIL; print('deps ok')"
 if ($LASTEXITCODE -ne 0) {
     throw "Build dependencies are missing. Run: $Python -m pip install -r packaging/requirements-build.txt"
 }
@@ -45,7 +45,10 @@ if (-not (Test-Path $exe)) { throw "Expected executable not found: $exe" }
 # next to the executable only.
 Copy-Item (Join-Path $PSScriptRoot "DiskWarden.exe.config") (Join-Path $appDir "DiskWarden.exe.config") -Force
 
-Compress-Archive -Path $appDir -DestinationPath $zipPath -CompressionLevel Optimal
+# The unsigned build triggers SmartScreen before any app UI can appear, so the
+# first-run guidance ships inside the zip and is visible on extraction.
+$firstRun = Join-Path $PSScriptRoot "START-HERE.txt"
+Compress-Archive -Path $appDir, $firstRun -DestinationPath $zipPath -CompressionLevel Optimal
 $hash = (Get-FileHash -Algorithm SHA256 $zipPath).Hash
 $sizeMb = [math]::Round((Get-Item $zipPath).Length / 1MB, 1)
 

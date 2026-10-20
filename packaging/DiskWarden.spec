@@ -25,9 +25,15 @@ a = Analysis(
         (os.path.join(ROOT, "data", "ide-catalog.json"), "data"),
         (os.path.join(ROOT, "data", "rules.json"), "data"),
         (os.path.join(ROOT, "packaging", "DiskWarden.exe.config"), "."),
+        # src/app/main.py resolves ICON_PATH under REPO_ROOT/packaging once frozen.
+        (os.path.join(ROOT, "packaging", "DiskWarden.ico"), "packaging"),
     ],
     hiddenimports=[
         "psutil",
+        "pystray",
+        "pystray._win32",
+        "PIL.Image",
+        "PIL.ImageDraw",
         "webview.platforms.edgechromium",
         "webview.platforms.winforms",
         "webview.platforms.mshtml",

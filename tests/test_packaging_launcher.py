@@ -89,5 +89,49 @@ class CheckRuntimeLayoutTest(unittest.TestCase):
         self.assertIn("全新的空目录", text)
 
 
+class LauncherLogRotationTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = os.path.join(self.tmp.name, "launcher.log")
+
+    def _write(self, name, text):
+        with open(os.path.join(self.tmp.name, name), "w", encoding="utf-8") as handle:
+            handle.write(text)
+
+    def _read(self, name):
+        with open(os.path.join(self.tmp.name, name), encoding="utf-8") as handle:
+            return handle.read()
+
+    def test_small_log_is_kept_in_place(self):
+        self._write("launcher.log", "small")
+        launcher._rotate_launcher_log(self.path, max_bytes=1024)
+        self.assertEqual(self._read("launcher.log"), "small")
+        self.assertFalse(os.path.exists(self.path + ".1"))
+
+    def test_large_log_is_shifted_with_its_backups(self):
+        self._write("launcher.log", "x" * 2048)
+        self._write("launcher.log.1", "one")
+        self._write("launcher.log.2", "two")
+        launcher._rotate_launcher_log(self.path, max_bytes=1024, backups=3)
+        self.assertFalse(os.path.exists(self.path))
+        self.assertEqual(self._read("launcher.log.1"), "x" * 2048)
+        self.assertEqual(self._read("launcher.log.2"), "one")
+        self.assertEqual(self._read("launcher.log.3"), "two")
+
+    def test_only_the_configured_number_of_backups_is_kept(self):
+        self._write("launcher.log", "x" * 2048)
+        for index in (1, 2, 3):
+            self._write("launcher.log.%d" % index, str(index))
+        launcher._rotate_launcher_log(self.path, max_bytes=1024, backups=3)
+        self.assertTrue(os.path.exists(self.path + ".1"))
+        self.assertEqual(self._read("launcher.log.2"), "1")
+        self.assertEqual(self._read("launcher.log.3"), "2")
+
+    def test_missing_log_is_not_an_error(self):
+        launcher._rotate_launcher_log(self.path, max_bytes=1024)
+        self.assertFalse(os.path.exists(self.path + ".1"))
+
+
 if __name__ == "__main__":
     unittest.main()

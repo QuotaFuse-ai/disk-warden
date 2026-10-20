@@ -583,7 +583,7 @@ I18N['zh-CN'] = {
   'nav.rules': '规则学习',
   'nav.history': '操作历史',
   'nav.settings': '设置',
-  'nav.version': 'v0.9.0-beta.5',
+  'nav.version': 'v0.9.0-beta.6',
   'page.ide.title': 'IDE 数据',
   'page.ide.desc': '扫描本机 AI IDE / CLI 的数据目录，安全迁移可再生的缓存与会话。',
   'page.projects.title': '项目目录',
@@ -884,6 +884,10 @@ I18N['zh-CN'] = {
   'settings.languageDesc': '切换后界面文案立即生效',
   'settings.autoStart': '开机自启',
   'settings.autoStartDesc': '登录 Windows 后自动在托盘运行',
+  'settings.autoStartUnsupported': '当前运行方式不会写入开机启动项，安装版生效',
+  'settings.logs': '日志目录',
+  'settings.logsDesc': '运行日志只保存在本机，按 2 MB 轮转并保留最近 3 份',
+  'settings.logsOpen': '打开目录',
   'settings.targetRoot': '目标存储根目录',
   'settings.targetRootDesc': '迁移后的目录、备份与日志都放在这里',
   'settings.autoMaintenance': '自动维护',
@@ -1150,6 +1154,7 @@ I18N['zh-CN'] = {
   'error.FORBIDDEN': '该操作不在允许范围内',
   'error.NOT_FOUND': '目录不存在',
   'error.PERMISSION_DENIED': '没有权限访问该目录',
+  'error.AUTOSTART_FAILED': '无法更新开机启动项，请检查当前用户权限',
   'error.IO_ERROR': '系统未能打开资源管理器',
   'error.ALREADY_MIGRATED': '这些目录已经迁移，无需重复迁移',
   'error.INTERNAL': '主机端内部错误',
@@ -1245,7 +1250,7 @@ I18N['en'] = {
   'nav.rules': 'Rule learning',
   'nav.history': 'History',
   'nav.settings': 'Settings',
-  'nav.version': 'v0.9.0-beta.5',
+  'nav.version': 'v0.9.0-beta.6',
   'page.ide.title': 'IDE data',
   'page.ide.desc': 'Scan data folders of AI IDEs and CLIs, then move regenerable caches and sessions safely.',
   'page.projects.title': 'Projects',
@@ -1546,6 +1551,10 @@ I18N['en'] = {
   'settings.languageDesc': 'Changes apply to the interface immediately',
   'settings.autoStart': 'Start with Windows',
   'settings.autoStartDesc': 'Run in the tray after sign-in',
+  'settings.autoStartUnsupported': 'Not available in this run mode; enabled in the installed build',
+  'settings.logs': 'Log folder',
+  'settings.logsDesc': 'Logs stay on this computer; 2 MB rotation keeps the last 3 files',
+  'settings.logsOpen': 'Open folder',
   'settings.targetRoot': 'Target storage root',
   'settings.targetRootDesc': 'Migrated folders, backups and logs live here',
   'settings.autoMaintenance': 'Auto maintenance',
@@ -1812,6 +1821,7 @@ I18N['en'] = {
   'error.FORBIDDEN': 'This action is not allowed',
   'error.NOT_FOUND': 'Folder does not exist',
   'error.PERMISSION_DENIED': 'Access to the folder was denied',
+  'error.AUTOSTART_FAILED': 'Could not update the startup item; check your user permissions',
   'error.IO_ERROR': 'The system could not open the file manager',
   'error.ALREADY_MIGRATED': 'These folders are already migrated',
   'error.INTERNAL': 'Host internal error',
@@ -2248,7 +2258,10 @@ function applySettings(s) {
   state.settings = {
     targetRoot: s.target_root || '',
     autoStart: !!s.launch_at_startup,
+    autoStartSupported: s.launch_at_startup_supported !== false,
+    autoStartError: s.launch_at_startup_error || '',
     autoMaintenance: !!s.auto_maintenance,
+    logsDir: (s.paths && s.paths.logs_dir) || '',
     uninstall: s.uninstall_policy === 'rollback' ? 'remove' : (s.uninstall_policy || 'keep'),
     dataRoot: s.data_root || '',
     appVersion: s.app_version || '',
@@ -3562,8 +3575,12 @@ function modalSettings() {
       <div class="ctrl"><input type="text" id="settings-root" value="${esc(state.settings.targetRoot)}"></div>
     </div>
     <div class="settings-row">
-      <div><div class="k">${esc(t('settings.autoStart'))}</div><div class="d">${esc(t('settings.autoStartDesc'))}</div></div>
+      <div><div class="k">${esc(t('settings.autoStart'))}</div><div class="d">${esc(t('settings.autoStartDesc'))}${state.settings.autoStartSupported === false ? ' · ' + esc(t('settings.autoStartUnsupported')) : ''}${state.settings.autoStartError ? ' · ' + esc(state.settings.autoStartError) : ''}</div></div>
       <div class="ctrl"><button type="button" class="sw ${state.settings.autoStart ? 'on' : ''}" role="switch" aria-checked="${state.settings.autoStart}" onclick="App.toggleSetting('autoStart')"></button></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.logs'))}</div><div class="d">${esc(t('settings.logsDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="btn btn-ghost btn-sm" title="${esc(state.settings.logsDir)}" onclick="App.openPath(state.settings.logsDir)">${esc(t('settings.logsOpen'))}</button></div>
     </div>
     <div class="settings-row">
       <div><div class="k">${esc(t('settings.autoMaintenance'))}</div><div class="d">${esc(t('settings.autoMaintenanceDesc'))}</div></div>
