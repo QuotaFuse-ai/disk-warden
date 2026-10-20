@@ -440,7 +440,7 @@ a{color:var(--blue);text-decoration:none}
 .settings-row select:focus,.settings-row input[type=text]:focus{outline:none;border-color:#7fd383}
 .settings-row input[type=text]{width:280px;font-family:Consolas,monospace}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,8px);background:#333b43;border:1px solid #454e57;color:#fff;padding:8px 14px;border-radius:3px;font-size:var(--fs-body);box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;max-width:70vw}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,8px);background:#333b43;border:1px solid #454e57;color:#fff;padding:8px 14px;border-radius:3px;font-size:var(--fs-body);box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;max-width:70vw;overflow-wrap:anywhere}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 .proto-fab{position:fixed;right:14px;bottom:14px;z-index:90;background:#fff;border:1px solid #dfe6eb;color:#7d8791;font-size:var(--fs-meta);font-weight:600;padding:6px 10px;border-radius:16px;box-shadow:0 3px 10px rgba(31,45,61,.1);display:flex;align-items:center;gap:5px}
@@ -706,7 +706,6 @@ I18N['zh-CN'] = {
   'ide.alreadyMigrated': '该软件的数据已位于目标盘，通过 junction 链接回原路径。',
   'ide.allGreenSelected': '全选可迁',
   'ide.cleanHint': '仅清理 Chromium / 编译缓存，不触碰会话与配置。',
-  'ide.openHint': '已在资源管理器中打开',
   'ide.selectIde': '请选择软件',
   'reason.chatDb': 'AI 对话与 agent 状态数据库，可再生',
   'reason.workspace': '各项目工作区索引，可再生',
@@ -1109,7 +1108,9 @@ I18N['zh-CN'] = {
   'toast.scanCancelled': '已取消扫描',
   'toast.copied': '已复制到剪贴板（原型模拟）',
   'toast.opened': '已在资源管理器中打开',
-  'toast.openFailed': '无法打开目录',
+  'toast.openedPath': '已在资源管理器中打开：{path}',
+  'toast.openFailedReason': '无法打开目录：{reason}',
+  'error.NO_PATH': '路径未知',
   'error.NOT_FOUND': '目录不存在',
   'error.PERMISSION_DENIED': '没有权限访问该目录',
   'error.IO_ERROR': '系统未能打开资源管理器',
@@ -1358,7 +1359,6 @@ I18N['en'] = {
   'ide.alreadyMigrated': 'This app already lives on the target drive and is linked back with a junction.',
   'ide.allGreenSelected': 'Select all migratable',
   'ide.cleanHint': 'Only Chromium and compile caches are cleaned. Sessions and config stay.',
-  'ide.openHint': 'Opened in Explorer',
   'ide.selectIde': 'Select an app',
   'reason.chatDb': 'AI chat and agent state database, regenerable',
   'reason.workspace': 'Per-project workspace index, regenerable',
@@ -1761,10 +1761,12 @@ I18N['en'] = {
   'toast.scanCancelled': 'Scan cancelled',
   'toast.copied': 'Copied to clipboard (prototype simulation)',
   'toast.opened': 'Opened in Explorer',
-  'toast.openFailed': 'Could not open folder',
+  'toast.openedPath': 'Opened in Explorer: {path}',
+  'toast.openFailedReason': 'Could not open folder: {reason}',
+  'error.NO_PATH': 'Path unknown',
   'error.NOT_FOUND': 'Folder does not exist',
   'error.PERMISSION_DENIED': 'Access to the folder was denied',
-  'error.IO_ERROR': 'Windows could not open Explorer',
+  'error.IO_ERROR': 'The system could not open the file manager',
   'error.INTERNAL': 'Host internal error',
   'toast.cleaned': 'Cache cleaned, freed {size} (prototype simulation)',
   'toast.ruleAdded': 'Rule added',
@@ -2213,7 +2215,10 @@ function rpc(method, params) {
 
 function errText(err) {
   if (!err) return '';
-  return t(err.message_key || ('error.' + (err.code || 'INTERNAL')));
+  const key = err.message_key || ('error.' + (err.code || 'INTERNAL'));
+  const label = t(key);
+  /* 主机端可能返回界面没有收录的错误码，兜底成通用文案，不把 key 漏给用户 */
+  return label === key ? t('error.INTERNAL') : label;
 }
 
 function fmtDate(iso) {
@@ -3249,10 +3254,10 @@ function renderIdeDetail(ide) {
     <div class="actions">
       ${migrated
         ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.openRollback('${ide.id}')">${esc(t('action.rollback'))}</button>
-           <button type="button" class="btn btn-ghost btn-sm" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>`
+           <button type="button" class="btn btn-ghost btn-sm" title="${esc((ide.runtime && ide.runtime.root) || t('error.NO_PATH'))}" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>`
         : `<button type="button" class="btn btn-primary btn-sm" ${g ? '' : 'disabled'} onclick="App.startPreview('${ide.id}')">${esc(t('action.migrate'))}</button>
            <button type="button" class="btn btn-ghost btn-sm" onclick="App.cleanCaches('${ide.id}')">${esc(t('action.clean'))}</button>
-           <button type="button" class="btn btn-ghost btn-sm" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>
+           <button type="button" class="btn btn-ghost btn-sm" title="${esc((ide.runtime && ide.runtime.root) || t('error.NO_PATH'))}" onclick="App.openIdeFolder('${ide.id}')">${esc(t('action.openFolder'))}</button>
            <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('feedback')">${esc(t('action.feedback'))}</button>`}
       <span class="spacer"></span>
       <span class="note">${esc(migrated ? t('rollback.note', { app: ide.name }) : t('ide.cleanHint'))}</span>
@@ -3417,7 +3422,7 @@ function renderProjects() {
         </div>
         <div class="actions">
           <button type="button" class="btn btn-primary btn-sm" onclick="App.cleanProject('all')">${esc(t('action.clean'))}</button>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="App.openProjectFolder('${p.id}')">${esc(t('action.openFolder'))}</button>
+          <button type="button" class="btn btn-ghost btn-sm" title="${esc(p.path || t('error.NO_PATH'))}" onclick="App.openProjectFolder('${p.id}')">${esc(t('action.openFolder'))}</button>
           <span class="spacer"></span><span class="note">${esc(t('projects.note'))}</span>
         </div>
       </div>
@@ -3450,7 +3455,7 @@ function renderDisk() {
                 </td>
                 <td class="num">${c.gb.toFixed(1)} GB</td>
                 <td><span class="tag tag-code">${esc(t('disk.handling.' + c.handling))}</span></td>
-                <td class="right"><button type="button" class="btn btn-ghost btn-xs" onclick="App.openDiskLocation('${c.id}')">${esc(t('action.viewLocation'))}</button></td>
+                <td class="right"><button type="button" class="btn btn-ghost btn-xs" title="${esc(DISK_LOCATIONS[c.id] || t('error.NO_PATH'))}" onclick="App.openDiskLocation('${c.id}')">${esc(t('action.viewLocation'))}</button></td>
               </tr>`).join('')}
             </tbody>
           </table>
@@ -4931,20 +4936,19 @@ const App = {
     });
   },
   openPath(path) {
-    if (!path) { this.toast(t('toast.openFailed')); return; }
-    rpc('app.reveal', { path: String(path) }).then(() => {
-      this.toast(t('toast.opened'));
-    }).catch(err => {
-      const detail = errText(err);
-      this.toast(t('toast.openFailed') + (detail ? ': ' + detail : ''));
-    });
+    const fail = (reason) => this.toast(t('toast.openFailedReason', { reason: reason || t('error.INTERNAL') }));
+    if (!path) { fail(t('error.NO_PATH')); return; }
+    rpc('app.reveal', { path: String(path) }).then(res => {
+      /* 主机端返回展开后的真实路径：提示里报出它，用户才知道资源管理器停在了哪儿 */
+      this.toast(res && res.path ? t('toast.openedPath', { path: res.path }) : t('toast.opened'));
+    }).catch(err => fail(errText(err)));
   },
   openIdeFolder(ideId) {
     const ide = getIde(ideId);
     this.openPath((ide.runtime && ide.runtime.root) || '');
   },
   openProjectFolder(projectId) {
-    const project = PROJECTS.find(x => x.id === projectId) || PROJECTS[0];
+    const project = PROJECTS.find(x => x.id === projectId);
     this.openPath(project ? project.path : '');
   },
   openDiskLocation(categoryId) {
