@@ -221,6 +221,15 @@ class CrashWindowTest(unittest.TestCase):
         self.run_recovery("recover")
         self.assert_settled()
 
+    def test_rolled_back_recovery_reports_success(self):
+        # The UI treats summary.ok false as "恢复失败"; a recovery that
+        # rolled the interrupted migration back is a success, not a failure.
+        runner_id = self.service.recovery_run(self.JOB_ID, "recover")["job_id"]
+        job = self.service.runner.wait(runner_id, 20)
+        self.assertEqual(job.get("state"), "done")
+        self.assertEqual(job["summary"]["state"], STATE_ROLLED_BACK)
+        self.assertTrue(job["summary"]["ok"], job["summary"])
+
     def test_rollback_on_an_unlinked_source_uses_recovery(self):
         self.run_recovery("rollback")
         self.assert_settled()

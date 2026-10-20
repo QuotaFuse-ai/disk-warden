@@ -29,10 +29,13 @@ from .transfer import (
 )
 
 if sys.platform.startswith("win"):
+    from .win.autostart import Autostart, AutostartError
     from .win.process import enumerate_processes
 elif sys.platform == "darwin":
+    from .autostart import Autostart, AutostartError
     from .mac.process import enumerate_processes
 else:
+    from .autostart import Autostart, AutostartError
     from .posix.process import enumerate_processes
 
 if sys.platform.startswith("win"):
@@ -69,6 +72,8 @@ else:
         return ""
 
 __all__ = [
+    "Autostart",
+    "AutostartError",
     "ExternalOpenError",
     "LinkError",
     "ProcessEnumerationError",

@@ -30,10 +30,10 @@ English | [Chinese](README.zh-CN.md)
 | Rollback engine and local store: journal / history / settings / learned rules (T11) | Done, merged to `main` |
 | AI analysis interface (T22) | Done, disabled by default |
 | UI wired to the real engine, AI key setup (T12, T25) | Done, merged to `main` |
-| Windows packaging (T15) | Unsigned development build (zip) available |
+| Windows packaging (T15) | Unsigned 0.9.0-beta.6 zip: tray, per-user autostart, rotating logs, packaged sandbox drills |
 | macOS packaging (T21) | Not started |
 
-**661 unit tests** cover the completed modules; CI runs them on every push.
+**704 unit tests** cover the completed modules; CI runs them on every push.
 
 ## Platforms
 

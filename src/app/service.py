@@ -115,6 +115,8 @@ from ..core.store.journal import (
     STATE_VERIFIED_LINK,
 )
 from ..platform import (
+    Autostart,
+    AutostartError,
     expand_path,
     is_junction,
     open_url,
@@ -340,8 +342,9 @@ class AppService(object):
         free_space_provider=None,
         transfer=None,
         ai_test_opener=None,
+        autostart=None,
     ):
-        # type: (object, object, object, object, object, object, object, object) -> None
+        # type: (object, object, object, object, object, object, object, object, object) -> None
         self.environ = dict(environ if environ is not None else os.environ)
         self.catalog_path = os.path.abspath(
             catalog_path or DEFAULT_CATALOG_PATH
@@ -351,6 +354,7 @@ class AppService(object):
         self._free_space_provider = free_space_provider
         self._transfer = transfer
         self._ai_test_opener = ai_test_opener
+        self.autostart = autostart if autostart is not None else Autostart()
 
         self._stored_ai_key = ""
         self._ai_key_error = ""
@@ -475,18 +479,87 @@ class AppService(object):
             LOGGER.warning("AI resolver disabled: %s", exc)
             return None
 
+    def _autostart_status(self):
+        # type: () -> dict
+        """Registry state of the current-user startup item (never raises)."""
+        try:
+            status = self.autostart.status()
+        except Exception as exc:
+            LOGGER.warning("could not read the startup item: %s", exc)
+            return {
+                "supported": False,
+                "enabled": False,
+                "command": "",
+                "registered": "",
+                "error": str(exc),
+            }
+        status = dict(status)
+        status.setdefault("supported", False)
+        status.setdefault("enabled", False)
+        status.setdefault("command", "")
+        status.setdefault("registered", "")
+        status.setdefault("error", "")
+        return status
+
+    def _apply_autostart(self, enabled):
+        # type: (bool) -> None
+        """Write or remove the ``HKCU`` startup value, without elevation.
+
+        A source checkout (and every non-Windows build) has no launch command
+        to register, so the preference is only persisted there.  In a frozen
+        build a registry failure is surfaced to the UI instead of leaving the
+        switch looking enabled while nothing starts with Windows.
+        """
+        # Ask the object, not ``status()``: a registry read failure must not be
+        # mistaken for "this build cannot start with Windows" and silently
+        # drop the user's choice.
+        try:
+            supported = bool(self.autostart.supported)
+        except Exception:
+            supported = False
+        if not supported:
+            return
+        try:
+            self.autostart.set_enabled(enabled)
+        except AutostartError as exc:
+            raise BridgeError(
+                "AUTOSTART_FAILED",
+                "could not update the startup item: %s" % exc,
+                {"code": getattr(exc, "code", "AUTOSTART_FAILED")},
+            )
+        except Exception as exc:
+            raise BridgeError(
+                "AUTOSTART_FAILED",
+                "could not update the startup item: %s" % exc,
+            )
+        after = self._autostart_status()
+        if bool(after["enabled"]) != bool(enabled):
+            raise BridgeError(
+                "AUTOSTART_FAILED",
+                "the startup item did not change; check permissions for "
+                "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                {"enabled": bool(after["enabled"])},
+            )
+
     def settings_get(self):
         # type: () -> dict
         with self._lock:
             settings = dict(self._settings)
         ai = self._ai_config
         public = ai.public_dict() if ai is not None else {}
+        autostart = self._autostart_status()
+        stored_startup = bool(settings.get("launch_at_startup", False))
         return {
             "app_version": APP_VERSION,
             "protocol_version": PROTOCOL_VERSION,
             "data_root": self.layout.root,
             "target_root": settings.get("data_root") or self.layout.root,
-            "launch_at_startup": bool(settings.get("launch_at_startup", False)),
+            "launch_at_startup": (
+                autostart["enabled"] if autostart["supported"] else stored_startup
+            ),
+            "launch_at_startup_supported": autostart["supported"],
+            "launch_at_startup_error": autostart["error"],
+            "launch_at_startup_command": autostart["command"],
             "auto_maintenance": bool(settings.get("auto_maintenance", False)),
             "uninstall_policy": settings.get("uninstall_policy", "keep"),
             "language": settings.get("language", "en"),
@@ -543,6 +616,9 @@ class AppService(object):
         if "launch_at_startup" in patch:
             if not isinstance(patch["launch_at_startup"], bool):
                 raise invalid("launch_at_startup must be a boolean")
+            # Always reconcile the registry with the requested value: a stale
+            # entry from an older extraction folder must not survive a toggle.
+            self._apply_autostart(patch["launch_at_startup"])
             settings["launch_at_startup"] = patch["launch_at_startup"]
         if "auto_maintenance" in patch:
             if not isinstance(patch["auto_maintenance"], bool):
@@ -2209,6 +2285,13 @@ class AppService(object):
         elif completion.ok:
             self._reconcile_success_history(entry, completion)
 
+        # A recovery that undoes the interrupted migration has resolved it:
+        # the source is intact again and nothing is pending.  ``ok`` follows
+        # the migration completion, so a rolled-back recovery used to report
+        # failure and the UI banner said "恢复失败" after a successful undo.
+        resolved = bool(completion.ok) or bool(completion.rolled_back) or (
+            completion.state in (STATE_ROLLED_BACK, STATE_ALREADY_ROLLED_BACK)
+        )
         summary = {
             "job_id": entry.job_id,
             "runner_job_id": job.job_id,
@@ -2217,7 +2300,7 @@ class AppService(object):
             "final_path": final_path,
             "state": completion.state,
             "state_label": STATE_LABELS.get(completion.state, completion.state),
-            "ok": bool(completion.ok),
+            "ok": resolved,
             "rolled_back": bool(completion.rolled_back),
             "error_code": completion.error_code or "",
             "error_message": completion.error_message or "",
@@ -2229,7 +2312,7 @@ class AppService(object):
                 "stage": "done",
                 "step": "done",
                 "done": True,
-                "ok": bool(completion.ok),
+                "ok": resolved,
                 "state": completion.state,
             },
         )
