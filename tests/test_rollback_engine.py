@@ -15,12 +15,14 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.core.migrate import paths as migrate_paths  # noqa: E402
+from src.core.rollback import engine as rollback_engine  # noqa: E402
 from src.core.rollback.engine import precheck_rollback, rollback  # noqa: E402
 from src.core.rollback.models import (  # noqa: E402
     ERROR_COPY,
@@ -411,6 +413,71 @@ class RollbackEngineTests(unittest.TestCase):
         self.assertTrue(result.target_removed)
         self.assertFalse(result.residual_copy)
         self.assertFalse(self.final.exists())
+        self.assertEqual(snapshot(self.source), expected_snapshot())
+
+    def test_residual_delete_is_refused_when_content_differs(self):
+        """T26/R-02: same size, different bytes must not be deleted."""
+        self.fixture.make_final(owned=True)
+        (self.final / "a.bin").write_bytes(
+            b"c" * len(FILE_PAYLOADS["a.bin"])
+        )
+
+        result = self._run(self._request(confirm_residual_delete=True))
+
+        self.assertEqual(result.state, STATE_RESIDUAL_COPY)
+        self.assertTrue(result.residual_copy)
+        self.assertFalse(result.target_removed)
+        self.assertEqual(result.error_code, ERROR_VERIFY)
+        self.assertTrue((self.final / "a.bin").is_file())
+        self.assertEqual(snapshot(self.source), expected_snapshot())
+
+    # -- T26/R-02: content is re-checked before any target deletion ------
+
+    def test_same_size_corruption_during_copy_fails_verification(self):
+        self._make_migrated()
+        payload = FILE_PAYLOADS["a.bin"]
+
+        def transfer(source, staging, log_path, cancel_token=None):
+            shutil.copytree(str(source), str(staging))
+            # Another program rewrites the target while rollback copies it:
+            # same byte count, different bytes.
+            (Path(source) / "a.bin").write_bytes(b"c" * len(payload))
+            return 0
+
+        result = self._run(transfer=transfer)
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error_code, ERROR_VERIFY)
+        self.assertEqual(result.state, STATE_ROLLBACK_FAILED)
+        self.assertTrue(result.data_kept)
+        self.assertTrue(result.relinked)
+        self.assertTrue(self.final.exists())
+        self.assertTrue(self.ops.is_junction(str(self.source)))
+
+    def test_same_size_corruption_before_cleanup_keeps_the_target(self):
+        self._make_migrated()
+        self._make_config_backup()
+        payload = FILE_PAYLOADS["a.bin"]
+        original = rollback_engine.restore_configs
+
+        def corrupt_after_restore(*args, **kwargs):
+            outcome = original(*args, **kwargs)
+            # The restored source is already in place; the target changes
+            # before the cleanup step is allowed to delete it.
+            (self.final / "a.bin").write_bytes(b"z" * len(payload))
+            return outcome
+
+        with mock.patch.object(
+            rollback_engine, "restore_configs", new=corrupt_after_restore
+        ):
+            result = self._run()
+
+        self.assertTrue(result.source_restored)
+        self.assertTrue(result.residual_copy)
+        self.assertFalse(result.target_removed)
+        self.assertEqual(result.error_code, ERROR_VERIFY)
+        self.assertIn("refusing to delete", result.error_message)
+        self.assertTrue((self.final / "a.bin").is_file())
         self.assertEqual(snapshot(self.source), expected_snapshot())
 
     # -- failure paths keep both copies ----------------------------------

@@ -497,6 +497,43 @@ def _remove_restore_dir(restore_parent, source_parent, job_id, warnings):
         warnings.append("cannot remove restore directory: %s" % error)
 
 
+def _content_check(left, right, cancel_token=None, ignore_paths=()):
+    # type: (str, str, object, tuple) -> Optional[str]
+    """Return ``None`` only when ``left`` and ``right`` provably hold equal bytes.
+
+    Any other outcome -- a size/content mismatch, a read or access error, a
+    cancellation -- returns a human-readable reason.  Callers must treat a
+    reason as "not verified" and keep the data (T26/R-02).
+    """
+    try:
+        outcome = verify_trees(
+            left,
+            right,
+            cancel_token=cancel_token,
+            ignore_paths=ignore_paths,
+        )
+    except MigrationCancelled:
+        return "content verification was cancelled"
+    except OSError as exc:
+        return "content verification is unavailable: %s" % exc
+    if outcome.ok:
+        return None
+    return outcome.reason or "content verification did not pass"
+
+
+def _ignored_ownership_files(job_id):
+    # type: (str) -> tuple
+    """Relative paths excluded from target-vs-source content comparison.
+
+    The target carries the job's ownership marker while the restored copy has
+    it stripped, so the marker is bookkeeping, not user data.
+    """
+    try:
+        return (paths.owner_marker_name(job_id),)
+    except (paths.PathValidationError, TypeError):
+        return ()
+
+
 def _strip_marker(restore_child, job_id):
     # type: (str, str) -> bool
     """Remove the job marker from the restored copy before promoting it."""
@@ -707,14 +744,31 @@ def rollback(
         journal.intent(
             request, STAGE_CLEANUP, {"action": "remove_residual_copy", "target": final_path}
         )
-        try:
-            errors = cleanup.remove_owned_tree(
-                final_path, os.path.dirname(final_path), job_id
-            )
-        except (cleanup.UnsafeCleanupError, OSError) as exc:
-            errors = [str(exc)]
+        # T26/R-02: the residual copy is only discarded once its bytes are
+        # proven equal to the source that stays.  An unavailable or failed
+        # check counts as "not verified" and keeps the copy.
+        residual_reason = _content_check(
+            final_path,
+            source_path,
+            cancel_token,
+            _ignored_ownership_files(job_id),
+        )
+        if residual_reason:
+            errors = [
+                "refusing to delete the residual target copy: %s"
+                % residual_reason
+            ]
+        else:
+            try:
+                errors = cleanup.remove_owned_tree(
+                    final_path, os.path.dirname(final_path), job_id
+                )
+            except (cleanup.UnsafeCleanupError, OSError) as exc:
+                errors = [str(exc)]
         if errors:
             result.error_code = ERROR_TARGET_DELETE
+            if residual_reason:
+                result.error_code = ERROR_VERIFY
             result.error_message = "; ".join(errors[:MAX_DETAIL_ITEMS])
             result.warnings.extend(errors)
         else:
@@ -1041,19 +1095,36 @@ def rollback(
         STAGE_CLEANUP,
         {"target": final_path, "owned": True},
     )
-    try:
-        errors = cleanup.remove_owned_tree(
-            final_path, os.path.dirname(final_path), job_id
-        )
-    except (cleanup.UnsafeCleanupError, OSError) as exc:
-        errors = [str(exc)]
-    if errors:
+    # T26/R-02: re-check content immediately before deleting the target copy.
+    # The restored source is already in place, so a target that no longer
+    # matches it is kept as a residual copy instead of being deleted.
+    predelete_reason = _content_check(
+        final_path,
+        source_path,
+        cancel_token,
+        _ignored_ownership_files(job_id),
+    )
+    if predelete_reason:
         result.residual_copy = True
-        result.error_code = ERROR_TARGET_DELETE
-        result.error_message = "; ".join(errors[:MAX_DETAIL_ITEMS])
-        result.warnings.extend(errors)
+        result.error_code = ERROR_VERIFY
+        result.error_message = (
+            "refusing to delete the target copy: %s" % predelete_reason
+        )
+        result.warnings.append(result.error_message)
     else:
-        result.target_removed = True
+        try:
+            errors = cleanup.remove_owned_tree(
+                final_path, os.path.dirname(final_path), job_id
+            )
+        except (cleanup.UnsafeCleanupError, OSError) as exc:
+            errors = [str(exc)]
+        if errors:
+            result.residual_copy = True
+            result.error_code = ERROR_TARGET_DELETE
+            result.error_message = "; ".join(errors[:MAX_DETAIL_ITEMS])
+            result.warnings.extend(errors)
+        else:
+            result.target_removed = True
     emitter.emit(
         STAGE_CLEANUP,
         STATUS_DONE if result.target_removed else STATUS_FAILED,
