@@ -29,12 +29,20 @@ import math
 import os
 import shutil
 import threading
+import time
 import traceback
 from collections import OrderedDict
 from datetime import datetime, timezone
 from urllib.parse import unquote, urlsplit
 
-from ..core.ai import AIResolver, OpenAICompatibleProvider, load_config
+from ..core.ai import (
+    AIResolver,
+    ENV_API_KEY,
+    OpenAICompatibleProvider,
+    ProviderError,
+    keystore,
+    load_config,
+)
 from ..core.migrate import (
     ERROR_CANCELLED,
     STATE_DONE,
@@ -129,6 +137,10 @@ SPACE_MARGIN_BYTES = 64 * 1024 * 1024
 SPACE_FACTOR = 1.05
 
 MAX_EXTERNAL_URL_LENGTH = 2048
+
+AI_TEST_TIMEOUT_SECONDS = 8.0
+AI_TEST_MAX_TOKENS = 1
+AI_KEY_MAX_LENGTH = keystore.MAX_SECRET_BYTES
 
 
 def _validate_external_url(url):
@@ -301,6 +313,11 @@ def _need_bytes(total_bytes):
     return int(math.ceil(max(0, total_bytes) * SPACE_FACTOR)) + SPACE_MARGIN_BYTES
 
 
+def _elapsed_ms(started):
+    # type: (float) -> int
+    return int(round((time.monotonic() - started) * 1000))
+
+
 def _fallback_root(environ):
     # type: (dict) -> str
     local = environ.get("LOCALAPPDATA") or ""
@@ -321,8 +338,9 @@ class AppService(object):
         process_provider=None,
         free_space_provider=None,
         transfer=None,
+        ai_test_opener=None,
     ):
-        # type: (object, object, object, object, object, object, object) -> None
+        # type: (object, object, object, object, object, object, object, object) -> None
         self.environ = dict(environ if environ is not None else os.environ)
         self.catalog_path = os.path.abspath(
             catalog_path or DEFAULT_CATALOG_PATH
@@ -331,6 +349,10 @@ class AppService(object):
         self._process_provider = process_provider
         self._free_space_provider = free_space_provider
         self._transfer = transfer
+        self._ai_test_opener = ai_test_opener
+
+        self._stored_ai_key = ""
+        self._ai_key_error = ""
 
         self.bus = EventBus()
         self.runner = JobRunner(self.bus)
@@ -392,10 +414,36 @@ class AppService(object):
             "enabled": bool(self._settings.get("ai_enabled", False)),
             "base_url": _text(self._settings.get("ai_base_url")),
             "model": _text(self._settings.get("ai_model")),
+            "api_key": self._stored_ai_key,
         }
+
+    def _load_stored_ai_key(self):
+        # type: () -> None
+        """Cache the decrypted key; keep a stable error code when it fails.
+
+        A key file copied from another account or machine cannot be decrypted
+        by DPAPI.  That is a recoverable state, not a crash: the layer simply
+        stays unavailable and the UI offers to clear the stored key.
+        """
+        try:
+            self._stored_ai_key = keystore.load(self.layout.ai_key_path)
+            self._ai_key_error = ""
+        except keystore.KeystoreError as exc:
+            self._stored_ai_key = ""
+            self._ai_key_error = exc.code
+            LOGGER.warning("stored AI key is unavailable (%s)", exc.code)
+
+    def _ai_key_source(self):
+        # type: () -> str
+        if _text(self.environ.get(ENV_API_KEY)):
+            return "env"
+        if keystore.stored(self.layout.ai_key_path):
+            return "stored"
+        return "none"
 
     def _refresh_ai(self):
         # type: () -> None
+        self._load_stored_ai_key()
         try:
             self._ai_config = load_config(
                 self.environ,
@@ -449,6 +497,8 @@ class AppService(object):
                 "base_url": public.get("base_url", ""),
                 "model": public.get("model", ""),
                 "api_key_set": bool(ai is not None and ai.api_key),
+                "api_key_source": self._ai_key_source(),
+                "api_key_error": self._ai_key_error,
                 "warning_key": "ai.third_party_warning",
                 "warning": "目录信息会发送给第三方 AI 服务",
             },
@@ -511,10 +561,6 @@ class AppService(object):
         if ai_patch is not None:
             if not isinstance(ai_patch, dict):
                 raise invalid("ai settings must be an object")
-            if "api_key" in ai_patch or "apiKey" in ai_patch:
-                raise invalid(
-                    "the API key is read from DISK_WARDEN_AI_API_KEY and is never stored"
-                )
             for key, setting_key in (
                 ("enabled", "ai_enabled"),
                 ("consent", "ai_consent"),
@@ -537,11 +583,57 @@ class AppService(object):
                 {"warning_key": "ai.third_party_warning"},
             )
 
+        if ai_patch is not None:
+            self._apply_ai_key(ai_patch)
+
         with self._lock:
             self._settings = settings
         self.settings_store.save(settings)
         self._refresh_ai()
         return self.settings_get()
+
+    def _apply_ai_key(self, ai_patch):
+        # type: (dict) -> bool
+        """Encrypt or clear ``ai.api_key`` and return True when it changed.
+
+        Only a DPAPI ciphertext reaches the disk.  The plaintext key is never
+        part of a returned value, exception message or log record.
+        """
+        raw = None
+        for name in ("api_key", "apiKey"):
+            if name in ai_patch:
+                if not isinstance(ai_patch[name], str):
+                    raise invalid("ai.%s must be a string" % name)
+                if raw is None:
+                    raw = ai_patch[name]
+        if raw is None:
+            return False
+
+        secret = raw.strip()
+        path = self.layout.ai_key_path
+        if not secret:
+            try:
+                keystore.clear(path)
+            except keystore.KeystoreError as exc:
+                LOGGER.warning("stored AI key could not be removed (%s)", exc.code)
+                raise BridgeError(
+                    "AI_KEY_STORE_FAILED", "the stored API key could not be removed"
+                )
+            return True
+
+        if len(secret.encode("utf-8")) > AI_KEY_MAX_LENGTH:
+            raise invalid("ai.api_key is too long")
+        try:
+            keystore.save(path, secret)
+        except keystore.KeystoreError as exc:
+            if exc.code == keystore.CODE_UNSUPPORTED:
+                raise BridgeError(
+                    "AI_KEY_UNSUPPORTED",
+                    "local key storage is not supported on this platform",
+                )
+            LOGGER.warning("AI key could not be stored (%s)", exc.code)
+            raise BridgeError("AI_KEY_STORE_FAILED", "the API key could not be stored")
+        return True
 
     def ai_status(self):
         # type: () -> dict
@@ -556,6 +648,84 @@ class AppService(object):
         self.settings_store.save(settings)
         self._refresh_ai()
         return self.settings_get()["ai"]
+
+    def ai_test(self, params=None):
+        # type: (object) -> dict
+        """Send one minimal chat request to verify the configured endpoint.
+
+        ``params`` may carry unsaved ``base_url`` / ``model`` / ``api_key``
+        values from the settings form; they are used for this one call and
+        never written anywhere.  Failures are reported inline (``ok: False``)
+        rather than raised, and the result never contains the key.
+        """
+        overrides = params if isinstance(params, dict) else {}
+        for name in ("base_url", "model", "api_key"):
+            if name in overrides and not isinstance(overrides[name], str):
+                raise invalid("ai.%s must be a string" % name)
+
+        config = self._ai_config
+        base_url = _text(overrides.get("base_url")) or (
+            config.base_url if config is not None else ""
+        )
+        model = _text(overrides.get("model")) or (
+            config.model if config is not None else ""
+        )
+        api_key = _text(overrides.get("api_key")) or (
+            config.api_key if config is not None else ""
+        )
+
+        def failure(code, message, latency_ms=0):
+            return {
+                "ok": False,
+                "latency_ms": latency_ms,
+                "model": model,
+                "error_code": code,
+                "message": message,
+            }
+
+        if not api_key:
+            return failure("missing_api_key", "no API key is configured")
+        if not base_url:
+            return failure("missing_base_url", "no endpoint is configured")
+        if not model:
+            return failure("missing_model", "no model is configured")
+
+        started = time.monotonic()
+        try:
+            provider = OpenAICompatibleProvider(
+                base_url,
+                model,
+                api_key,
+                timeout_seconds=AI_TEST_TIMEOUT_SECONDS,
+                opener=self._ai_test_opener,
+            )
+            envelope = provider.classify(
+                {
+                    "model": model,
+                    "messages": [{"role": "user", "content": "ping"}],
+                    "max_tokens": AI_TEST_MAX_TOKENS,
+                    "stream": False,
+                }
+            )
+        except ProviderError as exc:
+            LOGGER.info("AI connection test failed (%s)", exc.code)
+            return failure(exc.code, str(exc), _elapsed_ms(started))
+        except Exception as exc:
+            LOGGER.warning(
+                "AI connection test failed (%s)", type(exc).__name__
+            )
+            return failure(
+                "internal", "the connection test failed", _elapsed_ms(started)
+            )
+
+        reported = envelope.get("model")
+        return {
+            "ok": True,
+            "latency_ms": _elapsed_ms(started),
+            "model": reported if isinstance(reported, str) and reported else model,
+            "error_code": "",
+            "message": "",
+        }
 
     # -- read-only info --------------------------------------------------
 

@@ -22,9 +22,11 @@ from .cache import (
     cache_key,
     stable_file_version,
 )
+from . import keystore
 from .config import (
     AIConfig,
     DEFAULT_MAX_CALLS,
+    ENV_API_KEY,
     DEFAULT_MAX_OUTPUT_TOKENS,
     DEFAULT_MAX_TOTAL_TOKENS,
     REASON_DISABLED,
@@ -82,6 +84,7 @@ __all__ = [
     "DEFAULT_MAX_SEGMENTS",
     "DEFAULT_MAX_TOTAL_TOKENS",
     "DEFAULT_REASON_KEY",
+    "ENV_API_KEY",
     "OpenAICompatibleProvider",
     "PAYLOAD_SCHEMA_VERSION",
     "PROMPT_VERSION",
@@ -99,6 +102,7 @@ __all__ = [
     "estimate_tokens",
     "extension_counts",
     "has_leak",
+    "keystore",
     "leak_categories",
     "load_config",
     "parse_suggestion",

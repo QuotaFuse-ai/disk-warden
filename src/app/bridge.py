@@ -111,6 +111,7 @@ def build_methods(service):
         "settings.set": lambda p: service.settings_set(_settings_patch(p)),
         "ai.status": lambda p: service.ai_status(),
         "ai.consent": lambda p: service.ai_consent(),
+        "ai.test": lambda p: service.ai_test(p),
         "disk.info": lambda p: service.disk_info(),
         "scan.start": lambda p: service.scan_start(),
         "scan.cancel": lambda p: service.scan_cancel(p.get("job_id")),

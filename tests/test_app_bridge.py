@@ -18,6 +18,7 @@ EXPECTED_METHODS = {
     "settings.set",
     "ai.status",
     "ai.consent",
+    "ai.test",
     "disk.info",
     "scan.start",
     "scan.cancel",
