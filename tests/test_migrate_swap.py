@@ -66,7 +66,8 @@ class SourceRenameTests(unittest.TestCase):
         self.tombstone = str(self.fixture.tombstone)
         self.sleeps = []
 
-    def rename(self, ops, holder_provider=None, delays=(0, 0, 0)):
+    def rename(self, ops, holder_provider=None, delays=(0, 0, 0),
+               integrity_provider=None):
         return ensure_source_renamed(
             ops,
             self.source,
@@ -75,6 +76,7 @@ class SourceRenameTests(unittest.TestCase):
             holder_provider=holder_provider or (lambda path: []),
             sleep=self.sleeps.append,
             retry_delays=delays,
+            integrity_provider=integrity_provider or (lambda path: ""),
         )
 
     def test_transient_denial_is_retried_until_it_succeeds(self):
@@ -154,6 +156,37 @@ class SourceRenameTests(unittest.TestCase):
             self.rename(ops, holder_provider=explode, delays=())
 
         self.assertIn("cannot rename source to tombstone", str(raised.exception))
+
+    def test_integrity_denial_is_reported_without_retrying(self):
+        suffix = (
+            "; the app runs at integrity level Low but the folder requires"
+            " Medium"
+        )
+
+        with self.assertRaises(SwapError) as raised:
+            self.rename(
+                FakeOps(),
+                holder_provider=lambda path: self.fail("holders consulted"),
+                integrity_provider=lambda path: suffix,
+            )
+
+        message = str(raised.exception)
+        self.assertIn("cannot rename source to tombstone", message)
+        self.assertIn("integrity level Low", message)
+        self.assertEqual(self.sleeps, [])
+        self.assertTrue(self.fixture.source.is_dir())
+        self.assertFalse(self.fixture.tombstone.exists())
+
+    def test_integrity_lookup_failure_still_allows_the_rename(self):
+        def explode(path):
+            raise RuntimeError("integrity query unavailable")
+
+        renamed = self.rename(
+            FakeOps(), integrity_provider=explode
+        )
+
+        self.assertTrue(renamed)
+        self.assertTrue(self.fixture.tombstone.is_dir())
 
 
 if __name__ == "__main__":

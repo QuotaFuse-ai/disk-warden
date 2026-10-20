@@ -105,7 +105,13 @@ def _candidates():
     add(os.path.join(local, "DiskWarden") if local else "")
     add(os.path.join(roaming, "DiskWarden") if roaming else "")
     add(os.path.join(home, "DiskWarden"))
-    add(os.path.join(tempfile.gettempdir(), "DiskWarden"))
+    try:
+        add(os.path.join(tempfile.gettempdir(), "DiskWarden"))
+    except OSError:
+        # gettempdir() raises when no temp candidate is writable (a Low
+        # integrity start cannot create files under %TEMP%); that must not
+        # abort startup before the configured data root has been tried.
+        pass
     return roots
 
 
@@ -131,6 +137,47 @@ def _prepare_data_root():
         % "\n".join(tried)
     )
     return False
+
+
+def _warn_low_integrity():
+    # type: () -> None
+    """Explain a Low-integrity start before the user meets WinError 5.
+
+    Windows starts an image at the integrity label of its file, so a package
+    extracted into a Low-labelled folder runs Low even from an ordinary window
+    and is denied every write under ``%APPDATA%``.  The token level is fixed at
+    process creation, so this can be reported here but not repaired.
+    """
+    if not sys.platform.startswith("win"):
+        return
+    try:
+        from src.platform.win.integrity import (
+            MEDIUM,
+            level_name,
+            process_integrity_level,
+        )
+
+        level = process_integrity_level()
+    except Exception:
+        return
+    if level is None or level >= MEDIUM:
+        return
+    sys.stderr.write(
+        "low integrity start: token IL 0x%X (%s); writes to %%APPDATA%% and"
+        " other Medium folders will be denied\n" % (level, level_name(level))
+    )
+    app_dir = os.path.dirname(os.path.abspath(sys.executable))
+    _message(
+        "Disk Warden 正在以%s完整性级别（0x%X）运行。\n\n"
+        "Windows 的强制完整性策略禁止低完整性进程在 %%APPDATA%% 等普通目录中"
+        "重命名、移动、新建子目录或删除已有内容，因此跨盘迁移会在切换"
+        "源目录时失败并报 WinError 5，原因不是文件被占用。\n\n"
+        "常见原因是程序被解压到了带 Low 完整性标签的文件夹。请关闭程序，"
+        "把程序所在文件夹改为 Medium 后重新打开，例如在命令提示符中执行：\n\n"
+        "icacls \"%s\" /setintegritylevel (OI)(CI)M /T\n\n"
+        "也可以把程序解压到未加标签的普通目录（例如 C:\\DiskWarden）后重新打开。"
+        % (level_name(level), level, app_dir)
+    )
 
 
 def _prepare_webview_profile():
@@ -231,6 +278,7 @@ if __name__ == "__main__":
     if not _prepare_data_root():
         sys.exit(1)
     _redirect_logs(os.environ["DISKWARDEN_DATA_ROOT"])
+    _warn_low_integrity()
     profile, marker = _prepare_webview_profile()
     if not _install_webview(profile, marker):
         sys.exit(2)

@@ -45,6 +45,7 @@ if sys.platform.startswith("win"):
         volume_info,
     )
     from .win.handles import find_dir_holders
+    from .win.integrity import describe_denial as describe_integrity_denial
 else:
     from .posix.link import (
         create_junction,
@@ -61,6 +62,11 @@ else:
         """POSIX renames do not fail because of open handles; nothing to find."""
         return []
 
+    def describe_integrity_denial(path):
+        # type: (str) -> str
+        """POSIX has no mandatory integrity levels; nothing can be denied."""
+        return ""
+
 __all__ = [
     "LinkError",
     "ProcessEnumerationError",
@@ -71,6 +77,7 @@ __all__ = [
     "TransferUnsupportedError",
     "VolumeInfo",
     "create_junction",
+    "describe_integrity_denial",
     "enumerate_processes",
     "expand_path",
     "find_dir_holders",

@@ -14,7 +14,11 @@ import errno
 import os
 import time
 
-from ...platform import LinkError, find_dir_holders
+from ...platform import (
+    LinkError,
+    describe_integrity_denial,
+    find_dir_holders,
+)
 from . import marker, paths
 from .cleanup import UnsafeCleanupError, remove_owned_tree, remove_tree
 
@@ -59,10 +63,26 @@ def _holder_hint(source_path, holder_provider):
     )
 
 
-def _rename_for_swap(ops, source_path, tombstone_path, holder_provider, sleep,
-                     retry_delays):
-    # type: (object, str, str, object, object, tuple) -> None
+def _integrity_hint(source_path, integrity_provider):
+    # type: (str, object) -> str
+    """Explain a mandatory-integrity denial, or return ``""``."""
+    try:
+        return integrity_provider(source_path) or ""
+    except Exception:
+        return ""
+
+
+def _rename_for_swap(ops, source_path, tombstone_path, holder_provider,
+                     integrity_provider, sleep, retry_delays):
+    # type: (object, str, str, object, object, object, tuple) -> None
     """Rename, retrying transient access denials; raise SwapError on failure."""
+    # A denied write-up never succeeds on retry: the process token cannot reach
+    # the folder's integrity level, so report that instead of blaming a handle.
+    denial = _integrity_hint(source_path, integrity_provider)
+    if denial:
+        raise SwapError(
+            "cannot rename source to tombstone: access denied%s" % denial
+        )
     for delay in retry_delays:
         try:
             ops.rename(source_path, tombstone_path)
@@ -166,8 +186,9 @@ def ensure_target_ready(ops, staging_path, final_path, job_id):
 
 def ensure_source_renamed(ops, source_path, tombstone_path, job_id,
                           holder_provider=None, sleep=None,
-                          retry_delays=RENAME_RETRY_DELAYS):
-    # type: (object, str, str, str, object, object, tuple) -> bool
+                          retry_delays=RENAME_RETRY_DELAYS,
+                          integrity_provider=None):
+    # type: (object, str, str, str, object, object, tuple, object) -> bool
     """S6: atomically rename the source to its tombstone.
 
     Returns True when the rename happened in this call and False when a
@@ -175,6 +196,8 @@ def ensure_source_renamed(ops, source_path, tombstone_path, job_id,
     exist (ambiguous) or when either is not a plain directory.  A refusal to
     rename (another process holds a file open) is retried on a short bounded
     schedule; if it persists, the holding processes are named in the error.
+    A mandatory-integrity denial is reported immediately instead: retrying
+    cannot lift the process token's integrity level.
     """
     source_path = os.path.abspath(source_path)
     tombstone_path = os.path.abspath(tombstone_path)
@@ -203,6 +226,11 @@ def ensure_source_renamed(ops, source_path, tombstone_path, job_id,
             source_path,
             tombstone_path,
             find_dir_holders if holder_provider is None else holder_provider,
+            (
+                describe_integrity_denial
+                if integrity_provider is None
+                else integrity_provider
+            ),
             time.sleep if sleep is None else sleep,
             tuple(retry_delays) if retry_delays is not None else (),
         )
