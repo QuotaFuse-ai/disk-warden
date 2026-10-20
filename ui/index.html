@@ -516,6 +516,58 @@ a{color:var(--blue);text-decoration:none}
   .content > .cols > .panel.panel-scroll > .panel-body{overflow:visible;flex:none}
   .content > .cols .scroll-y{overflow:visible;flex:none}
 }
+/* ---------- 欢迎页（T16 · 本地优先） ---------- */
+.welcome-mask{
+  position:fixed;inset:0;z-index:120;overflow:auto;padding:26px 20px;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(1100px 560px at 12% -12%,rgba(236,249,234,.95) 0%,rgba(236,249,234,0) 60%),
+    radial-gradient(820px 460px at 104% 112%,rgba(230,243,251,.9) 0%,rgba(230,243,251,0) 58%),
+    var(--bg);
+}
+.welcome-card{width:660px;max-width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 18px 44px rgba(31,45,61,.13);overflow:hidden}
+.welcome-head{display:flex;align-items:center;gap:13px;padding:22px 26px 18px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,#f5fcf4 0%,#fff 100%)}
+.welcome-logo{width:46px;height:46px;border-radius:12px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,90,34,.18)}
+.welcome-head h2{font-size:var(--fs-page);font-weight:700;color:#2f3439;letter-spacing:.2px;line-height:1.25}
+.welcome-head .sub{font-size:var(--fs-meta);color:var(--dim);margin-top:3px}
+.welcome-tag{margin-left:auto;flex-shrink:0;font-size:var(--fs-micro);color:#2f8f35;background:var(--green-soft);border:1px solid var(--green-line);border-radius:10px;padding:2px 9px;white-space:nowrap}
+.welcome-body{padding:18px 26px 20px;display:flex;flex-direction:column;gap:13px}
+.welcome-lead{font-size:var(--fs-body);color:var(--text-2);line-height:1.75}
+.welcome-points{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px}
+.welcome-point{display:flex;gap:7px;font-size:var(--fs-body);color:var(--text-2);line-height:1.55}
+.welcome-point i{font-style:normal;color:var(--green-dark);font-weight:700;flex-shrink:0}
+.login-box{border:1px solid var(--line);border-radius:6px;background:var(--panel-2);padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.login-box .lb-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.login-box .lb-title{font-size:var(--fs-strong);font-weight:700;color:#2f3439}
+.login-box .lb-note{font-size:var(--fs-micro);color:var(--dim);line-height:1.55;flex:1;min-width:200px;text-align:right}
+.login-btns{display:flex;gap:8px;flex-wrap:wrap}
+.login-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:3px;border:1px solid #d7dee4;background:#fff;color:#2f3439;font-size:var(--fs-strong);transition:border-color .12s,background .12s,color .12s}
+.login-btn:hover:not(:disabled){border-color:#b9c4cc;background:#f7faf8}
+.login-btn:disabled{background:#f5f7f9;color:#9aa5ae;border-color:#e3e7eb;cursor:not-allowed}
+.login-btn .p-ico{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#eef2f5;color:#5b646d;font-size:9px;font-weight:700;letter-spacing:.2px;flex-shrink:0}
+.login-btn:disabled .p-ico{background:#e9edf1;color:#a8b1b9}
+.login-btn .p-state{font-size:var(--fs-micro);color:#6d7781;background:#eef1f4;border-radius:9px;padding:1px 7px}
+.login-btn:disabled .p-state{background:#e9edf1;color:#98a2ac}
+.login-flow{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:9px}
+.login-flow .lf-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:var(--fs-body);color:var(--text-2)}
+.login-flow .lf-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;animation:dw-pulse 1.5s ease-in-out infinite}
+.login-flow .lf-usercode{font-family:Consolas,"SFMono-Regular",monospace;font-size:20px;font-weight:700;letter-spacing:4px;color:#2f3439;background:#fff;border:1px solid #cfd8df;border-radius:4px;padding:5px 14px;user-select:all;-webkit-user-select:all}
+.login-flow .lf-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.login-flow .lf-hint{font-size:var(--fs-micro);color:var(--dim);line-height:1.6}
+@keyframes dw-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.welcome-foot{padding:13px 26px;border-top:1px solid var(--line-soft);background:#fbfcfd;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.welcome-foot .hint{font-size:var(--fs-micro);color:var(--dim);line-height:1.55;flex:1;min-width:180px}
+
+/* ---------- Star 蒙版（T16 · 可关闭） ---------- */
+.star-mask{position:fixed;inset:0;z-index:110;background:rgba(30,40,49,.38);display:flex;align-items:center;justify-content:center;padding:24px}
+.star-card{width:430px;max-width:100%;background:rgba(255,255,255,.96);border:1px solid #dfe6eb;border-radius:8px;box-shadow:var(--shadow);padding:22px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
+.star-ico{font-size:30px;line-height:1;color:#f2a900}
+.star-title{font-size:var(--fs-sub);font-weight:700;color:#2f3439}
+.star-body{font-size:var(--fs-body);color:var(--text-2);line-height:1.7}
+.star-actions{display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;justify-content:center}
+.star-actions .btn[disabled]{opacity:.55;cursor:not-allowed}
+.star-note{font-size:var(--fs-micro);color:var(--dim);line-height:1.5}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 }
@@ -537,6 +589,8 @@ a{color:var(--blue);text-decoration:none}
     </div>
   </main>
 </div>
+<div id="welcome-root"></div>
+<div id="star-root"></div>
 <div id="modal-root"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -1092,6 +1146,11 @@ I18N['zh-CN'] = {
   'error.PERMISSION_DENIED': '没有权限访问该目录',
   'error.IO_ERROR': '系统未能打开资源管理器',
   'error.INTERNAL': '主机端内部错误',
+  'error.AUTH_NOT_CONFIGURED': '尚未配置 OAuth 应用，无法登录',
+  'error.AUTH_CANCELLED': '登录已取消',
+  'error.AUTH_TIMEOUT': '等待授权超时，请重新登录',
+  'error.AUTH_FAILED': '登录失败',
+  'error.AUTH_REQUIRED': '请先登录 GitHub 账号',
   'toast.cleaned': '缓存清理完成，释放 {size}',
   'toast.ruleAdded': '规则已添加',
   'toast.saved': '设置已保存',
@@ -1165,7 +1224,62 @@ I18N['zh-CN'] = {
   'rollback.stage.record': '写入回滚记录',
   'rollback.stage.done': '完成',
   'success.rollbackable': '可在历史记录中随时回滚',
-  'toast.noGreen': '没有可迁移的目录'
+  'toast.noGreen': '没有可迁移的目录',
+  'toast.signedIn': '登录成功',
+  'toast.signedOut': '已退出登录',
+  'toast.starOpened': '已打开仓库页面，点完 Star 记得刷新状态',
+  'toast.starStillPending': '还没检测到 Star，点完后再试一次',
+  'toast.starGiteeSoon': 'Gitee 仓库即将上线，敬请期待',
+  'toast.starReopened': '已重新显示 Star 提示',
+  'welcome.title': '欢迎使用 Disk Warden',
+  'welcome.sub': '先把 C 盘腾出来，再谈其他',
+  'welcome.tag': '本地优先',
+  'welcome.lead': 'Disk Warden 把 AI IDE 的可再生缓存与会话迁到其他磁盘，C 盘腾出空间，IDE 照常打开。迁移全程在本机完成，随时可以回滚。',
+  'welcome.point1': '全程本地执行，不上传目录内容',
+  'welcome.point2': '逐目录勾选，迁移前先看预览',
+  'welcome.point3': '迁移后可一键回滚到 C 盘',
+  'welcome.point4': '登录完全可选，跳过也能用全部功能',
+  'welcome.loginTitle': '登录 GitHub（可选）',
+  'welcome.loginNote': '采用设备码方式登录：点击后会在浏览器打开 GitHub，输入页面上的 8 位代码即可。不登录也能用全部本地功能。',
+  'welcome.loginWith': '使用 {provider} 登录',
+  'welcome.unconfigured': '未配置',
+  'welcome.unconfiguredTitle': '{provider} 登录尚未配置：主机端缺少 client id 环境变量',
+  'welcome.unconfiguredHint': '需要人类先注册 OAuth 应用，再把 client id 放进主机端环境变量 {env}。未配置时按钮置灰，不会发起请求。',
+  'welcome.deviceTitle': '在浏览器中输入这串代码',
+  'welcome.deviceHint': '已尝试打开 {uri}。没打开的话，点下面的按钮手动打开。',
+  'welcome.deviceCopy': '复制代码',
+  'welcome.deviceCopied': '代码已复制',
+  'welcome.deviceOpen': '打开授权页面',
+  'welcome.waitingTime': '代码 {sec} 秒后失效，过期后可重新登录。',
+  'welcome.cancelLogin': '取消登录',
+  'welcome.retryLogin': '重新登录',
+  'welcome.errorReason': '原因：{reason}',
+  'welcome.skip': '跳过登录，直接使用全部本地功能',
+  'welcome.skipHint': '随时可以在「设置 → 账号」里登录。',
+  'welcome.continue': '进入主界面',
+  'welcome.signedIn': '已登录：{login}',
+  'welcome.insecure': '本机安全存储不可用，登录状态只在本次运行内有效。',
+  'star.title': '给 Disk Warden 点个 Star？',
+  'star.body': 'Disk Warden 是开源项目。如果它帮你腾出了 C 盘空间，去 GitHub 点个 Star 就是对我们最大的支持。',
+  'star.give': '去 GitHub 点 Star',
+  'star.refresh': '我已 Star，刷新状态',
+  'star.gitee': '去 Gitee 点 Star',
+  'star.giteeSoon': '即将上线',
+  'star.open': '打开项目主页',
+  'star.later': '以后再说',
+  'star.note': '不喜欢可以随时关掉，也可以到「设置」里再次打开。',
+  'star.thanksTitle': '谢谢你的 Star！',
+  'star.thanksBody': '你的支持是这个项目继续维护下去的动力。',
+  'star.close': '关闭',
+  'star.reopen': '再次显示 Star 提示',
+  'settings.account': '账号',
+  'settings.accountDesc': '登录 GitHub 是可选的，不影响任何本地功能。',
+  'settings.accountNone': '未登录',
+  'settings.accountSignedIn': '已登录 {login}',
+  'settings.signIn': '登录',
+  'settings.signOut': '退出登录',
+  'settings.starPrompt': 'Star 提示',
+  'settings.starPromptDesc': '重新显示给项目点 Star 的半透明提示，可随时关闭。'
 };
 I18N['en'] = {
   'app.tagline': 'Disk manager for AI IDEs',
@@ -1714,6 +1828,11 @@ I18N['en'] = {
   'error.PERMISSION_DENIED': 'Access to the folder was denied',
   'error.IO_ERROR': 'The system could not open the file manager',
   'error.INTERNAL': 'Host internal error',
+  'error.AUTH_NOT_CONFIGURED': 'No OAuth app is configured yet, sign-in is unavailable',
+  'error.AUTH_CANCELLED': 'Sign-in cancelled',
+  'error.AUTH_TIMEOUT': 'Timed out waiting for authorization, please try again',
+  'error.AUTH_FAILED': 'Sign-in failed',
+  'error.AUTH_REQUIRED': 'Sign in to GitHub first',
   'toast.cleaned': 'Cache cleaned, freed {size}',
   'toast.ruleAdded': 'Rule added',
   'toast.saved': 'Settings saved',
@@ -1787,7 +1906,62 @@ I18N['en'] = {
   'rollback.stage.record': 'Write rollback record',
   'rollback.stage.done': 'Done',
   'success.rollbackable': 'You can roll back from History at any time',
-  'toast.noGreen': 'No migratable folders selected'
+  'toast.noGreen': 'No migratable folders selected',
+  'toast.signedIn': 'Signed in',
+  'toast.signedOut': 'Signed out',
+  'toast.starOpened': 'Repository page opened. Refresh once you have starred it.',
+  'toast.starStillPending': 'Star not detected yet, try again once you have clicked it',
+  'toast.starGiteeSoon': 'The Gitee repository is coming soon',
+  'toast.starReopened': 'Star prompt reopened',
+  'welcome.title': 'Welcome to Disk Warden',
+  'welcome.sub': 'Free up C: first, everything else after',
+  'welcome.tag': 'Local first',
+  'welcome.lead': 'Disk Warden moves AI IDE caches and sessions to another drive so C: gets its space back and your IDE keeps working. Everything runs on this machine and can be rolled back.',
+  'welcome.point1': 'Runs locally, folder contents are never uploaded',
+  'welcome.point2': 'Pick folders one by one, preview before migrating',
+  'welcome.point3': 'One-click rollback to C: afterwards',
+  'welcome.point4': 'Sign-in is optional, every local feature works without it',
+  'welcome.loginTitle': 'Sign in to GitHub (optional)',
+  'welcome.loginNote': 'Sign-in uses a device code: your browser opens GitHub and you type the 8-character code shown here. Every local feature works without signing in.',
+  'welcome.loginWith': 'Continue with {provider}',
+  'welcome.unconfigured': 'Not configured',
+  'welcome.unconfiguredTitle': '{provider} sign-in is not configured: the host is missing its client id environment variable',
+  'welcome.unconfiguredHint': 'A human must register the OAuth app and put its client id into the host environment variable {env}. Until then the button stays disabled and nothing is sent.',
+  'welcome.deviceTitle': 'Enter this code in your browser',
+  'welcome.deviceHint': 'We tried to open {uri}. If it did not open, use the button below.',
+  'welcome.deviceCopy': 'Copy code',
+  'welcome.deviceCopied': 'Code copied',
+  'welcome.deviceOpen': 'Open the authorization page',
+  'welcome.waitingTime': 'The code expires in {sec}s; sign in again afterwards.',
+  'welcome.cancelLogin': 'Cancel sign-in',
+  'welcome.retryLogin': 'Sign in again',
+  'welcome.errorReason': 'Reason: {reason}',
+  'welcome.skip': 'Skip sign-in and use all local features',
+  'welcome.skipHint': 'You can sign in later from Settings → Account.',
+  'welcome.continue': 'Enter the app',
+  'welcome.signedIn': 'Signed in: {login}',
+  'welcome.insecure': 'Secure storage is unavailable, the sign-in only lasts for this run.',
+  'star.title': 'Star Disk Warden?',
+  'star.body': 'Disk Warden is an open-source project. If it freed up space on your C: drive, a GitHub star is the biggest help you can give us.',
+  'star.give': 'Star on GitHub',
+  'star.refresh': 'I starred it, refresh',
+  'star.gitee': 'Star on Gitee',
+  'star.giteeSoon': 'Coming soon',
+  'star.open': 'Open the project page',
+  'star.later': 'Maybe later',
+  'star.note': 'You can close this anytime and reopen it from Settings.',
+  'star.thanksTitle': 'Thanks for the star!',
+  'star.thanksBody': 'Your support keeps this project going.',
+  'star.close': 'Close',
+  'star.reopen': 'Show the Star prompt again',
+  'settings.account': 'Account',
+  'settings.accountDesc': 'Signing in to GitHub is optional and never gates local features.',
+  'settings.accountNone': 'Not signed in',
+  'settings.accountSignedIn': 'Signed in as {login}',
+  'settings.signIn': 'Sign in',
+  'settings.signOut': 'Sign out',
+  'settings.starPrompt': 'Star prompt',
+  'settings.starPromptDesc': 'Show the semi-transparent Star prompt again. It can always be closed.'
 };
 let LANG = 'zh-CN';
 function t(key, vars) {
@@ -1865,9 +2039,15 @@ const state = {
   settings: { targetRoot: '', autoStart: false, autoMaintenance: false, uninstall: 'keep',
     aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false },
   connected: false, booting: true, bootError: '', aiAsk: false,
+  /* T16：登录/欢迎页状态。welcome_seen 默认 true，避免 bootstrap 前闪一下欢迎页。 */
+  auth: { providers: [], signed_in: false, login: null, welcome_seen: true,
+    star: { pending: false, dismissed: false, starred: false },
+    secure_storage: true, flow: null, repository_url: '',
+    gitee: { provider: 'gitee', label: 'Gitee', url: '', available: false } },
   data: { settings: null, disk: null, snapshot: null, learned: null, scanJob: null, scanTimer: null,
     scanError: '', history: null, historyError: '', historyLoading: false,
-    recovery: null, recoveryRun: null, recoveryTimer: null, flow: null, jobTimer: null },
+    recovery: null, recoveryRun: null, recoveryTimer: null, flow: null, jobTimer: null,
+    authTimer: null },
   scanning: false, scanPct: 0,
   pendingYellow: null,
   historyFilter: 'all',
@@ -2214,6 +2394,7 @@ function hostReady() {
 function bootstrap() {
   state.booting = true;
   state.bootError = '';
+  bindAuthKeys();
   return hostReady().then(ok => {
     if (!ok) {
       state.booting = false;
@@ -2223,6 +2404,7 @@ function bootstrap() {
     }
     return rpc('app.hello').then(hello => {
       applySettings(hello.settings);
+      applyAuth(hello.auth || null);
       applyDisk(hello.disk || null);
       state.data.recovery = hello.recovery || null;
       state.connected = true;
@@ -2781,6 +2963,266 @@ function copyText(text) {
   return Promise.resolve(fallback());
 }
 
+/* ---------- 登录 / 欢迎页 / Star 蒙版（T16） ---------- */
+/* Device Flow 只有一个进行中的状态；其余都是终态。 */
+const AUTH_ACTIVE_STATES = ['pending'];
+/* 后端没有返回 providers 时（老版本主机端）也要把按钮画成「未配置」，绝不假装能登录。 */
+const AUTH_PROVIDER_FALLBACK = [
+  { provider: 'github', label: 'GitHub', configured: false, client_id_env: 'DISK_WARDEN_GITHUB_CLIENT_ID' }
+];
+
+function applyAuth(auth) {
+  if (!auth || typeof auth !== 'object') return;
+  const star = auth.star || {};
+  const login = auth.login && typeof auth.login === 'object' ? auth.login : null;
+  const gitee = auth.gitee && typeof auth.gitee === 'object' ? auth.gitee : {};
+  state.auth = {
+    providers: Array.isArray(auth.providers) ? auth.providers : [],
+    signed_in: !!auth.signed_in,
+    login: login,
+    welcome_seen: auth.welcome_seen !== false,
+    star: { pending: !!star.pending, dismissed: !!star.dismissed, starred: !!star.starred },
+    secure_storage: auth.secure_storage !== false,
+    flow: auth.flow && typeof auth.flow === 'object' ? auth.flow : null,
+    repository_url: auth.repository_url || state.auth.repository_url || '',
+    gitee: {
+      provider: 'gitee',
+      label: gitee.label || 'Gitee',
+      url: gitee.url || state.auth.gitee.url || '',
+      available: !!gitee.available
+    }
+  };
+}
+
+function authProviders() {
+  return state.auth.providers.length ? state.auth.providers : AUTH_PROVIDER_FALLBACK;
+}
+
+function authFlowActive() {
+  const f = state.auth.flow;
+  return !!f && AUTH_ACTIVE_STATES.indexOf(f.state) >= 0;
+}
+
+/* Gitee 只有「打开仓库页」这一种行为：不授权、不读 token、不做服务端判定。 */
+function giteeStarButton(cls) {
+  const g = state.auth.gitee || {};
+  const label = t('star.gitee') + (g.available ? '' : ' · ' + t('star.giteeSoon'));
+  if (g.available && g.url) {
+    return `<button type="button" class="${esc(cls)}" onclick="App.openGitee()">${esc(label)}</button>`;
+  }
+  return `<button type="button" class="${esc(cls)}" disabled aria-disabled="true">${esc(label)}</button>`;
+}
+
+function authErrorText(errOrCode) {
+  const raw = typeof errOrCode === 'string'
+    ? errOrCode
+    : (errOrCode && (errOrCode.code || errOrCode.message_key)) || '';
+  const code = String(raw).replace(/^error\./, '');
+  if (code) {
+    const dict = I18N[LANG] || I18N['zh-CN'];
+    const text = dict['error.' + code] || I18N['zh-CN']['error.' + code];
+    if (text) return text;
+  }
+  return t('error.AUTH_FAILED');
+}
+
+function authFlowSeconds(flow) {
+  if (!flow || !flow.expires_at) return 0;
+  const left = Math.round((new Date(flow.expires_at).getTime() - Date.now()) / 1000);
+  return left > 0 ? left : 0;
+}
+
+function stopAuthPolling() {
+  if (state.data.authTimer) {
+    clearInterval(state.data.authTimer);
+    state.data.authTimer = null;
+  }
+}
+
+function finishLogin() {
+  stopAuthPolling();
+  App.toast(t('toast.signedIn'));
+  render();
+}
+
+function startAuthPolling() {
+  stopAuthPolling();
+  state.data.authTimer = setInterval(() => {
+    if (!authFlowActive()) { stopAuthPolling(); return; }
+    rpc('auth.status').then(auth => {
+      const wasActive = authFlowActive();
+      applyAuth(auth);
+      if (wasActive && authFlowActive()) { renderWelcome(); return; }
+      stopAuthPolling();
+      if (state.auth.signed_in && !state.auth.welcome_seen) {
+        rpc('welcome.seen')
+          .then(res => { applyAuth(res); finishLogin(); })
+          .catch(() => finishLogin());
+        return;
+      }
+      const flow = state.auth.flow || {};
+      const err = flow.error || null;
+      if (flow.state === 'authenticated' && state.auth.signed_in) { finishLogin(); return; }
+      if (flow.state === 'expired') App.toast(authErrorText('AUTH_TIMEOUT'));
+      else if (flow.state === 'failed' && err && err.code) App.toast(authErrorText(err.code));
+      render();
+    }).catch(() => { stopAuthPolling(); });
+  }, 700);
+}
+
+function authFlowBanner(flow) {
+  const err = flow.error || {};
+  const st = flow.state;
+  if (AUTH_ACTIVE_STATES.indexOf(st) >= 0) {
+    const sec = authFlowSeconds(flow);
+    const code = String(flow.user_code || '');
+    const uri = String(flow.verification_uri || '');
+    return `<div class="login-flow" role="status" aria-live="polite">
+      <div class="lf-row"><span class="lf-dot" aria-hidden="true"></span><b>${esc(t('welcome.deviceTitle'))}</b></div>
+      <div class="lf-row"><span class="lf-usercode" id="auth-user-code">${esc(code)}</span></div>
+      <div class="lf-hint">${esc(t('welcome.deviceHint', { uri: uri }))}</div>
+      <div class="lf-actions">
+        <button type="button" class="btn btn-primary btn-xs" onclick="App.authCopyCode()">${esc(t('welcome.deviceCopy'))}</button>
+        <button type="button" class="btn btn-ghost btn-xs" onclick="App.authOpenVerify()">${esc(t('welcome.deviceOpen'))}</button>
+        <button type="button" class="btn btn-ghost btn-xs" onclick="App.authCancel()">${esc(t('welcome.cancelLogin'))}</button>
+      </div>
+      ${sec ? `<div class="lf-row"><span class="dim">${esc(t('welcome.waitingTime', { sec: sec }))}</span></div>` : ''}
+    </div>`;
+  }
+  if (st === 'failed') {
+    const reason = String(err.reason || '');
+    const provider = authProviders().find(p => p.provider === flow.provider) || {};
+    const retry = provider.configured
+      ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.authStart('${esc(flow.provider)}')">${esc(t('welcome.retryLogin'))}</button>`
+      : '';
+    return `<div class="banner danger"><span class="b-ico">▲</span><div><b>${esc(authErrorText(err.code))}</b>${reason ? `<br><span class="dim">${esc(t('welcome.errorReason', { reason: reason }))}</span>` : ''}${retry ? `<div class="banner-actions">${retry}</div>` : ''}</div></div>`;
+  }
+  if (st === 'cancelled' || st === 'expired') {
+    return `<div class="banner info"><span class="b-ico">i</span><div>${esc(authErrorText(st === 'expired' ? 'AUTH_TIMEOUT' : 'AUTH_CANCELLED'))}</div></div>`;
+  }
+  return '';
+}
+
+function renderWelcome() {
+  const root = document.getElementById('welcome-root');
+  if (!root) return;
+  const auth = state.auth;
+  if (!state.connected || state.booting || auth.welcome_seen) {
+    root.innerHTML = '';
+    root.dataset.open = '';
+    return;
+  }
+  const flow = auth.flow;
+  const active = authFlowActive();
+  const providers = authProviders();
+  const login = auth.login || {};
+  const unconfigured = providers.filter(p => !p.configured);
+
+  const providerBtns = providers.map(p => {
+    const label = p.label || p.provider;
+    const disabled = active || !p.configured;
+    const title = !p.configured ? ` title="${esc(t('welcome.unconfiguredTitle', { provider: label }))}"` : '';
+    return `<button type="button" class="login-btn"${disabled ? ' disabled' : ''}${title} aria-disabled="${disabled ? 'true' : 'false'}" onclick="App.authStart('${esc(p.provider)}')">
+      <span class="p-ico" aria-hidden="true">GH</span>
+      <span>${esc(t('welcome.loginWith', { provider: label }))}</span>
+      ${p.configured ? '' : `<span class="p-state">${esc(t('welcome.unconfigured'))}</span>`}
+    </button>`;
+  }).join('');
+
+  const envHint = unconfigured.length
+    ? `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('welcome.unconfiguredHint', { env: unconfigured[0].client_id_env || AUTH_PROVIDER_FALLBACK[0].client_id_env }))}</div></div>`
+    : '';
+
+  root.innerHTML = `<div class="welcome-mask">
+    <div class="welcome-card" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+      <div class="welcome-head">
+        <img class="welcome-logo" src="assets/brand/app-icon-64.png" alt="">
+        <div>
+          <h2 id="welcome-title">${esc(t('welcome.title'))}</h2>
+          <div class="sub">${esc(t('welcome.sub'))}</div>
+        </div>
+        <span class="welcome-tag">${esc(t('welcome.tag'))}</span>
+      </div>
+      <div class="welcome-body">
+        <div class="welcome-lead">${esc(t('welcome.lead'))}</div>
+        <div class="welcome-points">
+          ${[1, 2, 3, 4].map(n => `<div class="welcome-point"><i aria-hidden="true">✓</i><span>${esc(t('welcome.point' + n))}</span></div>`).join('')}
+        </div>
+        <div class="login-box">
+          <div class="lb-top"><span class="lb-title">${esc(t('welcome.loginTitle'))}</span><span class="lb-note">${esc(t('welcome.loginNote'))}</span></div>
+          <div class="login-btns">${providerBtns}</div>
+          ${envHint}
+          ${flow ? authFlowBanner(flow) : ''}
+          ${auth.signed_in ? `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('welcome.signedIn', { login: login.login || '' }))}</div></div>` : ''}
+          ${auth.secure_storage ? '' : `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('welcome.insecure'))}</div></div>`}
+          <div class="lf-actions">${giteeStarButton('btn btn-ghost btn-xs')}</div>
+        </div>
+      </div>
+      <div class="welcome-foot">
+        <button type="button" class="btn btn-primary" id="welcome-skip" onclick="App.skipLogin()">${esc(t('welcome.skip'))}</button>
+        <span class="hint">${esc(t('welcome.skipHint'))}</span>
+      </div>
+    </div>
+  </div>`;
+  if (root.dataset.open !== '1') {
+    root.dataset.open = '1';
+    const skip = document.getElementById('welcome-skip');
+    if (skip) skip.focus();
+  }
+}
+
+function renderStarOverlay() {
+  const root = document.getElementById('star-root');
+  if (!root) return;
+  const auth = state.auth;
+  const star = auth.star || {};
+  if (!state.connected || !auth.welcome_seen || !star.pending || star.dismissed) {
+    root.innerHTML = '';
+    root.dataset.open = '';
+    return;
+  }
+  const starred = !!star.starred;
+  const primary = starred ? '' : (auth.signed_in
+    ? `<button type="button" class="btn btn-primary btn-sm" onclick="App.starGive()">★ ${esc(t('star.give'))}</button>`
+    : `<button type="button" class="btn btn-primary btn-sm" onclick="App.openRepo()">${esc(t('star.open'))}</button>`);
+  /* Star 只在 GitHub 上写入：这里只打开仓库页，不申请 repo / public_repo 权限。 */
+  const refresh = (!starred && auth.signed_in)
+    ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.starCheck()">${esc(t('star.refresh'))}</button>`
+    : '';
+  /* Gitee 只提供打开仓库页；仓库未建立期间按钮显示「即将上线」并禁用，不发起任何授权。 */
+  const giteeBtn = giteeStarButton('btn btn-ghost btn-sm');
+  root.innerHTML = `<div class="star-mask" onclick="App.starDismiss()">
+    <div class="star-card" role="dialog" aria-modal="true" aria-labelledby="star-title" onclick="event.stopPropagation()">
+      <div class="star-ico" aria-hidden="true">★</div>
+      <div class="star-title" id="star-title">${esc(t(starred ? 'star.thanksTitle' : 'star.title'))}</div>
+      <div class="star-body">${esc(t(starred ? 'star.thanksBody' : 'star.body'))}</div>
+      <div class="star-actions">
+        ${primary}
+        ${refresh}
+        ${giteeBtn}
+        <button type="button" class="btn btn-ghost btn-sm" onclick="App.starDismiss()">${esc(starred ? t('star.close') : t('star.later'))}</button>
+      </div>
+      <div class="star-note">${esc(t('star.note'))}</div>
+    </div>
+  </div>`;
+  if (root.dataset.open !== '1') {
+    root.dataset.open = '1';
+    const first = root.querySelector('.star-actions .btn');
+    if (first) first.focus();
+  }
+}
+
+function bindAuthKeys() {
+  if (bindAuthKeys.bound) return;
+  bindAuthKeys.bound = true;
+  document.addEventListener('keydown', ev => {
+    if (ev.key !== 'Escape') return;
+    const starRoot = document.getElementById('star-root');
+    if (starRoot && starRoot.innerHTML) { ev.preventDefault(); App.starDismiss(); return; }
+    if (authFlowActive()) { ev.preventDefault(); App.authCancel(); }
+  });
+}
+
 function render() {
   const info = parseRoute();
   state.tab = info.tab; state.sub = info.sub; state.modal = info.modal || '';
@@ -2805,6 +3247,8 @@ function render() {
   const host = document.querySelector('#view .content');
   if (host && state.connected) host.insertAdjacentHTML('afterbegin', recoveryBanner());
   renderModal();
+  renderWelcome();
+  renderStarOverlay();
   document.documentElement.lang = LANG;
 }
 
@@ -3423,6 +3867,19 @@ function modalSettings() {
         <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('ai')">${esc(t('ai.link'))}</button>
       </div>
     </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.account'))}</div><div class="d">${esc(t('settings.accountDesc'))}</div></div>
+      <div class="ctrl row-flex">
+        <span class="badge ${state.auth.signed_in ? 'b-green' : 'b-gray'}">${esc(state.auth.signed_in ? t('settings.accountSignedIn', { login: (state.auth.login || {}).login || '' }) : t('settings.accountNone'))}</span>
+        ${state.auth.signed_in
+          ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.authSignOut()">${esc(t('settings.signOut'))}</button>`
+          : `<button type="button" class="btn btn-ghost btn-sm" onclick="App.openWelcome()">${esc(t('settings.signIn'))}</button>`}
+      </div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">★ ${esc(t('settings.starPrompt'))}</div><div class="d">${esc(t('settings.starPromptDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="btn btn-ghost btn-sm" onclick="App.starShow()">${esc(t('star.reopen'))}</button></div>
+    </div>
     <div class="banner info"><span class="b-ico">i</span><div><b>${esc(t('settings.spaceCheck'))}</b> · ${esc(t('settings.spaceCheckValue'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.cancel'))}</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="App.saveSettings()">${esc(t('action.save'))}</button>`;
@@ -3774,6 +4231,103 @@ const App = {
     try { localStorage.setItem('dw-lang', lang); } catch (e) {}
     render();
     rpc('settings.set', { language: lang }).catch(() => {});
+  },
+  /* ---------- 欢迎页 / 登录 / Star（T16） ---------- */
+  skipLogin() {
+    rpc('welcome.seen').then(auth => {
+      applyAuth(auth);
+      render();
+    }).catch(err => this.toast(errText(err)));
+  },
+  openWelcome() {
+    this.closeModal();
+    state.auth.welcome_seen = false;
+    render();
+  },
+  authStart(provider) {
+    const p = authProviders().find(x => x.provider === provider);
+    if (p && !p.configured) { this.toast(t('error.AUTH_NOT_CONFIGURED')); return; }
+    rpc('auth.start', { provider: provider }).then(auth => {
+      applyAuth(auth);
+      if (authFlowActive()) startAuthPolling();
+      else {
+        const flow = state.auth.flow || {};
+        if (flow.error && flow.error.code) this.toast(authErrorText(flow.error.code));
+      }
+      render();
+    }).catch(err => this.toast(authErrorText(err)));
+  },
+  authCopyCode() {
+    const flow = state.auth.flow || {};
+    const code = String(flow.user_code || '');
+    if (!code) return;
+    copyText(code).then(ok => { if (ok) this.toast(t('welcome.deviceCopied')); });
+  },
+  authOpenVerify() {
+    const flow = state.auth.flow || {};
+    this.openExternal(flow.verification_uri);
+  },
+  authCancel() {
+    rpc('auth.cancel').then(auth => {
+      stopAuthPolling();
+      applyAuth(auth);
+      render();
+    }).catch(err => this.toast(authErrorText(err)));
+  },
+  authSignOut() {
+    rpc('auth.sign_out').then(auth => {
+      stopAuthPolling();
+      applyAuth(auth);
+      this.toast(t('toast.signedOut'));
+      render();
+    }).catch(err => this.toast(errText(err)));
+  },
+  starShow() {
+    rpc('star.show').then(auth => {
+      applyAuth(auth);
+      this.toast(t('toast.starReopened'));
+      this.closeModal();
+      render();
+    }).catch(err => this.toast(errText(err)));
+  },
+  starDismiss() {
+    rpc('star.dismiss').then(auth => {
+      applyAuth(auth);
+      renderStarOverlay();
+    }).catch(() => {
+      state.auth.star.pending = false;
+      state.auth.star.dismissed = true;
+      renderStarOverlay();
+    });
+  },
+  starGive() {
+    rpc('star.give').then(auth => {
+      applyAuth(auth);
+      if (!state.auth.star.starred) this.toast(t('toast.starOpened'));
+      renderStarOverlay();
+    }).catch(err => this.toast(authErrorText(err)));
+  },
+  starCheck() {
+    rpc('star.check').then(auth => {
+      applyAuth(auth);
+      if (!state.auth.star.starred) this.toast(t('toast.starStillPending'));
+      renderStarOverlay();
+    }).catch(err => this.toast(authErrorText(err)));
+  },
+  openGitee() {
+    const gitee = state.auth.gitee || {};
+    if (!gitee.available || !gitee.url) {
+      this.toast(t('toast.starGiteeSoon'));
+      return;
+    }
+    this.openExternal(gitee.url);
+  },
+  openExternal(url) {
+    if (!url) return;
+    rpc('app.open_external', { url: url }).catch(err => this.toast(errText(err)));
+  },
+  openRepo() {
+    this.openExternal(state.auth.repository_url);
   },
   toggleSetting(key) {
     const root = document.getElementById('settings-root');

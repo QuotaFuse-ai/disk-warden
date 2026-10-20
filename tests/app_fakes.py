@@ -33,6 +33,9 @@ def make_service(
     environ=None,
     process_provider=None,
     free_space_provider=None,
+    auth_opener=None,
+    auth_http_opener=None,
+    auth_provider_loader=None,
 ):
     temp = tempfile.TemporaryDirectory()
     case.addCleanup(temp.cleanup)
@@ -43,6 +46,9 @@ def make_service(
         environ=dict(environ or {}),
         process_provider=process_provider or (lambda: []),
         free_space_provider=free_space_provider or (lambda path: FOUR_GIB),
+        auth_opener=auth_opener,
+        auth_http_opener=auth_http_opener,
+        auth_provider_loader=auth_provider_loader,
     )
     case.addCleanup(service.close)
     return service
