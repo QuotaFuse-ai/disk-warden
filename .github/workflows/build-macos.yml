@@ -10,7 +10,19 @@ name: build-macos
 # default job stays one runner and one artifact.
 
 on:
+  # A workflow that exists only on a feature branch cannot be dispatched from
+  # the API, and macos-latest minutes are too precious to build every push.
+  # The PR event gives the branch one real build, and reviewers see the result
+  # before merge; main keeps the same build afterwards.
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "packaging/**"
+      - "ui/**"
+      - "data/**"
+      - ".github/workflows/build-macos.yml"
   push:
     branches: [main]
     paths:
