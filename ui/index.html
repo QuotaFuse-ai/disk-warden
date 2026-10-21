@@ -2618,6 +2618,26 @@ function stopScanPolling() {
   }
 }
 
+/* 扫描是后台操作，可以从任意页面发起：记住发起时的位置，扫完回到原页面，
+   而不是一律把人丢到 IDE 数据页（规则学习里点「重新扫描」最明显）。 */
+function enterScanRoute() {
+  const here = location.hash || ('#' + state.tab);
+  state.data.scanFrom = state.tab === 'ide' ? '' : here;
+  if (state.data.scanFrom) render();
+  else App.go('#ide/scanning');
+}
+function leaveScanRoute() {
+  const back = state.data.scanFrom || '';
+  state.data.scanFrom = '';
+  const here = location.hash || ('#' + state.tab);
+  if (!back) { App.go('#ide' + (CATALOG.ides.length ? '' : '/empty')); return; }
+  if (back !== here) return;            /* 用户自己走开了，不再把人拽回去 */
+  return rpc('rules.learned.list')
+    .then(l => { state.data.learned = l; })
+    .catch(() => {})
+    .then(() => render());
+}
+
 function startScanPolling(jobId) {
   stopScanPolling();
   state.data.scanTimer = setInterval(() => pollScan(jobId), 350);
@@ -2628,6 +2648,7 @@ function scanFailed(err) {
   state.data.scanError = errText(err) || t('scan.failed');
   state.scanning = false;
   App.toast(t('scan.failed') + ': ' + state.data.scanError);
+  if (state.data.scanFrom) { state.data.scanFrom = ''; render(); return; }
   if (state.tab !== 'ide' || state.sub !== 'scanning') App.go('#ide/scanning');
   else render();
 }
@@ -2651,7 +2672,7 @@ function pollScan(jobId) {
         App.toast(t('scan.done', { n: n }));
         return rpc('disk.info').then(applyDisk).catch(() => {});
       }).then(() => {
-        App.go('#ide' + (CATALOG.ides.length ? '' : '/empty'));
+        return leaveScanRoute();
       }).catch(scanFailed);
     }
     if (job.state === 'cancelled') {
@@ -2659,6 +2680,12 @@ function pollScan(jobId) {
       state.scanning = false;
       state.data.scanJob = null;
       App.toast(t('scan.cancelled'));
+      const back = state.data.scanFrom || '';
+      state.data.scanFrom = '';
+      if (back) {
+        if (back === (location.hash || ('#' + state.tab))) render();
+        return;
+      }
       App.go('#ide' + (snapshot() ? '' : '/empty'));
       return;
     }
@@ -2676,7 +2703,9 @@ function pollScan(jobId) {
 }
 
 function freshRenderIfScanning() {
-  if (state.tab === 'ide' && state.sub === 'scanning') render();
+  if (state.tab === 'ide' && state.sub === 'scanning') { render(); return; }
+  /* 就地重扫（规则学习等页面）：只刷顶栏的进度，不动正文。 */
+  if (state.scanning) renderTopbar();
 }
 
 /* ---------- 操作历史（src/core/store/history） ---------- */
@@ -3485,6 +3514,8 @@ function renderTopbar() {
     meta.innerHTML = `<span class="warn">${esc(t('conn.connecting'))}</span>`;
   } else if (!state.connected) {
     meta.innerHTML = `<span class="warn">${esc(t('conn.unavailable'))}</span>`;
+  } else if (state.scanning) {
+    meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))} · ${state.scanPct || 0}%</span>`;
   } else if (state.tab === 'ide') {
     if (state.sub === 'scanning' || state.scanning) meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))}</span>`;
     else if (!KPI.lastScan) meta.innerHTML = `<span class="dim">${esc(t('meta.neverScan'))}<span class="dim"> · </span>${esc(t('meta.scope'))}</span>`;
@@ -4584,14 +4615,14 @@ const App = {
     bootstrap();
   },
   rescan() {
-    if (state.scanning) { this.go('#ide/scanning'); return; }
+    if (state.scanning) { if (!state.data.scanFrom) this.go('#ide/scanning'); return; }
     rpc('scan.start').then(res => {
       const jobId = res && res.job_id;
       state.scanning = true;
       state.data.scanError = '';
       state.scanPct = 3;
       state.data.scanJob = jobId ? { job_id: jobId, state: (res && res.state) || 'queued' } : null;
-      this.go('#ide/scanning');
+      enterScanRoute();
       if (jobId) startScanPolling(jobId);
     }).catch(err => {
       if (err && err.code === 'BUSY') {
@@ -4601,7 +4632,7 @@ const App = {
             state.scanning = true;
             state.data.scanJob = job;
             state.scanPct = scanPercent(job);
-            this.go('#ide/scanning');
+            enterScanRoute();
             startScanPolling(job.job_id);
             return;
           }
