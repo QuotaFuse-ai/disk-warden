@@ -124,6 +124,7 @@ from ..platform import (
     volume_info,
 )
 from . import APP_VERSION, PROTOCOL_VERSION
+from .auth import AuthManager, REPO_WEB_URL, gitee_repository
 from .errors import BridgeError, invalid, not_found
 from .events import EventBus
 from .jobs import RECOVER, ROLLBACK, MIGRATE, SCAN, STATE_CANCELLED, JobRunner
@@ -146,9 +147,20 @@ AI_TEST_MAX_TOKENS = 1
 AI_KEY_MAX_LENGTH = keystore.MAX_SECRET_BYTES
 
 
+#: GitHub's device-flow verification page (T16 sign-in).  The welcome card's
+#: "打开授权页面" button and ``auth.start`` both hand this URL to the browser,
+#: so it has to survive the allowlist below; nothing else outside the
+#: organisation is accepted.
+EXTERNAL_DEVICE_PATH = "/login/device"
+
+
 def _validate_external_url(url):
     # type: (object) -> str
-    """Only GitHub URLs under the QuotaFuse-ai organisation are allowed."""
+    """Only the GitHub pages Disk Warden opens itself are allowed.
+
+    That is the QuotaFuse-ai organisation (repository, star, issue links) and
+    GitHub's device-flow verification page.
+    """
     if not isinstance(url, str) or not url:
         raise invalid("url is required")
     if len(url) > MAX_EXTERNAL_URL_LENGTH:
@@ -162,13 +174,16 @@ def _validate_external_url(url):
         raise invalid("url is not valid")
     path = unquote(parsed.path)
     segments = path.split("/")
+    allowed_path = path.startswith("/QuotaFuse-ai/") or (
+        path.rstrip("/") == EXTERNAL_DEVICE_PATH
+    )
     if (
         parsed.scheme != "https"
         or parsed.hostname != "github.com"
         or port not in (None, 443)
         or parsed.username is not None
         or parsed.password is not None
-        or not path.startswith("/QuotaFuse-ai/")
+        or not allowed_path
         or "\\" in path
         or "." in segments
         or ".." in segments
@@ -179,6 +194,17 @@ def _validate_external_url(url):
             {"url": url},
         )
     return url
+
+
+def _open_star_page(url):
+    # type: (str) -> None
+    """Default browser hand-off for the Star overlay.
+
+    Module-level so ``open_url`` is resolved at call time and tests can patch
+    it; without a default the "去 GitHub 点 Star" button silently did nothing.
+    """
+    open_url(url)
+
 
 MIGRATION_TERMINAL = frozenset(
     [
@@ -359,8 +385,11 @@ class AppService(object):
         transfer=None,
         ai_test_opener=None,
         autostart=None,
+        auth_opener=None,
+        auth_http_opener=None,
+        auth_provider_loader=None,
     ):
-        # type: (object, object, object, object, object, object, object, object, object) -> None
+        # type: (object, object, object, object, object, object, object, object, object, object, object, object) -> None
         self.environ = dict(environ if environ is not None else os.environ)
         self.catalog_path = os.path.abspath(
             catalog_path or DEFAULT_CATALOG_PATH
@@ -374,6 +403,14 @@ class AppService(object):
 
         self._stored_ai_key = ""
         self._ai_key_error = ""
+        # Injectable only for tests: the browser opener never touches the
+        # network in production, and the HTTP opener is replaced so the device
+        # flow never reaches GitHub during a test run.  A missing opener used
+        # to leave the Star overlay's "去 GitHub 点 Star" button doing
+        # nothing at all, so default to the normal browser hand-off.
+        self._auth_opener = auth_opener or _open_star_page
+        self._auth_http_opener = auth_http_opener
+        self._auth_provider_loader = auth_provider_loader
 
         self.bus = EventBus()
         self.runner = JobRunner(self.bus)
@@ -383,6 +420,7 @@ class AppService(object):
         self._snapshot = None
         self._settings = {}
         self._ai_config = None
+        self._auth = None
         self._tool_names = {}
         self._started_at = utc_now()
         self._last_recovery = []
@@ -421,10 +459,24 @@ class AppService(object):
                 LOGGER.warning("could not persist default settings: %s", exc)
         self._settings = settings
         self._refresh_ai()
+        previous = self._auth
+        if previous is not None:
+            previous.close()
+        self._auth = AuthManager(
+            layout.config_dir,
+            environ=self.environ,
+            opener=self._auth_opener,
+            http_opener=self._auth_http_opener,
+            provider_loader=self._auth_provider_loader,
+        )
         self._snapshot = None
 
     def close(self):
         # type: () -> None
+        auth = self._auth
+        if auth is not None:
+            # Stops the device-flow poll thread so no request outlives the app.
+            auth.close()
         self.runner.shutdown()
 
     # -- settings / AI ---------------------------------------------------
@@ -820,6 +872,65 @@ class AppService(object):
             "message": "",
         }
 
+    # -- sign-in / welcome / star (T16) ----------------------------------
+
+    def _auth_manager(self):
+        # type: () -> object
+        auth = self._auth
+        if auth is None:  # pragma: no cover - _bind always builds one
+            raise BridgeError("INTERNAL", "auth manager is not available")
+        return auth
+
+    def auth_status(self):
+        # type: () -> dict
+        return self._auth_payload(self._auth_manager().status())
+
+    def _auth_payload(self, status):
+        # type: (dict) -> dict
+        # The repository URL is public and needed by the Star overlay; it is
+        # not a secret and never contains an application id.  Every auth
+        # method returns the same envelope so the UI can replace its state
+        # from any of them.
+        payload = dict(status)
+        payload["repository_url"] = REPO_WEB_URL
+        # Gitee is a link, not a provider: no token, no authorization code.
+        payload["gitee"] = gitee_repository()
+        return payload
+
+    def auth_start(self, provider):
+        # type: (object) -> dict
+        return self._auth_payload(self._auth_manager().start(provider))
+
+    def auth_cancel(self):
+        # type: () -> dict
+        return self._auth_payload(self._auth_manager().cancel())
+
+    def auth_sign_out(self):
+        # type: () -> dict
+        return self._auth_payload(self._auth_manager().sign_out())
+
+    def welcome_seen(self):
+        # type: () -> dict
+        return self._auth_payload(self._auth_manager().mark_welcome_seen())
+
+    def star_show(self):
+        # type: () -> dict
+        return self._auth_payload(self._auth_manager().show_star())
+
+    def star_dismiss(self):
+        # type: () -> dict
+        return self._auth_payload(self._auth_manager().dismiss_star())
+
+    def star_give(self):
+        # type: () -> dict
+        """Open the repository page, then re-read the public star state."""
+        return self._auth_payload(self._auth_manager().star())
+
+    def star_check(self):
+        # type: () -> dict
+        """Re-read the public star state (no browser, no extra scope)."""
+        return self._auth_payload(self._auth_manager().check_star())
+
     # -- read-only info --------------------------------------------------
 
     def hello(self):
@@ -830,6 +941,7 @@ class AppService(object):
             "protocol": PROTOCOL_VERSION,
             "started_at": self._started_at,
             "settings": self.settings_get(),
+            "auth": self.auth_status(),
             "disk": self.disk_info(),
             "scan": self._snapshot_summary(),
             "recovery": self.recovery_list(),
