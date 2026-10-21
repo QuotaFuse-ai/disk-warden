@@ -249,6 +249,9 @@ a{color:var(--blue);text-decoration:none}
 .banner b{font-weight:700}
 .banner .btn{margin-top:5px}
 .banner-actions{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.banner>div{min-width:0}
+.banner-actions .tag{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.proc-list{max-height:80px;overflow-y:auto;padding-right:2px}
 
 .preview-card{background:#f7faf7;border:1px solid #e2eee0;border-radius:4px;padding:10px 12px}
 .preview-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -721,6 +724,7 @@ I18N['zh-CN'] = {
   'ide.processTitle': '检测到进程正在运行',
   'ide.processBody': '迁移前必须退出 {app}，否则文件会被占用。Disk Warden 不会强制结束进程。',
   'ide.processBlock': '检测到 {n} 个进程正在使用该目录，迁移已阻断。',
+  'ide.processMore': '另 {n} 个进程',
   'ide.noSelection': '请至少选择一个可迁目录',
   'ide.alreadyMigrated': '该软件的数据已位于目标盘，通过 junction 链接回原路径。',
   'ide.allGreenSelected': '全选可迁',
@@ -1391,6 +1395,7 @@ I18N['en'] = {
   'ide.processTitle': 'Running process detected',
   'ide.processBody': 'Quit {app} before migrating, otherwise files are locked. Disk Warden never force-kills processes.',
   'ide.processBlock': '{n} processes are using this folder. Migration is blocked.',
+  'ide.processMore': '+{n} more',
   'ide.noSelection': 'Select at least one migratable folder',
   'ide.alreadyMigrated': 'This app already lives on the target drive and is linked back with a junction.',
   'ide.allGreenSelected': 'Select all migratable',
@@ -3106,6 +3111,21 @@ function ideRow(ide) {
   </button>`;
 }
 
+/* 进程列表可能很长（Cursor 一次就开十几个进程）。整串塞进一个 nowrap 标签会撑破
+   卡片、溢出窗口，所以按进程拆成可换行的标签，超过 6 个折叠成「另 N 个」，
+   完整列表放进 title，鼠标悬停可见。 */
+const PROC_CHIP_LIMIT = 6;
+function processChips(running) {
+  const shown = running.slice(0, PROC_CHIP_LIMIT);
+  const rest = running.length - shown.length;
+  const all = running.map(p => p.name + ' · PID ' + p.pid).join(' | ');
+  const chips = shown.map(p => `<span class="tag mono">${esc(p.name)} · PID ${esc(String(p.pid))}</span>`).join('');
+  const more = rest > 0
+    ? `<span class="tag mono" title="${esc(all)}">${esc(t('ide.processMore', { n: rest }))}</span>`
+    : '';
+  return `<div class="banner-actions proc-list">${chips}${more}</div>`;
+}
+
 function renderIdeDetail(ide) {
   const g = safetyCount(ide, 'green'), r = safetyCount(ide, 'red'), y = safetyCount(ide, 'yellow');
   const sel = selectedDirs(ide);
@@ -3116,7 +3136,7 @@ function renderIdeDetail(ide) {
   const migrated = ide.runtime.migrated;
   const redNote = r ? `<div class="banner danger" style="margin-top:2px"><span class="b-ico">⛨</span><div>${esc(t('ide.redExcluded', { n: r }))} <b>${esc(t('common.red'))}</b> · ${esc(t('ide.redLocked'))}</div></div>` : '';
   const yellowNote = y ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div>${esc(t('ide.yellowHint'))}</div></div>` : '';
-  const runBanner = running.length ? `<div class="banner warn"><span class="b-ico">▲</span><div><b>${esc(t('ide.processTitle'))}</b><br>${esc(t('ide.processBody', { app: ide.name }))}<div class="banner-actions"><span class="tag mono">${running.map(p => esc(p.name) + ' · PID ' + p.pid).join(' | ')}</span></div></div></div>` : '';
+  const runBanner = running.length ? `<div class="banner warn"><span class="b-ico">▲</span><div><b>${esc(t('ide.processTitle'))}</b><br>${esc(t('ide.processBody', { app: ide.name }))}${processChips(running)}</div></div>` : '';
   const migratedBanner = migrated ? `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('ide.alreadyMigrated'))}<br><span class="mono" style="font-size:var(--fs-meta)">${esc(ide.runtime.target || targetPathFor(ide))}</span></div></div>` : '';
   return `<div class="detail">
     <div class="detail-head">
