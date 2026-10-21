@@ -42,22 +42,6 @@
 - `python tools/repo_safety_check.py` 可离线审计仓库：提交进仓库的凭据、下载即执行的脚本、混淆命令、针对根目录的递归删除、可疑外连域名、符号链接、伪装扩展名、压缩包路径穿越。它不执行任何代码，也不上传任何数据。
 - 最近一次结果见 [`docs/security/repo-safety-report.md`](docs/security/repo-safety-report.md)，完整说明（应用会读写什么、如何验证下载、漏洞上报）见 [`SECURITY.md`](SECURITY.md)。
 
-## 下载与安装
-
-不用装 Python，也不用自己编译：打开 [**Releases 发布页**](https://github.com/QuotaFuse-ai/disk-warden/releases/latest)，下载对应平台的压缩包即可。每个 zip 里就是完整程序，解压即用。
-
-| 平台 | 文件 | 怎么用 |
-|---|---|---|
-| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.8-win-x64.zip` | 解压到固定目录，双击 `DiskWarden\DiskWarden.exe`。 |
-| macOS 11+（Apple Silicon） | `DiskWarden-0.9.0-beta.8-macos-arm64.zip` | 解压后打开 `DiskWarden.app`，首次需要放行一次（Gatekeeper）。 |
-
-每个压缩包都附带同名的 `.sha256` 校验文件和 zip 根目录下的 `START-HERE*.txt` 使用说明。
-
-- **Windows**：在 Windows 10/11 上实际构建并跑过——完整单元测试、打包产物的沙箱演练、冻结后的自检，全部针对发布出去的这一个包执行。
-- **macOS**：**目前还没有在真机上测试过**。团队手上没有 Mac，`.app` 由 GitHub Actions 的 `macos-latest` 构建，只通过了自动化的 `--smoke` 自检（包结构、WKWebView 后端、UI 文件是否齐全）。请当作开发者预览版看待，发现问题欢迎提 issue。
-
-两个包都**未做代码签名**，首次运行会分别出现一次 SmartScreen（Windows，「更多信息」→「仍要运行」）或 Gatekeeper 提示（macOS）。这两个提示都不是病毒告警，也不需要关闭任何系统安全功能。
-
 ## 与其他清理工具的区别
 
 - 认识 AI IDE 的目录结构，区分「可迁」「不可动」「未知」三类，而不是按文件类型乱删
@@ -162,7 +146,7 @@ tools/             演练与校验脚本
 - 迁移只复制、不递归删除源数据；删除只针对已校验的副本与失效链接
 - 危险目录（IDE 安装目录、用户源码等）默认禁止迁移，黄色目录需逐项确认
 - AI 分析默认关闭；开启后目录信息会发送给第三方 AI 服务，界面上会有明确提示
-- 仓库根目录的 `check*.py`、`upload*.py`、`test_ssh.py`、`clean.py` 等临时脚本含敏感凭据，已被 `.gitignore` 排除，**禁止提交入库**
+- 仓库中不含任何凭据。应用运行时获取的 token 交给系统密钥库（Windows 上是 DPAPI）保存，不会写入仓库；本地临时脚本已被 `.gitignore` 排除。如果有敏感信息混进被跟踪的文件，`tools/repo_safety_check.py` 会让 CI 直接失败
 
 ## 协作
 
