@@ -195,6 +195,17 @@ def _validate_external_url(url):
         )
     return url
 
+
+def _open_star_page(url):
+    # type: (str) -> None
+    """Default browser hand-off for the Star overlay.
+
+    Module-level so ``open_url`` is resolved at call time and tests can patch
+    it; without a default the "去 GitHub 点 Star" button silently did nothing.
+    """
+    open_url(url)
+
+
 MIGRATION_TERMINAL = frozenset(
     [
         STATE_DONE,
@@ -394,8 +405,10 @@ class AppService(object):
         self._ai_key_error = ""
         # Injectable only for tests: the browser opener never touches the
         # network in production, and the HTTP opener is replaced so the device
-        # flow never reaches GitHub during a test run.
-        self._auth_opener = auth_opener
+        # flow never reaches GitHub during a test run.  A missing opener used
+        # to leave the Star overlay's "去 GitHub 点 Star" button doing
+        # nothing at all, so default to the normal browser hand-off.
+        self._auth_opener = auth_opener or _open_star_page
         self._auth_http_opener = auth_http_opener
         self._auth_provider_loader = auth_provider_loader
 
