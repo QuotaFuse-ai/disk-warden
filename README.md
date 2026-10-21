@@ -13,6 +13,24 @@ English | [Chinese](README.zh-CN.md)
 
 **Windows** builds are available today. **macOS** (11+, Apple Silicon) builds are produced unsigned by CI: see [First launch on macOS](#first-launch-on-macos).
 
+## Download and install
+
+Ready-to-run packages, one click, no toolchain: open the [**Releases page**](https://github.com/QuotaFuse-ai/disk-warden/releases/latest) and download the archive for your platform. There is nothing to compile and no Python to install — each zip already contains the complete app.
+
+| Platform | File | What to do |
+|---|---|---|
+| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.8-win-x64.zip` | Unzip to a fixed folder, run `DiskWarden\DiskWarden.exe`. |
+| macOS 11+ (Apple Silicon) | `DiskWarden-0.9.0-beta.8-macos-arm64.zip` | Unzip, open `DiskWarden.app`, allow it once — see [First launch on macOS](#first-launch-on-macos). |
+
+Each archive ships with a matching `.sha256` file and a `START-HERE*.txt` guide in the zip root.
+
+**What has been verified.**
+
+- **Windows** — built and exercised on Windows 10/11: the full unit suite, the packaged sandbox drills, and the frozen executable's self-check all run on the released artifact.
+- **macOS** — **not tested on real hardware yet.** Nobody on the team has a Mac, so the `.app` is built by GitHub Actions on `macos-latest` and only passes an automated `--smoke` self-check (bundle layout, WKWebView backend, UI files present). Treat it as a developer preview: the packaging is verified, the click-through is not. Please report anything that breaks in an issue.
+
+Both builds are **unsigned**: Windows shows a SmartScreen prompt on first run (More info → Run anyway), macOS asks for Gatekeeper approval once. Neither warning is a virus alert, and neither requires switching off a system protection.
+
 ## Why not just a cleanup tool
 
 - It understands AI IDE directory layouts and classifies each directory as **movable**, **do-not-touch**, or **unknown** — instead of deleting files by extension
@@ -31,10 +49,10 @@ English | [Chinese](README.zh-CN.md)
 | AI analysis interface (T22) | Done, disabled by default |
 | UI wired to the real engine, AI key setup (T12, T25) | Done, merged to `main` |
 | Welcome screen, GitHub sign-in and star prompt (T16) | In progress: GitHub Device Flow; skipping sign-in never limits local features |
-| Windows packaging (T15) | Unsigned 0.9.0-beta.7 zip: tray, per-user autostart, rotating logs, packaged sandbox drills; T26 link-verification fixes are merged and ship in beta.8 |
-| macOS adaptation and packaging (T21) | Unsigned 0.9.0-beta.7 arm64 `.app` from GitHub Actions `macos-latest`: symlink transfer/links, LaunchAgent autostart, tray, rotating logs, in-app first-launch guide; CI builds and smoke-tests the bundle |
+| Windows packaging (T15) | Published as `DiskWarden-0.9.0-beta.8-win-x64.zip`: tray, per-user autostart, rotating logs, packaged sandbox drills |
+| macOS adaptation and packaging (T21) | Published as `DiskWarden-0.9.0-beta.8-macos-arm64.zip`, **untested on real hardware**: `.app` built on GitHub Actions `macos-latest`, symlink transfer/links, LaunchAgent autostart, tray, rotating logs, in-app first-launch guide; CI builds and smoke-tests the bundle |
 
-**832 unit tests** cover the completed modules; CI runs them on every push.
+**929 unit tests** cover the completed modules; CI runs them on every push.
 
 ## Platforms
 
