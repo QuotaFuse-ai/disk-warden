@@ -19,10 +19,12 @@
 
 | 平台 | 文件 | 怎么用 |
 |---|---|---|
-| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.9-win-x64.zip` | 解压到固定目录，双击 `DiskWarden\DiskWarden.exe`。 |
-| macOS 11+（Apple Silicon） | `DiskWarden-0.9.0-beta.9-macos-arm64.zip` | 解压后打开 `DiskWarden.app`，首次需要放行一次，见 [macOS 首次启动](#macos-首次启动)。 |
+| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.10-win-x64.zip` | 解压到 **C 盘**的固定目录（例如 `C:\DiskWarden`），双击 `DiskWarden\DiskWarden.exe`。 |
+| macOS 11+（Apple Silicon） | `DiskWarden-0.9.0-beta.10-macos-arm64.zip` | 解压后打开 `DiskWarden.app`，首次需要放行一次，见 [macOS 首次启动](#macos-首次启动)。 |
 
 每个压缩包都附带同名的 `.sha256` 校验文件和 zip 根目录下的 `START-HERE*.txt` 使用说明。
+
+**Windows：程序要放在 C 盘。** 解压到系统盘的固定目录，推荐 `C:\DiskWarden`，并从那里启动。不要直接在压缩包预览里运行，也不要放在「下载」文件夹里未解压直接运行、临时目录、U 盘或网络共享盘上：这些位置要么只读，要么重启后消失，要么每次启动路径都变，迁移时建立的目录联接会失效。程序的数据、设置和日志不在程序目录里，所以以后替换程序不会影响它们。
 
 **验证到什么程度**
 
@@ -60,8 +62,8 @@
 | AI 分析接口（T22） | 已完成，默认关闭 |
 | 界面接入真实引擎、AI 密钥配置（T12、T25） | 已完成，已合入 `main` |
 | 欢迎页与 GitHub 登录、Star 引导（T16） | 开发中：GitHub Device Flow；未登录也不限制任何本地功能 |
-| Windows 打包（T15） | 已发布 `DiskWarden-0.9.0-beta.9-win-x64.zip`：托盘、当前用户自启、日志轮转、打包产物沙箱演练 |
-| macOS 平台适配与打包（T21） | 已发布 `DiskWarden-0.9.0-beta.9-macos-arm64.zip`，**未在真机测试**：`.app` 由 GitHub Actions `macos-latest` 构建，rsync/cp 搬运、`ln -s` 建链与回读、LaunchAgent 自启、托盘、日志轮转、应用内首次启动引导；CI 构建并对产物做冒烟检查 |
+| Windows 打包（T15） | 已发布 `DiskWarden-0.9.0-beta.10-win-x64.zip`：托盘、当前用户自启、日志轮转、打包产物沙箱演练 |
+| macOS 平台适配与打包（T21） | 已发布 `DiskWarden-0.9.0-beta.10-macos-arm64.zip`，**未在真机测试**：`.app` 由 GitHub Actions `macos-latest` 构建，rsync/cp 搬运、`ln -s` 建链与回读、LaunchAgent 自启、托盘、日志轮转、应用内首次启动引导；CI 构建并对产物做冒烟检查 |
 
 已完成的模块由 **934 个单元测试**覆盖，CI 会在每次 push 时自动运行。
 
