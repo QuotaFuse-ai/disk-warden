@@ -137,7 +137,7 @@ def main(argv=None):
     window = create_window(service, bridge, debug=debug, hidden=start_hidden)
 
     settings = service.settings_get()
-    language = settings.get("language") or "zh-CN"
+    language = settings.get("language") or "en"
     quitting = {"value": False}
     tray = TrayController(
         window,

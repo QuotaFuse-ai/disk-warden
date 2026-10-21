@@ -19,8 +19,8 @@
 
 | 平台 | 文件 | 怎么用 |
 |---|---|---|
-| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.8-win-x64.zip` | 解压到固定目录，双击 `DiskWarden\DiskWarden.exe`。 |
-| macOS 11+（Apple Silicon） | `DiskWarden-0.9.0-beta.8-macos-arm64.zip` | 解压后打开 `DiskWarden.app`，首次需要放行一次，见 [macOS 首次启动](#macos-首次启动)。 |
+| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.9-win-x64.zip` | 解压到固定目录，双击 `DiskWarden\DiskWarden.exe`。 |
+| macOS 11+（Apple Silicon） | `DiskWarden-0.9.0-beta.9-macos-arm64.zip` | 解压后打开 `DiskWarden.app`，首次需要放行一次，见 [macOS 首次启动](#macos-首次启动)。 |
 
 每个压缩包都附带同名的 `.sha256` 校验文件和 zip 根目录下的 `START-HERE*.txt` 使用说明。
 
@@ -30,6 +30,17 @@
 - **macOS**：**目前还没有在真机上测试过**。团队手上没有 Mac，`.app` 由 GitHub Actions 的 `macos-latest` 构建，只通过了自动化的 `--smoke` 自检（包结构、WKWebView 后端、UI 文件是否齐全）。请当作开发者预览版看待：打包链路已验证，点击操作未验证。发现问题欢迎提 issue。
 
 两个包都**未做代码签名**：Windows 首次运行会弹 SmartScreen（点「更多信息」→「仍要运行」），macOS 首次打开会被 Gatekeeper 拦截一次。这两个提示都不是病毒告警，也不需要关闭任何系统安全功能。
+
+界面默认是**英文**；点标题栏的 `中文` / `EN` 按钮可切换为简体中文，选择会被记住。
+
+## 仓库安全说明
+
+现在不需要克隆源码，从 Releases 下载压缩包即可，但仍可自行验证：
+
+- 每个压缩包旁边都有 `.sha256` 文件。运行前先比对 `Get-FileHash -Algorithm SHA256`（PowerShell）或 `shasum -a 256` 的结果。
+- 仓库里**不存放任何编译好的可执行文件**。用户运行的每个二进制都由 `packaging/build.ps1` 或 macOS CI 从打标签的提交构建，再挂到 Release 上。
+- `python tools/repo_safety_check.py` 可离线审计仓库：提交进仓库的凭据、下载即执行的脚本、混淆命令、针对根目录的递归删除、可疑外连域名、符号链接、伪装扩展名、压缩包路径穿越。它不执行任何代码，也不上传任何数据。
+- 最近一次结果见 [`docs/security/repo-safety-report.md`](docs/security/repo-safety-report.md)，完整说明（应用会读写什么、如何验证下载、漏洞上报）见 [`SECURITY.md`](SECURITY.md)。
 
 ## 与其他清理工具的区别
 
@@ -49,10 +60,10 @@
 | AI 分析接口（T22） | 已完成，默认关闭 |
 | 界面接入真实引擎、AI 密钥配置（T12、T25） | 已完成，已合入 `main` |
 | 欢迎页与 GitHub 登录、Star 引导（T16） | 开发中：GitHub Device Flow；未登录也不限制任何本地功能 |
-| Windows 打包（T15） | 已发布 `DiskWarden-0.9.0-beta.8-win-x64.zip`：托盘、当前用户自启、日志轮转、打包产物沙箱演练 |
-| macOS 平台适配与打包（T21） | 已发布 `DiskWarden-0.9.0-beta.8-macos-arm64.zip`，**未在真机测试**：`.app` 由 GitHub Actions `macos-latest` 构建，rsync/cp 搬运、`ln -s` 建链与回读、LaunchAgent 自启、托盘、日志轮转、应用内首次启动引导；CI 构建并对产物做冒烟检查 |
+| Windows 打包（T15） | 已发布 `DiskWarden-0.9.0-beta.9-win-x64.zip`：托盘、当前用户自启、日志轮转、打包产物沙箱演练 |
+| macOS 平台适配与打包（T21） | 已发布 `DiskWarden-0.9.0-beta.9-macos-arm64.zip`，**未在真机测试**：`.app` 由 GitHub Actions `macos-latest` 构建，rsync/cp 搬运、`ln -s` 建链与回读、LaunchAgent 自启、托盘、日志轮转、应用内首次启动引导；CI 构建并对产物做冒烟检查 |
 
-已完成的模块由 **929 个单元测试**覆盖，CI 会在每次 push 时自动运行。
+已完成的模块由 **934 个单元测试**覆盖，CI 会在每次 push 时自动运行。
 
 ## 平台支持
 
