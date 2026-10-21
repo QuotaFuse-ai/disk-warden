@@ -22,7 +22,7 @@ VSVersionInfo(
             StringStruct('LegalCopyright', 'Copyright (c) QuotaFuse'),
             StringStruct('OriginalFilename', 'DiskWarden.exe'),
             StringStruct('ProductName', 'Disk Warden'),
-            StringStruct('ProductVersion', '0.9.0-beta.9')
+            StringStruct('ProductVersion', '0.9.0-beta.10')
           ]
         )
       ]
