@@ -8,6 +8,7 @@ from src.app.errors import BridgeError
 from tests.app_fakes import make_service
 
 ALLOWED = "https://github.com/QuotaFuse-ai/disk-warden/issues/new"
+DEVICE = "https://github.com/login/device"
 
 
 class OpenExternalTest(unittest.TestCase):
@@ -32,6 +33,33 @@ class OpenExternalTest(unittest.TestCase):
             result, opener = self.open_url(url)
             self.assertEqual(result["url"], url)
             opener.assert_called_once_with(url)
+
+    def test_device_verification_page_is_allowed(self):
+        # T16: the welcome card's "打开授权页面" button and auth.start both
+        # hand GitHub's device page to the browser.
+        for url in (
+            DEVICE,
+            DEVICE + "/",
+            DEVICE + "?user_code=ABCD-1234",
+        ):
+            result, opener = self.open_url(url)
+            self.assertEqual(result["url"], url)
+            opener.assert_called_once_with(url)
+
+    def test_other_github_login_pages_are_forbidden(self):
+        for url in (
+            "https://github.com/login/oauth/authorize",
+            "https://github.com/login/device-callback",
+            "https://github.com/login",
+            "https://github.com/settings/tokens",
+            "http://github.com/login/device",
+            "https://evil.com/login/device",
+        ):
+            with mock.patch("src.app.service.open_url") as opener:
+                with self.assertRaises(BridgeError) as caught:
+                    self.service.open_external(url)
+            self.assertEqual(caught.exception.code, "FORBIDDEN", url)
+            opener.assert_not_called()
 
     def test_other_schemes_and_hosts_are_forbidden(self):
         rejected = (
