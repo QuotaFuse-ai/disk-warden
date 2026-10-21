@@ -93,10 +93,28 @@ def volume_info(path):
     )
 
 
+def link_support(path):
+    # type: (str) -> dict
+    """Generic POSIX: directory symlinks are expected to work.
+
+    The development/CI fallback has no filesystem name to inspect; creation
+    reports the real error when a filesystem refuses symlinks.
+    """
+    info = volume_info(path)
+    return {
+        "supported": True,
+        "code": "",
+        "message": "",
+        "fs_name": info.fs_name,
+        "mount_point": info.mount_point,
+    }
+
+
 __all__ = [
     "create_junction",
     "is_junction",
     "is_link",
+    "link_support",
     "read_junction_target",
     "remove_junction",
     "rename_dir",

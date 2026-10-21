@@ -2,6 +2,7 @@
 """Plan registry and the red-path guard in ``plan.preview`` (architecture §5.5)."""
 
 import math
+import os
 import unittest
 
 from src.app.errors import BridgeError
@@ -153,8 +154,15 @@ class PlanPreviewGuardTest(unittest.TestCase):
         self.assertTrue(ctx.exception.detail["items"][0]["is_reparse"])
 
     def test_duplicate_final_paths_are_rejected(self):
-        one = make_item("cursor-cache", source_path=r"C:\Users\alice\Roaming\Cache")
-        two = make_item("cursor-cache-2", source_path=r"C:\Users\alice\Local\Cache")
+        # Two different source directories that end in the same basename.
+        # ``os.path.join`` keeps the paths native so the target name is the
+        # same on Windows and on POSIX hosts.
+        one = make_item(
+            "cursor-cache", source_path=os.path.join("Roaming", "Cache")
+        )
+        two = make_item(
+            "cursor-cache-2", source_path=os.path.join("Local", "Cache")
+        )
         with self.assertRaises(BridgeError) as ctx:
             self._preview([one, two])
         error = ctx.exception

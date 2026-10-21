@@ -12,6 +12,7 @@ ERROR_CODES = {
     "BLOCKED_RED_PATH": False,
     "INSUFFICIENT_SPACE": True,
     "TARGET_NOT_NTFS": False,
+    "TARGET_FS_UNSUPPORTED": False,
     "PERMISSION_DENIED": True,
     "IO_ERROR": True,
     "VERIFY_FAILED": True,

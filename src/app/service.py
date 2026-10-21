@@ -118,7 +118,9 @@ from ..platform import (
     Autostart,
     AutostartError,
     expand_path,
+    first_launch_guide,
     is_junction,
+    link_support,
     open_url,
     reveal_directory,
     volume_info,
@@ -631,6 +633,11 @@ class AppService(object):
             "auto_maintenance": bool(settings.get("auto_maintenance", False)),
             "uninstall_policy": settings.get("uninstall_policy", "keep"),
             "language": settings.get("language", "en"),
+            # Platform data, not a branch: the adapter decides whether an
+            # unsigned build needs first-launch steps and which ones.
+            "first_launch": first_launch_guide(
+                bool(settings.get("first_run_done", False))
+            ),
             "ai": {
                 "enabled": bool(public.get("enabled", False)),
                 "available": bool(public.get("available", False)),
@@ -692,6 +699,10 @@ class AppService(object):
             if not isinstance(patch["auto_maintenance"], bool):
                 raise invalid("auto_maintenance must be a boolean")
             settings["auto_maintenance"] = patch["auto_maintenance"]
+        if "first_run_done" in patch:
+            if not isinstance(patch["first_run_done"], bool):
+                raise invalid("first_run_done must be a boolean")
+            settings["first_run_done"] = patch["first_run_done"]
         if "uninstall_policy" in patch:
             policy = patch["uninstall_policy"]
             if policy not in ("keep", "rollback"):
@@ -1549,18 +1560,23 @@ class AppService(object):
             if self._free_space_provider is not None
             else _free_bytes(self.layout.data_dir)
         )
-        if os.name == "nt":
-            info = None
-            try:
-                info = volume_info(self.layout.data_dir)
-            except Exception:
-                info = None
-            if info is not None and not getattr(info, "is_ntfs", False):
-                raise BridgeError(
-                    "TARGET_NOT_NTFS",
-                    "the target disk must be NTFS to create links",
-                    {"target_root": self.layout.root, "fs": getattr(info, "fs_name", "")},
-                )
+        # The platform package owns the filesystem requirement (NTFS on
+        # Windows, APFS/HFS+ on macOS); no ``os.name`` test belongs here.
+        support = None
+        try:
+            support = link_support(self.layout.data_dir)
+        except Exception as exc:  # volume probing is advisory only
+            LOGGER.debug("link support probe failed: %s", exc)
+        if support is not None and not support.get("supported", True):
+            raise BridgeError(
+                support.get("code") or "TARGET_FS_UNSUPPORTED",
+                support.get("message") or "the target disk cannot hold links",
+                {
+                    "target_root": self.layout.root,
+                    "fs": support.get("fs_name", ""),
+                    "mount_point": support.get("mount_point", ""),
+                },
+            )
         if free < need:
             raise BridgeError(
                 "INSUFFICIENT_SPACE",

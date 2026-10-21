@@ -26,6 +26,8 @@ class TransferCancelled(TransferError):
 
 if sys.platform.startswith("win"):
     from .win.transfer import run_robocopy
+elif sys.platform == "darwin":
+    from .mac.transfer import run_robocopy
 else:
 
     def run_robocopy(src, dst, log_path, cancel_token=None):

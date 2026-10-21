@@ -53,7 +53,9 @@ def _open_directory(target):
     if sys.platform.startswith("win"):
         os.startfile(target)
     elif sys.platform == "darwin":
-        _spawn(["open", target])
+        # ``open -R`` opens Finder with the directory selected; plain ``open``
+        # would enter it and lose the "where is this" context the UI promises.
+        _spawn(["open", "-R", target])
     else:
         _spawn(["xdg-open", target])
 

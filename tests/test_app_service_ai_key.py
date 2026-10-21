@@ -211,6 +211,7 @@ class AITestRPCTest(unittest.TestCase):
         patch.update(overrides)
         self.service.settings_set({"ai": patch})
 
+    @unittest.skipUnless(keystore.is_supported(), "saving a key needs DPAPI")
     def test_success_reports_the_model_and_latency(self):
         self.configure()
         result = self.service.ai_test()
@@ -221,6 +222,7 @@ class AITestRPCTest(unittest.TestCase):
         self.assertGreaterEqual(result["latency_ms"], 0)
         self.assertNotIn(KEY, json.dumps(result))
 
+    @unittest.skipUnless(keystore.is_supported(), "saving a key needs DPAPI")
     def test_request_is_minimal(self):
         self.configure()
         self.service.ai_test()
@@ -244,6 +246,7 @@ class AITestRPCTest(unittest.TestCase):
         result = self.service.ai_test({"api_key": KEY, "base_url": AI_PATCH["base_url"]})
         self.assertEqual(result["error_code"], "missing_model")
 
+    @unittest.skipUnless(keystore.is_supported(), "saving a key needs DPAPI")
     def test_timeout_is_reported_inline(self):
         self.configure()
         self.opener.result = socket.timeout("timed out")
@@ -254,6 +257,7 @@ class AITestRPCTest(unittest.TestCase):
         self.assertNotIn(KEY, "\n".join(captured.output))
         self.assertNotIn(KEY, json.dumps(result))
 
+    @unittest.skipUnless(keystore.is_supported(), "saving a key needs DPAPI")
     def test_http_error_is_reported_inline(self):
         self.configure()
         self.opener.result = urllib.error.HTTPError(
