@@ -28,8 +28,12 @@ DEFAULT_SETTINGS = {
     "uninstall_policy": "keep",
     "language": "en",
     "auto_maintenance": False,
+    # Set once the user acknowledged the macOS first-launch dialog.  The
+    # dialog can always be reopened from settings, so this only controls
+    # whether it appears by itself on the next start.
+    "first_run_done": False,
 }
-_BOOL_KEYS = ("launch_at_startup", "auto_maintenance")
+_BOOL_KEYS = ("launch_at_startup", "auto_maintenance", "first_run_done")
 _STRING_KEYS = ("data_root", "language")
 _BOOL = object()
 

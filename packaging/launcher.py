@@ -12,17 +12,29 @@ user gets a message box instead of a silent exit, and an unusable
 ``D:\\DiskWarden`` or ``%LOCALAPPDATA%\\DiskWarden`` no longer aborts startup.
 
 WebView2 problems are handled here too.  pywebview keeps its browser profile
-in ``%APPDATA%\\pywebview``, which is shared with every other pywebview app and
-can be left corrupt by an interrupted run; when WebView2 cannot open it the
-form simply stays white.  The profile is relocated under the writable data
-root, a missing WebView2 runtime is reported before the window opens, and an
-initialization failure shows the real error and schedules a profile reset for
-the next start instead of failing silently.
+in a shared, per-user directory (``%APPDATA%\\pywebview`` on Windows,
+``~/Library/Application Support/pywebview`` on macOS) that an interrupted run
+can leave corrupt; when the engine cannot open it the form simply stays white.
+The profile is relocated under the writable data root, a missing WebView2
+runtime is reported before the window opens, and an initialization failure
+shows the real error and schedules a profile reset for the next start instead
+of failing silently.
+
+Only the pieces that are genuinely OS specific are branched: the error dialog,
+the runtime-DLL check, and the browser-engine setup.  Everything else -- data
+root selection, log redirection, the tray hand-off -- is the same code on both
+platforms.
+
+``--smoke`` is a packaging self-check: it reports whether the frozen bundle
+can import its browser backend and resolve a data root, then exits without
+opening a window.  The macOS CI job uses it because a runner has no window
+server to show a real window.
 """
 
-import ctypes
+import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -97,6 +109,10 @@ def _check_runtime_layout():
     """Refuse to start when older runtime files were extracted over this build."""
     if not getattr(sys, "frozen", False):
         return True
+    if not sys.platform.startswith("win"):
+        # Only the Windows onedir layout carries ``python3XX.dll`` next to the
+        # executable; the macOS bundle keeps the interpreter elsewhere.
+        return True
     expected = _bundled_python_dll()
     app_dir = os.path.dirname(os.path.abspath(sys.executable))
     stale = _stale_python_dlls(app_dir, expected)
@@ -121,12 +137,52 @@ def _fatal_exit(code):
     os._exit(code)
 
 
+_MAC_ALERT_SCRIPT = (
+    'on run argv\n'
+    'display alert "Disk Warden" message (item 1 of argv) as critical\n'
+    'end run'
+)
+
+
+def _mac_message(text, timeout=120):
+    # type: (str, int) -> bool
+    """Show a native alert; the text is passed as argv, never interpolated.
+
+    A windowed bundle has no console, so a startup failure that only reaches
+    stderr is invisible.  ``display alert`` has an explicit button, which
+    matters when the message explains why the app is about to exit.
+    """
+    try:
+        process = subprocess.run(
+            ["/usr/bin/osascript", "-e", _MAC_ALERT_SCRIPT, "--", str(text)],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=timeout,
+            check=False,
+        )
+    except Exception:
+        return False
+    return process.returncode == 0
+
+
 def _message(text):
     # type: (str) -> None
+    if sys.platform.startswith("win"):
+        try:
+            import ctypes
+
+            ctypes.windll.user32.MessageBoxW(None, text, "Disk Warden", 0x10)
+            return
+        except Exception:
+            pass
+    elif sys.platform == "darwin":
+        if _mac_message(text):
+            return
     try:
-        ctypes.windll.user32.MessageBoxW(None, text, "Disk Warden", 0x10)
-    except Exception:
         sys.stderr.write(text + "\n")
+    except Exception:
+        pass
 
 
 def _rotate_launcher_log(path, max_bytes=LAUNCHER_LOG_MAX_BYTES, backups=LAUNCHER_LOG_BACKUPS):
@@ -287,9 +343,9 @@ def _prepare_webview_profile():
     # type: () -> tuple
     """Return (profile dir, marker path) after recovering from a failed start.
 
-    The profile never lives in ``%APPDATA%\\pywebview``: that directory is
-    shared with other pywebview applications and a half-written one makes
-    WebView2 initialization fail, which pywebview only logs.  A marker left by
+    The profile never lives in pywebview's shared per-user directory: it is
+    shared with other pywebview applications and a half-written one makes the
+    engine's initialization fail, which pywebview only logs.  A marker left by
     the previous failure makes the next start recreate the profile.
     """
     root = os.environ["DISKWARDEN_DATA_ROOT"]
@@ -311,9 +367,40 @@ def _prepare_webview_profile():
     return profile, marker
 
 
+def _patch_storage_path(webview, profile):
+    # type: (object, str) -> None
+    original_start = webview.start
+
+    def start(*args, **kwargs):
+        kwargs.setdefault("storage_path", profile)
+        return original_start(*args, **kwargs)
+
+    webview.start = start
+
+
+def _install_webview_cocoa(profile, marker):
+    # type: (str, str) -> bool
+    """macOS: WKWebView needs no runtime check, only a private profile.
+
+    ``webview.platforms.cocoa`` is imported here rather than in the spec so a
+    broken bundle fails with our message instead of a traceback on stderr that
+    nobody can see.
+    """
+    try:
+        import webview
+        from webview.platforms import cocoa  # noqa: F401
+    except Exception:
+        _message("Disk Warden 无法加载 WebView 组件：\n\n" + traceback.format_exc())
+        return False
+    _patch_storage_path(webview, profile)
+    return True
+
+
 def _install_webview(profile, marker):
     # type: (str, str) -> bool
     """Point pywebview at our profile and make WebView2 failures visible."""
+    if sys.platform == "darwin":
+        return _install_webview_cocoa(profile, marker)
     try:
         import webview
         from webview.platforms import edgechromium, winforms
@@ -335,13 +422,7 @@ def _install_webview(profile, marker):
         )
         return False
 
-    original_start = webview.start
-
-    def start(*args, **kwargs):
-        kwargs.setdefault("storage_path", profile)
-        return original_start(*args, **kwargs)
-
-    webview.start = start
+    _patch_storage_path(webview, profile)
 
     original_ready = edgechromium.EdgeChrome.on_webview_ready
 
@@ -377,6 +458,124 @@ def _run():
     return main()
 
 
+def _smoke_report(root):
+    # type: (str) -> dict
+    """What the frozen bundle can prove without a window server.
+
+    A CI runner (and this project's developers) have no Mac to click through,
+    so the bundle is asked the questions a click would expose: can it import
+    its browser backend, does the platform layer answer, is the UI file where
+    ``src.app.main`` expects it.  Everything is caught individually so one
+    broken import still produces a readable report.
+    """
+    report = {
+        "ok": False,
+        "frozen": bool(getattr(sys, "frozen", False)),
+        "executable": sys.executable,
+        "platform": sys.platform,
+        "python": sys.version.split()[0],
+        "data_root": root,
+        "data_root_writable": False,
+        "ui_path": "",
+        "ui_present": False,
+        "webview": False,
+        "webview_backend": "",
+        "tray": "",
+        "link_support": {},
+        "errors": [],
+    }
+    try:
+        from src.app import APP_VERSION
+        from src.app import main as main_module
+
+        report["app_version"] = APP_VERSION
+        report["ui_path"] = main_module.UI_PATH
+        report["ui_present"] = os.path.isfile(main_module.UI_PATH)
+    except Exception as exc:
+        report["errors"].append("src.app.main: %s" % exc)
+
+    try:
+        report["data_root_writable"] = _writable(root)
+    except Exception as exc:
+        report["errors"].append("data root: %s" % exc)
+
+    try:
+        import webview  # noqa: F401
+
+        report["webview"] = True
+    except Exception as exc:
+        report["errors"].append("webview: %s" % exc)
+
+    if sys.platform == "darwin":
+        try:
+            from webview.platforms import cocoa  # noqa: F401
+
+            report["webview_backend"] = "cocoa"
+        except Exception as exc:
+            report["errors"].append("webview.platforms.cocoa: %s" % exc)
+        try:
+            import pystray  # noqa: F401
+            from pystray import _darwin  # noqa: F401
+
+            report["tray"] = "pystray._darwin"
+        except Exception as exc:
+            report["errors"].append("pystray: %s" % exc)
+
+    try:
+        from src.platform import link_support, volume_info
+
+        info = volume_info(root)
+        support = link_support(root)
+        report["link_support"] = {
+            "supported": bool(support.get("supported")),
+            "code": support.get("code", ""),
+            "fs_name": info.fs_name,
+            "mount_point": info.mount_point,
+        }
+    except Exception as exc:
+        report["errors"].append("src.platform.link_support: %s" % exc)
+
+    report["ok"] = bool(
+        report["frozen"]
+        and report["ui_present"]
+        and report["data_root_writable"]
+        and report["webview"]
+        and not report["errors"]
+    )
+    return report
+
+
+def _smoke_destination(argv):
+    # type: (list) -> str
+    for index, argument in enumerate(argv):
+        if argument == "--smoke-out" and index + 1 < len(argv):
+            return argv[index + 1]
+        if argument.startswith("--smoke-out="):
+            return argument.split("=", 1)[1]
+    return ""
+
+
+def _run_smoke(argv):
+    # type: (list) -> int
+    """Write the smoke report and exit; never opens a window."""
+    if not _prepare_data_root():
+        return 1
+    root = os.environ["DISKWARDEN_DATA_ROOT"]
+    report = _smoke_report(root)
+    target = _smoke_destination(argv) or os.path.join(root, "logs", "smoke.json")
+    try:
+        directory = os.path.dirname(target)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+        with open(target, "w", encoding="utf-8") as handle:
+            json.dump(report, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+    except OSError as exc:
+        _message("Disk Warden smoke check could not write %s:\n\n%s" % (target, exc))
+        return 1
+    return 0 if report["ok"] else 1
+
+
 def _run_drill(argv):
     # type: (list) -> int
     """QA sandbox drill, reached through the frozen executable.
@@ -393,6 +592,8 @@ def _run_drill(argv):
 if __name__ == "__main__":
     if "--drill" in sys.argv[1:]:
         sys.exit(_run_drill(sys.argv[1:]))
+    if "--smoke" in sys.argv[1:]:
+        sys.exit(_run_smoke(sys.argv[1:]))
     if not _check_runtime_layout():
         sys.exit(3)
     if not _prepare_data_root():

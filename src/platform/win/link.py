@@ -349,6 +349,24 @@ def rename_dir(source, destination):
     return destination
 
 
+def link_support(path):
+    # type: (str) -> dict
+    """Describe whether ``path``'s volume can hold junctions.
+
+    Junctions are reparse points; NTFS stores them, exFAT/FAT and network
+    shares do not.  The business layer asks this instead of testing
+    ``os.name`` itself, so the requirement lives with the platform.
+    """
+    info = volume_info(path)
+    return {
+        "supported": info.is_ntfs,
+        "code": "TARGET_NOT_NTFS",
+        "message": "the target disk must be NTFS to create links",
+        "fs_name": info.fs_name,
+        "mount_point": info.mount_point,
+    }
+
+
 def volume_info(path):
     # type: (str) -> VolumeInfo
     """Return the mount point, filesystem name and serial of ``path``'s volume."""
@@ -392,6 +410,7 @@ __all__ = [
     "create_junction",
     "is_junction",
     "is_link",
+    "link_support",
     "read_junction_target",
     "remove_junction",
     "rename_dir",
