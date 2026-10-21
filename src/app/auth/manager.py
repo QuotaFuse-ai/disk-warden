@@ -207,6 +207,10 @@ class AuthManager(object):
             "starred": bool(starred),
             "authenticated_at": _utc_now(),
         }
+        # Settle the flow before publishing the login: a reader that sees
+        # ``signed_in: true`` must never still see a pending flow. Pollers on a
+        # slow runner can otherwise catch the window between the two writes.
+        flow.mark_authenticated(login, starred)
         with self._lock:
             state = dict(self._state)
             state["login"] = login
@@ -219,7 +223,6 @@ class AuthManager(object):
             LOGGER.warning(
                 "the token is kept in memory only (secure storage unavailable)"
             )
-        flow.mark_authenticated(login, starred)
 
     # -- star guidance ---------------------------------------------------
 
