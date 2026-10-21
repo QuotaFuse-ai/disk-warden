@@ -1,4 +1,4 @@
-DiskWarden 0.9.0-beta.7（macOS，Apple Silicon / arm64）使用说明
+DiskWarden 0.9.0-beta.8（macOS，Apple Silicon / arm64）使用说明
 ================================================================
 
 一、第一次打开（未签名构建，macOS 会拦截一次）
