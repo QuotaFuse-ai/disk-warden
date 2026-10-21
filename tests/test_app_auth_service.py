@@ -12,6 +12,7 @@ import os
 import time
 import unittest
 from dataclasses import replace
+from unittest import mock
 
 from src.app.auth.config import REPO_WEB_URL, load_providers
 from src.app.errors import BridgeError
@@ -313,6 +314,46 @@ class ConfiguredFlowTest(unittest.TestCase):
             self.assertNotIn(TOKEN.encode(), raw)
         else:
             self.assertFalse(os.path.exists(path))
+
+
+class DefaultOpenerTest(unittest.TestCase):
+    """The packaged app injects no opener; the Star button must still open GitHub.
+
+    ``ConfiguredFlowTest`` injects ``auth_opener`` and therefore never noticed
+    that production built ``AuthManager`` with ``opener=None``, where
+    ``_open_repo`` silently skipped the browser hand-off: the Star overlay's
+    "去 GitHub 点 Star" button did nothing at all in the frozen build.
+    """
+
+    def setUp(self):
+        self.github = FakeGitHub()
+        self.service = make_service(
+            self,
+            environ=dict(GITHUB_ENV),
+            auth_http_opener=self.github,
+        )
+
+    def sign_in(self):
+        with mock.patch("src.app.service.open_url"):
+            status = self.service.auth_start("github")
+            self.assertEqual(status["flow"]["state"], "pending")
+            final = wait_for_signed_in(self.service)
+        self.assertTrue(final["signed_in"], final)
+
+    def test_star_button_opens_the_repo_with_the_installed_opener(self):
+        self.sign_in()
+        self.github.star_status = 204
+        with mock.patch("src.app.service.open_url") as opener:
+            starred = self.service.star_give()
+        opener.assert_called_once_with(REPO_WEB_URL)
+        self.assertTrue(starred["star"]["starred"])
+        self.assertFalse(starred["star"]["pending"])
+
+    def test_star_check_alone_opens_nothing(self):
+        self.sign_in()
+        with mock.patch("src.app.service.open_url") as opener:
+            self.service.star_check()
+        opener.assert_not_called()
 
 
 if __name__ == "__main__":
