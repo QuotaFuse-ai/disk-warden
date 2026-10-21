@@ -13,6 +13,22 @@ English | [Chinese](README.zh-CN.md)
 
 Runs on **Windows and macOS**.
 
+## Download and install
+
+No Python, no compiler, no build steps: open the [**Releases page**](https://github.com/QuotaFuse-ai/disk-warden/releases/latest) and download the archive for your platform. Each zip is the complete app — unzip and run.
+
+| Platform | File | What to do |
+|---|---|---|
+| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.8-win-x64.zip` | Unzip to a fixed folder, run `DiskWarden\DiskWarden.exe`. |
+| macOS 11+ (Apple Silicon) | `DiskWarden-0.9.0-beta.8-macos-arm64.zip` | Unzip, open `DiskWarden.app`, allow it once (Gatekeeper). |
+
+Each archive ships with a matching `.sha256` file and a `START-HERE*.txt` guide in the zip root.
+
+- **Windows** — built and exercised on Windows 10/11: the full unit suite, the packaged sandbox drills, and the frozen executable's self-check all run on the released artifact.
+- **macOS** — **not tested on real hardware yet.** Nobody on the team has a Mac, so the `.app` is built by GitHub Actions on `macos-latest` and only passes an automated `--smoke` self-check (bundle layout, WKWebView backend, UI files present). Treat it as a developer preview. Please report anything that breaks in an issue.
+
+Both builds are **unsigned**, so the first launch shows one SmartScreen (Windows → “More info” → “Run anyway”) or Gatekeeper prompt (macOS). Neither is a virus warning, and neither requires switching off a system protection.
+
 ## Why not just a cleanup tool
 
 - It understands AI IDE directory layouts and classifies each directory as **movable**, **do-not-touch**, or **unknown** — instead of deleting files by extension
@@ -30,9 +46,10 @@ Runs on **Windows and macOS**.
 | Rollback engine and local store: journal / history / settings / learned rules (T11) | Done, merged to `main` |
 | AI analysis interface (T22) | Done, disabled by default |
 | UI wired to the real engine (T12) | Done, merged to `main` |
-| Windows / macOS packaging (T15 / T21) | Not started |
+| Windows packaging (T15) | Published as `DiskWarden-0.9.0-beta.8-win-x64.zip` |
+| macOS packaging (T21) | Published as `DiskWarden-0.9.0-beta.8-macos-arm64.zip`, **untested on real hardware** |
 
-**594 unit tests** cover the completed modules; CI runs them on every push.
+**929 unit tests** cover the completed modules; CI runs them on every push.
 
 ## Platforms
 
