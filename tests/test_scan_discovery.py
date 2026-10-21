@@ -22,6 +22,12 @@ from src.core.scan import (  # noqa: E402
 
 REAL_CATALOG = REPO_ROOT / "data" / "ide-catalog.json"
 
+# The catalog in ``data/`` names Windows locations and the discovery parser
+# splits patterns on "\".  A macOS catalog is a separate task, so these cases
+# are skipped on non-Windows hosts instead of asserting that a Windows catalog
+# finds nothing there.
+WINDOWS = os.name == "nt"
+
 
 def make_catalog(directories, tool_id="demo", name="Demo"):
     """Build a one-tool catalog from (path, type, safety) tuples."""
@@ -116,6 +122,7 @@ def snapshot_tree(root):
     return items
 
 
+@unittest.skipUnless(WINDOWS, "catalog paths are Windows-oriented")
 class CursorDiscoveryTest(unittest.TestCase):
     def test_cursor_entries_are_found_by_real_catalog(self):
         import tempfile
@@ -160,6 +167,7 @@ class CursorDiscoveryTest(unittest.TestCase):
             self.assertEqual("red", login.safety)
 
 
+@unittest.skipUnless(WINDOWS, "catalog paths are Windows-oriented")
 class TraeCnDiscoveryTest(unittest.TestCase):
     def test_old_trae_cn_root_is_recognised(self):
         import tempfile
@@ -226,6 +234,7 @@ class TraeCnDiscoveryTest(unittest.TestCase):
             )
 
 
+@unittest.skipUnless(WINDOWS, "catalog paths are Windows-oriented")
 class ClaudeCodeDiscoveryTest(unittest.TestCase):
     def test_project_and_session_placeholders_expand(self):
         import tempfile
@@ -271,6 +280,7 @@ class ClaudeCodeDiscoveryTest(unittest.TestCase):
             self.assertEqual("red", memory.safety)
 
 
+@unittest.skipUnless(WINDOWS, "catalog paths are Windows-oriented")
 class EnvironmentExpansionTest(unittest.TestCase):
     def test_variable_lookup_is_case_insensitive(self):
         import tempfile
@@ -303,6 +313,7 @@ class EnvironmentExpansionTest(unittest.TestCase):
         self.assertEqual("demo", result.warnings[0].tool_id)
 
 
+@unittest.skipUnless(WINDOWS, "catalog paths are Windows-oriented")
 class ResilienceTest(unittest.TestCase):
     def test_missing_paths_do_not_abort_the_scan(self):
         import tempfile
@@ -392,6 +403,7 @@ class ResilienceTest(unittest.TestCase):
             self.assertEqual(1, len(result.warnings))
 
 
+@unittest.skipUnless(WINDOWS, "catalog paths are Windows-oriented")
 class ReadOnlyAndCoverageTest(unittest.TestCase):
     def test_scan_does_not_modify_the_scanned_tree(self):
         import tempfile

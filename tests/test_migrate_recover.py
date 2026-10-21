@@ -38,6 +38,7 @@ from tests.migrate_fakes import (  # noqa: E402
     MigrationFixture,
     expected_snapshot,
     snapshot,
+    write_file,
 )
 
 
@@ -167,15 +168,101 @@ class RecoverTests(unittest.TestCase):
         self.assertEqual(again.state, STATE_DONE)
         self.assertTrue(self.ops.is_junction(str(self.fixture.source)))
 
-    def test_source_and_tombstone_both_present_requires_recovery(self):
+    # -- source recreated next to the tombstone (S6/S7 crash window) ------
+
+    def test_identical_recreated_source_keeps_one_copy(self):
         self.fixture.make_final()
         shutil.copytree(str(self.fixture.source), str(self.fixture.tombstone))
 
         result = self.recover(STATE_SOURCE_RENAMED)
 
-        self.assertEqual(result.state, STATE_RECOVERY_REQUIRED)
+        self.assertEqual(result.state, STATE_ROLLED_BACK)
+        self.assertTrue(result.rolled_back)
         self.assert_source_tree()
-        self.assertTrue(self.fixture.tombstone.is_dir())
+        self.assertFalse(self.fixture.tombstone.exists())
+        self.assertFalse(self.fixture.final.exists())
+
+        again = self.recover(STATE_ROLLED_BACK)
+        self.assertEqual(again.state, STATE_ROLLED_BACK)
+        self.assert_source_tree()
+
+    def test_empty_recreated_source_is_replaced_by_the_old_copy(self):
+        self.fixture.move_source_to_tombstone()
+        self.fixture.source.mkdir()
+        self.fixture.make_final(base=self.fixture.tombstone)
+
+        result = self.recover(STATE_SOURCE_RENAMED)
+
+        self.assertEqual(result.state, STATE_ROLLED_BACK)
+        self.assert_source_tree()
+        self.assertFalse(self.fixture.tombstone.exists())
+        self.assertFalse(self.fixture.final.exists())
+
+    def test_different_recreated_source_preserves_the_old_copy(self):
+        self.fixture.make_final()
+        shutil.copytree(str(self.fixture.source), str(self.fixture.tombstone))
+        write_file(self.fixture.source, "fresh/c.bin", b"c" * 64)
+
+        result = self.recover(STATE_SOURCE_RENAMED)
+
+        self.assertEqual(result.state, STATE_ROLLED_BACK)
+        preserved = self.fixture.source_parent / ".dw-old-01234567"
+        self.assertIn(str(preserved), result.error_message)
+        self.assertEqual(snapshot(preserved), expected_snapshot())
+        self.assertTrue((self.fixture.source / "fresh" / "c.bin").is_file())
+        self.assertFalse(self.fixture.tombstone.exists())
+        # The target was a provable duplicate of the preserved copy.
+        self.assertFalse(self.fixture.final.exists())
+
+        again = self.recover(STATE_ROLLED_BACK)
+        self.assertEqual(again.state, STATE_ROLLED_BACK)
+        self.assertTrue(preserved.is_dir())
+        self.assertTrue((self.fixture.source / "fresh" / "c.bin").is_file())
+
+    def test_changed_target_is_left_in_place(self):
+        self.fixture.make_final()
+        shutil.copytree(str(self.fixture.source), str(self.fixture.tombstone))
+        write_file(self.fixture.final, "later.bin", b"d" * 32)
+
+        result = self.recover(STATE_SOURCE_RENAMED)
+
+        self.assertEqual(result.state, STATE_ROLLED_BACK)
+        self.assert_source_tree()
+        self.assertFalse(self.fixture.tombstone.exists())
+        self.assertTrue(self.fixture.final.is_dir())
+        self.assertTrue(
+            any("differs" in error for error in result.cleanup_errors),
+            result.cleanup_errors,
+        )
+
+    def test_unowned_target_is_left_in_place(self):
+        self.fixture.make_final(owned=False)
+        shutil.copytree(str(self.fixture.source), str(self.fixture.tombstone))
+
+        result = self.recover(STATE_SOURCE_RENAMED)
+
+        self.assertEqual(result.state, STATE_ROLLED_BACK)
+        self.assert_source_tree()
+        self.assertFalse(self.fixture.tombstone.exists())
+        self.assertTrue(self.fixture.final.is_dir())
+        self.assertEqual(snapshot(self.fixture.final), expected_snapshot())
+        self.assertTrue(
+            any("ownership marker" in error for error in result.cleanup_errors),
+            result.cleanup_errors,
+        )
+
+    def test_second_conflict_gets_a_new_preserved_slot(self):
+        self.fixture.make_final()
+        shutil.copytree(str(self.fixture.source), str(self.fixture.tombstone))
+        write_file(self.fixture.source, "fresh/c.bin", b"c" * 64)
+        self.fixture.source_parent.joinpath(".dw-old-01234567").mkdir()
+
+        result = self.recover(STATE_SOURCE_RENAMED)
+
+        self.assertEqual(result.state, STATE_ROLLED_BACK)
+        self.assertTrue(
+            self.fixture.source_parent.joinpath(".dw-old-01234567-2").is_dir()
+        )
 
     def test_tombstone_is_not_a_directory_requires_recovery(self):
         self.fixture.tombstone.write_bytes(b"not a directory")

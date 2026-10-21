@@ -1,0 +1,53 @@
+﻿DiskWarden 0.9.0-beta.9（Windows 10/11 x64）使用说明
+======================================================
+
+一、第一次打开
+1. 把整个 zip 解压到一个固定目录，不要只把 exe 拖出来单独运行：
+   程序依赖同目录下的 _internal 文件夹。
+2. 双击 DiskWarden\DiskWarden.exe。
+3. 如果出现“Windows 已保护你的电脑”蓝色提示（SmartScreen）：
+   - 点击“更多信息”
+   - 再点击“仍要运行”
+   这是软件未做代码签名的正常提示，不是病毒告警。本程序不会要求你关闭
+   SmartScreen、Defender 或任何系统安全功能。
+4. 主界面出现后即可使用。首次扫描可能需要几秒到几十秒。
+5. 如果提示缺少 WebView2：请安装微软官方的 Microsoft Edge WebView2
+   Runtime（常青版）后重新打开。Win11 与已更新的 Win10 通常已自带。
+
+二、运行环境
+- Windows 10 / 11 x64。
+- 不需要安装 Python。
+
+三、数据与日志放在哪
+- 默认数据目录：D:\DiskWarden。若不可写，启动器会依次回退到
+  %LOCALAPPDATA%\DiskWarden、%APPDATA%\DiskWarden、
+  %USERPROFILE%\DiskWarden、%TEMP%\DiskWarden，实际路径以设置页显示为准。
+- 日志：<数据目录>\logs\app.log。超过 2 MB 自动轮转为 app.log.1/.2，
+  另按天写 JSONL 归档日志，保留 14 天。
+- 设置页可以直接打开日志目录。
+
+四、托盘与开机自启
+- 点击窗口关闭按钮不会退出程序，而是缩到系统托盘；请从托盘菜单“退出”
+  才会真正结束进程。
+- 设置 → 开机自启：只写入当前用户注册表
+  HKCU\Software\Microsoft\Windows\CurrentVersion\Run 下的 DiskWarden 值，
+  不需要管理员权限；关闭开关会删除该值。
+
+五、迁移前请先退出 IDE
+- 迁移会把选中的缓存目录搬到数据盘，并在原位置建立一个 junction
+  （目录联接），对 IDE 透明。
+- 迁移与回滚前请完全退出对应 IDE（Cursor / Trae / Claude Code 等）。
+  程序检测到工具仍在运行时会拒绝操作，这是保护数据的设计。
+- 详细步骤见发布页的《迁移与回滚指南》。
+
+六、卸载
+1. 从托盘菜单退出程序。
+2. 在设置中关闭“开机自启”。
+3. 如果迁移过目录，先在应用内执行“回滚”，确认原目录已恢复为普通文件夹。
+4. 删除解压目录和数据目录（默认 D:\DiskWarden）。
+
+七、遇到问题
+- 打开设置页的“日志目录”，把 logs\app.log 与
+  config\migration-jobs\ 下对应任务号的 json 一起反馈，便于快速定位。
+- 日志里不会出现明文 API Key；即使启用 AI 分析，Key 也只保存在本机
+  加密的 config\ai-key.bin 中。

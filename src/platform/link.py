@@ -85,9 +85,28 @@ def _volume_info():
     # call time avoids the package-initialisation cycle.
     if sys.platform.startswith("win"):
         from .win.link import volume_info
+    elif sys.platform == "darwin":
+        from .mac.link import volume_info
     else:
         from .posix.link import volume_info
     return volume_info
+
+
+def link_support(path):
+    # type: (str) -> dict
+    """Describe whether ``path``'s volume can hold links.
+
+    Returns ``{"supported", "code", "message", "fs_name", "mount_point"}``.
+    The business layer raises its bridge error from ``code``/``message``, so
+    no ``os.name``/NTFS test leaks out of the platform package.
+    """
+    if sys.platform.startswith("win"):
+        from .win.link import link_support as adapter
+    elif sys.platform == "darwin":
+        from .mac.link import link_support as adapter
+    else:
+        from .posix.link import link_support as adapter
+    return adapter(path)
 
 
 def same_volume(left, right):
@@ -112,6 +131,7 @@ __all__ = [
     "LinkError",
     "VolumeInfo",
     "canonical_path",
+    "link_support",
     "link_target_matches",
     "same_volume",
     "strip_extended_prefix",

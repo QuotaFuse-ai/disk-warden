@@ -18,6 +18,16 @@ EXPECTED_METHODS = {
     "settings.set",
     "ai.status",
     "ai.consent",
+    "ai.test",
+    "auth.status",
+    "auth.start",
+    "auth.cancel",
+    "auth.sign_out",
+    "welcome.seen",
+    "star.show",
+    "star.dismiss",
+    "star.give",
+    "star.check",
     "disk.info",
     "scan.start",
     "scan.cancel",
@@ -33,6 +43,7 @@ EXPECTED_METHODS = {
     "rollback.start",
     "recovery.list",
     "recovery.run",
+    "recovery.ignore",
     "history.list",
     "rules.learned.list",
     "rules.override",
@@ -242,6 +253,15 @@ class ParamsValidationTest(BridgeTestBase):
             ("abc", "recover"),
             ("abc", "rollback"),
         ])
+
+    def test_recovery_ignore_requires_a_job_id(self):
+        error = self.assert_error(
+            self.call("recovery.ignore", {}), "INVALID_ARGUMENT"
+        )
+        self.assertIn("job_id", error["detail"]["reason"])
+        self.service.recovery_ignore.assert_not_called()
+        self.call("recovery.ignore", {"job_id": "abc"})
+        self.service.recovery_ignore.assert_called_once_with("abc")
 
     def test_history_list_defaults(self):
         self.call("history.list", {})

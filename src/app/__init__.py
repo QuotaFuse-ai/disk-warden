@@ -19,7 +19,7 @@
 Python 3.8 compatible (decision 0005).
 """
 
-APP_VERSION = "0.9.0-beta.1"
+APP_VERSION = "0.9.0-beta.9"
 PROTOCOL_VERSION = 1
 
 __all__ = ["APP_VERSION", "PROTOCOL_VERSION"]

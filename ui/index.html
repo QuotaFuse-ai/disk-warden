@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,6 +17,8 @@
   --line:#e3e7eb; --line-soft:#edf0f3;
   --text:#2f3439; --text-2:#5b646d; --muted:#7d8791; --dim:#98a2ac;
   --blue:#2f8bf5; --blue-2:#1d74dc; --red:#e5484d; --amber:#d98500;
+  /* 可访问性色板（主机端交互设计 v0.2 §4.2.1，产品已批准）：黄=待确认 + 禁用态 */
+  --amber-ink:#8a5c00; --amber-line:#f1dcaa; --amber-bar:#cc7300; --disabled-ink:#838d97;
   --violet:#7c5cff;
   --radius:5px; --radius-sm:3px;
   /* 桌面端字号阶梯：最小 11px，正文 14px（100% DPI 可读） */
@@ -39,7 +41,7 @@ a{color:var(--blue);text-decoration:none}
 ::-webkit-scrollbar-track{background:transparent}
 :focus-visible{outline:2px solid #7fd383;outline-offset:1px;border-radius:3px}
 
-.app{display:flex;flex-direction:column;height:100vh;min-width:1080px;background:var(--bg)}
+.app{display:flex;flex-direction:column;height:100vh;min-width:1024px;background:var(--bg)}
 
 /* ---------- 顶部绿色导航 ---------- */
 .topnav{
@@ -119,11 +121,11 @@ a{color:var(--blue);text-decoration:none}
 .btn-soft:hover{background:#ddf3db}
 .btn-sm{padding:6px 11px;font-size:var(--fs-body)}
 .btn-xs{padding:3px 8px;font-size:var(--fs-meta);border-radius:2px}
-.btn[disabled],.btn.disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.25)}
+.btn[disabled],.btn.disabled{opacity:.55;cursor:not-allowed}
 .btn[disabled]:hover,.btn.disabled:hover{background:inherit;color:inherit;border-color:inherit}
 .modal-foot .btn{padding:6px 16px}
 
-.v-red{color:var(--red)} .v-blue{color:var(--blue)} .v-green{color:#2f8e35} .v-amber{color:var(--amber)} .v-violet{color:var(--violet)}
+.v-red{color:var(--red)} .v-blue{color:var(--blue)} .v-green{color:#2f8e35} .v-amber{color:var(--amber-ink)} .v-violet{color:var(--violet)}
 
 /* ---------- 内容与分栏 ---------- */
 .content{display:flex;flex-direction:column;gap:12px;min-width:0;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:2px}
@@ -165,7 +167,7 @@ a{color:var(--blue);text-decoration:none}
 
 .legend{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:var(--fs-meta);color:var(--muted)}
 .legend .dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px}
-.dot-green{background:var(--green)} .dot-red{background:var(--red)} .dot-amber{background:#f0a020} .dot-blue{background:var(--blue)} .dot-gray{background:#aab3bc}
+.dot-green{background:var(--green)} .dot-red{background:var(--red)} .dot-amber{background:var(--amber-bar)} .dot-blue{background:var(--blue)} .dot-gray{background:#aab3bc}
 
 /* 列表栏 */
 .bar{background:#fff;border:1px solid var(--line);border-radius:5px;display:flex;flex-direction:column;gap:9px;min-width:0}
@@ -221,7 +223,7 @@ a{color:var(--blue);text-decoration:none}
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-micro);font-weight:600;padding:1px 6px;border-radius:2px;line-height:1.5;white-space:nowrap}
 .b-green{background:#eaf7e8;color:#2f8e35;border:1px solid #d0eccd}
 .b-red{background:#fff0ef;color:#d9363e;border:1px solid #f2c9c6}
-.b-amber{background:#fff7e6;color:#c47b00;border:1px solid #f1dcaa}
+.b-amber{background:#fff7e6;color:var(--amber-ink);border:1px solid var(--amber-line)}
 .b-blue{background:#eef5ff;color:#1f6fd0;border:1px solid #cfe2fb}
 .b-gray{background:#f2f4f6;color:#7d8791;border:1px solid #e1e6ea}
 .b-violet{background:#f3efff;color:#6f4bd8;border:1px solid #ddd0fb}
@@ -240,13 +242,16 @@ a{color:var(--blue);text-decoration:none}
 
 .banner{display:flex;gap:8px;padding:8px 10px;border-radius:3px;font-size:var(--fs-body);line-height:1.55;border:1px solid}
 .banner .b-ico{flex-shrink:0;font-size:var(--fs-sub);line-height:1.3}
-.banner.warn{background:#fff9ea;border-color:#f1dcaa;color:#a86a00}
+.banner.warn{background:#fff9ea;border-color:var(--amber-line);color:var(--amber-ink)}
 .banner.danger{background:#fff1f0;border-color:#f2c9c6;color:#c92f36}
 .banner.info{background:#eff6ff;border-color:#cfe2fb;color:#1f6fd0}
 .banner.ok{background:#f0faf0;border-color:#d0eccd;color:#2f8e35}
 .banner b{font-weight:700}
 .banner .btn{margin-top:5px}
 .banner-actions{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.banner>div{min-width:0}
+.banner-actions .tag{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.proc-list{max-height:80px;overflow-y:auto;padding-right:2px}
 
 .preview-card{background:#f7faf7;border:1px solid #e2eee0;border-radius:4px;padding:10px 12px}
 .preview-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -255,7 +260,7 @@ a{color:var(--blue);text-decoration:none}
 .kv .k{color:var(--muted)}
 .kv .v{font-family:Consolas,monospace;color:#2f3439;font-weight:600;text-align:right;word-break:break-all}
 .kv .v.ok{color:#2f8e35}
-.kv .v.warn{color:var(--amber)}
+.kv .v.warn{color:var(--amber-ink)}
 
 .section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:1px}
 .section-title h3{font-size:var(--fs-body);font-weight:700;color:#4a545e;letter-spacing:.3px;display:flex;align-items:center;gap:6px}
@@ -266,7 +271,7 @@ a{color:var(--blue);text-decoration:none}
 .row:hover{background:#f7fafc;border-color:#e0e6eb}
 .row.risk-green{box-shadow:inset 2px 0 0 var(--green)}
 .row.risk-red{box-shadow:inset 2px 0 0 var(--red);background:#fdf7f7}
-.row.risk-yellow{box-shadow:inset 2px 0 0 #f0a020}
+.row.risk-yellow{box-shadow:inset 2px 0 0 var(--amber-bar)}
 .row-check{flex-shrink:0;width:16px;height:16px;accent-color:var(--green);cursor:pointer}
 .row-main{flex:1;min-width:0}
 .row-name{font-size:var(--fs-strong);font-weight:550;color:#33383d;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -280,7 +285,7 @@ a{color:var(--blue);text-decoration:none}
 .trow:hover{background:#f7fafc;border-color:#e0e6eb}
 .trow.risk-green{box-shadow:inset 3px 0 0 var(--green)}
 .trow.risk-red{box-shadow:inset 3px 0 0 var(--red);background:#fdf7f7}
-.trow.risk-yellow{box-shadow:inset 3px 0 0 #f0a020;background:#fffbf3}
+.trow.risk-yellow{box-shadow:inset 3px 0 0 var(--amber-bar);background:#fffbf3}
 .trow.dir{grid-template-columns:18px minmax(0,1.6fr) minmax(0,1.15fr) 84px 106px}
 .trow.proj{grid-template-columns:18px minmax(0,1.6fr) minmax(0,1.2fr) 84px 106px}
 .trow.pend{grid-template-columns:minmax(0,1.6fr) minmax(0,1.1fr) 84px auto}
@@ -305,7 +310,7 @@ a{color:var(--blue);text-decoration:none}
 .kvbar .k{font-size:var(--fs-meta);color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .kvbar .v{font-size:var(--fs-body);font-family:Consolas,monospace;color:#2f3439;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kvbar .v.ok{color:#2f8e35}
-.kvbar .v.warn{color:var(--amber)}
+.kvbar .v.warn{color:var(--amber-ink)}
 
 /* 错误明细 / 失败项：逐条独占一行，路径在上、原因在下（长路径不截断、不与原因叠字） */
 .err-list{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -425,7 +430,7 @@ a{color:var(--blue);text-decoration:none}
 .modal-head h3{font-size:var(--fs-sub);font-weight:700;color:#2f3439;display:flex;align-items:center;gap:7px}
 .modal-head h3::before{content:"";width:3px;height:15px;border-radius:1px;background:var(--green);flex-shrink:0}
 .modal-head .sub{font-size:var(--fs-meta);color:var(--dim);margin-top:3px;line-height:1.45}
-.modal-x{background:none;border:none;color:#a2abb4;font-size:var(--fs-page);line-height:1;padding:4px 6px;border-radius:3px}
+.modal-x{background:none;border:none;color:var(--disabled-ink);font-size:var(--fs-page);line-height:1;padding:4px 6px;border-radius:3px}
 .modal-x:hover{color:#2f3439;background:#eef2f5}
 .modal-body{padding:14px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .modal-body > *{flex-shrink:0}
@@ -445,6 +450,19 @@ a{color:var(--blue);text-decoration:none}
 .settings-row select,.settings-row input[type=text]{background:#fff;border:1px solid #d7dee4;border-radius:3px;padding:7px 9px;font-size:var(--fs-body);color:var(--text)}
 .settings-row select:focus,.settings-row input[type=text]:focus{outline:none;border-color:#7fd383}
 .settings-row input[type=text]{width:280px;font-family:Consolas,monospace}
+
+/* ---------- 首次启动引导（macOS 未签名应用） ---------- */
+.fr-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.fr-steps li{display:flex;gap:10px;align-items:flex-start;font-size:var(--fs-body);line-height:1.65;color:var(--text)}
+.fr-n{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#eef3f7;color:var(--text-2);font-size:var(--fs-micro);font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px}
+.fr-adv{border:1px solid var(--line-soft);border-radius:5px;background:#fbfcfd;padding:9px 11px}
+.fr-adv summary{cursor:pointer;font-size:var(--fs-meta);font-weight:600;color:var(--text-2);list-style:none}
+.fr-adv summary::-webkit-details-marker{display:none}
+.fr-adv summary::before{content:"▸ ";color:var(--dim)}
+.fr-adv[open] summary::before{content:"▾ "}
+.fr-adv .cmd{display:block;margin-top:8px;padding:8px 10px;background:#f4f7f9;border:1px solid #e4eaef;border-radius:4px;font-size:var(--fs-meta);overflow-wrap:anywhere;user-select:all}
+.fr-adv p{margin:8px 0 0;font-size:var(--fs-meta);color:var(--dim);line-height:1.6}
+.fr-adv .row-flex{margin-top:8px}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,8px);background:#333b43;border:1px solid #454e57;color:#fff;padding:8px 14px;border-radius:3px;font-size:var(--fs-body);box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;max-width:70vw;overflow-wrap:anywhere}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -479,7 +497,7 @@ a{color:var(--blue);text-decoration:none}
 .sug-reason{font-size:var(--fs-body);color:#4a545e}
 .conf{font-family:Consolas,monospace;font-weight:700;color:#6f4bd8}
 
-.muted{color:var(--muted)} .dim{color:var(--dim)} .ok{color:#2f8e35} .warn{color:var(--amber)} .bad{color:var(--red)}
+.muted{color:var(--muted)} .dim{color:var(--dim)} .ok{color:#2f8e35} .warn{color:var(--amber-ink)} .bad{color:var(--red)}
 .mono{font-family:Consolas,"SFMono-Regular",monospace;font-variant-numeric:tabular-nums}
 .nowrap{white-space:nowrap} .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row-flex{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -516,6 +534,84 @@ a{color:var(--blue);text-decoration:none}
   .content > .cols > .panel.panel-scroll > .panel-body{overflow:visible;flex:none}
   .content > .cols .scroll-y{overflow:visible;flex:none}
 }
+/* ---------- ≤1080：最小可用宽度 1024 档（设计文档 §11.4.1 / §4.4） ---------- */
+@media (max-width:1080px){
+  .topnav{height:80px}
+  .nav-item{width:76px;height:72px;gap:5px}
+  .brand{width:150px}
+  .nav-ico{width:30px;height:30px}.nav-ico svg{width:18px;height:18px}
+  .split-layout{grid-template-columns:200px minmax(0,1fr)}
+  .system-chip{padding:0 9px;font-size:var(--fs-body)}
+  .empty{padding:40px 20px}
+  .modal,.modal.wide{width:min(580px,calc(100vw - 32px))}
+  /* 表格 → 行卡：横向滚动只允许在 ≥1080 生效 */
+  .table-wrap{overflow:visible}
+  .table,.table tbody{display:block;width:100%}
+  .table thead{display:none}
+  .table tr{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;min-height:44px;padding:9px 12px;margin-bottom:6px;background:var(--panel-2);border:1px solid #eef1f4;border-radius:4px}
+  .table td{display:block;padding:0;border:none;text-align:left;white-space:normal}
+  .table td:first-child{flex:1 1 100%;min-width:0}
+  /* 待确认/失败项：不折叠成横排，保持纵向列表 */
+  .cols .trow.pend,.modal .trow.pend{grid-template-columns:minmax(0,1fr);row-gap:5px;padding:10px 12px;align-items:start}
+  .cols .trow.pend .tcell.tpath,.modal .trow.pend .tcell.tpath,
+  .cols .trow.pend .tcell.tsize,.modal .trow.pend .tcell.tsize,
+  .cols .trow.pend .tcell.tdesc,.modal .trow.pend .tcell.tdesc,
+  .cols .trow.pend .tcell.wrap,.modal .trow.pend .tcell.wrap,
+  .cols .trow.pend .tcell.acts,.modal .trow.pend .tcell.acts{grid-column:1;grid-row:auto;justify-self:start;text-align:left}
+  .cols .trow.pend .tcell.acts,.modal .trow.pend .tcell.acts{justify-content:flex-start}
+}
+/* ---------- 欢迎页（T16 · 本地优先） ---------- */
+.welcome-mask{
+  position:fixed;inset:0;z-index:120;overflow:auto;padding:26px 20px;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(1100px 560px at 12% -12%,rgba(236,249,234,.95) 0%,rgba(236,249,234,0) 60%),
+    radial-gradient(820px 460px at 104% 112%,rgba(230,243,251,.9) 0%,rgba(230,243,251,0) 58%),
+    var(--bg);
+}
+.welcome-card{width:660px;max-width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 18px 44px rgba(31,45,61,.13);overflow:hidden}
+.welcome-head{display:flex;align-items:center;gap:13px;padding:22px 26px 18px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,#f5fcf4 0%,#fff 100%)}
+.welcome-logo{width:46px;height:46px;border-radius:12px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,90,34,.18)}
+.welcome-head h2{font-size:var(--fs-page);font-weight:700;color:#2f3439;letter-spacing:.2px;line-height:1.25}
+.welcome-head .sub{font-size:var(--fs-meta);color:var(--dim);margin-top:3px}
+.welcome-tag{margin-left:auto;flex-shrink:0;font-size:var(--fs-micro);color:#2f8f35;background:var(--green-soft);border:1px solid var(--green-line);border-radius:10px;padding:2px 9px;white-space:nowrap}
+.welcome-body{padding:18px 26px 20px;display:flex;flex-direction:column;gap:13px}
+.welcome-lead{font-size:var(--fs-body);color:var(--text-2);line-height:1.75}
+.welcome-points{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px}
+.welcome-point{display:flex;gap:7px;font-size:var(--fs-body);color:var(--text-2);line-height:1.55}
+.welcome-point i{font-style:normal;color:var(--green-dark);font-weight:700;flex-shrink:0}
+.login-box{border:1px solid var(--line);border-radius:6px;background:var(--panel-2);padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.login-box .lb-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.login-box .lb-title{font-size:var(--fs-strong);font-weight:700;color:#2f3439}
+.login-box .lb-note{font-size:var(--fs-micro);color:var(--dim);line-height:1.55;flex:1;min-width:200px;text-align:right}
+.login-btns{display:flex;gap:8px;flex-wrap:wrap}
+.login-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:3px;border:1px solid #d7dee4;background:#fff;color:#2f3439;font-size:var(--fs-strong);transition:border-color .12s,background .12s,color .12s}
+.login-btn:hover:not(:disabled){border-color:#b9c4cc;background:#f7faf8}
+.login-btn:disabled{background:#f5f7f9;color:#9aa5ae;border-color:#e3e7eb;cursor:not-allowed}
+.login-btn .p-ico{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#eef2f5;color:#5b646d;font-size:9px;font-weight:700;letter-spacing:.2px;flex-shrink:0}
+.login-btn:disabled .p-ico{background:#e9edf1;color:#a8b1b9}
+.login-btn .p-state{font-size:var(--fs-micro);color:#6d7781;background:#eef1f4;border-radius:9px;padding:1px 7px}
+.login-btn:disabled .p-state{background:#e9edf1;color:#98a2ac}
+.login-flow{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:9px}
+.login-flow .lf-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:var(--fs-body);color:var(--text-2)}
+.login-flow .lf-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;animation:dw-pulse 1.5s ease-in-out infinite}
+.login-flow .lf-usercode{font-family:Consolas,"SFMono-Regular",monospace;font-size:20px;font-weight:700;letter-spacing:4px;color:#2f3439;background:#fff;border:1px solid #cfd8df;border-radius:4px;padding:5px 14px;user-select:all;-webkit-user-select:all}
+.login-flow .lf-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.login-flow .lf-hint{font-size:var(--fs-micro);color:var(--dim);line-height:1.6}
+@keyframes dw-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.welcome-foot{padding:13px 26px;border-top:1px solid var(--line-soft);background:#fbfcfd;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.welcome-foot .hint{font-size:var(--fs-micro);color:var(--dim);line-height:1.55;flex:1;min-width:180px}
+
+/* ---------- Star 蒙版（T16 · 可关闭） ---------- */
+.star-mask{position:fixed;inset:0;z-index:110;background:rgba(30,40,49,.38);display:flex;align-items:center;justify-content:center;padding:24px}
+.star-card{width:430px;max-width:100%;background:rgba(255,255,255,.96);border:1px solid #dfe6eb;border-radius:8px;box-shadow:var(--shadow);padding:22px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
+.star-ico{font-size:30px;line-height:1;color:#f2a900}
+.star-title{font-size:var(--fs-sub);font-weight:700;color:#2f3439}
+.star-body{font-size:var(--fs-body);color:var(--text-2);line-height:1.7}
+.star-actions{display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;justify-content:center}
+.star-actions .btn[disabled]{opacity:.55;cursor:not-allowed}
+.star-note{font-size:var(--fs-micro);color:var(--dim);line-height:1.5}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 }
@@ -537,6 +633,8 @@ a{color:var(--blue);text-decoration:none}
     </div>
   </main>
 </div>
+<div id="welcome-root"></div>
+<div id="star-root"></div>
 <div id="modal-root"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -555,7 +653,7 @@ I18N['zh-CN'] = {
   'nav.rules': '规则学习',
   'nav.history': '操作历史',
   'nav.settings': '设置',
-  'nav.version': 'v0.9.0-beta.1',
+  'nav.version': 'v0.9.0-beta.9',
   'page.ide.title': 'IDE 数据',
   'page.ide.desc': '扫描本机 AI IDE / CLI 的数据目录，安全迁移可再生的缓存与会话。',
   'page.projects.title': '项目目录',
@@ -686,11 +784,14 @@ I18N['zh-CN'] = {
   'ide.migratableValue': '{n} 项 · {size}',
   'ide.redExcluded': '{n} 个受保护项已自动排除，不会迁移',
   'ide.redLocked': '受保护，无迁移入口',
+  'ide.migratedLocked': '已迁移，不能重复迁移',
+  'ide.migratedRowReason': '已迁移到目标盘，可随时回滚',
   'ide.yellowHint': '未知目录默认不参与迁移；确认后可手动勾选。',
   'ide.yellowLocked': '需先确认此目录的用途',
   'ide.processTitle': '检测到进程正在运行',
   'ide.processBody': '迁移前必须退出 {app}，否则文件会被占用。Disk Warden 不会强制结束进程。',
   'ide.processBlock': '检测到 {n} 个进程正在使用该目录，迁移已阻断。',
+  'ide.processMore': '另 {n} 个进程',
   'ide.noSelection': '请至少选择一个可迁目录',
   'ide.alreadyMigrated': '该软件的数据已位于目标盘，通过 junction 链接回原路径。',
   'ide.allGreenSelected': '全选可迁',
@@ -854,6 +955,10 @@ I18N['zh-CN'] = {
   'settings.languageDesc': '切换后界面文案立即生效',
   'settings.autoStart': '开机自启',
   'settings.autoStartDesc': '登录 Windows 后自动在托盘运行',
+  'settings.autoStartUnsupported': '当前运行方式不会写入开机启动项，安装版生效',
+  'settings.logs': '日志目录',
+  'settings.logsDesc': '运行日志只保存在本机，按 2 MB 轮转并保留最近 3 份',
+  'settings.logsOpen': '打开目录',
   'settings.targetRoot': '目标存储根目录',
   'settings.targetRootDesc': '迁移后的目录、备份与日志都放在这里',
   'settings.autoMaintenance': '自动维护',
@@ -991,24 +1096,54 @@ I18N['zh-CN'] = {
   'ai.sub': '不认识的目录交给 AI 判断，结果只是建议，你采纳后才写入规则。',
   'ai.enable': '启用 AI 辅助识别',
   'ai.enableDesc': '关闭后，未知目录只能手动确认。',
-  'ai.provider': '接入方式',
-  'ai.provider.relay': '用当前 Multica 助手的模型',
+  'ai.provider': '服务商',
+  'ai.providerHint': '选择常用服务商会自动填好接口地址与模型，仍可手动修改。',
+  'ai.provider.deepseek': 'DeepSeek',
+  'ai.provider.openai': 'OpenAI',
+  'ai.provider.qwen': '通义千问',
+  'ai.provider.kimi': 'Kimi（月之暗面）',
+  'ai.provider.zhipu': '智谱 GLM',
   'ai.provider.custom': '自定义 OpenAI 兼容接口',
   'ai.provider.none': '不对接（只用本地规则）',
   'ai.baseUrl': '接口地址',
   'ai.baseUrlDesc': '例：https://api.example.com/v1',
   'ai.model': '模型',
-  'ai.modelAuto': '跟随助手设置',
+  'ai.modelAuto': '服务端默认模型',
   'ai.key': '密钥',
-  'ai.keyDesc': '只从环境变量 DEEPSEEK_API_KEY 读取，不写入本机文件，不进日志、不进反馈内容',
+  'ai.keyDesc': '密钥用 Windows DPAPI 加密后只保存在本机，仅当前用户可解密；不写入日志，也不会进入反馈内容。',
+  'ai.keyHint': '密钥以密文保存，界面不会回显明文。留空表示不修改已保存的密钥。',
+  'ai.keyPlaceholder': '粘贴 API Key',
+  'ai.keyPlaceholderStored': '已保存，留空则不修改',
+  'ai.keyShow': '显示',
+  'ai.keyHide': '隐藏',
+  'ai.keyMask': '••••••••',
+  'ai.keySource.env': '来源：环境变量',
+  'ai.keySource.stored': '来源：本机加密保存',
+  'ai.keySource.none': '未保存密钥',
+  'ai.keyMissing': '未配置密钥',
+  'ai.keyStoredHint': '密钥已加密保存在本机，界面只显示掩码。',
+  'ai.keyEnvOverride': '环境变量 DISK_WARDEN_AI_API_KEY 优先于本机保存的密钥。',
+  'ai.keyUnavailable': '已保存的密钥无法解密（可能来自其他账户或电脑），请重新填写或清除。',
+  'ai.keyClear': '清除已保存的密钥',
+  'ai.keyCleared': '已清除本机保存的密钥',
+  'ai.savedWithKey': '设置已保存，密钥已加密保存在本机',
+  'ai.localOnlyTitle': '仅使用本地规则',
+  'ai.localOnly': '扫描、迁移、回滚照常可用，不受影响。',
   'ai.test': '测试连接',
-  'ai.testUnavailable': '连接测试将在后续版本提供。',
-  'ai.keyEnvSet': '已从环境变量读取',
-  'ai.keyEnvMissing': '未检测到环境变量',
-  'ai.testOk': '连接可用 · 延迟 0.8s',
-  'ai.testBad': '连接失败：密钥无效',
+  'ai.testing': '正在测试连接…',
+  'ai.testOk': '连接正常 · {model} · {ms} ms',
+  'ai.testBad': '连接失败：{reason}',
+  'ai.test.reason.missing_api_key': '还没有可用的密钥',
+  'ai.test.reason.missing_base_url': '没有填写接口地址',
+  'ai.test.reason.missing_model': '没有填写模型名称',
+  'ai.test.reason.timeout': '连接超时（8 秒）',
+  'ai.test.reason.network': '网络无法连接，请检查接口地址或代理',
+  'ai.test.reason.http': '服务端返回错误，请检查密钥与接口地址',
+  'ai.test.reason.rate_limited': '请求过于频繁，请稍后再试',
+  'ai.test.reason.invalid_response': '服务端返回内容无法解析',
+  'ai.test.reason.internal': '主机端内部错误',
   'ai.statusOn': '已对接',
-  'ai.statusOff': '未对接',
+  'ai.statusOff': '仅使用本地规则',
   'ai.scope': 'AI 能看到什么',
   'ai.scopeValue': '只有目录路径与文件名；不读文件内容，不上传任何文件',
   'ai.limit': '每次扫描最多调用',
@@ -1023,8 +1158,8 @@ I18N['zh-CN'] = {
   'ai.adopted': '已采纳，写入规则表',
   'ai.done': '本轮识别完成：{n} 项已给出建议',
   'ai.allDone': '待确认目录都已识别',
-  'ai.needKey': '先接好 AI 模型，再接着识别',
-  'ai.needModel': '请填写模型名称，或改用当前助手的模型',
+  'ai.needKey': '未配置 AI 接口或密钥，当前仅使用本地规则',
+  'ai.needModel': '请填写模型名称',
   'ai.noneLeft': '没有需要识别的目录了',
   'ai.filter': 'AI 已给建议',
   'ai.note': 'AI 识别结果仅作为建议，不会自动迁移任何文件。',
@@ -1090,8 +1225,19 @@ I18N['zh-CN'] = {
   'error.FORBIDDEN': '该操作不在允许范围内',
   'error.NOT_FOUND': '目录不存在',
   'error.PERMISSION_DENIED': '没有权限访问该目录',
+  'error.AUTOSTART_FAILED': '无法更新开机启动项，请检查当前用户权限',
   'error.IO_ERROR': '系统未能打开资源管理器',
+  'error.ALREADY_MIGRATED': '这些目录已经迁移，无需重复迁移',
   'error.INTERNAL': '主机端内部错误',
+  'error.AI_CONSENT_REQUIRED': '启用 AI 前需要先确认第三方数据说明',
+  'error.AI_KEY_UNSUPPORTED': '当前系统不支持在本机加密保存密钥，请改用环境变量 DISK_WARDEN_AI_API_KEY',
+  'error.AI_KEY_STORE_FAILED': '密钥保存失败，请重试',
+  'error.AI_KEY_DECRYPT_FAILED': '已保存的密钥无法解密，请重新填写或清除',
+  'error.AUTH_NOT_CONFIGURED': '此版本未内置 GitHub client id，登录不可用',
+  'error.AUTH_CANCELLED': '登录已取消',
+  'error.AUTH_TIMEOUT': '等待授权超时，请重新登录',
+  'error.AUTH_FAILED': '登录失败',
+  'error.AUTH_REQUIRED': '请先登录 GitHub 账号',
   'toast.cleaned': '缓存清理完成，释放 {size}',
   'toast.ruleAdded': '规则已添加',
   'toast.saved': '设置已保存',
@@ -1100,6 +1246,9 @@ I18N['zh-CN'] = {
   'toast.retry': '重试中',
   'toast.exported': '已导出',
   'toast.needSelect': '请先选择至少一个目录',
+  'toast.needSelectAllRed': '没有可迁目录：受保护项已自动排除',
+  'toast.needSelectMigrated': '没有可迁目录：都已迁移，可先回滚再迁移',
+  'toast.needSelectYellow': '没有可勾选目录：待确认项需先确认用途',
   'toast.spaceShort': '目标盘空间不足',
   'toast.blocked': '软件正在运行，无法迁移',
   'toast.unavailable': '该功能尚未接入主机端，将在后续版本提供',
@@ -1107,7 +1256,7 @@ I18N['zh-CN'] = {
   'unit.minutes': '分钟',
   'unit.seconds': '秒',
   'ai.consentTitle': '启用 AI 分析？',
-  'ai.consentBody': '启用后，目录名称、体积与分级结果等目录信息会发送给第三方 AI 服务用于分析。API Key 只从环境变量读取，不会写入本地。',
+  'ai.consentBody': '启用后，目录名称、体积与分级结果等目录信息会发送给第三方 AI 服务用于分析。API Key 经 Windows DPAPI 加密后仅保存在本机，只用于调用你填写的接口。',
   'ai.consentAccept': '同意并启用',
   'ai.consentDecline': '暂不启用',
   'ai.consentDone': 'AI 分析已启用',
@@ -1141,6 +1290,9 @@ I18N['zh-CN'] = {
   'recovery.needsHuman': '需要人工处理',
   'recovery.recover': '恢复',
   'recovery.rollback': '回滚',
+  'recovery.ignore': '忽略此项',
+  'recovery.ignoreHint': '只是不再提示，磁盘上的记录和数据都不会改动',
+  'recovery.ignored': '已忽略该项，状态再次变化时会重新提示',
   'recovery.running': '正在处理…',
   'recovery.done': '恢复完成',
   'recovery.successHint': '中断的任务已恢复，可以重新扫描确认状态。',
@@ -1165,7 +1317,116 @@ I18N['zh-CN'] = {
   'rollback.stage.record': '写入回滚记录',
   'rollback.stage.done': '完成',
   'success.rollbackable': '可在历史记录中随时回滚',
-  'toast.noGreen': '没有可迁移的目录'
+  'toast.noGreen': '没有可迁移的目录',
+  'state.planned': '已计划',
+  'state.backed_up': '配置已备份',
+  'state.copying': '复制中',
+  'state.copied': '复制完成',
+  'state.copy_verified': '副本已校验',
+  'state.target_ready': '目标就绪',
+  'state.source_renamed': '源已改名',
+  'state.linked': '链接已建立',
+  'state.verified_link': '链接已校验',
+  'state.linked_cleanup_pending': '待清理副本',
+  'state.done': '已完成',
+  'state.failed': '失败',
+  'state.rolled_back': '已回滚',
+  'state.recovery_required': '需人工确认',
+  'state.rollback_planned': '回滚已计划',
+  'state.rollback_link_removed': '链接已移除',
+  'state.rollback_copying': '回滚复制中',
+  'state.rollback_copied': '回滚副本已复制',
+  'state.rollback_verified': '回滚副本已校验',
+  'state.rollback_source_ready': '源已恢复',
+  'state.rollback_config_restored': '配置已恢复',
+  'state.rollback_failed': '回滚失败',
+  'state.rollback_recovery_required': '回滚需人工确认',
+  'state.already_rolled_back': '已回滚',
+  'state.residual_copy': '存在残留副本',
+  'state.state_abnormal': '状态异常',
+  'blockedCode.already_migrated': '已迁移到目标盘，不能重复迁移',
+  'blockedCode.permission_denied': '部分目录无法读取，无法安全迁移',
+  'blockedCode.blocked_red_path': '源目录是链接/重解析点，不能迁移',
+  'blockedCode.blocked_process': '应用正在运行或进程状态未知',
+  'blockedCode.duplicate_target': '目标位置已存在同名目录',
+  'toast.signedIn': '登录成功',
+  'toast.signedOut': '已退出登录',
+  'toast.starOpened': '已打开仓库页面，点完 Star 记得刷新状态',
+  'toast.starStillPending': '还没检测到 Star，点完后再试一次',
+  'toast.starGiteeSoon': 'Gitee 仓库即将上线，敬请期待',
+  'toast.starReopened': '已重新显示 Star 提示',
+  'welcome.title': '欢迎使用 Disk Warden',
+  'welcome.sub': '先把 C 盘腾出来，再谈其他',
+  'welcome.tag': '本地优先',
+  'welcome.lead': 'Disk Warden 把 AI IDE 的可再生缓存与会话迁到其他磁盘，C 盘腾出空间，IDE 照常打开。迁移全程在本机完成，随时可以回滚。',
+  'welcome.point1': '全程本地执行，不上传目录内容',
+  'welcome.point2': '逐目录勾选，迁移前先看预览',
+  'welcome.point3': '迁移后可一键回滚到 C 盘',
+  'welcome.point4': '登录完全可选，跳过也能用全部功能',
+  'welcome.loginTitle': '登录 GitHub（可选）',
+  'welcome.loginNote': '采用设备码方式登录：点击后会在浏览器打开 GitHub，输入页面上的 8 位代码即可。不登录也能用全部本地功能。',
+  'welcome.loginWith': '使用 {provider} 登录',
+  'welcome.unconfigured': '不可用',
+  'welcome.unconfiguredTitle': '{provider} 登录在此版本不可用：构建里没有内置 client id',
+  'welcome.unconfiguredHint': '公开的 client id 已内置在应用里（可用环境变量 {env} 覆盖），全程不需要 client secret。当前构建缺少它，按钮置灰、不会发起任何请求，本地功能不受影响。',
+  'welcome.deviceTitle': '在浏览器中输入这串代码',
+  'welcome.deviceHint': '已尝试打开 {uri}。没打开的话，点下面的按钮手动打开。',
+  'welcome.deviceCopy': '复制代码',
+  'welcome.deviceCopied': '代码已复制',
+  'welcome.deviceOpen': '打开授权页面',
+  'welcome.waitingTime': '代码 {sec} 秒后失效，过期后可重新登录。',
+  'welcome.cancelLogin': '取消登录',
+  'welcome.retryLogin': '重新登录',
+  'welcome.errorReason': '原因：{reason}',
+  'welcome.skip': '跳过登录，直接使用全部本地功能',
+  'welcome.skipHint': '随时可以在「设置 → 账号」里登录。',
+  'welcome.continue': '进入主界面',
+  'welcome.signedIn': '已登录：{login}',
+  'welcome.insecure': '本机安全存储不可用，登录状态只在本次运行内有效。',
+  'star.title': '给 Disk Warden 点个 Star？',
+  'star.body': 'Disk Warden 是开源项目。如果它帮你腾出了 C 盘空间，去 GitHub 点个 Star 就是对我们最大的支持。',
+  'star.give': '去 GitHub 点 Star',
+  'star.refresh': '我已 Star，刷新状态',
+  'star.gitee': '去 Gitee 点 Star',
+  'star.giteeSoon': '即将上线',
+  'star.open': '打开项目主页',
+  'star.later': '以后再说',
+  'star.note': '不喜欢可以随时关掉，也可以到「设置」里再次打开。',
+  'star.thanksTitle': '谢谢你的 Star！',
+  'star.thanksBody': '你的支持是这个项目继续维护下去的动力。',
+  'star.close': '关闭',
+  'star.reopen': '再次显示 Star 提示',
+  'settings.account': '账号',
+  'settings.accountDesc': '登录 GitHub 是可选的，不影响任何本地功能。',
+  'settings.accountNone': '未登录',
+  'settings.accountSignedIn': '已登录 {login}',
+  'settings.signIn': '登录',
+  'settings.signOut': '退出登录',
+  'settings.starPrompt': 'Star 提示',
+  'settings.starPromptDesc': '重新显示给项目点 Star 的半透明提示，可随时关闭。',
+  'firstRun.title': '首次启动设置',
+  'firstRun.sub': '这个版本没有 Apple 开发者签名，macOS 第一次会拦截它。按下面的步骤放行一次即可。',
+  'firstRun.version': '系统版本 macOS {version}',
+  'firstRun.versionUnknown': '没能识别系统版本。先按 macOS 15 及以上的步骤操作；如果看不到「仍要打开」，再用旧版本的方式：按住 Control 点按图标 → 打开。',
+  'firstRun.unsupported': 'Disk Warden 需要 macOS {min} 或更高版本，当前系统可能无法正常运行。',
+  'firstRun.step.move_to_applications': '把 DiskWarden.app 拖进「应用程序」文件夹。不要在下载目录或解压出来的临时目录里直接运行：系统会把程序挂到只读的随机路径上，之后的迁移会失败。',
+  'firstRun.step.try_to_open': '在「应用程序」里双击 DiskWarden.app。',
+  'firstRun.step.dismiss_block': '出现「Apple 无法验证“Disk Warden”是否包含恶意软件」时，点「完成」关掉。这是未签名应用的固定提示，不是病毒告警，也不需要关闭任何系统安全功能。',
+  'firstRun.step.open_privacy_security': '打开 系统设置 → 隐私与安全性，向下滚动到「安全性」，会有一条「已阻止使用“Disk Warden”」的提示，点「仍要打开」，然后输入登录密码或使用触控 ID。',
+  'firstRun.step.allow_anyway': '再双击一次 DiskWarden.app，在弹窗里点「打开」，主界面就出来了。之后双击即可正常启动。',
+  'firstRun.step.control_click_open': '在「应用程序」里按住 Control 键点按（或右键点按）DiskWarden.app 图标，在快捷菜单里选「打开」。',
+  'firstRun.step.confirm_open': '弹窗提示「macOS 无法验证此 App 是否包含恶意软件」时，点「打开」完成放行。',
+  'firstRun.step.double_click_later': '之后双击图标即可正常启动，不需要重复这些步骤。',
+  'firstRun.advanced': '高级选项：用终端移除隔离属性',
+  'firstRun.advancedRisk': '执行下面这条命令会一次性跳过上面的步骤，但它把整个 App 的隔离标记都去掉了，等于放弃系统对下载来源的检查。只对你亲手下载并确认过的这份文件使用；命令里的路径写错会作用到别的程序上，执行前请先核对路径。',
+  'firstRun.advancedNote': '根治办法是代码签名与公证（需要 Apple 开发者账号），本期没有做，后续再评估。',
+  'firstRun.copy': '复制命令',
+  'firstRun.later': '下次再说',
+  'firstRun.done': '我知道了',
+  'firstRun.help': '首次启动说明',
+  'firstRun.helpDesc': '重新查看未签名应用的放行步骤',
+  'firstRun.view': '查看步骤',
+  'firstRun.copied': '命令已复制'
 };
 I18N['en'] = {
   'app.tagline': 'Disk manager for AI IDEs',
@@ -1177,7 +1438,7 @@ I18N['en'] = {
   'nav.rules': 'Rule learning',
   'nav.history': 'History',
   'nav.settings': 'Settings',
-  'nav.version': 'v0.9.0-beta.1',
+  'nav.version': 'v0.9.0-beta.9',
   'page.ide.title': 'IDE data',
   'page.ide.desc': 'Scan data folders of AI IDEs and CLIs, then move regenerable caches and sessions safely.',
   'page.projects.title': 'Projects',
@@ -1308,11 +1569,14 @@ I18N['en'] = {
   'ide.migratableValue': '{n} items · {size}',
   'ide.redExcluded': '{n} protected items are excluded automatically',
   'ide.redLocked': 'Protected, no migration entry',
+  'ide.migratedLocked': 'Migrated, cannot migrate again',
+  'ide.migratedRowReason': 'Migrated to the target drive; rollback is available',
   'ide.yellowHint': 'Unknown folders are excluded until you confirm them.',
   'ide.yellowLocked': 'Confirm what this folder is first',
   'ide.processTitle': 'Running process detected',
   'ide.processBody': 'Quit {app} before migrating, otherwise files are locked. Disk Warden never force-kills processes.',
   'ide.processBlock': '{n} processes are using this folder. Migration is blocked.',
+  'ide.processMore': '+{n} more',
   'ide.noSelection': 'Select at least one migratable folder',
   'ide.alreadyMigrated': 'This app already lives on the target drive and is linked back with a junction.',
   'ide.allGreenSelected': 'Select all migratable',
@@ -1476,6 +1740,10 @@ I18N['en'] = {
   'settings.languageDesc': 'Changes apply to the interface immediately',
   'settings.autoStart': 'Start with Windows',
   'settings.autoStartDesc': 'Run in the tray after sign-in',
+  'settings.autoStartUnsupported': 'Not available in this run mode; enabled in the installed build',
+  'settings.logs': 'Log folder',
+  'settings.logsDesc': 'Logs stay on this computer; 2 MB rotation keeps the last 3 files',
+  'settings.logsOpen': 'Open folder',
   'settings.targetRoot': 'Target storage root',
   'settings.targetRootDesc': 'Migrated folders, backups and logs live here',
   'settings.autoMaintenance': 'Auto maintenance',
@@ -1613,24 +1881,54 @@ I18N['en'] = {
   'ai.sub': 'Unknown folders go to AI first. Its verdict is a suggestion until you adopt it.',
   'ai.enable': 'Use AI assistance',
   'ai.enableDesc': 'Off means unknown folders need your manual call.',
-  'ai.provider': 'Connection',
-  'ai.provider.relay': 'Use this Multica agent model',
+  'ai.provider': 'Provider',
+  'ai.providerHint': 'Picking a provider fills in the endpoint and model for you. Both stay editable.',
+  'ai.provider.deepseek': 'DeepSeek',
+  'ai.provider.openai': 'OpenAI',
+  'ai.provider.qwen': 'Qwen (DashScope)',
+  'ai.provider.kimi': 'Kimi (Moonshot)',
+  'ai.provider.zhipu': 'Zhipu GLM',
   'ai.provider.custom': 'Custom OpenAI-compatible endpoint',
   'ai.provider.none': 'No connection (local rules only)',
   'ai.baseUrl': 'Endpoint',
   'ai.baseUrlDesc': 'e.g. https://api.example.com/v1',
   'ai.model': 'Model',
-  'ai.modelAuto': 'Follow agent settings',
-  'ai.key': 'Key',
-  'ai.keyDesc': 'Read only from the DEEPSEEK_API_KEY environment variable. Never written to disk, logs or feedback.',
+  'ai.modelAuto': 'Server default model',
+  'ai.key': 'API key',
+  'ai.keyDesc': 'The key is encrypted with Windows DPAPI and stored on this machine only. Only your Windows account can decrypt it. It is never logged or included in feedback.',
+  'ai.keyHint': 'Stored as ciphertext; the plaintext is never shown again. Leave empty to keep the saved key.',
+  'ai.keyPlaceholder': 'Paste your API key',
+  'ai.keyPlaceholderStored': 'Saved — leave empty to keep it',
+  'ai.keyShow': 'Show',
+  'ai.keyHide': 'Hide',
+  'ai.keyMask': '••••••••',
+  'ai.keySource.env': 'Source: environment variable',
+  'ai.keySource.stored': 'Source: encrypted on this PC',
+  'ai.keySource.none': 'No key saved',
+  'ai.keyMissing': 'No key configured',
+  'ai.keyStoredHint': 'The key is encrypted on this PC; only a mask is shown.',
+  'ai.keyEnvOverride': 'The DISK_WARDEN_AI_API_KEY environment variable overrides the saved key.',
+  'ai.keyUnavailable': 'The saved key cannot be decrypted (it may come from another account or PC). Enter a new key or clear it.',
+  'ai.keyClear': 'Clear saved key',
+  'ai.keyCleared': 'Saved key cleared',
+  'ai.savedWithKey': 'Saved. The key is encrypted on this PC.',
+  'ai.localOnlyTitle': 'Local rules only',
+  'ai.localOnly': 'Scanning, migration and rollback keep working as usual.',
   'ai.test': 'Test connection',
-  'ai.testUnavailable': 'Connection test arrives in a later version.',
-  'ai.keyEnvSet': 'Read from environment variable',
-  'ai.keyEnvMissing': 'Environment variable not set',
-  'ai.testOk': 'Connection OK · 0.8s',
-  'ai.testBad': 'Connection failed: invalid key',
+  'ai.testing': 'Testing the connection…',
+  'ai.testOk': 'Connection OK · {model} · {ms} ms',
+  'ai.testBad': 'Connection failed: {reason}',
+  'ai.test.reason.missing_api_key': 'no usable key',
+  'ai.test.reason.missing_base_url': 'no endpoint entered',
+  'ai.test.reason.missing_model': 'no model entered',
+  'ai.test.reason.timeout': 'timed out after 8 seconds',
+  'ai.test.reason.network': 'cannot reach the endpoint — check the URL or proxy',
+  'ai.test.reason.http': 'the server rejected the request — check the key and endpoint',
+  'ai.test.reason.rate_limited': 'too many requests — try again shortly',
+  'ai.test.reason.invalid_response': 'the response could not be parsed',
+  'ai.test.reason.internal': 'host internal error',
   'ai.statusOn': 'Connected',
-  'ai.statusOff': 'Not connected',
+  'ai.statusOff': 'Local rules only',
   'ai.scope': 'What AI can see',
   'ai.scopeValue': 'Folder paths and file names only. File contents are never read or uploaded.',
   'ai.limit': 'Call limit per scan',
@@ -1645,8 +1943,8 @@ I18N['en'] = {
   'ai.adopted': 'Adopted and added to rules',
   'ai.done': 'Done: suggestions ready for {n} folders',
   'ai.allDone': 'Every pending folder has a suggestion',
-  'ai.needKey': 'Connect a model first',
-  'ai.needModel': 'Enter a model name, or use the agent model',
+  'ai.needKey': 'No AI endpoint or key configured — local rules only for now',
+  'ai.needModel': 'Enter a model name',
   'ai.noneLeft': 'Nothing left to identify',
   'ai.filter': 'AI suggested',
   'ai.note': 'AI results are suggestions only. No file is migrated automatically.',
@@ -1712,8 +2010,19 @@ I18N['en'] = {
   'error.FORBIDDEN': 'This action is not allowed',
   'error.NOT_FOUND': 'Folder does not exist',
   'error.PERMISSION_DENIED': 'Access to the folder was denied',
+  'error.AUTOSTART_FAILED': 'Could not update the startup item; check your user permissions',
   'error.IO_ERROR': 'The system could not open the file manager',
+  'error.ALREADY_MIGRATED': 'These folders are already migrated',
   'error.INTERNAL': 'Host internal error',
+  'error.AI_CONSENT_REQUIRED': 'Confirm the third-party data notice before enabling AI',
+  'error.AI_KEY_UNSUPPORTED': 'This system cannot store the key locally — use the DISK_WARDEN_AI_API_KEY environment variable',
+  'error.AI_KEY_STORE_FAILED': 'Could not save the key. Try again.',
+  'error.AI_KEY_DECRYPT_FAILED': 'The saved key cannot be decrypted. Enter a new one or clear it.',
+  'error.AUTH_NOT_CONFIGURED': 'This build has no GitHub client id, sign-in is unavailable',
+  'error.AUTH_CANCELLED': 'Sign-in cancelled',
+  'error.AUTH_TIMEOUT': 'Timed out waiting for authorization, please try again',
+  'error.AUTH_FAILED': 'Sign-in failed',
+  'error.AUTH_REQUIRED': 'Sign in to GitHub first',
   'toast.cleaned': 'Cache cleaned, freed {size}',
   'toast.ruleAdded': 'Rule added',
   'toast.saved': 'Settings saved',
@@ -1722,6 +2031,9 @@ I18N['en'] = {
   'toast.retry': 'Retrying',
   'toast.exported': 'Exported',
   'toast.needSelect': 'Select at least one folder first',
+  'toast.needSelectAllRed': 'Nothing to migrate: protected folders are excluded automatically',
+  'toast.needSelectMigrated': 'Nothing to migrate: all folders are already migrated — roll back one first',
+  'toast.needSelectYellow': 'Nothing checked yet: confirm the pending folders first',
   'toast.spaceShort': 'Not enough space on target',
   'toast.blocked': 'The app is running, cannot migrate',
   'toast.unavailable': 'This feature is not connected to the host yet and will arrive in a later version',
@@ -1729,7 +2041,7 @@ I18N['en'] = {
   'unit.minutes': 'min',
   'unit.seconds': 's',
   'ai.consentTitle': 'Enable AI analysis?',
-  'ai.consentBody': 'When enabled, folder names, sizes and risk results are sent to a third-party AI service for analysis. The API key is read from an environment variable and never stored locally.',
+  'ai.consentBody': 'When enabled, folder names, sizes and risk results are sent to a third-party AI service for analysis. The API key is encrypted with Windows DPAPI, stored only on this PC, and used solely to call the endpoint you configure.',
   'ai.consentAccept': 'Agree and enable',
   'ai.consentDecline': 'Not now',
   'ai.consentDone': 'AI analysis enabled',
@@ -1763,6 +2075,9 @@ I18N['en'] = {
   'recovery.needsHuman': 'Needs manual attention',
   'recovery.recover': 'Recover',
   'recovery.rollback': 'Roll back',
+  'recovery.ignore': 'Hide this',
+  'recovery.ignoreHint': 'Hides the notice only; the record and your data stay untouched',
+  'recovery.ignored': 'Hidden. It comes back if the state changes again',
   'recovery.running': 'Working…',
   'recovery.done': 'Recovery complete',
   'recovery.successHint': 'The interrupted job is recovered. Rescan to confirm the state.',
@@ -1787,13 +2102,122 @@ I18N['en'] = {
   'rollback.stage.record': 'Write rollback record',
   'rollback.stage.done': 'Done',
   'success.rollbackable': 'You can roll back from History at any time',
-  'toast.noGreen': 'No migratable folders selected'
+  'toast.noGreen': 'No migratable folders selected',
+  'state.planned': 'Planned',
+  'state.backed_up': 'Config backed up',
+  'state.copying': 'Copying',
+  'state.copied': 'Copy finished',
+  'state.copy_verified': 'Copy verified',
+  'state.target_ready': 'Target ready',
+  'state.source_renamed': 'Source renamed',
+  'state.linked': 'Link created',
+  'state.verified_link': 'Link verified',
+  'state.linked_cleanup_pending': 'Copy pending cleanup',
+  'state.done': 'Done',
+  'state.failed': 'Failed',
+  'state.rolled_back': 'Rolled back',
+  'state.recovery_required': 'Needs review',
+  'state.rollback_planned': 'Rollback planned',
+  'state.rollback_link_removed': 'Link removed',
+  'state.rollback_copying': 'Rolling back',
+  'state.rollback_copied': 'Rollback copy finished',
+  'state.rollback_verified': 'Rollback copy verified',
+  'state.rollback_source_ready': 'Source restored',
+  'state.rollback_config_restored': 'Config restored',
+  'state.rollback_failed': 'Rollback failed',
+  'state.rollback_recovery_required': 'Rollback needs review',
+  'state.already_rolled_back': 'Already rolled back',
+  'state.residual_copy': 'Leftover copy present',
+  'state.state_abnormal': 'State abnormal',
+  'blockedCode.already_migrated': 'Already migrated to the target drive; cannot migrate again',
+  'blockedCode.permission_denied': 'Some folders cannot be read, so migrating would be unsafe',
+  'blockedCode.blocked_red_path': 'Source is a link or reparse point and cannot be migrated',
+  'blockedCode.blocked_process': 'The app is running or its process state is unknown',
+  'blockedCode.duplicate_target': 'A folder with the same name already exists at the target',
+  'toast.signedIn': 'Signed in',
+  'toast.signedOut': 'Signed out',
+  'toast.starOpened': 'Repository page opened. Refresh once you have starred it.',
+  'toast.starStillPending': 'Star not detected yet, try again once you have clicked it',
+  'toast.starGiteeSoon': 'The Gitee repository is coming soon',
+  'toast.starReopened': 'Star prompt reopened',
+  'welcome.title': 'Welcome to Disk Warden',
+  'welcome.sub': 'Free up C: first, everything else after',
+  'welcome.tag': 'Local first',
+  'welcome.lead': 'Disk Warden moves AI IDE caches and sessions to another drive so C: gets its space back and your IDE keeps working. Everything runs on this machine and can be rolled back.',
+  'welcome.point1': 'Runs locally, folder contents are never uploaded',
+  'welcome.point2': 'Pick folders one by one, preview before migrating',
+  'welcome.point3': 'One-click rollback to C: afterwards',
+  'welcome.point4': 'Sign-in is optional, every local feature works without it',
+  'welcome.loginTitle': 'Sign in to GitHub (optional)',
+  'welcome.loginNote': 'Sign-in uses a device code: your browser opens GitHub and you type the 8-character code shown here. Every local feature works without signing in.',
+  'welcome.loginWith': 'Continue with {provider}',
+  'welcome.unconfigured': 'Unavailable',
+  'welcome.unconfiguredTitle': '{provider} sign-in is unavailable in this build: no client id is built in',
+  'welcome.unconfiguredHint': 'The public client id ships inside the app (override it with {env}) and no client secret is ever needed. This build has none, so the button stays disabled and nothing is sent; local features keep working.',
+  'welcome.deviceTitle': 'Enter this code in your browser',
+  'welcome.deviceHint': 'We tried to open {uri}. If it did not open, use the button below.',
+  'welcome.deviceCopy': 'Copy code',
+  'welcome.deviceCopied': 'Code copied',
+  'welcome.deviceOpen': 'Open the authorization page',
+  'welcome.waitingTime': 'The code expires in {sec}s; sign in again afterwards.',
+  'welcome.cancelLogin': 'Cancel sign-in',
+  'welcome.retryLogin': 'Sign in again',
+  'welcome.errorReason': 'Reason: {reason}',
+  'welcome.skip': 'Skip sign-in and use all local features',
+  'welcome.skipHint': 'You can sign in later from Settings → Account.',
+  'welcome.continue': 'Enter the app',
+  'welcome.signedIn': 'Signed in: {login}',
+  'welcome.insecure': 'Secure storage is unavailable, the sign-in only lasts for this run.',
+  'star.title': 'Star Disk Warden?',
+  'star.body': 'Disk Warden is an open-source project. If it freed up space on your C: drive, a GitHub star is the biggest help you can give us.',
+  'star.give': 'Star on GitHub',
+  'star.refresh': 'I starred it, refresh',
+  'star.gitee': 'Star on Gitee',
+  'star.giteeSoon': 'Coming soon',
+  'star.open': 'Open the project page',
+  'star.later': 'Maybe later',
+  'star.note': 'You can close this anytime and reopen it from Settings.',
+  'star.thanksTitle': 'Thanks for the star!',
+  'star.thanksBody': 'Your support keeps this project going.',
+  'star.close': 'Close',
+  'star.reopen': 'Show the Star prompt again',
+  'settings.account': 'Account',
+  'settings.accountDesc': 'Signing in to GitHub is optional and never gates local features.',
+  'settings.accountNone': 'Not signed in',
+  'settings.accountSignedIn': 'Signed in as {login}',
+  'settings.signIn': 'Sign in',
+  'settings.signOut': 'Sign out',
+  'settings.starPrompt': 'Star prompt',
+  'settings.starPromptDesc': 'Show the semi-transparent Star prompt again. It can always be closed.',
+  'firstRun.title': 'Set up the first launch',
+  'firstRun.sub': 'This build has no Apple developer signature, so macOS blocks it the first time. Follow these steps once to let it through.',
+  'firstRun.version': 'macOS {version}',
+  'firstRun.versionUnknown': 'The macOS version could not be read. Follow the macOS 15 and newer steps first; if there is no "Open Anyway" button, use the older way: Control-click the icon, then choose Open.',
+  'firstRun.unsupported': 'Disk Warden needs macOS {min} or newer; this system may not run it correctly.',
+  'firstRun.step.move_to_applications': 'Drag DiskWarden.app into the Applications folder. Do not run it from Downloads or from the folder a zip unzipped into: macOS would launch it from a read-only random path and later migrations would fail.',
+  'firstRun.step.try_to_open': 'Double-click DiskWarden.app in Applications.',
+  'firstRun.step.dismiss_block': 'When macOS says it cannot verify "Disk Warden", click Done. Every unsigned app shows this; it is not a virus warning and you do not need to switch off any system protection.',
+  'firstRun.step.open_privacy_security': 'Open System Settings -> Privacy & Security, scroll to Security and find the "Disk Warden was blocked" line. Click Open Anyway and authenticate with your password or Touch ID.',
+  'firstRun.step.allow_anyway': 'Double-click DiskWarden.app once more and click Open in the dialog. The main window appears; from then on a double-click is enough.',
+  'firstRun.step.control_click_open': 'In Applications, Control-click (or right-click) the DiskWarden.app icon and choose Open from the shortcut menu.',
+  'firstRun.step.confirm_open': 'In the "macOS cannot verify this app" dialog, click Open to let it through.',
+  'firstRun.step.double_click_later': 'After that a normal double-click starts the app; these steps are not repeated.',
+  'firstRun.advanced': 'Advanced: remove the quarantine flag in Terminal',
+  'firstRun.advancedRisk': 'This command skips the steps above but also removes the download-origin check for the whole app. Use it only on the file you downloaded yourself and checked; a wrong path in the command would affect another program, so verify the path first.',
+  'firstRun.advancedNote': 'The real fix is code signing and notarisation (an Apple Developer account). That is out of scope for this release.',
+  'firstRun.copy': 'Copy command',
+  'firstRun.later': 'Later',
+  'firstRun.done': 'Got it',
+  'firstRun.help': 'First-launch guide',
+  'firstRun.helpDesc': 'Show the steps for allowing an unsigned app again',
+  'firstRun.view': 'Show steps',
+  'firstRun.copied': 'Command copied'
 };
-let LANG = 'zh-CN';
+let LANG = 'en';
 function t(key, vars) {
-  const dict = I18N[LANG] || I18N['zh-CN'];
+  const dict = I18N[LANG] || I18N['en'];
   let s = dict[key];
-  if (s === undefined) s = I18N['zh-CN'][key];
+  if (s === undefined && LANG !== 'en') s = I18N['en'][key];
   if (s === undefined) return key;
   if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] !== undefined ? vars[k] : m));
   return s;
@@ -1863,11 +2287,18 @@ const state = {
   filter: 'all', search: '',
   checked: {}, confirmed: {},
   settings: { targetRoot: '', autoStart: false, autoMaintenance: false, uninstall: 'keep',
-    aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false },
+    aiEnabled: false, aiProvider: 'none', aiBaseUrl: '', aiModel: '', aiKeySet: false,
+    aiKeySource: 'none', aiKeyError: '', firstRun: null },
   connected: false, booting: true, bootError: '', aiAsk: false,
+  /* T16：登录/欢迎页状态。welcome_seen 默认 true，避免 bootstrap 前闪一下欢迎页。 */
+  auth: { providers: [], signed_in: false, login: null, welcome_seen: true,
+    star: { pending: false, dismissed: false, starred: false },
+    secure_storage: true, flow: null, repository_url: '',
+    gitee: { provider: 'gitee', label: 'Gitee', url: '', available: false } },
   data: { settings: null, disk: null, snapshot: null, learned: null, scanJob: null, scanTimer: null,
     scanError: '', history: null, historyError: '', historyLoading: false,
-    recovery: null, recoveryRun: null, recoveryTimer: null, flow: null, jobTimer: null },
+    recovery: null, recoveryRun: null, recoveryTimer: null, flow: null, jobTimer: null,
+    authTimer: null },
   scanning: false, scanPct: 0,
   pendingYellow: null,
   historyFilter: 'all',
@@ -1879,7 +2310,7 @@ const TABS = ['projects', 'ide', 'disk', 'rules', 'history'];
 
 function parseRoute() {
   const raw = (location.hash || '').replace(/^#/, '');
-  if (raw === 'settings' || raw === 'feedback' || raw === 'ai') return { tab: state.tab || 'projects', sub: '', modal: raw };
+  if (raw === 'settings' || raw === 'feedback' || raw === 'ai' || raw === 'mac-first-run') return { tab: state.tab || 'projects', sub: '', modal: raw };
   const parts = raw.split('/');
   if (parts[0] === 'rules-app') return { tab: 'rules', sub: '', modal: 'rules-app', app: parts[1] === 'all' ? '*' : (parts[1] || '') };
   const tab = TABS.indexOf(parts[0]) >= 0 ? parts[0] : 'projects';
@@ -1893,6 +2324,7 @@ function dirAt(ideId, idx) { const ide = getIde(ideId); return ide && ide.direct
 function dirKey(ideId, idx) { const d = dirAt(ideId, idx); return d && d.item_id ? 'item:' + d.item_id : yellowKey(ideId, idx); }
 function isConfirmed(ideId, idx) { return !!state.confirmed[dirKey(ideId, idx)]; }
 function isChecked(ideId, idx, dir) {
+  if (dir.migrated) return false;
   if (dir.safety === 'red') return false;
   if (dir.item_id && dir.can_migrate === false) return false;
   if (dir.safety === 'yellow' && !isConfirmed(ideId, idx)) return false;
@@ -1903,6 +2335,19 @@ function selectedDirs(ide) {
   return ide.directories.filter((d, i) => isChecked(ide.id, i, d));
 }
 function selectedSize(ide) { return sum(selectedDirs(ide), 'size_bytes'); }
+/* Explain an empty selection instead of a generic "select something" toast. */
+function emptySelectionKey(ide) {
+  const dirs = (ide && ide.directories) || [];
+  if (!dirs.length) return 'toast.needSelect';
+  const nonRed = dirs.filter(d => d.safety !== 'red');
+  if (!nonRed.length) return 'toast.needSelectAllRed';
+  if (nonRed.every(d => d.migrated)) return 'toast.needSelectMigrated';
+  if (
+    nonRed.some(d => !d.migrated && d.safety === 'yellow') &&
+    nonRed.every(d => d.migrated || d.safety === 'yellow')
+  ) return 'toast.needSelectYellow';
+  return 'toast.needSelect';
+}
 function targetAvailableGB() {
   const free = state.data.disk && state.data.disk.target && state.data.disk.target.available
     ? state.data.disk.target.free : null;
@@ -1989,7 +2434,12 @@ function toolById(id) { return allTools().find(x => x.id === id) || null; }
 function itemsFor(tool) { return allItems().filter(x => x.tool_id === tool.id); }
 function runningProcs(tool) { const rt = tool && tool.runtime; return (rt && rt.processes) || []; }
 function migratedItems(tool) { return itemsFor(tool).filter(x => !!x.migrated_job_id); }
-function isToolMigrated(tool) { return migratedItems(tool).length > 0; }
+/* A tool counts as migrated only when nothing is left to migrate; a partial
+   migration keeps the migrate action so the remaining folders stay reachable. */
+function isToolMigrated(tool) {
+  const actionable = itemsFor(tool).filter(x => x.safety !== 'red');
+  return actionable.length > 0 && actionable.every(x => !!x.migrated_job_id);
+}
 function migratedTarget(tool) {
   const it = migratedItems(tool)[0];
   return it ? (it.target_path || '') : '';
@@ -2120,16 +2570,22 @@ function applySettings(s) {
   state.settings = {
     targetRoot: s.target_root || '',
     autoStart: !!s.launch_at_startup,
+    autoStartSupported: s.launch_at_startup_supported !== false,
+    autoStartError: s.launch_at_startup_error || '',
     autoMaintenance: !!s.auto_maintenance,
+    logsDir: (s.paths && s.paths.logs_dir) || '',
     uninstall: s.uninstall_policy === 'rollback' ? 'remove' : (s.uninstall_policy || 'keep'),
     dataRoot: s.data_root || '',
     appVersion: s.app_version || '',
     ai: ai,
     aiEnabled: !!(ai && ai.enabled),
-    aiProvider: ai && ai.enabled ? (ai.base_url ? 'custom' : 'relay') : 'none',
+    aiProvider: aiPresetFor(ai && ai.base_url),
     aiBaseUrl: (ai && ai.base_url) || '',
     aiModel: (ai && ai.model) || '',
-    aiKeySet: !!(ai && ai.api_key_set)
+    aiKeySet: !!(ai && ai.api_key_set),
+    aiKeySource: (ai && ai.api_key_source) || 'none',
+    aiKeyError: (ai && ai.api_key_error) || '',
+    firstRun: s.first_launch || null
   };
 }
 
@@ -2214,6 +2670,7 @@ function hostReady() {
 function bootstrap() {
   state.booting = true;
   state.bootError = '';
+  bindAuthKeys();
   return hostReady().then(ok => {
     if (!ok) {
       state.booting = false;
@@ -2223,9 +2680,13 @@ function bootstrap() {
     }
     return rpc('app.hello').then(hello => {
       applySettings(hello.settings);
+      applyAuth(hello.auth || null);
       applyDisk(hello.disk || null);
       state.data.recovery = hello.recovery || null;
       state.connected = true;
+      /* 未签名构建的首次启动引导：由主机端决定是否需要（first_launch.show），
+         页面不判断平台。用户点「我知道了」后写入 first_run_done。 */
+      if (state.settings.firstRun && state.settings.firstRun.show && !modalKind()) location.hash = '#mac-first-run';
       const scan = hello.scan || {};
       const ready = scan.available
         ? rpc('scan.result').then(snap => setSnapshot(snap)).catch(() => {})
@@ -2282,6 +2743,26 @@ function stopScanPolling() {
   }
 }
 
+/* 扫描是后台操作，可以从任意页面发起：记住发起时的位置，扫完回到原页面，
+   而不是一律把人丢到 IDE 数据页（规则学习里点「重新扫描」最明显）。 */
+function enterScanRoute() {
+  const here = location.hash || ('#' + state.tab);
+  state.data.scanFrom = state.tab === 'ide' ? '' : here;
+  if (state.data.scanFrom) render();
+  else App.go('#ide/scanning');
+}
+function leaveScanRoute() {
+  const back = state.data.scanFrom || '';
+  state.data.scanFrom = '';
+  const here = location.hash || ('#' + state.tab);
+  if (!back) { App.go('#ide' + (CATALOG.ides.length ? '' : '/empty')); return; }
+  if (back !== here) return;            /* 用户自己走开了，不再把人拽回去 */
+  return rpc('rules.learned.list')
+    .then(l => { state.data.learned = l; })
+    .catch(() => {})
+    .then(() => render());
+}
+
 function startScanPolling(jobId) {
   stopScanPolling();
   state.data.scanTimer = setInterval(() => pollScan(jobId), 350);
@@ -2292,6 +2773,7 @@ function scanFailed(err) {
   state.data.scanError = errText(err) || t('scan.failed');
   state.scanning = false;
   App.toast(t('scan.failed') + ': ' + state.data.scanError);
+  if (state.data.scanFrom) { state.data.scanFrom = ''; render(); return; }
   if (state.tab !== 'ide' || state.sub !== 'scanning') App.go('#ide/scanning');
   else render();
 }
@@ -2315,7 +2797,7 @@ function pollScan(jobId) {
         App.toast(t('scan.done', { n: n }));
         return rpc('disk.info').then(applyDisk).catch(() => {});
       }).then(() => {
-        App.go('#ide' + (CATALOG.ides.length ? '' : '/empty'));
+        return leaveScanRoute();
       }).catch(scanFailed);
     }
     if (job.state === 'cancelled') {
@@ -2323,6 +2805,12 @@ function pollScan(jobId) {
       state.scanning = false;
       state.data.scanJob = null;
       App.toast(t('scan.cancelled'));
+      const back = state.data.scanFrom || '';
+      state.data.scanFrom = '';
+      if (back) {
+        if (back === (location.hash || ('#' + state.tab))) render();
+        return;
+      }
       App.go('#ide' + (snapshot() ? '' : '/empty'));
       return;
     }
@@ -2340,7 +2828,9 @@ function pollScan(jobId) {
 }
 
 function freshRenderIfScanning() {
-  if (state.tab === 'ide' && state.sub === 'scanning') render();
+  if (state.tab === 'ide' && state.sub === 'scanning') { render(); return; }
+  /* 就地重扫（规则学习等页面）：只刷顶栏的进度，不动正文。 */
+  if (state.scanning) renderTopbar();
 }
 
 /* ---------- 操作历史（src/core/store/history） ---------- */
@@ -2538,11 +3028,14 @@ function recoveryBanner() {
       const actions = (it.actions && it.actions.length ? it.actions : ['recover']);
       const buttons = actions.map(a => `<button type="button" class="btn btn-xs ${a === 'rollback' ? 'btn-ghost' : 'btn-soft'}" ${busy ? 'disabled' : ''} onclick="App.recoveryStart('${esc(it.job_id)}','${esc(a)}')">${esc(t(a === 'rollback' ? 'recovery.rollback' : 'recovery.recover'))}</button>`).join('');
       const human = it.needs_human ? ` · <b>${esc(t('recovery.needsHuman'))}</b>` : '';
+      const ignore = it.ignorable ? `<button type="button" class="btn btn-ghost btn-xs" title="${esc(t('recovery.ignoreHint'))}" ${busy ? 'disabled' : ''} onclick="App.recoveryIgnore('${esc(it.job_id)}')">${esc(t('recovery.ignore'))}</button>` : '';
+      const detail = it.detail ? `<span class="dim" style="font-size:var(--fs-meta);white-space:normal">${esc(it.detail)}</span>` : '';
       return `<div class="kv-item wide">
-        <span class="k">${esc(it.tool_name || it.tool_id || '')} · ${esc(it.label || it.state_label || it.state || '')}${human}${it.type === 'rollback' ? ' · ' + esc(t('history.type.rollback')) : ''}</span>
+        <span class="k">${esc(it.tool_name || it.tool_id || '')} · ${esc(it.label || stateLabel(it.state, it.state_label))}${human}${it.type === 'rollback' ? ' · ' + esc(t('history.type.rollback')) : ''}</span>
         <span class="v" style="font-weight:500;white-space:normal;font-size:var(--fs-meta)">${esc(it.source_path || '')}</span>
         <span class="dim" style="font-size:var(--fs-meta)">${esc(fmtBytes(it.bytes || 0))} · ${esc(fmtDate(it.updated_at))}</span>
-        <div class="banner-actions">${buttons}</div>
+        ${detail}
+        <div class="banner-actions">${buttons}${ignore}</div>
       </div>`;
     }).join('');
     html += `<div class="banner danger" style="margin-bottom:10px;align-items:flex-start">
@@ -2736,6 +3229,12 @@ function errorDetailLines(err) {
 }
 
 /* ---------- 展示辅助 ---------- */
+function blockedCodeText(code) {
+  if (!code) return '';
+  const key = 'blockedCode.' + String(code).toLowerCase();
+  const label = t(key);
+  return label === key ? '' : label;
+}
 function reasonText(dir) {
   if (!dir) return '';
   const key = dir.reason || '';
@@ -2743,7 +3242,7 @@ function reasonText(dir) {
     const label = t(key);
     if (label !== key) return label;
   }
-  return dir.blocked_reason || key || t('reason.unknown');
+  return blockedCodeText(dir.blocked_code) || dir.blocked_reason || key || t('reason.unknown');
 }
 
 function diagnosticsText() {
@@ -2781,6 +3280,266 @@ function copyText(text) {
   return Promise.resolve(fallback());
 }
 
+/* ---------- 登录 / 欢迎页 / Star 蒙版（T16） ---------- */
+/* Device Flow 只有一个进行中的状态；其余都是终态。 */
+const AUTH_ACTIVE_STATES = ['pending'];
+/* 后端没有返回 providers 时（老版本主机端）也要把按钮画成「未配置」，绝不假装能登录。 */
+const AUTH_PROVIDER_FALLBACK = [
+  { provider: 'github', label: 'GitHub', configured: false, client_id_env: 'DISK_WARDEN_GITHUB_CLIENT_ID' }
+];
+
+function applyAuth(auth) {
+  if (!auth || typeof auth !== 'object') return;
+  const star = auth.star || {};
+  const login = auth.login && typeof auth.login === 'object' ? auth.login : null;
+  const gitee = auth.gitee && typeof auth.gitee === 'object' ? auth.gitee : {};
+  state.auth = {
+    providers: Array.isArray(auth.providers) ? auth.providers : [],
+    signed_in: !!auth.signed_in,
+    login: login,
+    welcome_seen: auth.welcome_seen !== false,
+    star: { pending: !!star.pending, dismissed: !!star.dismissed, starred: !!star.starred },
+    secure_storage: auth.secure_storage !== false,
+    flow: auth.flow && typeof auth.flow === 'object' ? auth.flow : null,
+    repository_url: auth.repository_url || state.auth.repository_url || '',
+    gitee: {
+      provider: 'gitee',
+      label: gitee.label || 'Gitee',
+      url: gitee.url || state.auth.gitee.url || '',
+      available: !!gitee.available
+    }
+  };
+}
+
+function authProviders() {
+  return state.auth.providers.length ? state.auth.providers : AUTH_PROVIDER_FALLBACK;
+}
+
+function authFlowActive() {
+  const f = state.auth.flow;
+  return !!f && AUTH_ACTIVE_STATES.indexOf(f.state) >= 0;
+}
+
+/* Gitee 只有「打开仓库页」这一种行为：不授权、不读 token、不做服务端判定。 */
+function giteeStarButton(cls) {
+  const g = state.auth.gitee || {};
+  const label = t('star.gitee') + (g.available ? '' : ' · ' + t('star.giteeSoon'));
+  if (g.available && g.url) {
+    return `<button type="button" class="${esc(cls)}" onclick="App.openGitee()">${esc(label)}</button>`;
+  }
+  return `<button type="button" class="${esc(cls)}" disabled aria-disabled="true">${esc(label)}</button>`;
+}
+
+function authErrorText(errOrCode) {
+  const raw = typeof errOrCode === 'string'
+    ? errOrCode
+    : (errOrCode && (errOrCode.code || errOrCode.message_key)) || '';
+  const code = String(raw).replace(/^error\./, '');
+  if (code) {
+    const dict = I18N[LANG] || I18N['en'];
+    const text = dict['error.' + code] || I18N['en']['error.' + code];
+    if (text) return text;
+  }
+  return t('error.AUTH_FAILED');
+}
+
+function authFlowSeconds(flow) {
+  if (!flow || !flow.expires_at) return 0;
+  const left = Math.round((new Date(flow.expires_at).getTime() - Date.now()) / 1000);
+  return left > 0 ? left : 0;
+}
+
+function stopAuthPolling() {
+  if (state.data.authTimer) {
+    clearInterval(state.data.authTimer);
+    state.data.authTimer = null;
+  }
+}
+
+function finishLogin() {
+  stopAuthPolling();
+  App.toast(t('toast.signedIn'));
+  render();
+}
+
+function startAuthPolling() {
+  stopAuthPolling();
+  state.data.authTimer = setInterval(() => {
+    if (!authFlowActive()) { stopAuthPolling(); return; }
+    rpc('auth.status').then(auth => {
+      const wasActive = authFlowActive();
+      applyAuth(auth);
+      if (wasActive && authFlowActive()) { renderWelcome(); return; }
+      stopAuthPolling();
+      if (state.auth.signed_in && !state.auth.welcome_seen) {
+        rpc('welcome.seen')
+          .then(res => { applyAuth(res); finishLogin(); })
+          .catch(() => finishLogin());
+        return;
+      }
+      const flow = state.auth.flow || {};
+      const err = flow.error || null;
+      if (flow.state === 'authenticated' && state.auth.signed_in) { finishLogin(); return; }
+      if (flow.state === 'expired') App.toast(authErrorText('AUTH_TIMEOUT'));
+      else if (flow.state === 'failed' && err && err.code) App.toast(authErrorText(err.code));
+      render();
+    }).catch(() => { stopAuthPolling(); });
+  }, 700);
+}
+
+function authFlowBanner(flow) {
+  const err = flow.error || {};
+  const st = flow.state;
+  if (AUTH_ACTIVE_STATES.indexOf(st) >= 0) {
+    const sec = authFlowSeconds(flow);
+    const code = String(flow.user_code || '');
+    const uri = String(flow.verification_uri || '');
+    return `<div class="login-flow" role="status" aria-live="polite">
+      <div class="lf-row"><span class="lf-dot" aria-hidden="true"></span><b>${esc(t('welcome.deviceTitle'))}</b></div>
+      <div class="lf-row"><span class="lf-usercode" id="auth-user-code">${esc(code)}</span></div>
+      <div class="lf-hint">${esc(t('welcome.deviceHint', { uri: uri }))}</div>
+      <div class="lf-actions">
+        <button type="button" class="btn btn-primary btn-xs" onclick="App.authCopyCode()">${esc(t('welcome.deviceCopy'))}</button>
+        <button type="button" class="btn btn-ghost btn-xs" onclick="App.authOpenVerify()">${esc(t('welcome.deviceOpen'))}</button>
+        <button type="button" class="btn btn-ghost btn-xs" onclick="App.authCancel()">${esc(t('welcome.cancelLogin'))}</button>
+      </div>
+      ${sec ? `<div class="lf-row"><span class="dim">${esc(t('welcome.waitingTime', { sec: sec }))}</span></div>` : ''}
+    </div>`;
+  }
+  if (st === 'failed') {
+    const reason = String(err.reason || '');
+    const provider = authProviders().find(p => p.provider === flow.provider) || {};
+    const retry = provider.configured
+      ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.authStart('${esc(flow.provider)}')">${esc(t('welcome.retryLogin'))}</button>`
+      : '';
+    return `<div class="banner danger"><span class="b-ico">▲</span><div><b>${esc(authErrorText(err.code))}</b>${reason ? `<br><span class="dim">${esc(t('welcome.errorReason', { reason: reason }))}</span>` : ''}${retry ? `<div class="banner-actions">${retry}</div>` : ''}</div></div>`;
+  }
+  if (st === 'cancelled' || st === 'expired') {
+    return `<div class="banner info"><span class="b-ico">i</span><div>${esc(authErrorText(st === 'expired' ? 'AUTH_TIMEOUT' : 'AUTH_CANCELLED'))}</div></div>`;
+  }
+  return '';
+}
+
+function renderWelcome() {
+  const root = document.getElementById('welcome-root');
+  if (!root) return;
+  const auth = state.auth;
+  if (!state.connected || state.booting || auth.welcome_seen) {
+    root.innerHTML = '';
+    root.dataset.open = '';
+    return;
+  }
+  const flow = auth.flow;
+  const active = authFlowActive();
+  const providers = authProviders();
+  const login = auth.login || {};
+  const unconfigured = providers.filter(p => !p.configured);
+
+  const providerBtns = providers.map(p => {
+    const label = p.label || p.provider;
+    const disabled = active || !p.configured;
+    const title = !p.configured ? ` title="${esc(t('welcome.unconfiguredTitle', { provider: label }))}"` : '';
+    return `<button type="button" class="login-btn"${disabled ? ' disabled' : ''}${title} aria-disabled="${disabled ? 'true' : 'false'}" onclick="App.authStart('${esc(p.provider)}')">
+      <span class="p-ico" aria-hidden="true">GH</span>
+      <span>${esc(t('welcome.loginWith', { provider: label }))}</span>
+      ${p.configured ? '' : `<span class="p-state">${esc(t('welcome.unconfigured'))}</span>`}
+    </button>`;
+  }).join('');
+
+  const envHint = unconfigured.length
+    ? `<div class="banner info"><span class="b-ico">i</span><div>${esc(t('welcome.unconfiguredHint', { env: unconfigured[0].client_id_env || AUTH_PROVIDER_FALLBACK[0].client_id_env }))}</div></div>`
+    : '';
+
+  root.innerHTML = `<div class="welcome-mask">
+    <div class="welcome-card" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+      <div class="welcome-head">
+        <img class="welcome-logo" src="assets/brand/app-icon-64.png" alt="">
+        <div>
+          <h2 id="welcome-title">${esc(t('welcome.title'))}</h2>
+          <div class="sub">${esc(t('welcome.sub'))}</div>
+        </div>
+        <span class="welcome-tag">${esc(t('welcome.tag'))}</span>
+      </div>
+      <div class="welcome-body">
+        <div class="welcome-lead">${esc(t('welcome.lead'))}</div>
+        <div class="welcome-points">
+          ${[1, 2, 3, 4].map(n => `<div class="welcome-point"><i aria-hidden="true">✓</i><span>${esc(t('welcome.point' + n))}</span></div>`).join('')}
+        </div>
+        <div class="login-box">
+          <div class="lb-top"><span class="lb-title">${esc(t('welcome.loginTitle'))}</span><span class="lb-note">${esc(t('welcome.loginNote'))}</span></div>
+          <div class="login-btns">${providerBtns}</div>
+          ${envHint}
+          ${flow ? authFlowBanner(flow) : ''}
+          ${auth.signed_in ? `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('welcome.signedIn', { login: login.login || '' }))}</div></div>` : ''}
+          ${auth.secure_storage ? '' : `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('welcome.insecure'))}</div></div>`}
+          <div class="lf-actions">${giteeStarButton('btn btn-ghost btn-xs')}</div>
+        </div>
+      </div>
+      <div class="welcome-foot">
+        <button type="button" class="btn btn-primary" id="welcome-skip" onclick="App.skipLogin()">${esc(t('welcome.skip'))}</button>
+        <span class="hint">${esc(t('welcome.skipHint'))}</span>
+      </div>
+    </div>
+  </div>`;
+  if (root.dataset.open !== '1') {
+    root.dataset.open = '1';
+    const skip = document.getElementById('welcome-skip');
+    if (skip) skip.focus();
+  }
+}
+
+function renderStarOverlay() {
+  const root = document.getElementById('star-root');
+  if (!root) return;
+  const auth = state.auth;
+  const star = auth.star || {};
+  if (!state.connected || !auth.welcome_seen || !star.pending || star.dismissed) {
+    root.innerHTML = '';
+    root.dataset.open = '';
+    return;
+  }
+  const starred = !!star.starred;
+  const primary = starred ? '' : (auth.signed_in
+    ? `<button type="button" class="btn btn-primary btn-sm" onclick="App.starGive()">★ ${esc(t('star.give'))}</button>`
+    : `<button type="button" class="btn btn-primary btn-sm" onclick="App.openRepo()">${esc(t('star.open'))}</button>`);
+  /* Star 只在 GitHub 上写入：这里只打开仓库页，不申请 repo / public_repo 权限。 */
+  const refresh = (!starred && auth.signed_in)
+    ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.starCheck()">${esc(t('star.refresh'))}</button>`
+    : '';
+  /* Gitee 只提供打开仓库页；仓库未建立期间按钮显示「即将上线」并禁用，不发起任何授权。 */
+  const giteeBtn = giteeStarButton('btn btn-ghost btn-sm');
+  root.innerHTML = `<div class="star-mask" onclick="App.starDismiss()">
+    <div class="star-card" role="dialog" aria-modal="true" aria-labelledby="star-title" onclick="event.stopPropagation()">
+      <div class="star-ico" aria-hidden="true">★</div>
+      <div class="star-title" id="star-title">${esc(t(starred ? 'star.thanksTitle' : 'star.title'))}</div>
+      <div class="star-body">${esc(t(starred ? 'star.thanksBody' : 'star.body'))}</div>
+      <div class="star-actions">
+        ${primary}
+        ${refresh}
+        ${giteeBtn}
+        <button type="button" class="btn btn-ghost btn-sm" onclick="App.starDismiss()">${esc(starred ? t('star.close') : t('star.later'))}</button>
+      </div>
+      <div class="star-note">${esc(t('star.note'))}</div>
+    </div>
+  </div>`;
+  if (root.dataset.open !== '1') {
+    root.dataset.open = '1';
+    const first = root.querySelector('.star-actions .btn');
+    if (first) first.focus();
+  }
+}
+
+function bindAuthKeys() {
+  if (bindAuthKeys.bound) return;
+  bindAuthKeys.bound = true;
+  document.addEventListener('keydown', ev => {
+    if (ev.key !== 'Escape') return;
+    const starRoot = document.getElementById('star-root');
+    if (starRoot && starRoot.innerHTML) { ev.preventDefault(); App.starDismiss(); return; }
+    if (authFlowActive()) { ev.preventDefault(); App.authCancel(); }
+  });
+}
+
 function render() {
   const info = parseRoute();
   state.tab = info.tab; state.sub = info.sub; state.modal = info.modal || '';
@@ -2805,6 +3564,8 @@ function render() {
   const host = document.querySelector('#view .content');
   if (host && state.connected) host.insertAdjacentHTML('afterbegin', recoveryBanner());
   renderModal();
+  renderWelcome();
+  renderStarOverlay();
   document.documentElement.lang = LANG;
 }
 
@@ -2884,6 +3645,8 @@ function renderTopbar() {
     meta.innerHTML = `<span class="warn">${esc(t('conn.connecting'))}</span>`;
   } else if (!state.connected) {
     meta.innerHTML = `<span class="warn">${esc(t('conn.unavailable'))}</span>`;
+  } else if (state.scanning) {
+    meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))} · ${state.scanPct || 0}%</span>`;
   } else if (state.tab === 'ide') {
     if (state.sub === 'scanning' || state.scanning) meta.innerHTML = `<span class="warn">${esc(t('meta.scanning'))}</span>`;
     else if (!KPI.lastScan) meta.innerHTML = `<span class="dim">${esc(t('meta.neverScan'))}<span class="dim"> · </span>${esc(t('meta.scope'))}</span>`;
@@ -2954,6 +3717,21 @@ function ideRow(ide) {
   </button>`;
 }
 
+/* 进程列表可能很长（Cursor 一次就开十几个进程）。整串塞进一个 nowrap 标签会撑破
+   卡片、溢出窗口，所以按进程拆成可换行的标签，超过 6 个折叠成「另 N 个」，
+   完整列表放进 title，鼠标悬停可见。 */
+const PROC_CHIP_LIMIT = 6;
+function processChips(running) {
+  const shown = running.slice(0, PROC_CHIP_LIMIT);
+  const rest = running.length - shown.length;
+  const all = running.map(p => p.name + ' · PID ' + p.pid).join(' | ');
+  const chips = shown.map(p => `<span class="tag mono">${esc(p.name)} · PID ${esc(String(p.pid))}</span>`).join('');
+  const more = rest > 0
+    ? `<span class="tag mono" title="${esc(all)}">${esc(t('ide.processMore', { n: rest }))}</span>`
+    : '';
+  return `<div class="banner-actions proc-list">${chips}${more}</div>`;
+}
+
 function renderIdeDetail(ide) {
   const g = safetyCount(ide, 'green'), r = safetyCount(ide, 'red'), y = safetyCount(ide, 'yellow');
   const sel = selectedDirs(ide);
@@ -2964,7 +3742,7 @@ function renderIdeDetail(ide) {
   const migrated = ide.runtime.migrated;
   const redNote = r ? `<div class="banner danger" style="margin-top:2px"><span class="b-ico">⛨</span><div>${esc(t('ide.redExcluded', { n: r }))} <b>${esc(t('common.red'))}</b> · ${esc(t('ide.redLocked'))}</div></div>` : '';
   const yellowNote = y ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div>${esc(t('ide.yellowHint'))}</div></div>` : '';
-  const runBanner = running.length ? `<div class="banner warn"><span class="b-ico">▲</span><div><b>${esc(t('ide.processTitle'))}</b><br>${esc(t('ide.processBody', { app: ide.name }))}<div class="banner-actions"><span class="tag mono">${running.map(p => esc(p.name) + ' · PID ' + p.pid).join(' | ')}</span></div></div></div>` : '';
+  const runBanner = running.length ? `<div class="banner warn"><span class="b-ico">▲</span><div><b>${esc(t('ide.processTitle'))}</b><br>${esc(t('ide.processBody', { app: ide.name }))}${processChips(running)}</div></div>` : '';
   const migratedBanner = migrated ? `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('ide.alreadyMigrated'))}<br><span class="mono" style="font-size:var(--fs-meta)">${esc(ide.runtime.target || targetPathFor(ide))}</span></div></div>` : '';
   return `<div class="detail">
     <div class="detail-head">
@@ -3011,19 +3789,26 @@ function renderIdeDetail(ide) {
 
 function itemRow(ide, d, i) {
   const checked = isChecked(ide.id, i, d);
-  const badge = d.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>`
+  const badge = d.migrated ? `<span class="badge b-green">✓ ${esc(t('common.migrated'))}</span>`
+    : d.safety === 'green' ? `<span class="badge b-green">${esc(t('common.green'))}</span>`
     : d.safety === 'red' ? `<span class="badge b-red">⛨ ${esc(t('common.red'))}</span>`
     : `<span class="badge b-amber">? ${esc(t('common.yellow'))}</span>`;
-  const left = d.safety === 'red'
+  const left = d.migrated
+    ? `<span class="tcell lockcell"><span class="lock" title="${esc(t('ide.migratedLocked'))}" aria-label="${esc(t('ide.migratedLocked'))}">✓</span></span>`
+    : d.safety === 'red'
     ? `<span class="tcell lockcell"><span class="lock" title="${esc(t('ide.redLocked'))}" aria-label="${esc(t('ide.redLocked'))}">⛨</span></span>`
     : `<span class="tcell lockcell"><input class="row-check" type="checkbox" ${checked ? 'checked' : ''} ${d.safety === 'yellow' && !isConfirmed(ide.id, i) ? 'disabled' : ''} onclick="App.toggleCheck('${ide.id}',${i})" aria-label="${esc(d.path)}"></span>`;
   const confirmed = d.safety === 'yellow' && isConfirmed(ide.id, i);
-  const reason = reasonText(d) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
-  const act = d.safety === 'yellow' && !confirmed
+  const reason = d.migrated
+    ? t('ide.migratedRowReason')
+    : reasonText(d) + (d.safety === 'red' ? ' · ' + t('ide.redLocked') : '');
+  const act = d.migrated
+    ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.rollbackDir('${ide.id}',${i})">${esc(t('action.rollback'))}</button>`
+    : d.safety === 'yellow' && !confirmed
     ? `<button type="button" class="btn btn-ghost btn-xs" onclick="App.openYellow('${ide.id}',${i})">${esc(t('action.confirmYellow'))}</button>`
     : confirmed ? `<span class="badge b-gray">${esc(t('common.confirmed'))}</span>`
     : d.handling ? `<span class="tag tag-code">${esc(d.handling)}</span>` : '';
-  return `<div class="trow dir risk-${d.safety}" title="${esc(d.path)} · ${esc(reason)}">
+  return `<div class="trow dir risk-${d.migrated ? 'green' : d.safety}" title="${esc(d.path)} · ${esc(reason)}">
     ${left}
     <span class="tcell tpath badged">${badge}<span class="tp" title="${esc(d.path)}">${esc(d.path)}</span></span>
     <span class="tcell tdesc">${esc(reason)}</span>
@@ -3177,9 +3962,41 @@ function renderDisk() {
 }
 
 /* ---------- 规则学习 ---------- */
-function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && (!!state.settings.aiKeySet || state.settings.aiProvider === 'relay'); }
+/* 预设只负责填表单；保存时仍是普通的 base_url/model，可随意改。 */
+const AI_PRESETS = [
+  { id: 'deepseek', base: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+  { id: 'openai', base: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  { id: 'qwen', base: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus' },
+  { id: 'kimi', base: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-8k' },
+  { id: 'zhipu', base: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-flash' }
+];
+function aiPresetFor(baseUrl) {
+  const base = String(baseUrl || '').trim().replace(/\/+$/, '').toLowerCase();
+  if (!base) return 'none';
+  const hit = AI_PRESETS.find(p => p.base.toLowerCase() === base);
+  return hit ? hit.id : 'custom';
+}
+function aiSourceLabel(source) {
+  if (source === 'env') return t('ai.keySource.env');
+  if (source === 'stored') return t('ai.keySource.stored');
+  return t('ai.keySource.none');
+}
+function aiTestReason(code) {
+  const key = 'ai.test.reason.' + (code || 'internal');
+  const label = t(key);
+  return label === key ? t('ai.test.reason.internal') : label;
+}
+function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && !!state.settings.aiKeySet; }
 function aiModelName() { return state.settings.aiModel || t('ai.modelAuto'); }
 
+function stateLabel(code, fallback) {
+  if (code) {
+    const key = 'state.' + String(code).toLowerCase();
+    const label = t(key);
+    if (label !== key) return label;
+  }
+  return fallback || code || '';
+}
 function itemReason(it) {
   if (!it) return '';
   const key = it.reason || it.reason_key || '';
@@ -3187,7 +4004,7 @@ function itemReason(it) {
     const label = t(key);
     if (label !== key) return label;
   }
-  return it.blocked_reason || key || t('reason.unknown');
+  return blockedCodeText(it.blocked_code) || it.blocked_reason || key || t('reason.unknown');
 }
 function safetyBadge(safety) {
   if (safety === 'green') return `<span class="badge b-green">${esc(t('common.green'))}</span>`;
@@ -3207,7 +4024,7 @@ function pendingRow(it) {
   const path = it.source_path || it.rel_path || it.item_id;
   return `<div class="trow pend risk-yellow">
     <span class="tcell tpath badged"><span class="badge b-amber">?</span><span class="tp" title="${esc(path)}">${esc(path)}</span></span>
-    <span class="tcell tdesc" title="${esc(it.blocked_reason || '')}">${esc(itemReason(it))}</span>
+    <span class="tcell tdesc" title="${esc(itemReason(it))}">${esc(itemReason(it))}</span>
     <span class="tcell tsize">${fmtBytes(it.bytes || 0)}</span>
     <span class="tcell acts">
       <button type="button" class="btn btn-ghost btn-xs" onclick="App.overrideItem('${esc(it.item_id)}','green')">${esc(t('action.markGreen'))}</button>
@@ -3359,7 +4176,7 @@ function modalKind() {
   if (state.data.flow) return state.data.flow.kind;
   const info = parseRoute();
   if (info.modal) return info.modal;
-  const subs = ['process-blocked', 'yellow-confirm'];
+  const subs = ['process-blocked', 'yellow-confirm', 'mac-first-run'];
   return subs.indexOf(info.sub) >= 0 ? info.sub : '';
 }
 
@@ -3382,11 +4199,12 @@ function renderModal() {
   else if (kind === 'feedback') html = modalFeedback();
   else if (kind === 'process-blocked') html = modalBlocked();
   else if (kind === 'yellow-confirm') html = modalYellow();
+  else if (kind === 'mac-first-run') html = modalFirstRun();
   else if (kind === 'migrate') html = modalMigrateFlow();
   else if (kind === 'rollback') html = modalRollbackFlow();
   if (!html) { root.innerHTML = ''; return; }
   root.innerHTML = `<div class="modal-mask" onclick="App.closeModal()">
-    <div class="modal ${kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'migrate' || kind === 'rollback' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
+    <div class="modal ${kind === 'process-blocked' || kind === 'settings' || kind === 'ai' || kind === 'migrate' || kind === 'rollback' || kind === 'mac-first-run' ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(kind)}" onclick="event.stopPropagation()">${html}</div>
   </div>`;
 }
 
@@ -3401,8 +4219,12 @@ function modalSettings() {
       <div class="ctrl"><input type="text" id="settings-root" value="${esc(state.settings.targetRoot)}"></div>
     </div>
     <div class="settings-row">
-      <div><div class="k">${esc(t('settings.autoStart'))}</div><div class="d">${esc(t('settings.autoStartDesc'))}</div></div>
+      <div><div class="k">${esc(t('settings.autoStart'))}</div><div class="d">${esc(t('settings.autoStartDesc'))}${state.settings.autoStartSupported === false ? ' · ' + esc(t('settings.autoStartUnsupported')) : ''}${state.settings.autoStartError ? ' · ' + esc(state.settings.autoStartError) : ''}</div></div>
       <div class="ctrl"><button type="button" class="sw ${state.settings.autoStart ? 'on' : ''}" role="switch" aria-checked="${state.settings.autoStart}" onclick="App.toggleSetting('autoStart')"></button></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.logs'))}</div><div class="d">${esc(t('settings.logsDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="btn btn-ghost btn-sm" title="${esc(state.settings.logsDir)}" onclick="App.openPath(state.settings.logsDir)">${esc(t('settings.logsOpen'))}</button></div>
     </div>
     <div class="settings-row">
       <div><div class="k">${esc(t('settings.autoMaintenance'))}</div><div class="d">${esc(t('settings.autoMaintenanceDesc'))}</div></div>
@@ -3415,6 +4237,14 @@ function modalSettings() {
         <option value="remove" ${state.settings.uninstall === 'remove' ? 'selected' : ''}>${esc(t('settings.uninstall.remove'))}</option>
       </select></div>
     </div>
+    ${(() => {
+      const fr = state.settings.firstRun;
+      if (!fr || !(fr.steps || []).length) return '';
+      return `<div class="settings-row">
+      <div><div class="k">${esc(t('firstRun.help'))}</div><div class="d">${esc(t('firstRun.helpDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('mac-first-run')">${esc(t('firstRun.view'))}</button></div>
+    </div>`;
+    })()}
     <div class="settings-row">
       <div><div class="k">✦ ${esc(t('ai.enable'))}</div><div class="d">${esc(t('ai.sub'))}</div></div>
       <div class="ctrl row-flex">
@@ -3423,10 +4253,55 @@ function modalSettings() {
         <button type="button" class="btn btn-ghost btn-sm" onclick="App.openModal('ai')">${esc(t('ai.link'))}</button>
       </div>
     </div>
+    <div class="settings-row">
+      <div><div class="k">${esc(t('settings.account'))}</div><div class="d">${esc(t('settings.accountDesc'))}</div></div>
+      <div class="ctrl row-flex">
+        <span class="badge ${state.auth.signed_in ? 'b-green' : 'b-gray'}">${esc(state.auth.signed_in ? t('settings.accountSignedIn', { login: (state.auth.login || {}).login || '' }) : t('settings.accountNone'))}</span>
+        ${state.auth.signed_in
+          ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.authSignOut()">${esc(t('settings.signOut'))}</button>`
+          : `<button type="button" class="btn btn-ghost btn-sm" onclick="App.openWelcome()">${esc(t('settings.signIn'))}</button>`}
+      </div>
+    </div>
+    <div class="settings-row">
+      <div><div class="k">★ ${esc(t('settings.starPrompt'))}</div><div class="d">${esc(t('settings.starPromptDesc'))}</div></div>
+      <div class="ctrl"><button type="button" class="btn btn-ghost btn-sm" onclick="App.starShow()">${esc(t('star.reopen'))}</button></div>
+    </div>
     <div class="banner info"><span class="b-ico">i</span><div><b>${esc(t('settings.spaceCheck'))}</b> · ${esc(t('settings.spaceCheckValue'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('action.cancel'))}</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="App.saveSettings()">${esc(t('action.save'))}</button>`;
   return modalShell(t('settings.title'), t('settings.sub'), body, foot);
+}
+
+/* macOS 未签名应用的首次启动引导。版本差异由主机端 first_launch 数据给出
+   （tier / steps），页面只负责按 id 取文案，不做平台判断。 */
+function modalFirstRun() {
+  const g = state.settings.firstRun || {};
+  const steps = g.steps || [];
+  if (!steps.length) return '';
+  const list = steps
+    .map((id, i) => `<li><span class="fr-n">${i + 1}</span><span>${esc(t('firstRun.step.' + id))}</span></li>`)
+    .join('');
+  const unknown = g.tier === 'unknown'
+    ? `<div class="banner warn"><span class="b-ico">i</span><div>${esc(t('firstRun.versionUnknown'))}</div></div>`
+    : '';
+  const unsupported = g.supported === false
+    ? `<div class="banner danger"><span class="b-ico">▲</span><div>${esc(t('firstRun.unsupported', { min: g.min_supported || 11 }))}</div></div>`
+    : '';
+  const cmd = g.advanced_command || '';
+  const advanced = cmd ? `<details class="fr-adv">
+      <summary>${esc(t('firstRun.advanced'))}</summary>
+      <p>${esc(t('firstRun.advancedRisk'))}</p>
+      <code class="cmd mono">${esc(cmd)}</code>
+      <div class="row-flex"><button type="button" class="btn btn-ghost btn-xs" onclick="App.copyFirstRunCommand()">${esc(t('firstRun.copy'))}</button></div>
+      <p>${esc(t('firstRun.advancedNote'))}</p>
+    </details>` : '';
+  const body = `${unknown}${unsupported}
+    <div class="banner info"><span class="b-ico">i</span><div>${esc(t('firstRun.sub'))}</div></div>
+    <ol class="fr-steps">${list}</ol>
+    ${advanced}`;
+  const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.closeModal()">${esc(t('firstRun.later'))}</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="App.ackFirstRun()">${esc(t('firstRun.done'))}</button>`;
+  return modalShell(t('firstRun.title'), g.version ? t('firstRun.version', { version: g.version }) : '', body, foot);
 }
 
 function modalAi() {
@@ -3434,11 +4309,25 @@ function modalAi() {
   const ready = aiReady();
   const pendingCount = pendingYellowItems().length;
   const aiConsent = state.aiAsk ? `<div class="banner warn" style="margin-top:2px"><span class="b-ico">△</span><div><b>${esc(t('ai.consentTitle'))}</b><br>${esc(t('ai.consentBody'))}<div class="banner-actions"><button type="button" class="btn btn-primary btn-xs" onclick="App.confirmAiEnable()">${esc(t('ai.consentAccept'))}</button><button type="button" class="btn btn-ghost btn-xs" onclick="App.cancelAiAsk()">${esc(t('ai.consentDecline'))}</button></div></div></div>` : '';
+  const keyText = s.aiKeySet
+    ? `${t('ai.keyMask')} · ${aiSourceLabel(s.aiKeySource)}`
+    : (s.aiKeyError ? t('ai.keyUnavailable') : t('ai.keyMissing'));
+  const providerOptions = ['deepseek', 'openai', 'qwen', 'kimi', 'zhipu', 'custom', 'none']
+    .map(id => `<option value="${id}" ${s.aiProvider === id ? 'selected' : ''}>${esc(t('ai.provider.' + id))}</option>`)
+    .join('');
+  const clearKey = (s.aiKeySource === 'stored' || s.aiKeyError)
+    ? `<button type="button" class="btn btn-ghost btn-sm" onclick="App.clearAiKey()">${esc(t('ai.keyClear'))}</button>`
+    : '';
+  const keyNotes = `<div class="hint">${esc(t('ai.keyHint'))}</div>
+    ${s.aiKeySource === 'env' ? `<div class="hint">${esc(t('ai.keyEnvOverride'))}</div>` : ''}
+    ${s.aiKeyError ? `<div class="hint" style="color:var(--amber)">${esc(t('ai.keyUnavailable'))}</div>` : ''}`;
+  const localOnly = ready ? ''
+    : `<div class="banner info"><span class="b-ico">i</span><div><b>${esc(t('ai.localOnlyTitle'))}</b> · ${esc(t('ai.localOnly'))}</div></div>`;
   const body = `
     <div class="kvbar">
-      <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : 'warn'}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('common.status'))}</span><span class="v ${ready ? 'ok' : ''}">${esc(ready ? t('ai.statusOn') : t('ai.statusOff'))}</span></div>
       <div class="kv-item"><span class="k">${esc(t('ai.model'))}</span><span class="v">${esc(aiModelName())}</span></div>
-      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : 'warn'}">${esc(s.aiKeySet ? t('ai.keyEnvSet') : t('ai.keyEnvMissing'))}</span></div>
+      <div class="kv-item"><span class="k">${esc(t('ai.key'))}</span><span class="v ${s.aiKeySet ? 'ok' : (s.aiKeyError ? 'warn' : '')}">${esc(keyText)}</span></div>
       <div class="kv-item"><span class="k">${esc(t('rules.pending'))}</span><span class="v ${pendingCount ? 'warn' : 'ok'}">${pendingCount}</span></div>
     </div>
     <div class="settings-row">
@@ -3448,15 +4337,22 @@ function modalAi() {
     ${aiConsent}
     <div class="form-grid">
       <div class="field"><label>${esc(t('ai.provider'))}</label>
-        <select id="ai-provider">
-          <option value="relay" ${s.aiProvider === 'relay' ? 'selected' : ''}>${esc(t('ai.provider.relay'))}</option>
-          <option value="custom" ${s.aiProvider === 'custom' ? 'selected' : ''}>${esc(t('ai.provider.custom'))}</option>
-          <option value="none" ${s.aiProvider === 'none' ? 'selected' : ''}>${esc(t('ai.provider.none'))}</option>
-        </select>
+        <select id="ai-provider" onchange="App.pickAiPreset(this.value)">${providerOptions}</select>
+        <div class="hint">${esc(t('ai.providerHint'))}</div>
       </div>
       <div class="field"><label>${esc(t('ai.model'))}</label><input id="ai-model" value="${esc(s.aiModel)}" placeholder="${esc(t('ai.modelAuto'))}"></div>
       <div class="field full"><label>${esc(t('ai.baseUrl'))} <span class="dim">· ${esc(t('ai.baseUrlDesc'))}</span></label><input id="ai-base" value="${esc(s.aiBaseUrl)}" placeholder="https://"></div>
+      <div class="field full"><label>${esc(t('ai.key'))} <span class="dim">· ${esc(aiSourceLabel(s.aiKeySource))}</span></label>
+        <div class="row-flex">
+          <input id="ai-key" type="password" autocomplete="new-password" spellcheck="false" value="" style="flex:1;width:auto;min-width:220px" placeholder="${esc(s.aiKeySet ? t('ai.keyPlaceholderStored') : t('ai.keyPlaceholder'))}">
+          <button type="button" class="btn btn-ghost btn-sm" id="ai-key-toggle" onclick="App.toggleAiKey()">${esc(t('ai.keyShow'))}</button>
+          ${clearKey}
+        </div>
+        ${keyNotes}
+      </div>
     </div>
+    <div id="ai-test-result" class="mt-2"></div>
+    ${localOnly}
     <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.key'))}</b> · ${esc(t('ai.keyDesc'))}</div></div>
     <div class="banner info"><span class="b-ico">⛨</span><div><b>${esc(t('ai.scope'))}</b> · ${esc(t('ai.scopeValue'))}</div></div>`;
   const foot = `<button type="button" class="btn btn-ghost btn-sm" onclick="App.aiTest()">${esc(t('ai.test'))}</button>
@@ -3639,7 +4535,7 @@ function modalMigrateFailed(f, toolName) {
   const fromPlan = f.errorScope === 'plan';
   const code = err.code || (failed[0] && failed[0].state) || '';
   const lines = errorDetailLines(err);
-  const failedRows = failed.map(it => `<div class="err-item"><span class="e-path">${esc(it.source_path || '')}</span><span class="e-msg">${esc(it.error_message || it.state_label || it.state || '')}</span></div>`).join('');
+  const failedRows = failed.map(it => `<div class="err-item"><span class="e-path">${esc(it.source_path || '')}</span><span class="e-msg">${esc(it.error_message || stateLabel(it.state, it.state_label))}</span></div>`).join('');
   const body = `
     <div class="banner danger"><span class="b-ico">✕</span><div>${esc(fromPlan ? t('blocked.planDesc') : t('failed.sub'))}</div></div>
     ${code || lines.length ? `<div class="mt-3">
@@ -3775,6 +4671,103 @@ const App = {
     render();
     rpc('settings.set', { language: lang }).catch(() => {});
   },
+  /* ---------- 欢迎页 / 登录 / Star（T16） ---------- */
+  skipLogin() {
+    rpc('welcome.seen').then(auth => {
+      applyAuth(auth);
+      render();
+    }).catch(err => this.toast(errText(err)));
+  },
+  openWelcome() {
+    this.closeModal();
+    state.auth.welcome_seen = false;
+    render();
+  },
+  authStart(provider) {
+    const p = authProviders().find(x => x.provider === provider);
+    if (p && !p.configured) { this.toast(t('error.AUTH_NOT_CONFIGURED')); return; }
+    rpc('auth.start', { provider: provider }).then(auth => {
+      applyAuth(auth);
+      if (authFlowActive()) startAuthPolling();
+      else {
+        const flow = state.auth.flow || {};
+        if (flow.error && flow.error.code) this.toast(authErrorText(flow.error.code));
+      }
+      render();
+    }).catch(err => this.toast(authErrorText(err)));
+  },
+  authCopyCode() {
+    const flow = state.auth.flow || {};
+    const code = String(flow.user_code || '');
+    if (!code) return;
+    copyText(code).then(ok => { if (ok) this.toast(t('welcome.deviceCopied')); });
+  },
+  authOpenVerify() {
+    const flow = state.auth.flow || {};
+    this.openExternal(flow.verification_uri);
+  },
+  authCancel() {
+    rpc('auth.cancel').then(auth => {
+      stopAuthPolling();
+      applyAuth(auth);
+      render();
+    }).catch(err => this.toast(authErrorText(err)));
+  },
+  authSignOut() {
+    rpc('auth.sign_out').then(auth => {
+      stopAuthPolling();
+      applyAuth(auth);
+      this.toast(t('toast.signedOut'));
+      render();
+    }).catch(err => this.toast(errText(err)));
+  },
+  starShow() {
+    rpc('star.show').then(auth => {
+      applyAuth(auth);
+      this.toast(t('toast.starReopened'));
+      this.closeModal();
+      render();
+    }).catch(err => this.toast(errText(err)));
+  },
+  starDismiss() {
+    rpc('star.dismiss').then(auth => {
+      applyAuth(auth);
+      renderStarOverlay();
+    }).catch(() => {
+      state.auth.star.pending = false;
+      state.auth.star.dismissed = true;
+      renderStarOverlay();
+    });
+  },
+  starGive() {
+    rpc('star.give').then(auth => {
+      applyAuth(auth);
+      if (!state.auth.star.starred) this.toast(t('toast.starOpened'));
+      renderStarOverlay();
+    }).catch(err => this.toast(authErrorText(err)));
+  },
+  starCheck() {
+    rpc('star.check').then(auth => {
+      applyAuth(auth);
+      if (!state.auth.star.starred) this.toast(t('toast.starStillPending'));
+      renderStarOverlay();
+    }).catch(err => this.toast(authErrorText(err)));
+  },
+  openGitee() {
+    const gitee = state.auth.gitee || {};
+    if (!gitee.available || !gitee.url) {
+      this.toast(t('toast.starGiteeSoon'));
+      return;
+    }
+    this.openExternal(gitee.url);
+  },
+  openExternal(url) {
+    if (!url) return;
+    rpc('app.open_external', { url: url }).catch(err => this.toast(errText(err)));
+  },
+  openRepo() {
+    this.openExternal(state.auth.repository_url);
+  },
   toggleSetting(key) {
     const root = document.getElementById('settings-root');
     if (root) state.settings.targetRoot = root.value;
@@ -3801,15 +4794,28 @@ const App = {
   reconnect() {
     bootstrap();
   },
+  ackFirstRun() {
+    rpc('settings.set', { first_run_done: true }).then(s => {
+      applySettings(s);
+      this.closeModal();
+    }).catch(err => this.toast(errText(err)));
+  },
+  copyFirstRunCommand() {
+    const g = state.settings.firstRun || {};
+    if (!g.advanced_command) return;
+    copyText(g.advanced_command).then(ok => {
+      this.toast(t(ok ? 'firstRun.copied' : 'toast.copyFailed'));
+    });
+  },
   rescan() {
-    if (state.scanning) { this.go('#ide/scanning'); return; }
+    if (state.scanning) { if (!state.data.scanFrom) this.go('#ide/scanning'); return; }
     rpc('scan.start').then(res => {
       const jobId = res && res.job_id;
       state.scanning = true;
       state.data.scanError = '';
       state.scanPct = 3;
       state.data.scanJob = jobId ? { job_id: jobId, state: (res && res.state) || 'queued' } : null;
-      this.go('#ide/scanning');
+      enterScanRoute();
       if (jobId) startScanPolling(jobId);
     }).catch(err => {
       if (err && err.code === 'BUSY') {
@@ -3819,7 +4825,7 @@ const App = {
             state.scanning = true;
             state.data.scanJob = job;
             state.scanPct = scanPercent(job);
-            this.go('#ide/scanning');
+            enterScanRoute();
             startScanPolling(job.job_id);
             return;
           }
@@ -3950,7 +4956,7 @@ const App = {
   startPreview(ideId) {
     const ide = getIde(ideId);
     state.selectedIde = ide.id;
-    if (!selectedDirs(ide).length) { this.toast(t('toast.needSelect')); return; }
+    if (!selectedDirs(ide).length) { this.toast(t(emptySelectionKey(ide))); return; }
     state.returnHash = '#ide';
     if (ide.runtime.running.length) { this.go('#ide/process-blocked'); return; }
     if (!spaceOk(ide)) { this.toast(t('toast.spaceShort')); return; }
@@ -4055,6 +5061,13 @@ const App = {
     if (!it) { this.toast(t('history.noRollback')); return; }
     if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
     this._openRollback(it.migrated_job_id);
+  },
+  rollbackDir(ideId, idx) {
+    const ide = getIde(ideId);
+    const d = dirAt(ideId, idx);
+    if (!d || !d.migrated_job_id) { this.toast(t('history.noRollback')); return; }
+    if (ide.runtime.running.length) { this.toast(t('toast.blocked')); return; }
+    this._openRollback(d.migrated_job_id);
   },
   historyRollback(id) {
     const h = HISTORY.find(x => x.id === id);
@@ -4185,6 +5198,17 @@ const App = {
     state.data.recoveryRun = null;
     render();
   },
+  recoveryIgnore(jobId) {
+    if (!jobId) return;
+    const run = state.data.recoveryRun;
+    if (run && (run.phase === 'starting' || run.phase === 'progress')) return;
+    rpc('recovery.ignore', { job_id: jobId }).then(() => {
+      this.toast(t('recovery.ignored'));
+      return refreshRecovery();
+    }).then(() => render()).catch(err => {
+      this.toast((err && err.detail && err.detail.message) || (err && err.code) || String(err));
+    });
+  },
   retryMigrate() {
     const f = state.data.flow;
     if (!f || f.kind !== 'migrate') { this._beginMigrate(state.selectedIde); return; }
@@ -4266,22 +5290,74 @@ const App = {
       this.toast(errText(err));
     });
   },
+  pickAiPreset(value) {
+    const preset = AI_PRESETS.find(p => p.id === value);
+    if (!preset) return;
+    const base = document.getElementById('ai-base');
+    const model = document.getElementById('ai-model');
+    if (base) base.value = preset.base;
+    if (model) model.value = preset.model;
+  },
+  toggleAiKey() {
+    const input = document.getElementById('ai-key');
+    const btn = document.getElementById('ai-key-toggle');
+    if (!input) return;
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    if (btn) btn.textContent = t(show ? 'ai.keyHide' : 'ai.keyShow');
+  },
+  clearAiKey() {
+    rpc('settings.set', { ai: { api_key: '' } }).then(s => {
+      applySettings(s);
+      render();
+      this.toast(t('ai.keyCleared'));
+    }).catch(err => this.toast(errText(err)));
+  },
   saveAi() {
     const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-    const provider = val('ai-provider') || state.settings.aiProvider;
+    const provider = val('ai-provider') || 'none';
     const patch = {
-      enabled: provider !== 'none' && !!state.settings.aiEnabled,
-      base_url: provider === 'custom' ? val('ai-base') : '',
-      model: val('ai-model') || state.settings.aiModel
+      enabled: !!state.settings.aiEnabled,
+      base_url: provider === 'none' ? '' : val('ai-base'),
+      model: provider === 'none' ? '' : val('ai-model')
     };
+    const typedKey = val('ai-key');
+    /* 只有用户主动填了新密钥才发送；留空表示保留已保存的密钥 */
+    if (typedKey) patch.api_key = typedKey;
     rpc('settings.set', { ai: patch }).then(s => {
       applySettings(s);
+      if (typedKey) {
+        render();
+        this.toast(t('ai.savedWithKey'));
+        return;
+      }
       this.toast(t('toast.saved'));
       this.closeModal();
     }).catch(err => this.toast(errText(err)));
   },
   aiTest() {
-    this.toast(t('ai.testUnavailable'));
+    const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    const baseUrl = val('ai-base');
+    const model = val('ai-model');
+    const apiKey = val('ai-key');
+    const box = document.getElementById('ai-test-result');
+    if (box) box.innerHTML = `<div class="banner info"><span class="b-ico">…</span><div>${esc(t('ai.testing'))}</div></div>`;
+    const params = { base_url: baseUrl, model: model };
+    /* 表单里刚填、尚未保存的密钥只用于这一次测试，主机端不会写入磁盘 */
+    if (apiKey) params.api_key = apiKey;
+    rpc('ai.test', params).then(res => {
+      const out = document.getElementById('ai-test-result');
+      if (!out) return;
+      if (res && res.ok) {
+        out.innerHTML = `<div class="banner ok"><span class="b-ico">✓</span><div>${esc(t('ai.testOk', { model: res.model || model, ms: res.latency_ms || 0 }))}</div></div>`;
+        return;
+      }
+      const reason = aiTestReason((res && res.error_code) || 'internal');
+      out.innerHTML = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('ai.testBad', { reason: reason }))}</div></div>`;
+    }).catch(err => {
+      const out = document.getElementById('ai-test-result');
+      if (out) out.innerHTML = `<div class="banner warn"><span class="b-ico">△</span><div>${esc(t('ai.testBad', { reason: errText(err) }))}</div></div>`;
+    });
   },
   copyDiagnostics() {
     copyText(diagnosticsText()).then(ok => {

@@ -121,6 +121,12 @@ class AIAvailabilityTest(AISettingsTestBase):
         self.assertEqual(ai["base_url"], AI_PATCH["base_url"])
         self.assertEqual(ai["model"], AI_PATCH["model"])
 
+    def test_api_key_is_detected_while_ai_is_disabled(self):
+        ai = self.service.settings_get()["ai"]
+        self.assertFalse(ai["enabled"])
+        self.assertTrue(ai["api_key_set"])
+        self.assertEqual(ai["disabled_reason"], "disabled")
+
     def test_missing_key_keeps_ai_unavailable(self):
         service = make_service(self)
         service.ai_consent()
@@ -172,15 +178,13 @@ class AIAvailabilityTest(AISettingsTestBase):
 
 
 class AISettingsValidationTest(AISettingsTestBase):
-    def test_api_key_cannot_be_supplied_through_settings(self):
+    def test_api_key_must_be_a_string(self):
         for key in ("api_key", "apiKey"):
-            with self.assertRaises(BridgeError) as ctx:
-                self.service.settings_set({"ai": {key: API_KEY}})
-            self.assertEqual(ctx.exception.code, "INVALID_ARGUMENT")
-            self.assertIn(
-                "DISK_WARDEN_AI_API_KEY",
-                ctx.exception.detail.get("reason", ""),
-            )
+            for value in (None, 42, [], {}):
+                with self.assertRaises(BridgeError) as ctx:
+                    self.service.settings_set({"ai": {key: value}})
+                self.assertEqual(ctx.exception.code, "INVALID_ARGUMENT")
+                self.assertIn("must be a string", ctx.exception.detail.get("reason", ""))
 
     def test_ai_must_be_an_object(self):
         self.assert_invalid({"ai": "on"}, "ai settings must be an object")
