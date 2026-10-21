@@ -11,18 +11,20 @@ You do not need the source tree to run Disk Warden. Every release publishes a co
 
 Both archives are built from a tagged commit by our own build pipeline (Windows: `packaging/build.ps1`; macOS: GitHub Actions `macos-latest`). Neither is code-signed yet, so Gatekeeper or SmartScreen will warn the first time — see the first-launch steps in the README.
 
+On Windows, unpack the archive into a fixed folder **on the C: drive** (`C:\DiskWarden` is the recommended path) and run it from there. Running from inside the zip preview, a temporary folder, a USB stick or a network share is not supported: the location is read-only, disappears, or changes path, and the junctions created during a migration would break.
+
 ## Verify what you downloaded
 
 Each archive ships next to a `.sha256` file on the Releases page.
 
 ```powershell
 # Windows PowerShell
-Get-FileHash .\DiskWarden-0.9.0-beta.9-win-x64.zip -Algorithm SHA256
+Get-FileHash .\DiskWarden-0.9.0-beta.10-win-x64.zip -Algorithm SHA256
 ```
 
 ```bash
 # macOS / Linux
-shasum -a 256 DiskWarden-0.9.0-beta.9-macos-arm64.zip
+shasum -a 256 DiskWarden-0.9.0-beta.10-macos-arm64.zip
 ```
 
 Compare the output with the `.sha256` asset for the same release. If it differs, do not run the archive.
@@ -30,7 +32,7 @@ Compare the output with the `.sha256` asset for the same release. If it differs,
 ## What the app touches
 
 - It reads the data directories of AI IDEs it recognises; no other user files are opened.
-- It writes migrated data, a journal, history, settings and logs under its own data root (`%LOCALAPPDATA%\DiskWarden` on Windows, `~/Library/Application Support/DiskWarden` on macOS).
+- It writes migrated data, a journal, history, settings and logs under its own data root, never inside the app folder: `D:\DiskWarden` on Windows when that drive exists and is writable, otherwise `%LOCALAPPDATA%\DiskWarden`; `~/Library/Application Support/DiskWarden` on macOS. The Settings page shows the path in use.
 - It creates junctions (Windows) or symlinks (macOS) only at the directories you approve.
 - Every move is copied, verified, and only then linked; the original stays in place until verification passes.
 - Network access is limited to GitHub (sign-in and the star check) and, if you explicitly configure it, one AI endpoint you supply. AI analysis is off by default.

@@ -1,9 +1,11 @@
-﻿DiskWarden 0.9.0-beta.9（Windows 10/11 x64）使用说明
+﻿DiskWarden 0.9.0-beta.10（Windows 10/11 x64）使用说明
 ======================================================
 
 一、第一次打开
-1. 把整个 zip 解压到一个固定目录，不要只把 exe 拖出来单独运行：
-   程序依赖同目录下的 _internal 文件夹。
+1. 把整个 zip 解压到 C 盘（系统盘）的一个固定目录，推荐 C:\DiskWarden。
+   - 不要直接在压缩包预览里运行，不要放在 U 盘、网络共享盘或临时目录：
+     这些位置要么只读，要么每次启动路径都变，迁移时建立的目录联接会失效。
+   - 也不要只把 exe 拖出来单独运行：程序依赖同目录下的 _internal 文件夹。
 2. 双击 DiskWarden\DiskWarden.exe。
 3. 如果出现“Windows 已保护你的电脑”蓝色提示（SmartScreen）：
    - 点击“更多信息”
@@ -19,9 +21,13 @@
 - 不需要安装 Python。
 
 三、数据与日志放在哪
-- 默认数据目录：D:\DiskWarden。若不可写，启动器会依次回退到
-  %LOCALAPPDATA%\DiskWarden、%APPDATA%\DiskWarden、
-  %USERPROFILE%\DiskWarden、%TEMP%\DiskWarden，实际路径以设置页显示为准。
+- 程序目录和数据目录是分开的：替换程序不会影响数据。
+- 数据目录默认取 D:\DiskWarden（仅当 D 盘存在且可写）；D 盘不存在或
+  不可写时，启动器会依次回退到 %LOCALAPPDATA%\DiskWarden（位于 C 盘）、
+  %APPDATA%\DiskWarden、%USERPROFILE%\DiskWarden、%TEMP%\DiskWarden，
+  实际路径以设置页显示为准。
+- 如果希望数据也固定在 C 盘，启动前设置环境变量：
+  DISKWARDEN_DATA_ROOT=C:\DiskWardenData
 - 日志：<数据目录>\logs\app.log。超过 2 MB 自动轮转为 app.log.1/.2，
   另按天写 JSONL 归档日志，保留 14 天。
 - 设置页可以直接打开日志目录。
@@ -44,7 +50,8 @@
 1. 从托盘菜单退出程序。
 2. 在设置中关闭“开机自启”。
 3. 如果迁移过目录，先在应用内执行“回滚”，确认原目录已恢复为普通文件夹。
-4. 删除解压目录和数据目录（默认 D:\DiskWarden）。
+4. 删除解压目录（推荐位置 C:\DiskWarden）和数据目录（设置页会显示实际路径，
+   默认 D:\DiskWarden）。
 
 七、遇到问题
 - 打开设置页的“日志目录”，把 logs\app.log 与
