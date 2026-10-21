@@ -1,0 +1,129 @@
+/* ==========================================================================
+   uitour — dark preview skin (screenshot-only)
+   --------------------------------------------------------------------------
+   The product has no dark theme yet; this file exists so UI review can eyeball
+   every page in a dark context (and so T29 "de-webify" has a second surface to
+   compare).  It is injected by Playwright *after* ui/index.html loads and is
+   never referenced by the shipped app.
+
+   Rules of the road for editing this file:
+   * Override design tokens first; only fall back to literal-colour selectors
+     for the handful of places ui/index.html hardcodes hex values.
+   * Keep contrast >= 4.5:1 for body text on the panel colours below.
+   * Do not assume a token exists — check :root in ui/index.html first.
+   ========================================================================== */
+
+html, body { background: #14181c; color: #d6dde4; }
+
+:root {
+  --bg: #14181c;
+  --panel: #1b2127;
+  --panel-2: #1f262d;
+  --line: #2b333b;
+  --line-soft: #242b32;
+  --text: #d6dde4;
+  --text-2: #b3bec8;
+  --muted: #93a0ac;
+  --dim: #7d8a96;
+
+  --green: #4fcf55;
+  --green-dark: #3fbb46;
+  --green-deep: #6ddc73;
+  --green-soft: #1d2a20;
+  --green-line: #2c4630;
+
+  --amber-ink: #f0b849;
+  --amber-line: #4a3b1d;
+  --amber-bar: #d98f14;
+  --disabled-ink: #7d8a96;
+
+  --shadow: 0 14px 34px rgba(0, 0, 0, .55);
+}
+
+/* --- chrome ---------------------------------------------------------- */
+.topnav { background: linear-gradient(180deg, #24352a 0%, #1e2c23 55%, #1a261e 100%) !important; }
+.topbar { background: #1b2127 !important; border-bottom-color: #2b333b !important; }
+.main { background: #14181c; }
+.search { background: #1f262d !important; border-color: #2b333b !important; color: #d6dde4; }
+.bar { background: #1b2127 !important; border-color: #2b333b !important; }
+::-webkit-scrollbar-thumb { background: #3a444e; border-color: #14181c; }
+::-webkit-scrollbar-thumb:hover { background: #4a555f; }
+
+/* --- buttons --------------------------------------------------------- */
+.btn-primary { color: #10240f; }
+.btn-ghost { background: #232b33 !important; color: #c8d2dc !important; border-color: #38424c !important; }
+.b-red { background: #33201f !important; color: #ff8b8f !important; border-color: #513030 !important; }
+.b-amber { background: #332b1b !important; color: #f0b849 !important; border-color: #4a3b1d !important; }
+.b-gray { background: #232b33 !important; color: #9aa6b1 !important; border-color: #333c45 !important; }
+.b-violet { background: #2a2340 !important; color: #b9a6ff !important; border-color: #3d3460 !important; }
+.b-plain { background: #1f262d !important; color: #93a0ac !important; border-color: #333c45 !important; }
+.b-green { background: #1d2a20 !important; color: #6ddc73 !important; border-color: #2c4630 !important; }
+.b-blue { background: #1c2a3a !important; color: #79b6f7 !important; border-color: #2a4056 !important; }
+.btn-ai { background: #2a2340 !important; color: #b9a6ff !important; }
+.btn-ai:hover { background: #332a4c !important; }
+
+/* --- banners --------------------------------------------------------- */
+.banner.warn { background: #2e2819 !important; border-color: #4a3b1d !important; color: #f0b849 !important; }
+.banner.danger { background: #32201f !important; border-color: #513030 !important; color: #ff8b8f !important; }
+.banner.ok { background: #1d2a20 !important; border-color: #2c4630 !important; color: #6ddc73 !important; }
+.banner.info { background: #1c2a3a !important; border-color: #2a4056 !important; color: #79b6f7 !important; }
+
+/* --- cards / rows / tables ------------------------------------------- */
+.preview-card { background: #19211b !important; border-color: #26332a !important; }
+.kvbar { background: #19211b !important; border-color: #26332a !important; }
+.row:hover { background: #202830 !important; border-color: #2f3941 !important; }
+.row.risk-red { background: #2a1f1f !important; }
+.trow:hover { background: #202830 !important; border-color: #2f3941 !important; }
+.trow.risk-red { background: #2a1f1f !important; }
+.trow.risk-yellow { background: #2c2618 !important; }
+.err-item { background: #2a1f1f !important; border-color: #513030 !important; }
+.copy-btn { background: #232b33 !important; border-color: #333c45 !important; color: #c8d2dc !important; }
+.sw { background: #333c45 !important; }
+.sw::after { background: #e6ebf0 !important; }
+.tag { background: #232b33 !important; border-color: #333c45 !important; color: #93a0ac !important; }
+.tag-code { background: #1d2a20 !important; border-color: #2c4630 !important; color: #6ddc73 !important; }
+.empty-ico { background: #1d2a20 !important; color: #4fcf55 !important; border-color: #2c4630 !important; }
+.stage.active { background: #1d2a20 !important; color: #d6dde4 !important; }
+.stage { background: #1f262d; color: #93a0ac; }
+.sk-row { background: linear-gradient(90deg, #232b33 25%, #2b343d 37%, #232b33 63%) !important; }
+.proj-card { background: #1b2127 !important; border-color: #2b333b !important; }
+.proj-card:hover { background: #202a22 !important; border-color: #35503a !important; }
+.proj-card.active { background: #1d2a20 !important; border-color: #3f6a45 !important; }
+.hist-card { background: #1b2127 !important; border-color: #2b333b !important; }
+.hist-card:hover { background: #202a22 !important; }
+.hist-card.active { background: #1d2a20 !important; border-color: #3f6a45 !important; }
+.table th { background: #1f262d !important; color: #93a0ac !important; }
+.table td { border-color: #242b32; }
+.table tbody tr:hover td { background: #202830 !important; }
+.field input, .field select { background: #1f262d !important; border-color: #333c45 !important; }
+
+/* --- timeline -------------------------------------------------------- */
+.tl-dot { background: #1b2127 !important; border-color: #3a444e !important; color: #93a0ac !important; }
+.tl-dot.err { background: #32201f !important; border-color: #6b3a3a !important; color: #ff8b8f !important; }
+.tl-code { background: #32201f !important; border-color: #513030 !important; color: #ff8b8f !important; }
+
+/* --- modals ---------------------------------------------------------- */
+.modal { background: #1b2127 !important; border-color: #333c45 !important; }
+.modal-head { background: #1f262d !important; border-bottom-color: #2b333b !important; }
+.modal-foot { background: #1a2026 !important; border-top-color: #2b333b !important; }
+.sum-box { background: #1f262d !important; border-color: #2b333b !important; }
+.settings-row select, .settings-row input[type=text] {
+  background: #1f262d !important; border-color: #333c45 !important; color: #d6dde4 !important;
+}
+.ai-key { background: #2a2340 !important; border-color: #3d3460 !important; color: #b9a6ff !important; }
+
+/* --- welcome / star -------------------------------------------------- */
+.welcome-mask, .star-mask { background: rgba(6, 9, 12, .72); }
+.welcome-card, .star-card { background: #1b2127 !important; border: 1px solid #333c45 !important; }
+.welcome-head { background: linear-gradient(180deg, #1d2a20 0%, #1b2127 100%) !important; border-bottom-color: #2b333b !important; }
+.welcome-foot { background: #1a2026 !important; border-top-color: #2b333b !important; }
+.login-btn { background: #232b33 !important; border-color: #38424c !important; color: #d6dde4 !important; }
+.login-btn:hover { background: #2a333c !important; }
+.login-flow .lf-usercode { background: #232b33 !important; border-color: #38424c !important; color: #e8eef3 !important; }
+.login-box { background: #1f262d !important; border-color: #2b333b !important; }
+
+/* --- toast ----------------------------------------------------------- */
+.toast { background: #2b343d !important; border-color: #3f4a54 !important; color: #eef3f7 !important; }
+
+/* --- icons / decorative ---------------------------------------------- */
+.topnav .brand img, .welcome-logo { filter: none; }
