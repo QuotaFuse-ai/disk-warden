@@ -1,13 +1,13 @@
 # Disk Warden 0.9.0-beta.10 release notes
 
 - Release date: 2026-10-21
-- Version: `0.9.0-beta.10` (source: `main` at `TBD`)
+- Version: `0.9.0-beta.10` (source: `main` at `5a4bb81`)
 - Release page: <https://github.com/QuotaFuse-ai/disk-warden/releases/tag/v0.9.0-beta.10>
 
 | Platform | Artifact | Bytes | SHA-256 |
 |---|---|---|---|
-| Windows 10/11 x64 | `DiskWarden-0.9.0-beta.10-win-x64.zip` | TBD | `TBD` |
-| macOS 11+ arm64 | `DiskWarden-0.9.0-beta.10-macos-arm64.zip` | TBD | `TBD` |
+| Windows 10/11 x64 | `DiskWarden-0.9.0-beta.10-win-x64.zip` | 36,700,380 | `6182d6d433ecead2c77b5c11925d932d5f2942ef6fad416bebd2c75d3ef9f9dd` |
+| macOS 11+ arm64 | `DiskWarden-0.9.0-beta.10-macos-arm64.zip` | 16,498,327 | `0659f0cf4193c12063f5c0bda877604afdd211e2ad79528c810119a5711ef867` |
 
 Both builds are unsigned. The macOS build is **not tested on real hardware** (built by
 GitHub Actions `macos-latest`, automated `--smoke` check only).
@@ -33,12 +33,12 @@ No application logic changed in this release.
 
 | Check | Result |
 |---|---|
-| Unit tests (Windows, `python -m unittest discover -s tests`) | TBD |
-| CI tests (Linux 3.10/3.12) | TBD |
-| Packaged sandbox drills (`packaging/run-drills.ps1`) | TBD |
-| macOS CI: unit tests, packaging, `--smoke` | TBD |
-| `tools/repo_safety_check.py` on the tree and both archives | TBD |
-| Install note present in bundled `START-HERE.txt` and docs | TBD |
+| Unit tests (Windows, `python -m unittest discover -s tests`) | 934 run, OK (1 skipped) |
+| CI tests (Linux 3.10/3.12, PR #16) | pass |
+| Packaged sandbox drills (`packaging/run-drills.ps1`) | 8/8 pass |
+| macOS CI: unit tests, packaging, `--smoke` | pass (`ok: true`, `app_version = 0.9.0-beta.10`) |
+| `tools/repo_safety_check.py` on the tree and both archives | 217 files, 0 high, verdict PASS |
+| Install note present in bundled `START-HERE.txt` and docs | yes, both archives (205 / 203 entries) |
 
 ## Known limitations (unchanged)
 
