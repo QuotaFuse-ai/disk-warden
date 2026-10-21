@@ -147,9 +147,20 @@ AI_TEST_MAX_TOKENS = 1
 AI_KEY_MAX_LENGTH = keystore.MAX_SECRET_BYTES
 
 
+#: GitHub's device-flow verification page (T16 sign-in).  The welcome card's
+#: "打开授权页面" button and ``auth.start`` both hand this URL to the browser,
+#: so it has to survive the allowlist below; nothing else outside the
+#: organisation is accepted.
+EXTERNAL_DEVICE_PATH = "/login/device"
+
+
 def _validate_external_url(url):
     # type: (object) -> str
-    """Only GitHub URLs under the QuotaFuse-ai organisation are allowed."""
+    """Only the GitHub pages Disk Warden opens itself are allowed.
+
+    That is the QuotaFuse-ai organisation (repository, star, issue links) and
+    GitHub's device-flow verification page.
+    """
     if not isinstance(url, str) or not url:
         raise invalid("url is required")
     if len(url) > MAX_EXTERNAL_URL_LENGTH:
@@ -163,13 +174,16 @@ def _validate_external_url(url):
         raise invalid("url is not valid")
     path = unquote(parsed.path)
     segments = path.split("/")
+    allowed_path = path.startswith("/QuotaFuse-ai/") or (
+        path.rstrip("/") == EXTERNAL_DEVICE_PATH
+    )
     if (
         parsed.scheme != "https"
         or parsed.hostname != "github.com"
         or port not in (None, 443)
         or parsed.username is not None
         or parsed.password is not None
-        or not path.startswith("/QuotaFuse-ai/")
+        or not allowed_path
         or "\\" in path
         or "." in segments
         or ".." in segments
