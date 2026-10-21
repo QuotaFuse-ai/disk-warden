@@ -22,7 +22,7 @@ Usage::
 
     python tools/repo_safety_check.py
     python tools/repo_safety_check.py --json report.json --md report.md
-    python tools/repo_safety_check.py --zip dist/DiskWarden-0.9.0-beta.9-win-x64.zip
+    python tools/repo_safety_check.py --zip dist/DiskWarden-0.9.0-beta.10-win-x64.zip
 """
 
 import argparse

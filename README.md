@@ -19,10 +19,12 @@ Ready-to-run packages, one click, no toolchain: open the [**Releases page**](htt
 
 | Platform | File | What to do |
 |---|---|---|
-| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.9-win-x64.zip` | Unzip to a fixed folder, run `DiskWarden\DiskWarden.exe`. |
-| macOS 11+ (Apple Silicon) | `DiskWarden-0.9.0-beta.9-macos-arm64.zip` | Unzip, open `DiskWarden.app`, allow it once — see [First launch on macOS](#first-launch-on-macos). |
+| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.10-win-x64.zip` | Unzip to a fixed folder **on the C: drive** (e.g. `C:\DiskWarden`), then run `DiskWarden\DiskWarden.exe`. |
+| macOS 11+ (Apple Silicon) | `DiskWarden-0.9.0-beta.10-macos-arm64.zip` | Unzip, open `DiskWarden.app`, allow it once — see [First launch on macOS](#first-launch-on-macos). |
 
 Each archive ships with a matching `.sha256` file and a `START-HERE*.txt` guide in the zip root.
+
+**Windows: keep the app on the C: drive.** Unpack into a fixed folder on your system drive — `C:\DiskWarden` is the recommended path — and start it from there. Do not run it from inside the zip preview, from `Downloads` after a "run without extracting", from a temporary folder, from a USB stick or from a network share: those locations are read-only, disappear, or change path between launches, and the junctions the app creates when it moves a directory would break. Program data, settings and logs are stored outside the app folder, so replacing the app later never touches them.
 
 **What has been verified.**
 
@@ -60,8 +62,8 @@ You no longer need to clone this repository to use Disk Warden — download the 
 | AI analysis interface (T22) | Done, disabled by default |
 | UI wired to the real engine, AI key setup (T12, T25) | Done, merged to `main` |
 | Welcome screen, GitHub sign-in and star prompt (T16) | In progress: GitHub Device Flow; skipping sign-in never limits local features |
-| Windows packaging (T15) | Published as `DiskWarden-0.9.0-beta.9-win-x64.zip`: tray, per-user autostart, rotating logs, packaged sandbox drills |
-| macOS adaptation and packaging (T21) | Published as `DiskWarden-0.9.0-beta.9-macos-arm64.zip`, **untested on real hardware**: `.app` built on GitHub Actions `macos-latest`, symlink transfer/links, LaunchAgent autostart, tray, rotating logs, in-app first-launch guide; CI builds and smoke-tests the bundle |
+| Windows packaging (T15) | Published as `DiskWarden-0.9.0-beta.10-win-x64.zip`: tray, per-user autostart, rotating logs, packaged sandbox drills |
+| macOS adaptation and packaging (T21) | Published as `DiskWarden-0.9.0-beta.10-macos-arm64.zip`, **untested on real hardware**: `.app` built on GitHub Actions `macos-latest`, symlink transfer/links, LaunchAgent autostart, tray, rotating logs, in-app first-launch guide; CI builds and smoke-tests the bundle |
 
 **934 unit tests** cover the completed modules; CI runs them on every push.
 
