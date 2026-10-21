@@ -42,22 +42,6 @@ You no longer need to clone this repository to use Disk Warden — download the 
 - `python tools/repo_safety_check.py` audits the tracked tree offline: committed credentials, download-and-run or obfuscated scripts, destructive deletes, unexpected outbound hosts, symlinks, disguised executables, and archive path traversal. It executes and uploads nothing.
 - The latest result is committed in [`docs/security/repo-safety-report.md`](docs/security/repo-safety-report.md); the full policy, app behaviour and reporting process are in [`SECURITY.md`](SECURITY.md).
 
-## Download and install
-
-No Python, no compiler, no build steps: open the [**Releases page**](https://github.com/QuotaFuse-ai/disk-warden/releases/latest) and download the archive for your platform. Each zip is the complete app — unzip and run.
-
-| Platform | File | What to do |
-|---|---|---|
-| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.8-win-x64.zip` | Unzip to a fixed folder, run `DiskWarden\DiskWarden.exe`. |
-| macOS 11+ (Apple Silicon) | `DiskWarden-0.9.0-beta.8-macos-arm64.zip` | Unzip, open `DiskWarden.app`, allow it once (Gatekeeper). |
-
-Each archive ships with a matching `.sha256` file and a `START-HERE*.txt` guide in the zip root.
-
-- **Windows** — built and exercised on Windows 10/11: the full unit suite, the packaged sandbox drills, and the frozen executable's self-check all run on the released artifact.
-- **macOS** — **not tested on real hardware yet.** Nobody on the team has a Mac, so the `.app` is built by GitHub Actions on `macos-latest` and only passes an automated `--smoke` self-check (bundle layout, WKWebView backend, UI files present). Treat it as a developer preview. Please report anything that breaks in an issue.
-
-Both builds are **unsigned**, so the first launch shows one SmartScreen (Windows → “More info” → “Run anyway”) or Gatekeeper prompt (macOS). Neither is a virus warning, and neither requires switching off a system protection.
-
 ## Why not just a cleanup tool
 
 - It understands AI IDE directory layouts and classifies each directory as **movable**, **do-not-touch**, or **unknown** — instead of deleting files by extension
@@ -162,7 +146,7 @@ This is a source-available license, not an OSI-approved open-source license.
 - Migration copies only; the source is never recursively deleted. Deletion targets verified copies and stale links only
 - Dangerous directories (IDE installations, user source code) are blocked from migration; yellow-tier directories require explicit confirmation
 - AI analysis is off by default. When enabled, directory information is sent to a third-party AI service, and the UI says so before you turn it on
-- Temporary scripts in the repo root (`check*.py`, `upload*.py`, `test_ssh.py`, `clean.py`) contain sensitive credentials. They are excluded by `.gitignore` and **must not be committed**
+- No credentials are tracked. Tokens the app obtains at runtime are stored with the OS keychain (DPAPI on Windows) and never written to the repository; local scratch scripts are gitignored. `tools/repo_safety_check.py` fails the build if a secret pattern ever lands in a tracked file
 
 ## Contributing
 
