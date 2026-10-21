@@ -14,10 +14,11 @@ Python 3.8 compatible (decision 0005).
 """
 
 import os
+import stat as stat_module
 from dataclasses import dataclass
 from typing import Dict, Optional
 
-from ...platform import link_target_matches
+from ...platform import LinkError, is_reparse_stat, link_target_matches
 from . import link, marker, paths, swap
 from .cleanup import UnsafeCleanupError, remove_tombstone
 from .models import (
@@ -253,17 +254,245 @@ def _recover_link_source(result, emitter, ops, observation,
     )
 
 
-def _recover_source_present(result, emitter, ops, observation, recorded_state,
-                            source_path, tombstone_path, final_path, job_id,
-                            staging_path):
-    """The source path is a real directory: S5/S6 were never completed."""
-    if observation.tombstone_kind == "dir":
+def _data_index(root):
+    # type: (str) -> Optional[Dict[str, int]]
+    """Relative path -> size for the user data below ``root``.
+
+    This mirrors V2 verification (relative path set plus per-file size) with one
+    deliberate difference: the ownership marker this tool writes into a final
+    target is metadata, not user data, so it is skipped.  Comparing a promoted
+    target to the copy it came from must not fail merely because the target
+    carries the marker that proves who copied it.
+
+    ``None`` means "cannot prove equality" (an unreadable path, a reparse point
+    or an entry that is neither file nor directory); callers treat that as
+    "not equal", which keeps data in place instead of deleting it.
+    """
+    index = {}  # type: Dict[str, int]
+    stack = [("", root)]
+    try:
+        while stack:
+            prefix, directory = stack.pop()
+            with os.scandir(directory) as entries:
+                children = list(entries)
+            for entry in children:
+                info = entry.stat(follow_symlinks=False)
+                rel = prefix + "/" + entry.name if prefix else entry.name
+                if is_reparse_stat(info):
+                    return None
+                if stat_module.S_ISDIR(info.st_mode):
+                    stack.append((rel, entry.path))
+                elif stat_module.S_ISREG(info.st_mode):
+                    if not prefix and paths.is_owner_marker_name(entry.name):
+                        continue
+                    index[os.path.normcase(rel)] = info.st_size
+                else:
+                    return None
+    except OSError:
+        return None
+    return index
+
+
+def _trees_equal(left, right):
+    # type: (str, str) -> bool
+    """True only when both trees provably hold the same data."""
+    left_index = _data_index(left)
+    if left_index is None:
+        return False
+    right_index = _data_index(right)
+    if right_index is None:
+        return False
+    return left_index == right_index
+
+
+def _preserved_copy_path(source_path, job_id):
+    # type: (str, str) -> str
+    """Sibling slot that keeps a pre-migration copy beside the source."""
+    parent = os.path.dirname(source_path)
+    base = ".dw-old-%s" % paths.job_prefix(job_id)
+    candidate = os.path.join(parent, base)
+    index = 2
+    while os.path.lexists(candidate):
+        candidate = os.path.join(parent, "%s-%d" % (base, index))
+        index += 1
+    return candidate
+
+
+def _settle_target(result, observation, final_path, job_id, duplicate_proven):
+    # type: (CompletionResult, Observation, str, str, bool) -> None
+    """Remove the job's promoted copy only when it is a proven duplicate.
+
+    The target is this job's own directory (ownership marker), but its content
+    may have changed after the crash.  It is deleted only when V2 verification
+    proved it equals the copy that is kept; otherwise it is left in place and
+    the reason is recorded for the journal.
+    """
+    if observation.final_kind != "dir":
+        return
+    if not observation.final_owned:
+        result.cleanup_errors.append(
+            "the copy at %s has no ownership marker; it was left in place"
+            % final_path
+        )
+        return
+    if not duplicate_proven:
+        result.cleanup_errors.append(
+            "the copy at %s differs from the kept copy; it was left in place"
+            % final_path
+        )
+        return
+    _discard_target(result, final_path, job_id)
+
+
+def _recover_source_and_tombstone(result, emitter, ops, observation,
+                                 source_path, tombstone_path, final_path,
+                                 job_id, staging_path):
+    # type: (CompletionResult, Emitter, object, Observation, str, str, str, str, str) -> CompletionResult
+    """The tool recreated the source directory next to the old copy.
+
+    The crash happened between S6 and S7: the source was renamed to the job's
+    tombstone, the tool recreated its directory, and the junction was never
+    placed.  Recovery must converge without asking the user to resolve a state
+    the filesystem can settle on its own, and without deleting content that is
+    not proven to exist elsewhere:
+
+    * an empty recreated directory holds nothing -> restore the old copy;
+    * a recreated directory identical to the old copy -> the old copy is
+      redundant -> keep the source, drop the duplicate;
+    * anything else is a real conflict -> keep the directory the tool is using
+      and preserve the old copy beside it, so neither side is lost.
+    """
+    duplicate_target = bool(
+        observation.final_kind == "dir"
+        and observation.final_owned
+        and _trees_equal(tombstone_path, final_path)
+    )
+
+    try:
+        source_empty = not ops.list_dir(source_path)
+    except OSError as exc:
         return _finish(
             result,
             emitter,
             STATE_RECOVERY_REQUIRED,
             ERROR_RECOVERY,
-            "source and tombstone both exist; refusing to guess",
+            "cannot inspect the recreated source directory: %s" % exc,
+        )
+
+    if source_empty:
+        # Nothing lives in the recreated directory: the old copy wins.
+        try:
+            os.rmdir(source_path)
+            _step(result, "remove-empty-source", True)
+        except OSError as exc:
+            return _finish(
+                result,
+                emitter,
+                STATE_RECOVERY_REQUIRED,
+                ERROR_RECOVERY,
+                "the recreated source directory is not empty: %s" % exc,
+            )
+        try:
+            swap.restore_source(ops, source_path, tombstone_path, job_id)
+            _step(result, "restore-source", True)
+        except swap.SwapError as exc:
+            return _finish(
+                result,
+                emitter,
+                STATE_RECOVERY_REQUIRED,
+                ERROR_RECOVERY,
+                "the source cannot be restored; close the tool and retry: %s"
+                % exc,
+            )
+        _settle_target(
+            result, observation, final_path, job_id, duplicate_target
+        )
+        _discard_staging(result, staging_path, job_id)
+        return _finish(
+            result,
+            emitter,
+            STATE_ROLLED_BACK,
+            rolled_back=True,
+            source_removed=False,
+            link_created=False,
+            link_verified=False,
+            message="the recreated directory was empty; the original was restored",
+        )
+
+    if _trees_equal(source_path, tombstone_path):
+        # Both copies hold the same bytes: the old copy is provably redundant.
+        errors = _cleanup_tombstone(result, tombstone_path, job_id)
+        if errors:
+            return _finish(
+                result,
+                emitter,
+                STATE_RECOVERY_REQUIRED,
+                ERROR_RECOVERY,
+                "the recreated directory matches the old copy, but the old copy "
+                "could not be removed",
+            )
+        _settle_target(
+            result, observation, final_path, job_id, duplicate_target
+        )
+        _discard_staging(result, staging_path, job_id)
+        return _finish(
+            result,
+            emitter,
+            STATE_ROLLED_BACK,
+            rolled_back=True,
+            source_removed=False,
+            link_created=False,
+            link_verified=False,
+            message="the recreated directory matches the old copy; "
+                    "the duplicate was removed",
+        )
+
+    # A genuine conflict.  The tool is writing to the source directory right
+    # now, so it stays; the pre-migration copy is preserved beside it and the
+    # user is told exactly where it is.
+    try:
+        preserved = _preserved_copy_path(source_path, job_id)
+        ops.rename(tombstone_path, preserved)
+        _step(result, "preserve-old-copy", True, path=preserved)
+    except (LinkError, OSError) as exc:
+        return _finish(
+            result,
+            emitter,
+            STATE_RECOVERY_REQUIRED,
+            ERROR_RECOVERY,
+            "the two copies differ and the old copy cannot be preserved: %s"
+            % exc,
+        )
+    _settle_target(result, observation, final_path, job_id, duplicate_target)
+    _discard_staging(result, staging_path, job_id)
+    return _finish(
+        result,
+        emitter,
+        STATE_ROLLED_BACK,
+        rolled_back=True,
+        source_removed=False,
+        link_created=False,
+        link_verified=False,
+        message="the current directory was kept; the previous copy is "
+                "preserved at %s" % preserved,
+    )
+
+
+def _recover_source_present(result, emitter, ops, observation, recorded_state,
+                            source_path, tombstone_path, final_path, job_id,
+                            staging_path):
+    """The source path is a real directory: S5/S6 were never completed."""
+    if observation.tombstone_kind == "dir":
+        return _recover_source_and_tombstone(
+            result,
+            emitter,
+            ops,
+            observation,
+            source_path,
+            tombstone_path,
+            final_path,
+            job_id,
+            staging_path,
         )
     if observation.final_kind == "link" or observation.final_kind == "other":
         return _finish(

@@ -234,8 +234,19 @@ class SizeMismatch:
 
 
 @dataclass
+class ContentMismatch:
+    """A relative path whose bytes differ although the size matches (T26/R-02)."""
+
+    rel_path: str
+
+    def to_dict(self):
+        # type: () -> Dict[str, object]
+        return {"rel_path": self.rel_path}
+
+
+@dataclass
 class VerifyResult:
-    """V2 verification: path set, per-file bytes, file count and total bytes."""
+    """V2 verification: path set, per-file size and content, totals."""
 
     ok: bool
     reason: str = ""
@@ -246,9 +257,11 @@ class VerifyResult:
     missing: List[str] = field(default_factory=list)
     extra: List[str] = field(default_factory=list)
     size_mismatches: List[SizeMismatch] = field(default_factory=list)
+    content_mismatches: List[ContentMismatch] = field(default_factory=list)
     missing_count: int = 0
     extra_count: int = 0
     size_mismatch_count: int = 0
+    content_mismatch_count: int = 0
     errors: List[str] = field(default_factory=list)
     reparse_paths: List[str] = field(default_factory=list)
 
@@ -266,9 +279,13 @@ class VerifyResult:
             "size_mismatches": [
                 mismatch.to_dict() for mismatch in self.size_mismatches
             ],
+            "content_mismatches": [
+                mismatch.to_dict() for mismatch in self.content_mismatches
+            ],
             "missing_count": self.missing_count,
             "extra_count": self.extra_count,
             "size_mismatch_count": self.size_mismatch_count,
+            "content_mismatch_count": self.content_mismatch_count,
             "errors": list(self.errors),
             "reparse_paths": list(self.reparse_paths),
         }
@@ -434,6 +451,7 @@ __all__ = [
     "STATUS_PROGRESS",
     "STATUS_SKIPPED",
     "STATUS_START",
+    "ContentMismatch",
     "SizeMismatch",
     "TERMINAL_STATES",
     "VerifyResult",

@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
 """Windows junctions and volume identity.
 
-Junctions are created with ``mklink /J`` (no elevation required) and removed
-with ``os.rmdir``, which unlinks the reparse point without entering the
-target.  Target read-back uses ``os.readlink`` and strips the ``\\\\?\\``
-prefix; the result may be an 8.3 short path, so comparison belongs to
+Junctions are written as reparse points directly through ``DeviceIoControl``
+(T26/R-01).  ``cmd /c mklink`` is never used: ``cmd`` re-parses the rest of
+the command line, so ``&``, ``|`` and ``^`` inside a path truncate the
+command and silently create a junction that points at a non-existent prefix.
+The direct call takes the target as a UTF-16 buffer, so no path can be
+reinterpreted as shell syntax, and no elevation is required.
+
+Every created link is read back and compared with the requested target before
+success is reported; a link that does not match is removed and reported as a
+:class:`LinkError`.  Links are removed with ``os.rmdir``, which unlinks the
+reparse point without entering the target.  Target read-back uses
+``os.readlink`` and strips the ``\\\\?\\`` prefix; the result may be an 8.3
+short path, so comparison belongs to
 :func:`src.platform.link.link_target_matches`.
 
 Python 3.8 compatible (decision 0005).
@@ -13,7 +22,7 @@ Python 3.8 compatible (decision 0005).
 import ctypes
 import os
 import stat
-import subprocess
+import struct
 from ctypes import wintypes
 
 from ..filesystem import FILE_ATTRIBUTE_REPARSE_POINT
@@ -25,10 +34,55 @@ from ..link import (
 )
 
 IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003
-_CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+# Win32 constants for the reparse point write path.  Values are stable ABI
+# (winnt.h / winbase.h); no third-party dependency is introduced.
+_GENERIC_WRITE = 0x40000000
+_OPEN_EXISTING = 3
+_FILE_FLAG_BACKUP_SEMANTICS = 0x02000000
+_FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000
+_FSCTL_SET_REPARSE_POINT = 0x000900A4
+_INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
+
+# ``REPARSE_DATA_BUFFER`` header: ReparseTag (ULONG) + ReparseDataLength
+# (USHORT) + Reserved (USHORT).
+_REPARSE_HEADER_BYTES = 8
+# MountPointReparseBuffer prefix: four USHORT offsets (substitute name offset
+# and length, print name offset and length), then PathBuffer.
+_MOUNT_POINT_OFFSETS_BYTES = 8
+
 _MAX_PATH = 261
 
 _kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+
+_CreateFileW = _kernel32.CreateFileW
+_CreateFileW.argtypes = [
+    wintypes.LPCWSTR,
+    wintypes.DWORD,
+    wintypes.DWORD,
+    ctypes.c_void_p,
+    wintypes.DWORD,
+    wintypes.DWORD,
+    wintypes.HANDLE,
+]
+_CreateFileW.restype = wintypes.HANDLE
+
+_DeviceIoControl = _kernel32.DeviceIoControl
+_DeviceIoControl.argtypes = [
+    wintypes.HANDLE,
+    wintypes.DWORD,
+    ctypes.c_void_p,
+    wintypes.DWORD,
+    ctypes.c_void_p,
+    wintypes.DWORD,
+    ctypes.POINTER(wintypes.DWORD),
+    ctypes.c_void_p,
+]
+_DeviceIoControl.restype = wintypes.BOOL
+
+_CloseHandle = _kernel32.CloseHandle
+_CloseHandle.argtypes = [wintypes.HANDLE]
+_CloseHandle.restype = wintypes.BOOL
 
 _GetVolumePathNameW = _kernel32.GetVolumePathNameW
 _GetVolumePathNameW.argtypes = [
@@ -90,15 +144,133 @@ def is_link(path):
     return _is_reparse(info)
 
 
+def _mount_point_buffer(target_path):
+    # type: (str) -> ctypes.Array
+    """Build a ``REPARSE_DATA_BUFFER`` describing a junction to ``target_path``.
+
+    The substitute name (``\\??\\<path>``) is what the filesystem follows; the
+    print name is what Explorer shows.  Both are UTF-16LE byte buffers, so
+    ``&``, ``|``, ``^``, ``%`` and friends carry no special meaning here.
+    """
+    substitute = ("\\??\\" + target_path).encode("utf-16-le")
+    print_name = target_path.encode("utf-16-le")
+    # Both names are NUL-terminated inside PathBuffer, but the recorded
+    # lengths exclude their terminator; the print name therefore starts two
+    # bytes after the substitute name.  This matches the bytes Windows itself
+    # returns for ``mklink /J`` (FSCTL_GET_REPARSE_POINT).
+    substitute_offset = 0
+    print_offset = len(substitute) + 2
+    data_length = (
+        _MOUNT_POINT_OFFSETS_BYTES
+        + len(substitute) + 2
+        + len(print_name) + 2
+    )
+    total = _REPARSE_HEADER_BYTES + data_length
+    buffer = ctypes.create_string_buffer(total)
+    struct.pack_into(
+        "<IHH", buffer, 0, IO_REPARSE_TAG_MOUNT_POINT, data_length, 0
+    )
+    struct.pack_into(
+        "<HHHH",
+        buffer,
+        _REPARSE_HEADER_BYTES,
+        substitute_offset,
+        len(substitute),
+        print_offset,
+        len(print_name),
+    )
+    start = _REPARSE_HEADER_BYTES + _MOUNT_POINT_OFFSETS_BYTES
+    buffer[start:start + len(substitute)] = substitute
+    start = _REPARSE_HEADER_BYTES + _MOUNT_POINT_OFFSETS_BYTES + print_offset
+    buffer[start:start + len(print_name)] = print_name
+    return buffer
+
+
+def _set_reparse_point(link_path, target_path):
+    # type: (str, str) -> None
+    """Create the junction at ``link_path``; raise :class:`LinkError` on failure.
+
+    The empty directory is created first (``CreateFileW`` alone cannot create
+    a directory), then reopened with ``FILE_FLAG_OPEN_REPARSE_POINT`` so the
+    reparse point is written on the directory itself instead of its target.
+    """
+    buffer = _mount_point_buffer(target_path)
+    extended_link = (
+        link_path
+        if link_path.startswith("\\\\?\\")
+        else "\\\\?\\" + link_path
+    )
+    try:
+        os.mkdir(link_path)
+    except OSError as exc:
+        raise LinkError(
+            "cannot create link path %s: %s" % (link_path, exc)
+        )
+    handle = _CreateFileW(
+        extended_link,
+        _GENERIC_WRITE,
+        0,
+        None,
+        _OPEN_EXISTING,
+        _FILE_FLAG_OPEN_REPARSE_POINT | _FILE_FLAG_BACKUP_SEMANTICS,
+        None,
+    )
+    if not handle or handle == _INVALID_HANDLE_VALUE:
+        error = ctypes.get_last_error()
+        raise LinkError(
+            "cannot open link path for writing: %s (error %d)"
+            % (link_path, error)
+        )
+    try:
+        returned = wintypes.DWORD(0)
+        if not _DeviceIoControl(
+            handle,
+            _FSCTL_SET_REPARSE_POINT,
+            buffer,
+            ctypes.sizeof(buffer),
+            None,
+            0,
+            ctypes.byref(returned),
+            None,
+        ):
+            error = ctypes.get_last_error()
+            raise LinkError(
+                "cannot write junction %s -> %s (error %d)"
+                % (link_path, target_path, error)
+            )
+    finally:
+        _CloseHandle(handle)
+
+
+def _discard_failed_link(link_path):
+    # type: (str) -> None
+    """Remove the half-created link; never raises.
+
+    ``os.rmdir`` unlinks a reparse point without entering it, and also
+    removes the empty directory ``CreateFileW`` may have left behind.
+    """
+    try:
+        os.rmdir(link_path)
+    except OSError:
+        pass
+
+
 def create_junction(link_path, target_path):
     # type: (str, str) -> str
     """Create ``link_path`` as a junction to ``target_path``.
 
+    The reparse point is written directly (never through ``cmd``), then read
+    back: a junction that does not resolve to ``target_path`` is removed and
+    reported as an error, so this function never returns a link that points
+    somewhere else.
+
     Never replaces an existing path: a link already present is reported as an
     error so the caller can inspect it first (architecture 6.5).
     """
-    link_path = os.path.abspath(os.path.normpath(link_path))
-    target_path = os.path.abspath(os.path.normpath(target_path))
+    link_path = os.path.abspath(os.path.normpath(strip_extended_prefix(link_path)))
+    target_path = os.path.abspath(
+        os.path.normpath(strip_extended_prefix(target_path))
+    )
     if not os.path.isdir(target_path):
         raise LinkError("junction target is not a directory: %s" % target_path)
     if os.path.lexists(link_path):
@@ -109,24 +281,16 @@ def create_junction(link_path, target_path):
         )
 
     try:
-        completed = subprocess.run(
-            ["cmd", "/c", "mklink", "/J", link_path, target_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            creationflags=_CREATE_NO_WINDOW,
-        )
-    except OSError as exc:
-        raise LinkError("mklink failed to start: %s" % exc)
-
-    if completed.returncode != 0:
-        output = completed.stdout.decode("mbcs", "replace").strip()
-        raise LinkError(
-            "mklink exited with %d%s"
-            % (
-                completed.returncode,
-                ": %s" % output if output else "",
+        _set_reparse_point(link_path, target_path)
+        actual = read_junction_target(link_path)
+        if not link_target_matches(actual, target_path):
+            raise LinkError(
+                "junction %s resolved to %r instead of %r"
+                % (link_path, actual, target_path)
             )
-        )
+    except LinkError:
+        _discard_failed_link(link_path)
+        raise
     return link_path
 
 
@@ -185,6 +349,24 @@ def rename_dir(source, destination):
     return destination
 
 
+def link_support(path):
+    # type: (str) -> dict
+    """Describe whether ``path``'s volume can hold junctions.
+
+    Junctions are reparse points; NTFS stores them, exFAT/FAT and network
+    shares do not.  The business layer asks this instead of testing
+    ``os.name`` itself, so the requirement lives with the platform.
+    """
+    info = volume_info(path)
+    return {
+        "supported": info.is_ntfs,
+        "code": "TARGET_NOT_NTFS",
+        "message": "the target disk must be NTFS to create links",
+        "fs_name": info.fs_name,
+        "mount_point": info.mount_point,
+    }
+
+
 def volume_info(path):
     # type: (str) -> VolumeInfo
     """Return the mount point, filesystem name and serial of ``path``'s volume."""
@@ -228,6 +410,7 @@ __all__ = [
     "create_junction",
     "is_junction",
     "is_link",
+    "link_support",
     "read_junction_target",
     "remove_junction",
     "rename_dir",

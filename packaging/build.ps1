@@ -1,11 +1,11 @@
 # Build the unsigned Windows x64 development package (PyInstaller onedir).
 # Run from anywhere:  powershell -ExecutionPolicy Bypass -File packaging\build.ps1
 #   -Python <path to python.exe>   interpreter with packaging/requirements-build.txt
-#   -Version <artifact version>    defaults to 0.9.0-beta.1
+#   -Version <artifact version>    defaults to 0.9.0-beta.9
 
 param(
     [string]$Python = "python",
-    [string]$Version = "0.9.0-beta.1"
+    [string]$Version = "0.9.0-beta.9"
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,12 +17,12 @@ if (-not (Test-Path $Python) -and -not (Get-Command $Python -ErrorAction Silentl
 }
 
 $pyVersion = & $Python -c "import sys; print('%d.%d' % sys.version_info[:2])"
-if ($pyVersion -notin @("3.8", "3.9", "3.10", "3.11")) {
-    throw "Python 3.8-3.11 required for the pinned PyInstaller 5.x build (found $pyVersion)"
+if ($pyVersion -ne "3.12") {
+    throw "Python 3.12 required for the pinned PyInstaller 6.x build (found $pyVersion)"
 }
 Write-Host "Using Python $pyVersion ($Python)"
 
-& $Python -c "import PyInstaller, webview, psutil; print('deps ok')"
+& $Python -c "import PyInstaller, webview, psutil, pystray, PIL; print('deps ok')"
 if ($LASTEXITCODE -ne 0) {
     throw "Build dependencies are missing. Run: $Python -m pip install -r packaging/requirements-build.txt"
 }
@@ -45,7 +45,10 @@ if (-not (Test-Path $exe)) { throw "Expected executable not found: $exe" }
 # next to the executable only.
 Copy-Item (Join-Path $PSScriptRoot "DiskWarden.exe.config") (Join-Path $appDir "DiskWarden.exe.config") -Force
 
-Compress-Archive -Path $appDir -DestinationPath $zipPath -CompressionLevel Optimal
+# The unsigned build triggers SmartScreen before any app UI can appear, so the
+# first-run guidance ships inside the zip and is visible on extraction.
+$firstRun = Join-Path $PSScriptRoot "START-HERE.txt"
+Compress-Archive -Path $appDir, $firstRun -DestinationPath $zipPath -CompressionLevel Optimal
 $hash = (Get-FileHash -Algorithm SHA256 $zipPath).Hash
 $sizeMb = [math]::Round((Get-Item $zipPath).Length / 1MB, 1)
 
