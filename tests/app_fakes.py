@@ -35,6 +35,9 @@ def make_service(
     free_space_provider=None,
     ai_test_opener=None,
     autostart=None,
+    auth_opener=None,
+    auth_http_opener=None,
+    auth_provider_loader=None,
 ):
     temp = tempfile.TemporaryDirectory()
     case.addCleanup(temp.cleanup)
@@ -47,6 +50,9 @@ def make_service(
         free_space_provider=free_space_provider or (lambda path: FOUR_GIB),
         ai_test_opener=ai_test_opener,
         autostart=autostart,
+        auth_opener=auth_opener,
+        auth_http_opener=auth_http_opener,
+        auth_provider_loader=auth_provider_loader,
     )
     case.addCleanup(service.close)
     return service
