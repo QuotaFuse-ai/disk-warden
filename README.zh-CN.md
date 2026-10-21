@@ -13,6 +13,22 @@
 
 支持 **Windows 与 macOS** 双平台。
 
+## 下载与安装
+
+不用装 Python，也不用自己编译：打开 [**Releases 发布页**](https://github.com/QuotaFuse-ai/disk-warden/releases/latest)，下载对应平台的压缩包即可。每个 zip 里就是完整程序，解压即用。
+
+| 平台 | 文件 | 怎么用 |
+|---|---|---|
+| Windows 10 / 11 x64 | `DiskWarden-0.9.0-beta.8-win-x64.zip` | 解压到固定目录，双击 `DiskWarden\DiskWarden.exe`。 |
+| macOS 11+（Apple Silicon） | `DiskWarden-0.9.0-beta.8-macos-arm64.zip` | 解压后打开 `DiskWarden.app`，首次需要放行一次（Gatekeeper）。 |
+
+每个压缩包都附带同名的 `.sha256` 校验文件和 zip 根目录下的 `START-HERE*.txt` 使用说明。
+
+- **Windows**：在 Windows 10/11 上实际构建并跑过——完整单元测试、打包产物的沙箱演练、冻结后的自检，全部针对发布出去的这一个包执行。
+- **macOS**：**目前还没有在真机上测试过**。团队手上没有 Mac，`.app` 由 GitHub Actions 的 `macos-latest` 构建，只通过了自动化的 `--smoke` 自检（包结构、WKWebView 后端、UI 文件是否齐全）。请当作开发者预览版看待，发现问题欢迎提 issue。
+
+两个包都**未做代码签名**，首次运行会分别出现一次 SmartScreen（Windows，「更多信息」→「仍要运行」）或 Gatekeeper 提示（macOS）。这两个提示都不是病毒告警，也不需要关闭任何系统安全功能。
+
 ## 与其他清理工具的区别
 
 - 认识 AI IDE 的目录结构，区分「可迁」「不可动」「未知」三类，而不是按文件类型乱删
@@ -30,9 +46,10 @@
 | 回滚引擎与本地存储：journal / 历史 / 设置 / 学习规则（T11） | 已完成，已合入 `main` |
 | AI 分析接口（T22） | 已完成，默认关闭 |
 | 界面接入真实引擎（T12） | 已完成，已合入 `main` |
-| Windows / macOS 打包（T15 / T21） | 未开始 |
+| Windows 打包（T15） | 已发布 `DiskWarden-0.9.0-beta.8-win-x64.zip` |
+| macOS 打包（T21） | 已发布 `DiskWarden-0.9.0-beta.8-macos-arm64.zip`，**未在真机测试** |
 
-已完成的模块由 **594 个单元测试**覆盖，CI 会在每次 push 时自动运行。
+已完成的模块由 **929 个单元测试**覆盖，CI 会在每次 push 时自动运行。
 
 ## 平台支持
 
