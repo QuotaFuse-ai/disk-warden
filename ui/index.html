@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -653,7 +653,7 @@ I18N['zh-CN'] = {
   'nav.rules': '规则学习',
   'nav.history': '操作历史',
   'nav.settings': '设置',
-  'nav.version': 'v0.9.0-beta.8',
+  'nav.version': 'v0.9.0-beta.9',
   'page.ide.title': 'IDE 数据',
   'page.ide.desc': '扫描本机 AI IDE / CLI 的数据目录，安全迁移可再生的缓存与会话。',
   'page.projects.title': '项目目录',
@@ -1318,6 +1318,37 @@ I18N['zh-CN'] = {
   'rollback.stage.done': '完成',
   'success.rollbackable': '可在历史记录中随时回滚',
   'toast.noGreen': '没有可迁移的目录',
+  'state.planned': '已计划',
+  'state.backed_up': '配置已备份',
+  'state.copying': '复制中',
+  'state.copied': '复制完成',
+  'state.copy_verified': '副本已校验',
+  'state.target_ready': '目标就绪',
+  'state.source_renamed': '源已改名',
+  'state.linked': '链接已建立',
+  'state.verified_link': '链接已校验',
+  'state.linked_cleanup_pending': '待清理副本',
+  'state.done': '已完成',
+  'state.failed': '失败',
+  'state.rolled_back': '已回滚',
+  'state.recovery_required': '需人工确认',
+  'state.rollback_planned': '回滚已计划',
+  'state.rollback_link_removed': '链接已移除',
+  'state.rollback_copying': '回滚复制中',
+  'state.rollback_copied': '回滚副本已复制',
+  'state.rollback_verified': '回滚副本已校验',
+  'state.rollback_source_ready': '源已恢复',
+  'state.rollback_config_restored': '配置已恢复',
+  'state.rollback_failed': '回滚失败',
+  'state.rollback_recovery_required': '回滚需人工确认',
+  'state.already_rolled_back': '已回滚',
+  'state.residual_copy': '存在残留副本',
+  'state.state_abnormal': '状态异常',
+  'blockedCode.already_migrated': '已迁移到目标盘，不能重复迁移',
+  'blockedCode.permission_denied': '部分目录无法读取，无法安全迁移',
+  'blockedCode.blocked_red_path': '源目录是链接/重解析点，不能迁移',
+  'blockedCode.blocked_process': '应用正在运行或进程状态未知',
+  'blockedCode.duplicate_target': '目标位置已存在同名目录',
   'toast.signedIn': '登录成功',
   'toast.signedOut': '已退出登录',
   'toast.starOpened': '已打开仓库页面，点完 Star 记得刷新状态',
@@ -1407,7 +1438,7 @@ I18N['en'] = {
   'nav.rules': 'Rule learning',
   'nav.history': 'History',
   'nav.settings': 'Settings',
-  'nav.version': 'v0.9.0-beta.8',
+  'nav.version': 'v0.9.0-beta.9',
   'page.ide.title': 'IDE data',
   'page.ide.desc': 'Scan data folders of AI IDEs and CLIs, then move regenerable caches and sessions safely.',
   'page.projects.title': 'Projects',
@@ -2072,6 +2103,37 @@ I18N['en'] = {
   'rollback.stage.done': 'Done',
   'success.rollbackable': 'You can roll back from History at any time',
   'toast.noGreen': 'No migratable folders selected',
+  'state.planned': 'Planned',
+  'state.backed_up': 'Config backed up',
+  'state.copying': 'Copying',
+  'state.copied': 'Copy finished',
+  'state.copy_verified': 'Copy verified',
+  'state.target_ready': 'Target ready',
+  'state.source_renamed': 'Source renamed',
+  'state.linked': 'Link created',
+  'state.verified_link': 'Link verified',
+  'state.linked_cleanup_pending': 'Copy pending cleanup',
+  'state.done': 'Done',
+  'state.failed': 'Failed',
+  'state.rolled_back': 'Rolled back',
+  'state.recovery_required': 'Needs review',
+  'state.rollback_planned': 'Rollback planned',
+  'state.rollback_link_removed': 'Link removed',
+  'state.rollback_copying': 'Rolling back',
+  'state.rollback_copied': 'Rollback copy finished',
+  'state.rollback_verified': 'Rollback copy verified',
+  'state.rollback_source_ready': 'Source restored',
+  'state.rollback_config_restored': 'Config restored',
+  'state.rollback_failed': 'Rollback failed',
+  'state.rollback_recovery_required': 'Rollback needs review',
+  'state.already_rolled_back': 'Already rolled back',
+  'state.residual_copy': 'Leftover copy present',
+  'state.state_abnormal': 'State abnormal',
+  'blockedCode.already_migrated': 'Already migrated to the target drive; cannot migrate again',
+  'blockedCode.permission_denied': 'Some folders cannot be read, so migrating would be unsafe',
+  'blockedCode.blocked_red_path': 'Source is a link or reparse point and cannot be migrated',
+  'blockedCode.blocked_process': 'The app is running or its process state is unknown',
+  'blockedCode.duplicate_target': 'A folder with the same name already exists at the target',
   'toast.signedIn': 'Signed in',
   'toast.signedOut': 'Signed out',
   'toast.starOpened': 'Repository page opened. Refresh once you have starred it.',
@@ -2151,11 +2213,11 @@ I18N['en'] = {
   'firstRun.view': 'Show steps',
   'firstRun.copied': 'Command copied'
 };
-let LANG = 'zh-CN';
+let LANG = 'en';
 function t(key, vars) {
-  const dict = I18N[LANG] || I18N['zh-CN'];
+  const dict = I18N[LANG] || I18N['en'];
   let s = dict[key];
-  if (s === undefined) s = I18N['zh-CN'][key];
+  if (s === undefined && LANG !== 'en') s = I18N['en'][key];
   if (s === undefined) return key;
   if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] !== undefined ? vars[k] : m));
   return s;
@@ -2969,7 +3031,7 @@ function recoveryBanner() {
       const ignore = it.ignorable ? `<button type="button" class="btn btn-ghost btn-xs" title="${esc(t('recovery.ignoreHint'))}" ${busy ? 'disabled' : ''} onclick="App.recoveryIgnore('${esc(it.job_id)}')">${esc(t('recovery.ignore'))}</button>` : '';
       const detail = it.detail ? `<span class="dim" style="font-size:var(--fs-meta);white-space:normal">${esc(it.detail)}</span>` : '';
       return `<div class="kv-item wide">
-        <span class="k">${esc(it.tool_name || it.tool_id || '')} · ${esc(it.label || it.state_label || it.state || '')}${human}${it.type === 'rollback' ? ' · ' + esc(t('history.type.rollback')) : ''}</span>
+        <span class="k">${esc(it.tool_name || it.tool_id || '')} · ${esc(it.label || stateLabel(it.state, it.state_label))}${human}${it.type === 'rollback' ? ' · ' + esc(t('history.type.rollback')) : ''}</span>
         <span class="v" style="font-weight:500;white-space:normal;font-size:var(--fs-meta)">${esc(it.source_path || '')}</span>
         <span class="dim" style="font-size:var(--fs-meta)">${esc(fmtBytes(it.bytes || 0))} · ${esc(fmtDate(it.updated_at))}</span>
         ${detail}
@@ -3167,6 +3229,12 @@ function errorDetailLines(err) {
 }
 
 /* ---------- 展示辅助 ---------- */
+function blockedCodeText(code) {
+  if (!code) return '';
+  const key = 'blockedCode.' + String(code).toLowerCase();
+  const label = t(key);
+  return label === key ? '' : label;
+}
 function reasonText(dir) {
   if (!dir) return '';
   const key = dir.reason || '';
@@ -3174,7 +3242,7 @@ function reasonText(dir) {
     const label = t(key);
     if (label !== key) return label;
   }
-  return dir.blocked_reason || key || t('reason.unknown');
+  return blockedCodeText(dir.blocked_code) || dir.blocked_reason || key || t('reason.unknown');
 }
 
 function diagnosticsText() {
@@ -3268,8 +3336,8 @@ function authErrorText(errOrCode) {
     : (errOrCode && (errOrCode.code || errOrCode.message_key)) || '';
   const code = String(raw).replace(/^error\./, '');
   if (code) {
-    const dict = I18N[LANG] || I18N['zh-CN'];
-    const text = dict['error.' + code] || I18N['zh-CN']['error.' + code];
+    const dict = I18N[LANG] || I18N['en'];
+    const text = dict['error.' + code] || I18N['en']['error.' + code];
     if (text) return text;
   }
   return t('error.AUTH_FAILED');
@@ -3921,6 +3989,14 @@ function aiTestReason(code) {
 function aiReady() { return !!state.settings.aiEnabled && state.settings.aiProvider !== 'none' && !!state.settings.aiKeySet; }
 function aiModelName() { return state.settings.aiModel || t('ai.modelAuto'); }
 
+function stateLabel(code, fallback) {
+  if (code) {
+    const key = 'state.' + String(code).toLowerCase();
+    const label = t(key);
+    if (label !== key) return label;
+  }
+  return fallback || code || '';
+}
 function itemReason(it) {
   if (!it) return '';
   const key = it.reason || it.reason_key || '';
@@ -3928,7 +4004,7 @@ function itemReason(it) {
     const label = t(key);
     if (label !== key) return label;
   }
-  return it.blocked_reason || key || t('reason.unknown');
+  return blockedCodeText(it.blocked_code) || it.blocked_reason || key || t('reason.unknown');
 }
 function safetyBadge(safety) {
   if (safety === 'green') return `<span class="badge b-green">${esc(t('common.green'))}</span>`;
@@ -3948,7 +4024,7 @@ function pendingRow(it) {
   const path = it.source_path || it.rel_path || it.item_id;
   return `<div class="trow pend risk-yellow">
     <span class="tcell tpath badged"><span class="badge b-amber">?</span><span class="tp" title="${esc(path)}">${esc(path)}</span></span>
-    <span class="tcell tdesc" title="${esc(it.blocked_reason || '')}">${esc(itemReason(it))}</span>
+    <span class="tcell tdesc" title="${esc(itemReason(it))}">${esc(itemReason(it))}</span>
     <span class="tcell tsize">${fmtBytes(it.bytes || 0)}</span>
     <span class="tcell acts">
       <button type="button" class="btn btn-ghost btn-xs" onclick="App.overrideItem('${esc(it.item_id)}','green')">${esc(t('action.markGreen'))}</button>
@@ -4459,7 +4535,7 @@ function modalMigrateFailed(f, toolName) {
   const fromPlan = f.errorScope === 'plan';
   const code = err.code || (failed[0] && failed[0].state) || '';
   const lines = errorDetailLines(err);
-  const failedRows = failed.map(it => `<div class="err-item"><span class="e-path">${esc(it.source_path || '')}</span><span class="e-msg">${esc(it.error_message || it.state_label || it.state || '')}</span></div>`).join('');
+  const failedRows = failed.map(it => `<div class="err-item"><span class="e-path">${esc(it.source_path || '')}</span><span class="e-msg">${esc(it.error_message || stateLabel(it.state, it.state_label))}</span></div>`).join('');
   const body = `
     <div class="banner danger"><span class="b-ico">✕</span><div>${esc(fromPlan ? t('blocked.planDesc') : t('failed.sub'))}</div></div>
     ${code || lines.length ? `<div class="mt-3">

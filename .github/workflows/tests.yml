@@ -24,3 +24,14 @@ jobs:
 
       - name: Run tests
         run: python -m pytest tests -q
+
+      - name: Repository safety check
+        if: matrix.python-version == '3.12'
+        run: python tools/repo_safety_check.py --md repo-safety-report.md
+
+      - name: Upload safety report
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-safety-report
+          path: repo-safety-report.md
