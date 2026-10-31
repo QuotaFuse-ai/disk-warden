@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Migration engines (T09 copy half, T10 swap/link/recovery half).
+"""Migration engines (copy half and swap/link/recovery half).
 
-The frozen architecture places this package at ``src/core/migrate`` while the
-task briefs write ``src/migrate``; the architecture layout wins (same
-deviation as T06-T08, documented in docs/tasks/TASK-009/).
+The package lives at ``src/core/migrate``; older briefs wrote
+``src/migrate``. The architecture layout wins.
 
-Engine A (T09) never renames or deletes source data:
+Engine A never renames or deletes source data:
     prepare_copy(request, ...) -> MigrationResult
 
 Engine B (T10) consumes a successful ``MigrationResult`` and runs S5-S9:

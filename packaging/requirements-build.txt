@@ -1,4 +1,4 @@
-# Build dependencies are pinned for Python 3.12 (decision 0012).
+# Build dependencies are pinned for Python 3.12.
 # Install with: python -m pip install -r packaging/requirements-build.txt
 pywebview==6.1
 pythonnet==3.2.1

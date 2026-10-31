@@ -42,7 +42,7 @@ You no longer need to clone this repository to use Disk Warden — download the 
 - Every archive has a `.sha256` asset next to it. Compare `Get-FileHash -Algorithm SHA256` (PowerShell) or `shasum -a 256` with that value before running anything.
 - The repository tracks **no compiled binaries**. Everything users execute is produced by `packaging/build.ps1` or the macOS CI job from a tagged commit and attached to a release.
 - `python tools/repo_safety_check.py` audits the tracked tree offline: committed credentials, download-and-run or obfuscated scripts, destructive deletes, unexpected outbound hosts, symlinks, disguised executables, and archive path traversal. It executes and uploads nothing.
-- The latest result is committed in [`docs/security/repo-safety-report.md`](docs/security/repo-safety-report.md); the full policy, app behaviour and reporting process are in [`SECURITY.md`](SECURITY.md).
+- The full policy, app behaviour and reporting process are in [`SECURITY.md`](SECURITY.md).
 
 ## Why not just a cleanup tool
 
@@ -56,21 +56,21 @@ You no longer need to clone this repository to use Disk Warden — download the 
 
 | Capability | Status |
 |---|---|
-| Directory scan, size accounting, risk classification (T06–T08) | Done |
-| Copy, verification, link creation, crash recovery (T09–T10) | Done |
-| Rollback engine and local store: journal / history / settings / learned rules (T11) | Done, merged to `main` |
-| AI analysis interface (T22) | Done, disabled by default |
-| UI wired to the real engine, AI key setup (T12, T25) | Done, merged to `main` |
-| Welcome screen, GitHub sign-in and star prompt (T16) | In progress: GitHub Device Flow; skipping sign-in never limits local features |
-| Windows packaging (T15) | Published as `DiskWarden-0.9.0-beta.10-win-x64.zip`: tray, per-user autostart, rotating logs, packaged sandbox drills |
-| macOS adaptation and packaging (T21) | Published as `DiskWarden-0.9.0-beta.10-macos-arm64.zip`, **untested on real hardware**: `.app` built on GitHub Actions `macos-latest`, symlink transfer/links, LaunchAgent autostart, tray, rotating logs, in-app first-launch guide; CI builds and smoke-tests the bundle |
+| Directory scan, size accounting, risk classification | Done |
+| Copy, verification, link creation, crash recovery | Done |
+| Rollback engine and local store: journal / history / settings / learned rules | Done, merged to `main` |
+| AI analysis interface | Done, disabled by default |
+| UI wired to the real engine, AI key setup | Done, merged to `main` |
+| Welcome screen, GitHub sign-in and star prompt | In progress: GitHub Device Flow; skipping sign-in never limits local features |
+| Windows packaging | Published as `DiskWarden-0.9.0-beta.10-win-x64.zip`: tray, per-user autostart, rotating logs, packaged sandbox drills |
+| macOS adaptation and packaging | Published as `DiskWarden-0.9.0-beta.10-macos-arm64.zip`, **untested on real hardware**: `.app` built on GitHub Actions `macos-latest`, symlink transfer/links, LaunchAgent autostart, tray, rotating logs, in-app first-launch guide; CI builds and smoke-tests the bundle |
 
 **934 unit tests** cover the completed modules; CI runs them on every push.
 
 ## Platforms
 
 - **Windows 10/11** — primary development and verification platform. The core engine is implemented: robocopy transfer, `mklink /J` links, process-in-use detection, volume and free-space checks.
-- **macOS 11+ (Apple Silicon)** — in scope for the first release (decision 0004). Everything platform-specific lives in `src/platform/mac/`: `rsync`/`cp` transfer, `ln -s` symlinks with target read-back, volume and free-space checks, process detection, and a per-user LaunchAgent for autostart. The unsigned `.app` is built on GitHub Actions `macos-latest` (decision 0007); Intel Macs need a separate x64 build, which is not produced yet.
+- **macOS 11+ (Apple Silicon)** — in scope for the first release. Everything platform-specific lives in `src/platform/mac/`: `rsync`/`cp` transfer, `ln -s` symlinks with target read-back, volume and free-space checks, process detection, and a per-user LaunchAgent for autostart. The unsigned `.app` is built on GitHub Actions `macos-latest`; Intel Macs need a separate x64 build, which is not produced yet.
   - **Known gap in 0.9.0-beta:** automatic discovery (`data/ide-catalog.json` + `src/core/scan/discovery.py`) is still Windows-only, so the scan finds nothing on a Mac and the list comes up empty. The app, tray, autostart, logs, and the migration engine itself are in place; a macOS catalog is a follow-up task.
 
 ## First launch on macOS
@@ -89,7 +89,7 @@ Data lives in `~/Library/Application Support/DiskWarden` (`logs/app.log` below i
 
 ## Stack
 
-- Python 3.12 as the official build toolchain (decision 0012); the test suite runs on 3.10 and 3.12 in CI
+- Python 3.12 as the official build toolchain; the test suite runs on 3.10 and 3.12 in CI
 - UI: a single self-contained HTML/JS page (`ui/index.html`) hosted by pywebview (WebView2 on Windows, WKWebView on macOS)
 - Packaging: PyInstaller 6 onedir; macOS artifacts built in CI
 
@@ -124,7 +124,7 @@ src/
   platform/        platform adapters: win / mac / posix
 data/              IDE catalog and rule data
 ui/                static UI prototype
-docs/              requirements, decisions, specs, task outputs
+docs/              requirements, specs, guides and release notes
 tests/             unit tests
 tools/             drills and validation scripts
 ```
@@ -136,6 +136,9 @@ tools/             drills and validation scripts
 3. [Product spec](docs/specs/产品规格-v1.0.md) — acceptance criteria and safety invariants
 4. [Architecture](docs/specs/架构设计-v1.0.md) — modules, interfaces and data flow
 5. [UI interaction spec](docs/specs/界面交互说明-v1.0.md) — screens and interaction rules
+6. [Migration and rollback guide](docs/迁移与回滚指南.md)
+7. [Privacy statement](docs/隐私说明.md)
+8. [Release notes](docs/release-notes/)
 
 ## License
 

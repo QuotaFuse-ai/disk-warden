@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build the unsigned macOS app locally, the same way CI does (T21).
+# Build the unsigned macOS app locally, the same way CI does.
 #
 #   ./packaging/build-macos.sh
 #

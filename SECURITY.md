@@ -56,7 +56,7 @@ It flags:
 - outbound hosts outside a documented allowlist
 - symlinks, oversized files, disguised double extensions, archive path traversal
 
-The latest result is committed in [`docs/security/repo-safety-report.md`](docs/security/repo-safety-report.md). The repository tracks **no compiled binaries**: every executable users receive is produced by the build pipeline and attached to a release, and is listed with its SHA-256 in the report.
+The repository tracks **no compiled binaries**: every executable users receive is produced by the build pipeline and attached to a release together with its SHA-256.
 
 ## Reporting a vulnerability
 
