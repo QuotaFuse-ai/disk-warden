@@ -1,4 +1,4 @@
-# Build dependencies for the unsigned macOS .app (decision 0012 pins the
+# Build dependencies for the unsigned macOS .app (pinned for the
 # Windows build to Python 3.12 + PyInstaller 6.x; this file mirrors it).
 # Install with: python -m pip install -r packaging/requirements-build-macos.txt
 #

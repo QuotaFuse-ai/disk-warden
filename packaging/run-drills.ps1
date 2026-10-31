@@ -1,4 +1,4 @@
-# Package acceptance drills (T15).
+# Package acceptance drills.
 #
 # Runs the frozen DiskWarden.exe itself in a throw-away sandbox and checks
 # scan -> plan -> migrate -> verify -> rollback, the two force-kill crash

@@ -42,7 +42,7 @@
 - 每个压缩包旁边都有 `.sha256` 文件。运行前先比对 `Get-FileHash -Algorithm SHA256`（PowerShell）或 `shasum -a 256` 的结果。
 - 仓库里**不存放任何编译好的可执行文件**。用户运行的每个二进制都由 `packaging/build.ps1` 或 macOS CI 从打标签的提交构建，再挂到 Release 上。
 - `python tools/repo_safety_check.py` 可离线审计仓库：提交进仓库的凭据、下载即执行的脚本、混淆命令、针对根目录的递归删除、可疑外连域名、符号链接、伪装扩展名、压缩包路径穿越。它不执行任何代码，也不上传任何数据。
-- 最近一次结果见 [`docs/security/repo-safety-report.md`](docs/security/repo-safety-report.md)，完整说明（应用会读写什么、如何验证下载、漏洞上报）见 [`SECURITY.md`](SECURITY.md)。
+- 完整说明（应用会读写什么、如何验证下载、漏洞上报）见 [`SECURITY.md`](SECURITY.md)。
 
 ## 与其他清理工具的区别
 
@@ -56,21 +56,21 @@
 
 | 能力 | 状态 |
 |---|---|
-| 目录扫描、体积统计、风险判定（T06–T08） | 已完成 |
-| 数据搬运、校验、建链、崩溃恢复（T09–T10） | 已完成 |
-| 回滚引擎与本地存储：journal / 历史 / 设置 / 学习规则（T11） | 已完成，已合入 `main` |
-| AI 分析接口（T22） | 已完成，默认关闭 |
-| 界面接入真实引擎、AI 密钥配置（T12、T25） | 已完成，已合入 `main` |
-| 欢迎页与 GitHub 登录、Star 引导（T16） | 开发中：GitHub Device Flow；未登录也不限制任何本地功能 |
-| Windows 打包（T15） | 已发布 `DiskWarden-0.9.0-beta.10-win-x64.zip`：托盘、当前用户自启、日志轮转、打包产物沙箱演练 |
-| macOS 平台适配与打包（T21） | 已发布 `DiskWarden-0.9.0-beta.10-macos-arm64.zip`，**未在真机测试**：`.app` 由 GitHub Actions `macos-latest` 构建，rsync/cp 搬运、`ln -s` 建链与回读、LaunchAgent 自启、托盘、日志轮转、应用内首次启动引导；CI 构建并对产物做冒烟检查 |
+| 目录扫描、体积统计、风险判定 | 已完成 |
+| 数据搬运、校验、建链、崩溃恢复 | 已完成 |
+| 回滚引擎与本地存储：journal / 历史 / 设置 / 学习规则 | 已完成，已合入 `main` |
+| AI 分析接口 | 已完成，默认关闭 |
+| 界面接入真实引擎、AI 密钥配置 | 已完成，已合入 `main` |
+| 欢迎页与 GitHub 登录、Star 引导 | 开发中：GitHub Device Flow；未登录也不限制任何本地功能 |
+| Windows 打包 | 已发布 `DiskWarden-0.9.0-beta.10-win-x64.zip`：托盘、当前用户自启、日志轮转、打包产物沙箱演练 |
+| macOS 平台适配与打包 | 已发布 `DiskWarden-0.9.0-beta.10-macos-arm64.zip`，**未在真机测试**：`.app` 由 GitHub Actions `macos-latest` 构建，rsync/cp 搬运、`ln -s` 建链与回读、LaunchAgent 自启、托盘、日志轮转、应用内首次启动引导；CI 构建并对产物做冒烟检查 |
 
 已完成的模块由 **934 个单元测试**覆盖，CI 会在每次 push 时自动运行。
 
 ## 平台支持
 
 - **Windows 10/11**：当前主开发与验证平台。核心引擎已实现：robocopy 搬运、`mklink /J` 建链、进程占用检测、卷信息与空间预检。
-- **macOS 11+（Apple Silicon）**：属于第一期产品范围（决策 0004）。所有平台相关实现都在 `src/platform/mac/`：`rsync`/`cp` 搬运、`ln -s` 建链并回读目标、卷信息与空间检查、进程检测、当前用户 LaunchAgent 自启。未签名 `.app` 由 GitHub Actions `macos-latest` 构建（决策 0007）；Intel Mac 需要单独的 x64 构建，目前尚未产出。
+- **macOS 11+（Apple Silicon）**：属于第一期产品范围。所有平台相关实现都在 `src/platform/mac/`：`rsync`/`cp` 搬运、`ln -s` 建链并回读目标、卷信息与空间检查、进程检测、当前用户 LaunchAgent 自启。未签名 `.app` 由 GitHub Actions `macos-latest` 构建；Intel Mac 需要单独的 x64 构建，目前尚未产出。
   - **0.9.0-beta 的已知缺口**：自动发现（`data/ide-catalog.json` + `src/core/scan/discovery.py`）仍是 Windows 专用，在 Mac 上扫描结果为 0，列表是空的。应用、托盘、自启、日志与迁移引擎均就绪；macOS 目录清单是后续任务。
 
 ## macOS 首次启动
@@ -89,7 +89,7 @@
 
 ## 技术栈
 
-- Python 3.12 为正式构建工具链（决策 0012）；CI 在 3.10 与 3.12 上跑测试
+- Python 3.12 为正式构建工具链；CI 在 3.10 与 3.12 上跑测试
 - 界面：原生 HTML/JS 单页（`ui/index.html`），由 pywebview 承载（Windows WebView2 / macOS WKWebView）
 - 打包：PyInstaller 6 onedir；macOS 产物由 CI 构建
 
@@ -124,7 +124,7 @@ src/
   platform/        平台适配层：win / mac / posix
 data/              IDE 目录清单与规则数据
 ui/                静态界面原型
-docs/              需求、决策、规格、任务产出
+docs/              需求、规格、使用指南与发布说明
 tests/             单元测试
 tools/             演练与校验脚本
 ```
@@ -136,6 +136,9 @@ tools/             演练与校验脚本
 3. `docs/specs/产品规格-v1.0.md` — 验收口径与安全不变量
 4. `docs/specs/架构设计-v1.0.md` — 模块、接口与数据流
 5. `docs/specs/界面交互说明-v1.0.md` — 页面与交互规则
+6. `docs/迁移与回滚指南.md` — 迁移与回滚操作
+7. `docs/隐私说明.md` — 隐私与网络行为
+8. `docs/release-notes/` — 版本发布说明
 
 ## 许可证
 

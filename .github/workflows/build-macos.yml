@@ -1,9 +1,8 @@
 name: build-macos
 
-# Unsigned macOS development build (T21). Produces DiskWarden.app inside a
-# zip and runs the frozen bundle's --smoke self-check, because nobody on the
-# team has a Mac to click through. The click-through verification is still a
-# human step; see docs/tasks/T21/验证记录.md.
+# Unsigned macOS development build. Produces DiskWarden.app inside a zip and
+# runs the frozen bundle's --smoke self-check. A real click-through on a Mac
+# is still a manual release step.
 #
 # macos-latest is Apple Silicon (arm64). Intel Macs need a macos-13 leg; add
 # one to the matrix only when an Intel build is actually requested, so the

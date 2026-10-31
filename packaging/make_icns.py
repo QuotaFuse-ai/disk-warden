@@ -9,7 +9,7 @@ blurry icon entry.
 
     python packaging/make_icns.py
 
-Python 3.8 compatible (decision 0005).
+Python 3.8 compatible.
 """
 
 import os

@@ -17,11 +17,11 @@ PyInstaller onedir 目录，压缩为 `DiskWarden-<version>-win-x64.zip`，解�
 - zip 根目录附带 `START-HERE.txt`（由 `build.ps1` 从 `packaging/START-HERE.txt` 复制）：
   SmartScreen 在程序启动前拦截，应用内弹窗看不到，解压时能看到的这份说明才是
   「更多信息 → 仍要运行」的有效入口
-- 本版不做安装器、不做代码签名，也不包含自动更新（见决策 0008 / T15）
+- 本版不做安装器、不做代码签名，也不包含自动更新（首期策略）
 
 ## 构建环境
 
-- Windows 10/11 x64，Python **3.12**（决策 0012；取代决策 0005 的 3.8 基线）
+- Windows 10/11 x64，Python **3.12**（取代 3.8 基线）
 - 依赖版本锁定在 `requirements-build.txt`，PyInstaller 6.x + hooks-contrib 2026.8
 - 目标机器需要 WebView2 Runtime（Win11 与已更新的 Win10 通常自带），不需要 Python
 - PyInstaller 6 把运行库收进 `_internal/`；**不要**把新包解压覆盖到旧版目录，
