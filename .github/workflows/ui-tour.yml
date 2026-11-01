@@ -1,0 +1,69 @@
+name: ui-tour
+
+# 每个提交都把「所有页面 × 3 个窗口宽度 × 明暗 × 中英」截图出来，
+# 不用装包、不用 Windows、不用客户端：见 tools/uitour/__main__.py 的用法说明。
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "ui/**"
+      - "tools/uitour/**"
+      - "packaging/requirements-ci.txt"
+      - ".github/workflows/ui-tour.yml"
+  pull_request:
+    paths:
+      - "ui/**"
+      - "tools/uitour/**"
+      - "packaging/requirements-ci.txt"
+      - ".github/workflows/ui-tour.yml"
+
+concurrency:
+  group: ui-tour-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  shots:
+    name: 页面截图矩阵（ubuntu + chromium）
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 中文字体必须在截图前装好，否则 zh-CN 的图全是方框。
+      - name: Install CJK fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+
+      # Playwright 只装在 CI 里（packaging/requirements-ci.txt），
+      # 不进 requirements-build.txt，也不进 PyInstaller spec。
+      - name: Install tour dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r packaging/requirements-ci.txt
+          python -m playwright install --with-deps chromium
+
+      - name: List pages
+        run: python -m tools.uitour --list-pages
+
+      - name: Render every page
+        run: |
+          python -m tools.uitour --out dist/uitour --summary "$GITHUB_STEP_SUMMARY"
+
+      # 失败也上传，坏的截图才是排查素材。
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-tour
+          path: dist/uitour
+          if-no-files-found: warn
+          retention-days: 30

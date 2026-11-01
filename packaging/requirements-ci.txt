@@ -1,0 +1,14 @@
+# CI / dev-only dependencies for the screenshot tour (TASK-UITOUR-001).
+#
+# These packages are NEVER bundled into the shipped app: they are not listed
+# in packaging/requirements-build.txt and not referenced by
+# packaging/DiskWarden.spec (no datas / hiddenimports entry).  Keeping them in
+# a separate file is what keeps the installer small and the antivirus surface
+# unchanged -- a browser engine has no business inside a folder-size tool.
+#
+# Install (local):
+#   python -m pip install -r packaging/requirements-ci.txt
+#   python -m playwright install chromium
+#
+# Pinned to the version the tour was written and verified against.
+playwright==1.40.0
