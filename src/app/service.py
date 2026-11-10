@@ -42,6 +42,7 @@ from ..core.ai import (
     ProviderError,
     keystore,
     load_config,
+    senate,
 )
 from ..core.migrate import (
     ERROR_CANCELLED,
@@ -390,6 +391,7 @@ class AppService(object):
         auth_opener=None,
         auth_http_opener=None,
         auth_provider_loader=None,
+        senate_config_path=None,
     ):
         # type: (object, object, object, object, object, object, object, object, object, object, object, object) -> None
         self.environ = dict(environ if environ is not None else os.environ)
@@ -413,6 +415,10 @@ class AppService(object):
         self._auth_opener = auth_opener or _open_star_page
         self._auth_http_opener = auth_http_opener
         self._auth_provider_loader = auth_provider_loader
+        self.senate = senate.SenateRoleModels(
+            config_path=senate_config_path,
+            environ=self.environ,
+        )
 
         self.bus = EventBus()
         self.runner = JobRunner(self.bus)
@@ -794,6 +800,41 @@ class AppService(object):
     def ai_status(self):
         # type: () -> dict
         return self.settings_get()["ai"]
+
+    def senate_role_models_get(self):
+        # type: () -> dict
+        """StockSenate debate roles and their provider/model (QUOT-518).
+
+        The values come from StockSenate's own ``config/llm_config.toml``; the
+        panel only displays them.  ``engine`` says where the file lives and
+        whether it exists, so the UI can mark the source badge.
+        """
+        return self._senate_call(lambda gov: gov.get())
+
+    def senate_role_models_put(self, params):
+        # type: (object) -> dict
+        """Validate and write role -> provider/model with atomic replace.
+
+        ``roles`` is ``{role: {provider, model, api_key_env?}}``; optional
+        ``expected_revision`` (from the last GET) turns a concurrent edit into
+        a ``SENATE_STALE`` error instead of silently overwriting it.
+        """
+        if not isinstance(params, dict):
+            raise invalid("params must be an object")
+        roles = params.get("roles")
+        if not isinstance(roles, dict):
+            raise invalid("roles is required")
+        revision = params.get("expected_revision")
+        if revision is not None and not isinstance(revision, str):
+            raise invalid("expected_revision must be a string")
+        return self._senate_call(lambda gov: gov.put(roles, revision))
+
+    def _senate_call(self, call):
+        # type: (object) -> dict
+        try:
+            return call(self.senate)
+        except senate.SenateError as exc:
+            raise BridgeError(exc.code, exc.reason, exc.detail)
 
     def ai_consent(self):
         # type: () -> dict
