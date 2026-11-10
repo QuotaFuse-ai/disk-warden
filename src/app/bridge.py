@@ -112,6 +112,8 @@ def build_methods(service):
         "ai.status": lambda p: service.ai_status(),
         "ai.consent": lambda p: service.ai_consent(),
         "ai.test": lambda p: service.ai_test(p),
+        "senate.role_models.get": lambda p: service.senate_role_models_get(),
+        "senate.role_models.put": lambda p: service.senate_role_models_put(p),
         "auth.status": lambda p: service.auth_status(),
         "auth.start": lambda p: service.auth_start(_require_str(p, "provider")),
         "auth.cancel": lambda p: service.auth_cancel(),

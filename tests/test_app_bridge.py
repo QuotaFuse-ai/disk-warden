@@ -19,6 +19,8 @@ EXPECTED_METHODS = {
     "ai.status",
     "ai.consent",
     "ai.test",
+    "senate.role_models.get",
+    "senate.role_models.put",
     "auth.status",
     "auth.start",
     "auth.cancel",
